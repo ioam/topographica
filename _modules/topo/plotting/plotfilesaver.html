@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.plotting.plotfilesaver &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.plotting.plotfilesaver</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File saving routines for plots.</span>
+
+<span class="sd">Typically called using save_plotgroup in commands/analysis.py, but these</span>
+<span class="sd">objects can also be instantiated explicitly, to save a series of plots.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">Image</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">normalize_path</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+
+<span class="c"># Consider using PIL&#39;s ImageFont module</span>
+
+<div class="viewcode-block" id="PlotGroupSaver"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotfilesaver.PlotGroupSaver">[docs]</a><span class="k">class</span> <span class="nc">PlotGroupSaver</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows a PlotGroup to be saved as a set of bitmap files on disk.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;png&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Bitmap image file format to use.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filename_prefix</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Optional prefix that can be used in the filename_format command</span>
+<span class="s">        to disambiguate different simulations or conditions.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filename_suffix</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Optional suffix that can be used in the filename_format command</span>
+<span class="s">        to disambiguate different simulations or conditions.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filename_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span>
+        <span class="s">&quot;</span><span class="si">%(filename_prefix)s%(basename)s</span><span class="s">_</span><span class="si">%(plot_label)s%(filename_suffix)s</span><span class="s">.</span><span class="si">%(file_format)s</span><span class="s">&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Format string to use for generating filenames for plots.  This</span>
+<span class="s">        string will be evaluated in the context of a dictionary that</span>
+<span class="s">        defines various items commonly used when generating filenames,</span>
+<span class="s">        including::</span>
+
+<span class="s">          basename:    the default sim.basename(), usually name+time()</span>
+<span class="s">          time:        the current simulation time (topo.sim.time())</span>
+<span class="s">          sim_name:    the name of the current simulation (topo.sim.name)</span>
+<span class="s">          plot_label:  the label specfied in the PlotGroup for this plot</span>
+<span class="s">          file_format: the bitmap image file format for this type of plot</span>
+<span class="s">          plotgroup_name: the name of this PlotGroup</span>
+<span class="s">      &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="c"># Should move this out of plotfilesaver to get the same filenames in the GUI.</span>
+    <span class="c"># Should also allow each template in topo/command/analysis.py to have a nice</span>
+    <span class="c"># short filename format, perhaps as an option.</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PlotGroupSaver</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span> <span class="o">=</span> <span class="n">plotgroup</span>
+
+
+<div class="viewcode-block" id="PlotGroupSaver.strip"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotfilesaver.PlotGroupSaver.strip">[docs]</a>    <span class="k">def</span> <span class="nf">strip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Strip inappropriate characters from a filename.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">filename</span>\
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="s">&#39;_&#39;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span><span class="s">&#39;_&#39;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span><span class="s">&#39;_&#39;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&amp;&#39;</span><span class="p">,</span><span class="s">&#39;And&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PlotGroupSaver.filename"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotfilesaver.PlotGroupSaver.filename">[docs]</a>    <span class="k">def</span> <span class="nf">filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">label</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate a specific filename from the filename_format.&quot;&quot;&quot;</span>
+        <span class="n">varmap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">())</span>
+        <span class="n">varmap</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+        <span class="n">varmap</span><span class="p">[</span><span class="s">&#39;basename&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span>
+        <span class="n">varmap</span><span class="p">[</span><span class="s">&#39;sim_name&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">varmap</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">varmap</span><span class="p">[</span><span class="s">&#39;plot_label&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">label</span>
+        <span class="n">varmap</span><span class="p">[</span><span class="s">&#39;plotgroup_name&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">varmap</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_format</span> <span class="o">%</span> <span class="n">varmap</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">save_to_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plots</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">labels</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">normalize_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)))</span>
+
+
+
+
+
+
+<span class="c"># Could move this elsewhere if it will be useful.</span>
+<span class="c">#</span>
+<span class="c"># Adapted from:</span>
+<span class="c"># http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/412982</span></div>
+<div class="viewcode-block" id="make_contact_sheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotfilesaver.make_contact_sheet">[docs]</a><span class="k">def</span> <span class="nf">make_contact_sheet</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="p">(</span><span class="n">marl</span><span class="p">,</span><span class="n">mart</span><span class="p">,</span><span class="n">marr</span><span class="p">,</span><span class="n">marb</span><span class="p">),</span> <span class="n">padding</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a contact sheet (image grid) from a 2D array of PIL images::</span>
+
+<span class="sd">      imgs     2D array of images</span>
+
+<span class="sd">      marl     The left margin in pixels</span>
+<span class="sd">      mart     The top margin in pixels</span>
+<span class="sd">      marr     The right margin in pixels</span>
+<span class="sd">      marb     The bottom margin in pixels</span>
+
+<span class="sd">      padding  The padding between images in pixels</span>
+
+<span class="sd">    Returns a PIL image object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># should make sure imgs is numpy array</span>
+
+    <span class="c"># CB: *** should do this in numpy without the conversion to list and back! ***</span>
+    <span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">i_widths</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">imgs</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span><span class="p">)</span>
+    <span class="n">i_heights</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">imgs</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span><span class="p">)</span>
+
+    <span class="n">col_widths</span> <span class="o">=</span> <span class="n">i_widths</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">row_heights</span> <span class="o">=</span> <span class="n">i_heights</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">marw</span> <span class="o">=</span> <span class="n">marl</span><span class="o">+</span><span class="n">marr</span>
+    <span class="n">marh</span> <span class="o">=</span> <span class="n">mart</span><span class="o">+</span> <span class="n">marb</span>
+
+    <span class="n">padw</span> <span class="o">=</span> <span class="p">(</span><span class="n">ncols</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">padding</span>
+    <span class="n">padh</span> <span class="o">=</span> <span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">padding</span>
+
+    <span class="n">isize</span> <span class="o">=</span> <span class="p">(</span><span class="n">col_widths</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">+</span><span class="n">marw</span><span class="o">+</span><span class="n">padw</span><span class="p">,</span> <span class="n">row_heights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">+</span><span class="n">marh</span><span class="o">+</span><span class="n">padh</span><span class="p">)</span>
+
+    <span class="c"># Create the new image. The background doesn&#39;t have to be white.</span>
+    <span class="n">white</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">inew</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s">&#39;RGB&#39;</span><span class="p">,</span><span class="n">isize</span><span class="p">,</span><span class="n">white</span><span class="p">)</span>
+
+    <span class="c"># CB: should be replaced with a more numpy technique.</span>
+    <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">icol</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="p">):</span>
+            <span class="c"># if different widths in a col, or different heights in a</span>
+            <span class="c"># row, each image will currently just go at top left</span>
+            <span class="c"># defined by largest in col/row (should be centered</span>
+            <span class="c"># instead)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">marl</span><span class="o">+</span><span class="n">col_widths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">icol</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">+</span><span class="n">icol</span><span class="o">*</span><span class="n">padding</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">left</span><span class="o">+</span><span class="n">i_widths</span><span class="p">[</span><span class="n">irow</span><span class="p">,</span><span class="n">icol</span><span class="p">]</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="n">mart</span><span class="o">+</span><span class="n">row_heights</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">irow</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">+</span><span class="n">irow</span><span class="o">*</span><span class="n">padding</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="n">upper</span><span class="o">+</span><span class="n">i_heights</span><span class="p">[</span><span class="n">irow</span><span class="p">,</span><span class="n">icol</span><span class="p">]</span>
+            <span class="n">inew</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="n">irow</span><span class="p">,</span><span class="n">icol</span><span class="p">],(</span><span class="n">left</span><span class="p">,</span><span class="n">upper</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">lower</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">inew</span>
+
+
+
+</div>
+<div class="viewcode-block" id="CFProjectionPlotGroupSaver"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotfilesaver.CFProjectionPlotGroupSaver">[docs]</a><span class="k">class</span> <span class="nc">CFProjectionPlotGroupSaver</span><span class="p">(</span><span class="n">PlotGroupSaver</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows a CFProjectionPlotGroup to be saved as a bitmap file,</span>
+<span class="sd">    concatenating all the CF plots into a single image.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">save_to_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">image</span>
+                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plots</span><span class="p">],</span>
+                           <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">proj_plotting_shape</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">make_contact_sheet</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">normalize_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/plotting/plotfilesaver.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

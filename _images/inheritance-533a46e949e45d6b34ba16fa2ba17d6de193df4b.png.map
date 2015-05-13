@@ -1,0 +1,7 @@
+<map id="inheritanced3f0b2a809" name="inheritanced3f0b2a809">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="4,4,202,23"/>
+<area shape="rect" id="node2" href="#topo.submodel.Model" title="params(random_seed=Integer, name=String)" alt="" coords="239,4,361,23"/>
+<area shape="rect" id="node5" href="#topo.submodel.earlyvision.SensoryModel" title="params(dims=List, num_inputs=Integer, random_seed=Integer, name=String)" alt="" coords="398,4,614,23"/>
+<area shape="rect" id="node3" href="#topo.submodel.earlyvision.EarlyVisionModel" title="params(center_size=Number, gain_control=Boolean, gain_control_SF=Boolean, gain_control_size=Number, lgn_density=Number, lgnaff_radius=Number, lgnaff_strength=Number, lgnlateral_radius=Number, retina_density=Number, surround_size=Number, v1aff_radius=Number, align_orientations=Boolean, area=Number, contrast=Number, dataset=ObjectSelector, dim_fraction=Number, max_disparity=Number, num_lags=Integer, period=Number, sf_channels=Integer, sf_spacing=Number, speed=Number, dims=List, num_inputs=Integer, random_seed=Integer, name=String)" alt="" coords="918,4,1147,23"/>
+<area shape="rect" id="node4" href="#topo.submodel.earlyvision.VisualInputModel" title="params(align_orientations=Boolean, area=Number, contrast=Number, dataset=ObjectSelector, dim_fraction=Number, max_disparity=Number, num_lags=Integer, period=Number, sf_channels=Integer, sf_spacing=Number, speed=Number, dims=List, num_inputs=Integer, random_seed=Integer, name=String)" alt="" coords="650,4,881,23"/>
+</map>

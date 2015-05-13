@@ -1,0 +1,7 @@
+<map id="inheritance965e871ae9" name="inheritance965e871ae9">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,54,264,79"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="312,54,624,79"/>
+<area shape="rect" id="node4" href="#topo.misc.unitsupport.strip_pq_hook" title="params(name=String)" alt="" coords="683,29,938,54"/>
+<area shape="rect" id="node5" href="#topo.misc.unitsupport.strip_unum_hook" title="params(name=String)" alt="" coords="673,78,949,103"/>
+<area shape="rect" id="node3" href="#topo.misc.unitsupport.Conversions" title="The UnumConversion class holds unit conversions and definitions," alt="" coords="13,5,257,30"/>
+</map>

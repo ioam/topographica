@@ -1,0 +1,9 @@
+<map id="inheritancedae98195e7" name="inheritancedae98195e7">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,103,264,129"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPLearningFn" title="Compute new CFs for a CFProjection based on input and output activity values." alt="" coords="313,103,511,129"/>
+<area shape="rect" id="node3" href="#topo.learningfn.projfn.CFPLF_EuclideanHebbian" title="Hebbian CFProjection learning rule based on Euclidean distance." alt="" coords="561,5,882,30"/>
+<area shape="rect" id="node4" href="#topo.learningfn.projfn.CFPLF_OutstarHebbian" title="CFPLearningFunction applying the specified (default is Hebbian)" alt="" coords="567,54,875,79"/>
+<area shape="rect" id="node5" href="#topo.learningfn.projfn.CFPLF_PluginScaled" title="CFPLearningFunction applying the specified single_cf_fn to each CF." alt="" coords="577,103,865,129"/>
+<area shape="rect" id="node6" href="#topo.learningfn.projfn.CFPLF_Trace" title="LearningFn that incorporates a trace of recent activity," alt="" coords="601,153,841,178"/>
+<area shape="rect" id="node7" href="#topo.learningfn.projfn.HomeoSynaptic" title="Learning function using homeostatic synaptic scaling from" alt="" coords="589,202,853,227"/>
+</map>

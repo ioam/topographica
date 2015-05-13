@@ -1,0 +1,733 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.transferfn.misc &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.transferfn" href="../transferfn.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../transferfn.html" accesskey="U">topo.transferfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.transferfn.misc</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Transfer functions with more complex dependencies.</span>
+
+<span class="sd">$Id: basic.py 10790 2009-11-21 17:51:33Z antolikjan $</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">imagen</span>
+<span class="kn">from</span> <span class="nn">holoviews</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">import</span> <span class="nn">topo.base.functionfamily</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">clip_lower</span><span class="p">,</span><span class="n">array_argmax</span>
+<span class="kn">from</span> <span class="nn">topo.base.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheetcoords</span> <span class="kn">import</span> <span class="n">SheetCoordinateSystem</span>
+
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">TransferFn</span><span class="p">,</span> <span class="n">TransferFnWithState</span>
+
+
+<span class="c"># Not suitable for basic.py due to its dependence on patterns.</span>
+<div class="viewcode-block" id="PatternCombine"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.PatternCombine">[docs]</a><span class="k">class</span> <span class="nc">PatternCombine</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combine the supplied pattern with one generated using a</span>
+<span class="sd">    PatternGenerator.</span>
+
+<span class="sd">    Useful for operations like adding noise or masking out lesioned</span>
+<span class="sd">    items or around the edges of non-rectangular shapes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">imagen</span><span class="o">.</span><span class="n">PatternGenerator</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">Constant</span><span class="p">(),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Pattern to combine with the supplied matrix.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">operator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">,</span><span class="n">precedence</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Binary Numeric function used to combine the two patterns.</span>
+
+<span class="s">        Any binary Numeric array &quot;ufunc&quot; returning the same type of</span>
+<span class="s">        array as the operands and supporting the reduce operator is</span>
+<span class="s">        allowed here.  See topo.pattern.Composite.operator for more</span>
+<span class="s">        details.</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="c">###JABHACKALERT: Need to set it up to be independent of</span>
+        <span class="c">#density; right now only things like random numbers work</span>
+        <span class="c">#reasonably</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">)))</span>
+        <span class="n">generated_pattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">(</span><span class="n">bounds</span><span class="o">=</span><span class="n">bb</span><span class="p">,</span><span class="n">xdensity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">new_pattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">generated_pattern</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="n">new_pattern</span>
+
+
+
+<span class="c"># Not suitable for basic.py due to its dependence on patterns.</span></div>
+<div class="viewcode-block" id="KernelMax"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.KernelMax">[docs]</a><span class="k">class</span> <span class="nc">KernelMax</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replaces the given matrix with a kernel function centered around the maximum value.</span>
+
+<span class="sd">    This operation is usually part of the Kohonen SOM algorithm, and</span>
+<span class="sd">    approximates a series of lateral interactions resulting in a</span>
+<span class="sd">    single activity bubble.</span>
+
+<span class="sd">    The radius of the kernel (i.e. the surround) is specified by the</span>
+<span class="sd">    parameter &#39;radius&#39;, which should be set before using __call__.</span>
+<span class="sd">    The shape of the surround is determined by the</span>
+<span class="sd">    neighborhood_kernel_generator, and can be any PatternGenerator</span>
+<span class="sd">    instance, or any function accepting bounds, density, radius, and</span>
+<span class="sd">    height to return a kernel matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">kernel_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Kernel radius in Sheet coordinates.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">neighborhood_kernel_generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">imagen</span><span class="o">.</span><span class="n">PatternGenerator</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Neighborhood function&quot;</span><span class="p">)</span>
+
+    <span class="n">crop_radius_multiplier</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Factor by which the radius should be multiplied, when deciding</span>
+<span class="s">        how far from the winner to keep evaluating the kernel.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">density</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Density of the Sheet whose matrix we act on, for use</span>
+<span class="s">        in converting from matrix to Sheet coordinates.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_radius</span>
+        <span class="n">crop_radius</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">1.25</span><span class="p">,</span><span class="n">radius</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_radius_multiplier</span><span class="p">))</span>
+
+        <span class="c"># find out the matrix coordinates of the winner</span>
+        <span class="n">wr</span><span class="p">,</span><span class="n">wc</span> <span class="o">=</span> <span class="n">array_argmax</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c"># convert to sheet coordinates</span>
+        <span class="n">wy</span> <span class="o">=</span> <span class="n">rows</span><span class="o">-</span><span class="n">wr</span><span class="o">-</span><span class="mi">1</span>
+
+        <span class="c"># Optimization: Calculate the bounding box around the winner</span>
+        <span class="c"># in which weights will be changed</span>
+        <span class="n">cmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">wc</span><span class="o">-</span><span class="n">crop_radius</span><span class="p">,</span>  <span class="mi">0</span><span class="p">)</span>
+        <span class="n">cmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">wc</span><span class="o">+</span><span class="n">crop_radius</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">cols</span><span class="p">)</span>
+        <span class="n">rmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">wr</span><span class="o">-</span><span class="n">crop_radius</span><span class="p">,</span>  <span class="mi">0</span><span class="p">)</span>
+        <span class="n">rmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">wr</span><span class="o">+</span><span class="n">crop_radius</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">rows</span><span class="p">)</span>
+        <span class="n">ymin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">wy</span><span class="o">-</span><span class="n">crop_radius</span><span class="p">,</span>  <span class="mi">0</span><span class="p">)</span>
+        <span class="n">ymax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">wy</span><span class="o">+</span><span class="n">crop_radius</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">rows</span><span class="p">)</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="n">cmin</span><span class="p">,</span><span class="n">ymin</span><span class="p">),</span> <span class="p">(</span><span class="n">cmax</span><span class="p">,</span><span class="n">ymax</span><span class="p">)))</span>
+
+        <span class="c"># generate the kernel matrix and insert it into the correct</span>
+        <span class="c"># part of the output array</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighborhood_kernel_generator</span><span class="p">(</span><span class="n">bounds</span><span class="o">=</span><span class="n">bb</span><span class="p">,</span><span class="n">xdensity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                                    <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">radius</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="n">wc</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">wy</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">rmin</span><span class="p">:</span><span class="n">rmax</span><span class="p">,</span><span class="n">cmin</span><span class="p">:</span><span class="n">cmax</span><span class="p">]</span> <span class="o">=</span> <span class="n">kernel</span>
+
+</div>
+<div class="viewcode-block" id="HalfRectify"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.HalfRectify">[docs]</a><span class="k">class</span> <span class="nc">HalfRectify</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transfer function that applies a half-wave rectification (clips at zero)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">t_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The initial value of threshold at which output becomes non-zero..&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="n">gain</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The neuronal gain&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">randomized_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to randomize the initial t parameter.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">noise_magnitude</span> <span class="o">=</span>  <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The magnitude of the additive noise to apply to the t_init</span>
+<span class="s">        parameter at initialization.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomized_init</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init</span> <span class="o">+</span> \
+                    <span class="p">(</span><span class="n">imagen</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">()</span> \
+                 <span class="p">(</span><span class="n">xdensity</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ydensity</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> \
+                 <span class="bp">self</span><span class="o">.</span><span class="n">noise_magnitude</span><span class="o">*</span><span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init</span>
+
+        <span class="n">x</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">clip_lower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span>
+
+
+</div>
+<div class="viewcode-block" id="TemporalScatter"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.TemporalScatter">[docs]</a><span class="k">class</span> <span class="nc">TemporalScatter</span><span class="p">(</span><span class="n">TransferFnWithState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scatter values across time using a specified distribution,</span>
+<span class="sd">    discretized into a symmetric interval around zero. This class is</span>
+<span class="sd">    still work in progress as part of the TCAL model.</span>
+
+<span class="sd">    As no notion of time exists at the level of transfer functions</span>
+<span class="sd">    (state is changes according to call count), this class assumes a</span>
+<span class="sd">    fixed, &#39;clocked&#39; timestep exists between subsequent calls.</span>
+
+<span class="sd">    Internally, an activity buffer is computed with a depth</span>
+<span class="sd">    corresponding to the number of timestep intervals with the stated</span>
+<span class="sd">    span value.</span>
+
+<span class="sd">    Note that the transfer function only has the power to delay</span>
+<span class="sd">    output. Therefore the central peak of a unimodal, zero-mean</span>
+<span class="sd">    distribution will occur *after* the time &#39;span&#39; has elapsed.</span>
+
+<span class="sd">    In addition it is very *important* to view the depth map using the</span>
+<span class="sd">    view_depth_map method: if the majority of the values generated by</span>
+<span class="sd">    the distribution are outside the chosen span, values smaller and</span>
+<span class="sd">    larger than the span will be lumped into the first and last bins</span>
+<span class="sd">    respectively, distorting the shape of the intended distribution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">timestep</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The timestep interval in milliseconds. This value is used to</span>
+<span class="s">       compute the depth and sample the supplied distribution.</span>
+
+<span class="s">       Note that value must be specified some some extenal source and</span>
+<span class="s">       there is no way to ensure that subsequent calls are regular</span>
+<span class="s">       with the stated interval.</span>
+<span class="s">       &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">distribution</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">imagen</span><span class="o">.</span><span class="n">PatternGenerator</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">GaussianRandom</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The pattern generator that defines the scatter distribution in</span>
+<span class="s">       milliseconds. Any random distribution may be used</span>
+<span class="s">       e.g. UniformRandom or GaussianRandom. Note that the discretized</span>
+<span class="s">       binning with the given &#39;span&#39; is zero-centered.</span>
+
+<span class="s">       In other words, even if a distribution is not-symmetric</span>
+<span class="s">       (i.e. skewed), binning will occur around a symmetric interval</span>
+<span class="s">       around zero with a total extent given by the span.</span>
+<span class="s">       &quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="n">span</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The input distribution is expected to be continuous and may be</span>
+<span class="s">       unbounded. For instance, a Gaussian distribution may generate</span>
+<span class="s">       sample values that are unbounded in both the positive and</span>
+<span class="s">       negative direction.</span>
+
+<span class="s">       The span parameter determines the size of the (zero-centered)</span>
+<span class="s">       interval which is binned.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemporalScatter</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span>  <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_depth_map</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c"># The raw depth map (float values)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth_map</span> <span class="o">=</span> <span class="bp">None</span>        <span class="c"># The discretized depth map (ints)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="bp">None</span>          <span class="c"># The activity buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">=</span><span class="p">[]</span>
+
+
+<div class="viewcode-block" id="TemporalScatter.view_depth_map"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.TemporalScatter.view_depth_map">[docs]</a>    <span class="k">def</span> <span class="nf">view_depth_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;both&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Visualize the depth map using holoviews, including</span>
+<span class="sd">        distribution histograms.</span>
+
+<span class="sd">        Mode may be one of &#39;discrete&#39;, &#39;raw&#39; or &#39;both&#39;:</span>
+
+<span class="sd">        * The &#39;discrete&#39; mode presents the depth map used by</span>
+<span class="sd">          TemporalScatter, showing the latency at which</span>
+<span class="sd">          TemporalScatter will propagate the input i.e. discrete,</span>
+<span class="sd">          positive latencies in milliseconds.</span>
+
+<span class="sd">        * The &#39;raw&#39; mode shows the continuous distribution before</span>
+<span class="sd">          discretization. This is typically a zero-mean, zero-centered</span>
+<span class="sd">          distribution i.e a continuous, zero-centered latency</span>
+<span class="sd">          distribution.</span>
+
+<span class="sd">        * Both presents both of the above types together (default).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">views</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;raw&#39;</span><span class="p">,</span> <span class="s">&#39;both&#39;</span><span class="p">]:</span>
+            <span class="n">views</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_depth_map</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s">&#39;Pattern&#39;</span><span class="p">,</span>
+                               <span class="n">label</span><span class="o">=</span><span class="s">&#39;Raw Depth map&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">hist</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;discrete&#39;</span><span class="p">,</span> <span class="s">&#39;both&#39;</span><span class="p">]:</span>
+            <span class="n">scaled_map</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">depth_map</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">)</span>
+            <span class="n">discrete_sv</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="n">scaled_map</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s">&#39;Pattern&#39;</span><span class="p">,</span>
+                                <span class="n">label</span><span class="o">=</span><span class="s">&#39;Depth map&#39;</span><span class="p">)</span>
+            <span class="n">views</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">discrete_sv</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">num_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
+                                          <span class="n">bin_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="k">else</span> <span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">views</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="TemporalScatter.depth"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.TemporalScatter.depth">[docs]</a>    <span class="k">def</span> <span class="nf">depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The depth of the activity buffer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;The span of the specified limits must be&quot;</span>
+                            <span class="s">&quot; an exact, *positive*, multiple of timestep&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_compute_depth_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span> <span class="o">=</span> <span class="n">shape</span>
+
+        <span class="p">(</span><span class="n">min_lim</span><span class="p">,</span> <span class="n">max_lim</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_depth_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;ScatterDepth&#39;</span><span class="p">,</span>
+                                               <span class="n">xdensity</span><span class="o">=</span><span class="n">d1</span><span class="p">,</span> <span class="n">ydensity</span><span class="o">=</span><span class="n">d2</span><span class="p">,</span>
+                                               <span class="n">bounds</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+
+        <span class="n">bin_edges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_lim</span><span class="p">,</span> <span class="n">max_lim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">))</span>
+        <span class="n">discretized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_depth_map</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bin_edges</span><span class="p">)</span>
+        <span class="c"># Out of bounds bins (to +inf) need to be pulled back in.</span>
+        <span class="n">discretized</span><span class="p">[</span><span class="n">discretized</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_edges</span><span class="p">)]</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">discretized</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># The buffer is a 3D array containing a stack of activities</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">depth_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_depth_map</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># Roll the buffer and copy x to the top of the stack</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+
+        <span class="n">x</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">d1</span><span class="p">)[:,</span> <span class="bp">None</span><span class="p">],</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">d2</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">depth_map</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">state_push</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">),</span>
+                                           <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_call</span><span class="p">)))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemporalScatter</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">*=</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span> <span class="nf">state_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemporalScatter</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_pop</span><span class="p">()</span>
+
+
+</div>
+<div class="viewcode-block" id="AdaptiveThreshold"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.AdaptiveThreshold">[docs]</a><span class="k">class</span> <span class="nc">AdaptiveThreshold</span><span class="p">(</span><span class="n">TransferFnWithState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adapts the parameters of a linear threshold function to maintain a</span>
+<span class="sd">    constant desired average activity. Defined in:</span>
+
+<span class="sd">    Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar.</span>
+<span class="sd">    Mechanisms for stable, robust, and adaptive development of orientation</span>
+<span class="sd">    maps in the primary visual cortex.</span>
+<span class="sd">    Journal of Neuroscience 33:15747-15766, 2013.</span>
+<span class="sd">    http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">t_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Initial value of the threshold value t.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">randomized_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to randomize the initial t parameter.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">seed</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Random seed used to control the initial randomized t values.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">target_activity</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.024</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The target average activity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">linear_slope</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Slope of the linear portion above threshold.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Learning rate for homeostatic plasticity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">smoothing</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.991</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Weighting of previous activity vs. current activity when</span>
+<span class="s">        calculating the average activity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">noise_magnitude</span> <span class="o">=</span>  <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The magnitude of the additive noise to apply to the t_init</span>
+<span class="s">        parameter at initialization.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">period</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        How often the threshold should be adjusted.</span>
+
+<span class="s">        If the period is 0, the threshold is adjusted continuously, each</span>
+<span class="s">        time this TransferFn is called.</span>
+
+<span class="s">        For nonzero periods, adjustments occur only the first time</span>
+<span class="s">        this TransferFn is called after topo.sim.time() reaches an</span>
+<span class="s">        integer multiple of the period.</span>
+
+<span class="s">        For example, if period is 2.5 and the TransferFn is evaluated</span>
+<span class="s">        every 0.05 simulation time units, the threshold will be</span>
+<span class="s">        adjusted at times 2.55, 5.05, 7.55, etc.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HomeostaticResponse</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">=</span><span class="bp">None</span>     <span class="c"># To allow state_push at init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span><span class="o">=</span><span class="bp">None</span> <span class="c"># To allow state_push at init</span>
+
+        <span class="n">next_timestamp</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_update_timestamp</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="n">next_timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_avg_prev</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_prev</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_avg_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_activity</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomized_init</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init</span> <span class="o">+</span> \
+                <span class="p">(</span><span class="n">imagen</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span> \
+                    <span class="n">random_generator</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">))</span> \
+                     <span class="p">(</span><span class="n">xdensity</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ydensity</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> \
+                     <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_magnitude</span><span class="o">*</span><span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_activity</span>
+
+
+    <span class="k">def</span> <span class="nf">_apply_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the piecewise-linear thresholding operation to the activity.&quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">clip_lower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_slope</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_slope</span>
+
+
+    <span class="k">def</span> <span class="nf">_update_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prev_t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">prev_avg</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">target_activity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies exponential smoothing to the given current activity and previous</span>
+<span class="sd">        smoothed value following the equations given in the report cited above.</span>
+
+<span class="sd">        If plastic is set to False, the running exponential average</span>
+<span class="sd">        values and thresholds are not updated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y_avg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">smoothing</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">smoothing</span><span class="o">*</span><span class="n">prev_avg</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">prev_t</span> <span class="o">+</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_avg</span> <span class="o">-</span> <span class="n">target_activity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">y_avg</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span> <span class="k">else</span> <span class="p">(</span><span class="n">prev_avg</span><span class="p">,</span> <span class="n">prev_t</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialises on the first call and then applies homeostasis.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_update_timestamp</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_update_timestamp</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span>
+            <span class="c"># Using activity matrix and and smoothed activity from *previous* call.</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_threshold</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_prev</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_avg_prev</span><span class="p">,</span>
+                                                          <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+                                                          <span class="bp">self</span><span class="o">.</span><span class="n">target_activity</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y_avg_prev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span>   <span class="c"># Copy only if not in continuous mode</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_threshold</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>            <span class="c"># Apply the threshold only after it is updated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_prev</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:]</span>  <span class="c"># Recording activity for the next periodic update</span>
+
+
+    <span class="k">def</span> <span class="nf">state_push</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">),</span>
+                                           <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span><span class="p">),</span>
+                                           <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_call</span><span class="p">),</span>
+                                           <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_next_update_timestamp</span><span class="p">),</span>
+                                           <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_avg_prev</span><span class="p">),</span>
+                                           <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_prev</span><span class="p">)))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HomeostaticResponse</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">state_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_update_timestamp</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_avg_prev</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_prev</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HomeostaticResponse</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_pop</span><span class="p">()</span>
+
+
+<span class="c"># Old alias for AdaptiveThreshold</span></div>
+<span class="n">HomeostaticResponse</span> <span class="o">=</span> <span class="n">AdaptiveThreshold</span>
+
+<div class="viewcode-block" id="AttributeTrackingTF"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.html#topo.transferfn.misc.AttributeTrackingTF">[docs]</a><span class="k">class</span> <span class="nc">AttributeTrackingTF</span><span class="p">(</span><span class="n">TransferFnWithState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Keeps track of attributes of a specified Parameterized over time, for analysis or plotting.</span>
+
+<span class="sd">    Useful objects to track include sheets (e.g. &quot;topo.sim[&#39;V1&#39;]&quot;),</span>
+<span class="sd">    projections (&quot;topo.sim[&#39;V1&#39;].projections[&#39;LateralInhibitory&#39;]&quot;),</span>
+<span class="sd">    or an output_function.</span>
+
+<span class="sd">    Any attribute whose value is a matrix the same size as the</span>
+<span class="sd">    activity matrix can be tracked.  Only specified units within this</span>
+<span class="sd">    matrix will be tracked.</span>
+
+<span class="sd">    If no object is specified, this function will keep track of the</span>
+<span class="sd">    incoming activity over time.</span>
+
+<span class="sd">    The results are stored in a dictionary named &#39;values&#39;, as (time,</span>
+<span class="sd">    value) pairs indexed by the parameter name and unit.  For</span>
+<span class="sd">    instance, if the value of attribute &#39;x&#39; is v for unit (0.0,0.0)</span>
+<span class="sd">    at time t, values[&#39;x&#39;][(0.0,0.0)]=(t,v).</span>
+
+<span class="sd">    Updating of the tracked values can be disabled temporarily using</span>
+<span class="sd">    the plastic parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># ALERT: Need to make this read-only, because it can&#39;t be changed</span>
+    <span class="c"># after instantiation unless _object is also changed.  Or else</span>
+    <span class="c"># need to make _object update whenever object is changed and</span>
+    <span class="c"># _object has already been set.</span>
+    <span class="nb">object</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Parameterized instance whose parameters will be tracked.</span>
+
+<span class="s">        If this parameter&#39;s value is a string, it will be evaluated first</span>
+<span class="s">        (by calling Python&#39;s eval() function).  This feature is designed to</span>
+<span class="s">        allow circular references, so that the TF can track the object that</span>
+<span class="s">        owns it, without causing problems for recursive traversal (as for</span>
+<span class="s">        script_repr()).&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="c"># There may be some way to achieve the above without using eval(), which would be better.</span>
+    <span class="c">#JLALERT When using this function snapshots cannot be saved because of problem with eval()</span>
+
+    <span class="n">attrib_names</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of names of the function object&#39;s parameters that should be stored.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">units</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">)],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Sheet coordinates of the unit(s) for which parameter values will be stored.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        How often to update the tracked values.</span>
+
+<span class="s">        For instance, step=1 means to update them every time this TF is</span>
+<span class="s">        called; step=2 means to update them every other time.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">coordframe</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        SheetCoordinateSystem to use to convert the position into matrix coordinates.</span>
+
+<span class="s">        If this parameter&#39;s value is a string, it will be evaluated</span>
+<span class="s">        first(by calling Python&#39;s eval() function).  This feature is</span>
+<span class="s">        designed to allow circular references, so that the TF can</span>
+<span class="s">        track the object that owns it, without causing problems for</span>
+<span class="s">        recursive traversal (as for script_repr()).&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AttributeTrackingTF</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">=</span><span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coordframe</span><span class="o">=</span><span class="bp">None</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrib_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">][</span><span class="n">u</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordframe</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordframe</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span><span class="n">SheetCoordinateSystem</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;is already a coordframe, no need to specify coordframe&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span><span class="n">SheetCoordinateSystem</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_coordframe</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordframe</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_coordframe</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordframe</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;A coordinate frame (e.g. coordframe=topo.sim[&#39;V1&#39;]) must be specified in order to track&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">))</span>
+
+        <span class="c">#collect values on each appropriate step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrib_names</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">p</span><span class="o">==</span><span class="s">&quot;x&quot;</span><span class="p">:</span>
+                        <span class="n">value_matrix</span><span class="o">=</span><span class="n">x</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">value_matrix</span><span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
+                        <span class="n">mat_u</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_coordframe</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">][</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span><span class="n">value_matrix</span><span class="p">[</span><span class="n">mat_u</span><span class="p">]))</span>
+
+
+</div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">TransferFn</span><span class="p">)]))</span>
+<span class="n">__all__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;TransferFn&quot;</span><span class="p">)</span>
+<span class="n">__all__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;TransferFnWithState&quot;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/transferfn/misc.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../transferfn.html" >topo.transferfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

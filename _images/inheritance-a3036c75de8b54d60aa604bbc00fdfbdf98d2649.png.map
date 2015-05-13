@@ -1,0 +1,20 @@
+<map id="inheritance09fca71fec" name="inheritance09fca71fec">
+<area shape="rect" id="node1" title="Internal class." alt="" coords="114,116,222,135"/>
+<area shape="rect" id="node5" title="Internal class." alt="" coords="315,41,399,60"/>
+<area shape="rect" id="node8" title="Toplevel widget, e.g. for dialogs." alt="" coords="312,153,402,172"/>
+<area shape="rect" id="node2" title="Internal class." alt="" coords="4,116,77,135"/>
+<area shape="rect" id="node3" title="Geometry manager Grid." alt="" coords="132,4,204,23"/>
+<area shape="rect" id="node4" title="Menu widget which allows to display menu bars, pull&#45;down menus and pop&#45;up menus." alt="" coords="555,41,633,60"/>
+<area shape="rect" id="node13" title="Tkinter Menu, but with a way to access entries by name." alt="" coords="772,41,859,60"/>
+<area shape="rect" id="node6" title="Geometry manager Pack." alt="" coords="131,41,205,60"/>
+<area shape="rect" id="node7" title="Geometry manager Place." alt="" coords="129,78,207,98"/>
+<area shape="rect" id="node9" title="Provides functions for the communication with the window manager." alt="" coords="133,153,203,172"/>
+<area shape="rect" id="node10" title="params(name=String)" alt="" coords="259,98,455,117"/>
+<area shape="rect" id="node15" title="params(name=String)" alt="" coords="511,78,677,98"/>
+<area shape="rect" id="node21" href="#topo.tkgui.topoconsole.PlotsMenuEntry" title="params(name=String)" alt="" coords="492,116,697,135"/>
+<area shape="rect" id="node11" title="A ScrolledWindow with extra features intended to be common to all" alt="" coords="758,134,873,153"/>
+<area shape="rect" id="node22" href="#topo.tkgui.topoconsole.TopoConsole" title="params(pretty_parameters=Boolean, name=String)" alt="" coords="945,106,1136,125"/>
+<area shape="rect" id="node19" href="#topo.tkgui.topoconsole.ControllableMenu" title="A Menu, but where entries are accessible by name (using" alt="" coords="934,41,1148,60"/>
+<area shape="rect" id="node14" title="params(pretty_parameters=Boolean, name=String)" alt="" coords="745,78,886,98"/>
+<area shape="rect" id="node20" href="#topo.tkgui.topoconsole.DockManager" title="Manages windows that can be tabs in a notebook, or toplevels." alt="" coords="942,4,1139,23"/>
+</map>

@@ -1,0 +1,875 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.unit.testsheet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tests.unit.testsheet</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Unit tests for sheet and sheetcoords.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">istest</span><span class="p">,</span> <span class="n">nottest</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.sheetcoords</span> <span class="kn">import</span> <span class="n">Slice</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">topo.base.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+
+
+<span class="c"># CEBALERT:</span>
+<span class="c"># Changes that need to be made to this file:</span>
+<span class="c"># - don&#39;t create a new ct every time, just change its density</span>
+<span class="c"># - test array versions of coordinate transform functions</span>
+<span class="c"># - ensure methods of Slice are tested</span>
+
+<span class="nd">@nottest</span>
+<div class="viewcode-block" id="TestCoordinateTransforms"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms">[docs]</a><span class="k">class</span> <span class="nc">TestCoordinateTransforms</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tests for sheet.</span>
+
+<span class="sd">    Subclassed for use; the subclasses have a setUp method to create</span>
+<span class="sd">    the particular coordinates to use each time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">makeBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">)</span>
+
+        <span class="c"># float bounds for matrix coordinates: these</span>
+        <span class="c"># values are actually outside the matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rbound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cbound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+
+        <span class="c">#self.cbound = int(self.density*(self.right-self.left)) / float((self.right-self.left))</span>
+        <span class="c">#self.rbound = int(self.density*(self.top-self.bottom)) / float((self.top-self.bottom))</span>
+
+
+        <span class="c"># CEBALERT: this is supposed to be a small distance</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="mf">0.00001</span>
+
+        <span class="c"># Sheet values around the edge of the BoundingBox</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_in_right_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">-</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_in_bottom_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span> <span class="o">+</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_out_top_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="o">+</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_out_left_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">-</span> <span class="n">D</span>
+
+        <span class="c"># Matrix values around the edge of the matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_out_right_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rbound</span> <span class="o">+</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_out_bottom_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cbound</span> <span class="o">+</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_out_top_idx</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">-</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_out_left_idx</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">-</span> <span class="n">D</span>
+
+
+
+    <span class="c">### sheet2matrix() tests</span>
+    <span class="c">#</span>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrix_center"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrix_center">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrix_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the center of the Sheet corresponds to the center</span>
+<span class="sd">        of the matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">y_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="n">x_center</span><span class="p">,</span><span class="n">y_center</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">),(</span><span class="bp">self</span><span class="o">.</span><span class="n">rbound</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">cbound</span><span class="o">/</span><span class="mf">2.0</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrix_left_top"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrix_left_top">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrix_left_top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the top-left of the Sheet is [0,0] in matrix</span>
+<span class="sd">        coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrix_right_bottom"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrix_right_bottom">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrix_right_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the bottom-right of the Sheet is [rbound,cbound] in matrix</span>
+<span class="sd">        coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">),(</span><span class="bp">self</span><span class="o">.</span><span class="n">rbound</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">cbound</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrix_matrix2sheet"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrix_matrix2sheet">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrix_matrix2sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that matrix2sheet() is the inverse of sheet2matrix().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># top-right corner</span>
+        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">)</span>
+        <span class="n">x_right</span><span class="p">,</span> <span class="n">y_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">x_right</span><span class="p">,</span><span class="n">y_top</span><span class="p">),(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">))</span>
+
+        <span class="c"># bottom-left corner</span>
+        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span>
+        <span class="n">x_left</span><span class="p">,</span> <span class="n">y_bottom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">x_left</span><span class="p">,</span><span class="n">y_bottom</span><span class="p">),(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrix2sheet_sheet2matrix"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrix2sheet_sheet2matrix">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrix2sheet_sheet2matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that sheet2matrix() is the inverse of matrix2sheet().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># top-right corner</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="p">))</span>
+        <span class="n">top_row</span><span class="p">,</span><span class="n">right_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">top_row</span><span class="p">,</span><span class="n">right_col</span><span class="p">),(</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="p">)))</span>
+
+        <span class="c"># bottom-left corner</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">bottom_row</span><span class="p">,</span><span class="n">left_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">bottom_row</span><span class="p">,</span><span class="n">left_col</span><span class="p">),(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+
+
+    <span class="c">### sheet2matrixidx() tests</span>
+    <span class="c">#</span></div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrixidx_left_top"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrixidx_left_top">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrixidx_left_top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test a point just inside the top-left corner of the BoundingBox, and</span>
+<span class="sd">        one just outside.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="c"># outside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_out_left_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">just_out_top_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrixidx_left_bottom"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrixidx_left_bottom">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrixidx_left_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test a point just inside the left-bottom corner of the BoundingBox, and</span>
+<span class="sd">        one just outside.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_in_bottom_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="c"># outside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_out_left_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrixidx_right_top"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrixidx_right_top">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrixidx_right_top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test a point just inside the top-right corner of the BoundingBox, and</span>
+<span class="sd">        one just outside.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_in_right_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="c"># outside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">just_out_top_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_sheet2matrixidx_right_bottom"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_sheet2matrixidx_right_bottom">[docs]</a>    <span class="k">def</span> <span class="nf">test_sheet2matrixidx_right_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test a point just inside the bottom-right corner of the BoundingBox,</span>
+<span class="sd">        and the corner itself - which should not be inside.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_in_right_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">just_in_bottom_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="c"># not inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">))</span>
+
+
+    <span class="c">### matrix2sheet() tests</span>
+    <span class="c">#</span></div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrix2sheet_left_top"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrix2sheet_left_top">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrix2sheet_left_top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that Sheet&#39;s (0,0) is the top-left of the matrix.</span>
+
+<span class="sd">        Check that just outside the top-left in matrix coordinates</span>
+<span class="sd">        comes back to Sheet coordinates that are outside the</span>
+<span class="sd">        BoundingBox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">))</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">just_out_left_idx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">just_out_top_idx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrix2sheet_right_bottom"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrix2sheet_right_bottom">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrix2sheet_right_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that Sheet&#39;s (right,bottom) is the bottom-right in</span>
+<span class="sd">        matrix coordinates i.e. [rbound,cbound]</span>
+
+<span class="sd">        Check that just outside the bottom-right in matrix coordinates</span>
+<span class="sd">        comes back to Sheet coordinates that are outside the</span>
+<span class="sd">        BoundingBox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rbound</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">cbound</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">))</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">just_out_right_idx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">just_out_bottom_idx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrix2sheet_center"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrix2sheet_center">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrix2sheet_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the center in Sheet coordinates corresponds to</span>
+<span class="sd">        the center in continuous matrix coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">y_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">center_float_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rbound</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">center_float_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cbound</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="n">center_float_row</span><span class="p">,</span><span class="n">center_float_col</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">x_center</span><span class="p">,</span><span class="n">y_center</span><span class="p">))</span>
+
+
+
+    <span class="c">### matrixidx2sheet() tests</span>
+    <span class="c">#</span></div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrixidx2sheet_left_top"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrixidx2sheet_left_top">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrixidx2sheet_left_top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The top-left matrix cell [0,0] should be given back in Sheet</span>
+<span class="sd">        coordinates at the center of that cell.</span>
+
+<span class="sd">        The cell [-1,-1] outside this corner should come back out of</span>
+<span class="sd">        the BoundingBox</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span>
+
+        <span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">test_x</span><span class="p">,</span><span class="n">test_y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">test_x</span><span class="p">,</span><span class="n">test_y</span><span class="p">))</span>
+
+        <span class="c"># outside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">test_x</span><span class="p">,</span><span class="n">test_y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrixidx2sheet_left_bottom"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrixidx2sheet_left_bottom">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrixidx2sheet_left_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The bottom-left matrix cell [0,rbound] should be given back</span>
+<span class="sd">        in Sheet coordinates at the center of that cell.</span>
+
+<span class="sd">        The cell [last_row+1,-1] outside this corner should come back out of</span>
+<span class="sd">        the BoundingBox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">,</span><span class="mi">0</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="c"># outside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">test_x</span><span class="p">,</span><span class="n">test_y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrixidx2sheet_right_top"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrixidx2sheet_right_top">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrixidx2sheet_right_top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The top-right matrix cell [cbound,0] should be given back</span>
+<span class="sd">        in Sheet coordinates at the center of that cell.</span>
+
+<span class="sd">        The cell [-1,last_col+1] outside this corner should come back out of</span>
+<span class="sd">        the BoundingBox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># inside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="c"># outside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">test_x</span><span class="p">,</span><span class="n">test_y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrixidx2sheet_right_bottom"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrixidx2sheet_right_bottom">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrixidx2sheet_right_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The bottom-right matrix cell [cbound,rbound] should be given back</span>
+<span class="sd">        in Sheet coordinates at the center of that cell.</span>
+
+<span class="sd">        The cell [last_row+1,last_col+1] outside this corner should come back out of</span>
+<span class="sd">        the BoundingBox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="c"># outside</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">test_x</span><span class="p">,</span><span class="n">test_y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrixidx2sheet_center"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrixidx2sheet_center">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrixidx2sheet_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The row and col *index* of the center unit in the matrix should come</span>
+<span class="sd">        back as the Sheet coordinates of the center of that center unit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">center_unit_idx</span>
+        <span class="n">x_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">y_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">x_center</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span><span class="p">,</span> <span class="n">y_center</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="TestCoordinateTransforms.test_matrixidx2sheet_sheet2matrixidx"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestCoordinateTransforms.test_matrixidx2sheet_sheet2matrixidx">[docs]</a>    <span class="k">def</span> <span class="nf">test_matrixidx2sheet_sheet2matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that sheet2matrixidx() is the inverse of matrix2sheetidx().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># top-right corner</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="p">))</span>
+        <span class="n">top_row</span><span class="p">,</span><span class="n">right_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">top_row</span><span class="p">,</span><span class="n">right_col</span><span class="p">),(</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_col</span><span class="p">)))</span>
+
+        <span class="c"># bottom-left corner</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">bottom_row</span><span class="p">,</span><span class="n">left_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">bottom_row</span><span class="p">,</span><span class="n">left_col</span><span class="p">),(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_row</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+</div></div>
+<span class="nd">@istest</span>
+<div class="viewcode-block" id="TestBox1Coordinates"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestBox1Coordinates">[docs]</a><span class="k">class</span> <span class="nc">TestBox1Coordinates</span><span class="p">(</span><span class="n">TestCoordinateTransforms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test coordinate transformations using the standard, origin-centered unit box</span>
+<span class="sd">    with density 10.</span>
+
+<span class="sd">    A 10x10 matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+        <span class="c"># for the matrix representation - I think having this manual statement is</span>
+        <span class="c"># safer than a calculation...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_col</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center_unit_idx</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>  <span class="c"># by the way sheet2matrixidx is defined</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeBox</span><span class="p">()</span>
+</div>
+<span class="nd">@istest</span>
+<div class="viewcode-block" id="TestBox2Coordinates"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.TestBox2Coordinates">[docs]</a><span class="k">class</span> <span class="nc">TestBox2Coordinates</span><span class="p">(</span><span class="n">TestCoordinateTransforms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test coordinate transformations on the box defined by (1,1), (3,4),</span>
+<span class="sd">    with density 8.</span>
+
+<span class="sd">    A 24 x 16 matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top</span>  <span class="o">=</span> <span class="mi">4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span> <span class="o">=</span> <span class="mf">0.0625</span>
+
+        <span class="c"># for the matrix representation - I think having this manual statement is</span>
+        <span class="c"># safer than a calculation...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span> <span class="o">=</span> <span class="mi">23</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_col</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center_unit_idx</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>  <span class="c"># by the way sheet2matrixidx is defined</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeBox</span><span class="p">()</span>
+
+<span class="c"># CEB: unfinished and unused - still making tests for TestBox3Coordinates...</span>
+</div>
+<span class="nd">@nottest</span>
+<span class="k">class</span> <span class="nc">TestBox3Coordinates</span><span class="p">(</span><span class="n">TestCoordinateTransforms</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="mf">0.8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="mf">0.8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">half_unit</span> <span class="o">=</span> <span class="mf">0.03125</span>
+
+        <span class="c"># for the matrix representation - I think having this manual statement is</span>
+        <span class="c"># safer than a calculation...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_row</span> <span class="o">=</span> <span class="mi">24</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_col</span> <span class="o">=</span> <span class="mi">24</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center_unit_idx</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>  <span class="c"># by the way sheet2matrixidx is defined</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeBox</span><span class="p">()</span>
+
+<span class="nd">@istest</span>
+<div class="viewcode-block" id="ExtraSheetTests"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.ExtraSheetTests">[docs]</a><span class="k">class</span> <span class="nc">ExtraSheetTests</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    sheet tests that were written independently of the framework above.</span>
+
+<span class="sd">    Each of these tests runs once and is independent of the rest of the file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_slice2bounds_bounds2slice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.75</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">27</span><span class="p">,</span><span class="mi">29</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">29</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">test_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">test_slice</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ExtraSheetTests.test_coordinate_position"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testsheet-module.html#topo.tests.unit.testsheet.ExtraSheetTests.test_coordinate_position">[docs]</a>    <span class="k">def</span> <span class="nf">test_coordinate_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        these tests duplicate some of the earlier ones,</span>
+<span class="sd">        except these use a matrix with non-integer</span>
+<span class="sd">        (right-left) and (top-bottom). This is an important</span>
+<span class="sd">        test case for the definition of density; without it,</span>
+<span class="sd">        the tests above could be passed by a variety of</span>
+<span class="sd">        sheet2matrix, bounds2shape functions, etc.</span>
+
+<span class="sd">        CEBALERT: transfer the box to TestBox3Coordinates and have</span>
+<span class="sd">        these tests run in the framework.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.8</span><span class="p">,</span><span class="o">-</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.8</span><span class="p">)</span>
+        <span class="c"># mimics that a sheet recalculates its density)</span>
+        <span class="n">density</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">16</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)))</span>
+
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">density</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.8</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">24</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">),(</span><span class="mi">12</span><span class="p">,</span><span class="mi">12</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="o">-</span><span class="mf">0.8</span><span class="p">,</span><span class="o">-</span><span class="mf">0.8</span><span class="p">),(</span><span class="mi">24</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                         <span class="p">(((</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">density</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">l</span><span class="p">,</span>
+                          <span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">density</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">b</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                         <span class="p">(((</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">density</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">l</span> <span class="p">,</span>
+                          <span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">density</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">b</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">density</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">b</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertNotEqual</span><span class="p">((</span><span class="mi">24</span><span class="p">,</span><span class="mi">24</span><span class="p">),</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">24</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">24</span><span class="p">),</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="mi">24</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">ct</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">test_Sheet_creation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># Example where the nominal x and y densities would not be equal.</span>
+        <span class="c"># density along x =10</span>
+        <span class="c"># density along y &lt;10</span>
+        <span class="c"># The density along y should become 10, by adjusting the height to be 2.0</span>
+        <span class="c"># in this case.</span>
+        <span class="c"># The y center of the bounds should remain -0.0025. Hence we should get</span>
+        <span class="c"># a bottom bound of -1.0025 and a top one of 0.9975.</span>
+        <span class="n">sheet</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                      <span class="n">nominal_bounds</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">1.005</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">1.0</span><span class="p">))))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">sheet</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">sheet</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span><span class="n">sheet</span><span class="o">.</span><span class="n">ydensity</span><span class="p">)</span>
+
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">lbrt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="mf">0.9975</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0025</span><span class="p">)</span>
+
+
+
+    <span class="c"># CEBALERT: this test should probably be somewhere else and</span>
+    <span class="c"># called something different</span>
+    <span class="k">def</span> <span class="nf">test_connection_field_like</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># test a ConnectionField-like example</span>
+        <span class="n">sheet</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+        <span class="n">cf_bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),(</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.6</span><span class="p">)))</span>
+
+        <span class="n">slice_</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">cf_bounds</span><span class="p">,</span><span class="n">sheet</span><span class="p">)</span>
+        <span class="n">slice_</span><span class="o">.</span><span class="n">crop_to_sheet</span><span class="p">(</span><span class="n">sheet</span><span class="p">)</span>
+
+        <span class="c"># check it&#39;s been cropped to fit onto sheet...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">slice_</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+
+        <span class="c"># now check that it gives the correct bounds...</span>
+        <span class="n">cropped_bounds</span> <span class="o">=</span> <span class="n">slice_</span><span class="o">.</span><span class="n">compute_bounds</span><span class="p">(</span><span class="n">sheet</span><span class="p">)</span>
+
+        <span class="n">true_cropped_bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cropped_bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_cropped_bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="c"># and that bounds2shape() gets the correct size</span>
+<span class="c">#        rows,cols = bounds2shape(cropped_bounds,sheet.density,sheet.ydensity)</span>
+<span class="c">#        self.assertEqual((rows,cols),(2,2))</span>
+
+
+    <span class="k">def</span> <span class="nf">test_bounds2slice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># test that if you ask to slice the matrix with the sheet&#39;s BoundingBox, you</span>
+        <span class="c"># get back the whole matrix</span>
+        <span class="n">sheet_bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+        <span class="n">true_slice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span> <span class="c"># inclusive left boundary, exclusive right boundary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span><span class="n">true_slice</span><span class="p">)</span>
+
+        <span class="c"># for the following tests, the values have been all computed by hand and then</span>
+        <span class="c"># tested (by JC). The boundingbox and density tested have been chosen randomly,</span>
+        <span class="c"># then drawn to get the slice from it.</span>
+
+        <span class="c"># Test with 20 density.</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span><span class="o">-</span><span class="mf">0.20</span><span class="p">),(</span><span class="mf">0.20</span><span class="p">,</span><span class="mf">0.05</span><span class="p">)))</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+
+        <span class="n">true_slice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">14</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span><span class="n">true_slice</span><span class="p">)</span>
+
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.40</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="o">-</span><span class="mf">0.30</span><span class="p">,</span><span class="mf">0.30</span><span class="p">)))</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+        <span class="n">true_slice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span><span class="n">true_slice</span><span class="p">)</span>
+
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="mf">0.15</span><span class="p">,</span><span class="mf">0.10</span><span class="p">),(</span><span class="mf">0.30</span><span class="p">,</span><span class="mf">0.30</span><span class="p">)))</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+        <span class="n">true_slice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span><span class="n">true_slice</span><span class="p">)</span>
+
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span><span class="o">-</span><span class="mf">0.45</span><span class="p">),(</span><span class="mf">0.10</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">)))</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+        <span class="n">true_slice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">19</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span><span class="n">true_slice</span><span class="p">)</span>
+
+        <span class="c"># test with 7 density sheet.</span>
+
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">,</span><span class="mf">0.5</span><span class="o">-</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">),(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">4.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+        <span class="n">true_slice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span><span class="n">true_slice</span><span class="p">)</span>
+
+        <span class="c">#(4x4 matrix)</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span><span class="n">xdensity</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">test_bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">slice_</span><span class="o">=</span><span class="n">Slice</span><span class="p">(</span><span class="n">test_bounds</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+        <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span> <span class="o">=</span> <span class="n">slice_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">((</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+        <span class="c"># Note: this test fails because units that fall on the</span>
+        <span class="c"># boundaries should all be included; bounds2slice does not</span>
+        <span class="c"># include the ones on the left boundary because of floating point</span>
+        <span class="c"># representation.</span>
+        <span class="c">#test_bounds.translate(0.05,-0.05)</span>
+        <span class="c">#r1,r2,c1,c2 = ct.bounds2slice(test_bounds)</span>
+        <span class="c">#self.assertEqual((r1,r2,c1,c2),(1,4,1,4))</span>
+
+
+    <span class="k">def</span> <span class="nf">test_slice2bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># test that if you ask to slice the matrix with the sheet&#39;s BoundingBox, you</span>
+        <span class="c"># get back the whole matrix</span>
+        <span class="c"># (I chose to use a 7 density, I don&#39;t know why I like 7 so much, it is kind of mystical)</span>
+
+        <span class="n">sheet_bb</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">true_bounds_lbrt</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_bounds_lbrt</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="c"># for the following tests, the values have been all computed</span>
+        <span class="c"># by hand and then tested (by JC). The boundingbox and density</span>
+        <span class="c"># tested have been chosen randomly, then drawn to get the slice</span>
+        <span class="c"># from it.</span>
+
+        <span class="c"># Test for 10 density</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">true_bounds_lbrt</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_bounds_lbrt</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">true_bounds_lbrt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_bounds_lbrt</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="c"># Test for 7 density</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">true_bounds_lbrt</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">5.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">,</span><span class="mf">0.5</span><span class="o">-</span><span class="mf">3.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_bounds_lbrt</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">slice_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">true_bounds_lbrt</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="o">-</span><span class="mf">6.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">,</span><span class="mf">0.5</span><span class="o">-</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">7.0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_bounds_lbrt</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="c"># Test for 25 density</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">sheet_bb</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">true_bounds_lbrt</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">4.0</span><span class="o">/</span><span class="mf">25.0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">10.0</span><span class="o">/</span><span class="mf">25.0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_bounds_lbrt</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+
+        <span class="n">slice_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slice_</span><span class="p">,</span><span class="n">ct</span><span class="p">))</span>
+        <span class="n">true_bounds_lbrt</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">3.0</span><span class="o">/</span><span class="mf">25.0</span><span class="p">,</span><span class="mf">0.5</span><span class="o">-</span><span class="mf">18.0</span><span class="o">/</span><span class="mf">25.0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">11.0</span><span class="o">/</span><span class="mf">25.0</span><span class="p">,</span><span class="mf">0.5</span><span class="o">-</span><span class="mf">7.0</span><span class="o">/</span><span class="mf">25.0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">true_bounds_lbrt</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+
+<span class="c">##     # bounds2shape() tests</span>
+<span class="c">##     #</span>
+<span class="c">##     def test_bounds2shape(self):</span>
+<span class="c">##         &quot;&quot;&quot;</span>
+<span class="c">##         Check that the shape of the matrix based on the BoundingBox and</span>
+<span class="c">##         density is correct.</span>
+<span class="c">##         &quot;&quot;&quot;</span>
+<span class="c">##         n_rows,n_cols = bounds2shape(self.box,self.density)</span>
+<span class="c">##         self.assertEqual((n_rows,n_cols),(self.last_row+1,self.last_col+1))</span>
+
+
+    <span class="k">def</span> <span class="nf">test_sheetview_release</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">()</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+        <span class="c"># Call s.sheet_view(..) with a parameter</span>
+        <span class="n">sv2</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                        <span class="n">metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">src_name</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">sv2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">release_sheet_view</span><span class="p">(</span><span class="s">&#39;Activity&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="mi">0</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">nose</span>
+	<span class="n">nose</span><span class="o">.</span><span class="n">runmodule</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../News/index.html">News</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../../Links/index.html">Links</a></li>
+<li><a href="../../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/tests/unit/testsheet.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

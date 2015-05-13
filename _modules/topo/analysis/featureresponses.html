@@ -1,0 +1,569 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.analysis.featureresponses &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.analysis.featureresponses</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">FeatureResponses and associated functions and classes.</span>
+
+<span class="sd">These classes implement map and tuning curve measurement based</span>
+<span class="sd">on measuring responses while varying features of an input pattern.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">ParamOverrides</span>
+
+<span class="kn">from</span> <span class="nn">holoviews</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">HoloMap</span>
+<span class="kn">from</span> <span class="nn">holoviews.ipython.widgets</span> <span class="kn">import</span> <span class="n">ProgressBar</span>
+<span class="kn">from</span> <span class="nn">holoviews.interface.collector</span> <span class="kn">import</span> <span class="n">AttrDict</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">import</span> <span class="nn">topo.base.sheetcoords</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">restore_input_generators</span><span class="p">,</span> <span class="n">save_input_generators</span>
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">pattern</span>
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">GeneratorSheet</span>
+
+<span class="kn">from</span> <span class="nn">featuremapper.command</span> <span class="kn">import</span> <span class="n">PatternPresentingCommand</span><span class="p">,</span> <span class="n">MeasureResponseCommand</span><span class="p">,</span>\
+    <span class="n">SingleInputResponseCommand</span><span class="p">,</span> <span class="n">SinusoidalMeasureResponseCommand</span><span class="p">,</span> <span class="n">PositionMeasurementCommand</span><span class="p">,</span>\
+    <span class="n">FeatureCurveCommand</span><span class="p">,</span> <span class="n">UnitCurveCommand</span>
+<span class="kn">from</span> <span class="nn">featuremapper</span> <span class="kn">import</span> <span class="n">MeasurementInterrupt</span><span class="p">,</span> <span class="n">DistributionMatrix</span><span class="p">,</span> <span class="n">FullMatrix</span><span class="p">,</span> <span class="n">FeatureResponses</span><span class="p">,</span>\
+    <span class="n">ReverseCorrelation</span><span class="p">,</span> <span class="n">FeatureMaps</span><span class="p">,</span> <span class="n">FeatureCurves</span><span class="p">,</span> <span class="n">Feature</span>
+<span class="kn">from</span> <span class="nn">featuremapper.metaparams</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">featuremapper.features</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="n">activity_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+
+
+<div class="viewcode-block" id="update_sheet_activity"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.featureresponses.update_sheet_activity">[docs]</a><span class="k">def</span> <span class="nf">update_sheet_activity</span><span class="p">(</span><span class="n">sheet_name</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the &#39;_activity_buffer&#39; ViewMap for a given sheet by name.</span>
+
+<span class="sd">    If force is False and the existing Activity Image isn&#39;t stale,</span>
+<span class="sd">    the existing view is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;ActivityBuffer&#39;</span>
+    <span class="n">sheet</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)[</span><span class="n">sheet_name</span><span class="p">]</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">AttrDict</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span>
+                        <span class="n">row_precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                        <span class="n">src_name</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                        <span class="n">timestamp</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">view</span><span class="p">:</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sheet</span><span class="o">.</span><span class="n">activity</span><span class="p">),</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">HoloMap</span><span class="p">((</span><span class="n">time</span><span class="p">,</span> <span class="n">im</span><span class="p">),</span> <span class="n">key_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">Time</span><span class="p">])</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">view</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">force</span> <span class="ow">or</span> <span class="n">view</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="s">&#39;Time&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">:</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sheet</span><span class="o">.</span><span class="n">activity</span><span class="p">),</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+            <span class="n">im</span><span class="o">.</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span>
+            <span class="n">view</span><span class="p">[</span><span class="n">time</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span>
+    <span class="k">return</span> <span class="n">view</span>
+
+</div>
+<div class="viewcode-block" id="update_activity"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.featureresponses.update_activity">[docs]</a><span class="k">def</span> <span class="nf">update_activity</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a map of neural activity available for each sheet, for use in</span>
+<span class="sd">    template-based plots.</span>
+
+<span class="sd">    This command simply asks each sheet for a copy of its activity</span>
+<span class="sd">    matrix, and then makes it available for plotting.  Of course, for</span>
+<span class="sd">    some sheets providing this information may be non-trivial, e.g. if</span>
+<span class="sd">    they need to average over recent spiking activity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">sheet_name</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">update_sheet_activity</span><span class="p">(</span><span class="n">sheet_name</span><span class="p">,</span> <span class="n">force</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="pattern_present"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.featureresponses.pattern_present">[docs]</a><span class="k">class</span> <span class="nc">pattern_present</span><span class="p">(</span><span class="n">PatternPresentingCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a set of input patterns, installs them into the specified</span>
+<span class="sd">    GeneratorSheets, runs the simulation for the specified length of</span>
+<span class="sd">    time, then restores the original patterns and the original</span>
+<span class="sd">    simulation time.  Thus this input is not considered part of the</span>
+<span class="sd">    regular simulation, and is usually for testing purposes.</span>
+
+<span class="sd">    May also be used to measure the response to a pattern by calling</span>
+<span class="sd">    it with restore_events disabled and restore_state and</span>
+<span class="sd">    install_sheetview enabled, which will push and pop the simulation</span>
+<span class="sd">    state and install the response in the sheets views dictionary. The</span>
+<span class="sd">    update_activity command implements this functionality.</span>
+
+<span class="sd">    As a special case, if &#39;inputs&#39; is just a single pattern, and not</span>
+<span class="sd">    a dictionary, it is presented to all GeneratorSheets.</span>
+
+<span class="sd">    If this process is interrupted by the user, the temporary patterns</span>
+<span class="sd">    may still be installed on the retina.</span>
+
+<span class="sd">    If overwrite_previous is true, the given inputs overwrite those</span>
+<span class="sd">    previously defined.</span>
+
+<span class="sd">    If plastic is False, overwrites the existing values of Sheet.plastic</span>
+<span class="sd">    to disable plasticity, then re-enables plasticity.</span>
+
+<span class="sd">    If this process is interrupted by the user, the temporary patterns</span>
+<span class="sd">    may still be installed on the retina.</span>
+
+<span class="sd">    In order to to see the sequence of values presented, you may use</span>
+<span class="sd">    the back arrow history mechanism in the GUI. Note that the GUI&#39;s Activity</span>
+<span class="sd">    window must be open. Alternatively or access the activities through the</span>
+<span class="sd">    Activity entry in the views.Maps dictionary on the specified sheets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">apply_output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Determines whether sheet output functions will be applied.</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A dictionary of GeneratorSheetName:PatternGenerator pairs to be</span>
+<span class="s">        installed into the specified GeneratorSheets&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">install_sheetview</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Determines</span>
+<span class="s">        whether to install a sheet view in the global storage dictionary.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">plastic</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If plastic is False, overwrites the existing values of</span>
+<span class="s">        Sheet.plastic to disable plasticity, then reenables plasticity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">overwrite_previous</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If overwrite_previous is true, the given inputs overwrite those</span>
+<span class="s">        previously defined.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">restore_events</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If True, restore simulation events after the response has been</span>
+<span class="s">        measured, so that no simulation time will have elapsed.</span>
+<span class="s">        Implied by restore_state=True.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">restore_state</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If True, restore the state of both sheet activities and simulation</span>
+<span class="s">        events</span>
+<span class="s">        after the response has been measured. Implies restore_events.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">return_responses</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If True, return a dictionary of the responses.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">{},</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">params_to_override</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params_to_override</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">))</span>
+        <span class="c"># ensure EPs get started (if pattern_response is called before the</span>
+        <span class="c"># simulation is run())</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">restore_state</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">overwrite_previous</span><span class="p">:</span>
+            <span class="n">save_input_generators</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+            <span class="c"># turn off plasticity everywhere</span>
+            <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">sheet</span><span class="o">.</span><span class="n">override_plasticity_state</span><span class="p">(</span><span class="n">new_plasticity_state</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">each</span><span class="p">,</span> <span class="s">&#39;measure_maps&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">each</span><span class="o">.</span><span class="n">measure_maps</span><span class="p">:</span>
+                        <span class="n">each</span><span class="o">.</span><span class="n">apply_output_fns</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># Register the inputs on each input sheet</span>
+        <span class="n">generatorsheets</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">generatorsheets</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">generatorsheets</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">each</span><span class="p">):</span>
+                    <span class="n">generatorsheets</span><span class="p">[</span><span class="n">each</span><span class="p">]</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">each</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s">&#39;</span><span class="si">%s</span><span class="s"> not a valid Sheet name for pattern_present.&#39;</span> <span class="o">%</span> <span class="n">each</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">restore_events</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">event_push</span><span class="p">()</span>
+
+        <span class="n">durations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">durations</span><span class="p">)</span>
+        <span class="n">projection_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">conn</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span> <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">connections</span><span class="p">())</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">+</span> <span class="n">projection_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="n">responses</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">durations</span><span class="p">):</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">durations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">topo</span><span class="p">,</span> <span class="s">&#39;guimain&#39;</span><span class="p">):</span>
+                <span class="n">update_activity</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">install_sheetview</span><span class="p">)</span>
+                <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">refresh_activity_windows</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">return_responses</span><span class="p">:</span>
+
+                <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">responses</span><span class="p">[(</span><span class="n">output</span><span class="p">,</span> <span class="n">time</span><span class="p">)]</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">output</span><span class="p">]</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="k">elif</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">projection_dict</span><span class="p">:</span>
+                        <span class="n">responses</span><span class="p">[(</span><span class="n">output</span><span class="p">,</span> <span class="n">time</span><span class="p">)]</span> <span class="o">=</span> <span class="n">projection_dict</span><span class="p">[</span><span class="n">output</span><span class="p">]</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">restore_events</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">event_pop</span><span class="p">()</span>
+
+        <span class="c"># turn sheets&#39; plasticity and output_fn plasticity back on if we</span>
+        <span class="c"># turned it off before</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">sheet</span><span class="o">.</span><span class="n">restore_plasticity_state</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">each</span><span class="o">.</span><span class="n">apply_output_fns</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">overwrite_previous</span><span class="p">:</span>
+            <span class="n">restore_input_generators</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">restore_state</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">state_pop</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">responses</span>
+
+
+</div>
+<div class="viewcode-block" id="pattern_response"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.featureresponses.pattern_response">[docs]</a><span class="k">class</span> <span class="nc">pattern_response</span><span class="p">(</span><span class="n">pattern_present</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This command is used to perform measurements, which require a</span>
+<span class="sd">    number of permutations to complete. The inputs and outputs are</span>
+<span class="sd">    defined as dictionaries corresponding to the generator sheets they</span>
+<span class="sd">    are to be presented on and the measurement sheets to record from</span>
+<span class="sd">    respectively. The update_activity_fn then accumulates the updated</span>
+<span class="sd">    activity into the appropriate entry in the outputs dictionary.</span>
+
+<span class="sd">    The command also makes sure that time, events and state are reset</span>
+<span class="sd">    after each presentation. If a GUI is found a timer will be opened</span>
+<span class="sd">    to display a progress bar and sheet_views will be made available</span>
+<span class="sd">    to the sheet to display activities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">restore_state</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If True, restore the state of both sheet activities and</span>
+<span class="s">        simulation events after the response has been measured.</span>
+<span class="s">        Implies restore_events.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">return_responses</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If True, return a dictionary of the measured sheet activities.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Whether or not to display a textual progress bar during</span>
+<span class="s">       measurements. Disabled when using the Tk GUI.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">{},</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[],</span> <span class="n">current</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">all_input_names</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s">&#39;default&#39;</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">input_name</span> <span class="ow">in</span> <span class="n">all_input_names</span><span class="p">:</span>
+                <span class="n">inputs</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">inputs</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">input_name</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_input_names</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+            <span class="n">inputs</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">current</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span> <span class="o">=</span> <span class="n">current</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">topo</span><span class="p">,</span> <span class="s">&#39;guimain&#39;</span><span class="p">):</span>
+                <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">open_progress_window</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">install_sheetview</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Measurement Progress&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MeasurementInterrupt</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">update_timer</span><span class="p">(</span><span class="s">&#39;Measurement Timer&#39;</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">current</span><span class="p">)</span><span class="o">/</span><span class="n">total</span><span class="o">*</span><span class="mi">100</span> <span class="k">if</span> <span class="n">total</span> <span class="k">else</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span> <span class="ow">and</span> <span class="p">(</span><span class="n">progress</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span> <span class="ow">or</span> <span class="n">progress</span> <span class="o">==</span> <span class="mi">100</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span> <span class="o">=</span> <span class="n">progress</span> <span class="o">+</span> <span class="mi">1</span> <span class="c"># +1 reduces fast updates/flicker</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span><span class="p">(</span><span class="n">progress</span><span class="p">)</span>
+
+        <span class="n">responses</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">pattern_response</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+                                                           <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+                                                           <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">topo</span><span class="p">,</span> <span class="s">&#39;guimain&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">current</span> <span class="o">==</span> <span class="n">total</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">refresh_activity_windows</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">responses</span>
+
+
+</div>
+<span class="k">def</span> <span class="nf">topo_metadata_fn</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[],</span> <span class="n">output_names</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the shapes of the specified GeneratorSheets and measurement</span>
+<span class="sd">    sheets, or if none are specified return all that can be found in</span>
+<span class="sd">    the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">AttrDict</span><span class="p">()</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">generator_sheets</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">)</span>
+    <span class="n">all_sheets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+    <span class="n">measurement_sheets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                              <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">&#39;measure_maps&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">measure_maps</span><span class="p">)</span>
+    <span class="n">projections</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">conn</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span> <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">connections</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">input_names</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">input_names</span> <span class="o">=</span> <span class="n">generator_sheets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;inputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">input_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">generator_sheets</span><span class="p">:</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="n">generator_sheets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;inputs&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">gs</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="s">&#39;precedence&#39;</span><span class="p">:</span> <span class="n">gs</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span>
+                                     <span class="s">&#39;row_precedence&#39;</span><span class="p">:</span> <span class="n">gs</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                                     <span class="s">&#39;shape&#39;</span><span class="p">:</span> <span class="n">gs</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;src_name&#39;</span><span class="p">:</span> <span class="n">gs</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Input sheet {0} not found.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">output_names</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">output_names</span> <span class="o">=</span> <span class="n">measurement_sheets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;outputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">output_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">all_sheets</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">all_sheets</span><span class="p">[</span><span class="n">o</span><span class="p">]</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;outputs&#39;</span><span class="p">][</span><span class="n">o</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="s">&#39;precedence&#39;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span>
+                                      <span class="s">&#39;row_precedence&#39;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                                      <span class="s">&#39;shape&#39;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;src_name&#39;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">projections</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">projections</span><span class="p">[</span><span class="n">o</span><span class="p">]</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;outputs&#39;</span><span class="p">][</span><span class="n">o</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="s">&#39;precedence&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span>
+                                      <span class="s">&#39;row_precedence&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                                      <span class="s">&#39;shape&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;dest_name&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="s">&#39;src_name&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Output sheet {0} not found.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">o</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">metadata</span>
+
+
+<span class="k">class</span> <span class="nc">StorageHook</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+
+    <span class="n">sublabel</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Storage location on the sheet specific view object. If None simply</span>
+<span class="s">        inserts results into top level views object.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">only_latest</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to replace any existing results in the global Layout.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewcontainer</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(),</span> <span class="o">**</span><span class="nb">dict</span><span class="p">([(</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">proj</span><span class="p">)</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">connections</span><span class="p">()]))</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">viewcontainer</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">label</span><span class="p">,</span> <span class="n">src_name</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="n">src_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Sheet</span><span class="p">):</span>
+                <span class="n">storage</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">sublabel</span><span class="p">]</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">sublabel</span> <span class="k">else</span> <span class="n">source</span><span class="o">.</span><span class="n">views</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">proj_store</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">proj_store</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">sublabel</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">storage</span> <span class="o">=</span> <span class="n">proj_store</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">sublabel</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">storage</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">only_latest</span><span class="p">:</span>
+                <span class="n">storage</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">container</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">storage</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_feature_preference</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the feature preference for a particular unit.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sheet</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span>
+        <span class="n">map_name</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;Preference&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coords</span>
+        <span class="k">return</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">[</span><span class="n">map_name</span><span class="p">]</span><span class="o">.</span><span class="n">last</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> should be measured before plotting this tuning curve -- &quot;</span>
+             <span class="s">&quot;using default value of </span><span class="si">%s</span><span class="s"> for </span><span class="si">%s</span><span class="s"> unit (</span><span class="si">%d</span><span class="s">,</span><span class="si">%d</span><span class="s">).&quot;</span><span class="p">)</span> <span class="o">%</span>
+            <span class="p">(</span><span class="n">map_name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">default</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;DistributionMatrix&quot;</span><span class="p">,</span>
+    <span class="s">&quot;FullMatrix&quot;</span><span class="p">,</span>
+    <span class="s">&quot;FeatureResponses&quot;</span><span class="p">,</span>
+    <span class="s">&quot;ReverseCorrelation&quot;</span><span class="p">,</span>
+    <span class="s">&quot;FeatureMaps&quot;</span><span class="p">,</span>
+    <span class="s">&quot;FeatureCurves&quot;</span><span class="p">,</span>
+    <span class="s">&quot;Feature&quot;</span><span class="p">,</span>
+    <span class="s">&quot;MeasureResponseCommand&quot;</span><span class="p">,</span>
+    <span class="s">&quot;SinusoidalMeasureResponseCommand&quot;</span><span class="p">,</span>
+    <span class="s">&quot;PositionMeasurementCommand&quot;</span><span class="p">,</span>
+    <span class="s">&quot;SingleInputResponseCommand&quot;</span><span class="p">,</span>
+    <span class="s">&quot;FeatureCurveCommand&quot;</span><span class="p">,</span>
+    <span class="s">&quot;UnitCurveCommand&quot;</span><span class="p">,</span>
+    <span class="s">&quot;pattern_present&quot;</span><span class="p">,</span>
+    <span class="s">&quot;pattern_response&quot;</span><span class="p">,</span>
+    <span class="s">&quot;update_activity&quot;</span><span class="p">,</span>
+    <span class="s">&quot;update_sheet_activity&quot;</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/analysis/featureresponses.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

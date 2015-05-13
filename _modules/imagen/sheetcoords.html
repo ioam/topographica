@@ -1,0 +1,725 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.sheetcoords &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="imagen" href="../imagen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" accesskey="U">imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for imagen.sheetcoords</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Provides SheetCoordinateSystem, allowing conversion between the two</span>
+<span class="sd">coordinate systems used in ImaGen.</span>
+
+<span class="sd">&#39;Sheet coordinates&#39; allow simulation parameters to be specified in</span>
+<span class="sd">units that are density-independent, whereas &#39;matrix coordinates&#39;</span>
+<span class="sd">provide a means of realizing the continuous sheets.</span>
+
+<span class="sd">Hence we can have a pair of &#39;sheet coordinates&#39; (x,y); floating-point</span>
+<span class="sd">Cartesian coordinates indicating an arbitrary point on the sheet&#39;s plane.</span>
+<span class="sd">We can also have a pair of &#39;matrix coordinates&#39; (r,c), which are used</span>
+<span class="sd">to address an underlying matrix. These matrix coordinates are also</span>
+<span class="sd">floating-point numbers to allow precise conversion between the two</span>
+<span class="sd">schemes. Where it is necessary to address a specific element of the</span>
+<span class="sd">matrix (as is often the case in calculations), we also have the usual</span>
+<span class="sd">matrix index coordinates (r_idx, c_idx). We refer to these as</span>
+<span class="sd">matrixidx coordinates. SheetCoordinateSystem provies methods for converting</span>
+<span class="sd">between sheet and matrix coordinates, as well as sheet and matrixidx</span>
+<span class="sd">coordinates.</span>
+
+<span class="sd">Everyone should use these facilities for conversions between the two</span>
+<span class="sd">coordinate systems to guarantee consistency.</span>
+
+
+
+
+<span class="sd">Example of how the matrix stores the representation of the Sheet</span>
+<span class="sd">================================================================</span>
+
+<span class="sd">For the purposes of this example, assume the goal is a Sheet with</span>
+<span class="sd">density=3 that has a 1 at (-1/2,-1/2), a 5 at (0.0,0.0), and a 9 at</span>
+<span class="sd">(1/2,1/2).  More precisely, for this Sheet,</span>
+
+<span class="sd">the continuous area from -1/2,-1/2 to -1/6,-1/6 has value 1,</span>
+<span class="sd">the continuous area from -1/6,-1/6 to  1/6,1/6  has value 5, and</span>
+<span class="sd">the continuous area from  1/6,1/6  to  1/2,1/2  has value 9.</span>
+
+<span class="sd">With the rest of the elements filled in, the Sheet would look like::</span>
+
+<span class="sd">    (-1/2,1/2) -+-----+-----+-----+- (1/2,1/2)</span>
+<span class="sd">                |     |     |     |</span>
+<span class="sd">                |  7  |  8  |  9  |</span>
+<span class="sd">                |     |     |     |</span>
+<span class="sd">    (-1/2,1/6) -+-----+-----+-----+- (1/2,1/6)</span>
+<span class="sd">                |     |     |     |</span>
+<span class="sd">                |  4  |  5  |  6  |</span>
+<span class="sd">                |     |     |     |</span>
+<span class="sd">   (-1/2,-1/6) -+-----+-----+-----+- (1/2,-1/6)</span>
+<span class="sd">                |     |     |     |</span>
+<span class="sd">                |  1  |  2  |  3  |</span>
+<span class="sd">                |     |     |     |</span>
+<span class="sd">   (-1/2,-1/2) -+-----+-----+-----+- (1/2,-1/2)</span>
+
+<span class="sd">where element 5 is centered on 0.0,0.0.  A matrix that would match</span>
+<span class="sd">these Sheet coordinates is::</span>
+
+<span class="sd">  [[7 8 9]</span>
+<span class="sd">   [4 5 6]</span>
+<span class="sd">   [1 2 3]]</span>
+
+<span class="sd">If we have such a matrix, we can access it in one of two ways: Sheet</span>
+<span class="sd">or matrix/matrixidx coordinates.  In matrixidx coordinates, the matrix is indexed</span>
+<span class="sd">by rows and columns, and it is possible to ask for the element at</span>
+<span class="sd">location [0,2] (which returns 9 as in any normal row-major matrix).</span>
+<span class="sd">But the values can additionally be accessed in Sheet coordinates,</span>
+<span class="sd">where the matrix is indexed by a point in the Cartesian plane.  In</span>
+<span class="sd">Sheet coordinates, it is possible to ask for the element at location</span>
+<span class="sd">(0.3,0.02), which returns floating-point matrix coordinates that can</span>
+<span class="sd">be cropped to give the nearest matrix element, namely the one with</span>
+<span class="sd">value 6.</span>
+
+<span class="sd">Of course, it would be an error to try to pass matrix coordinates like</span>
+<span class="sd">[0,2] to the sheet2matrix calls; the result would be a value far</span>
+<span class="sd">outside of the actual matrix.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;$Revision$&#39;</span>
+
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span><span class="n">floor</span><span class="p">,</span><span class="n">ceil</span><span class="p">,</span><span class="n">round_</span><span class="p">,</span><span class="n">arange</span>
+
+<span class="kn">from</span> <span class="nn">boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+
+
+
+
+
+<span class="c"># Note about the &#39;bounds-master&#39; approach we have adopted</span>
+<span class="c"># =======================================================</span>
+<span class="c">#</span>
+<span class="c"># Our current approach is a &quot;bounds-master&quot; approach, where we trust</span>
+<span class="c"># the user&#39;s specified x width, and choose the nearest density and y</span>
+<span class="c"># height to make that possible.  The advantage of this is that when we</span>
+<span class="c"># change the density (which is often), each such simulation is the</span>
+<span class="c"># best possible approximation to the given area.  Generally, the area</span>
+<span class="c"># is much more meaningful than the density, so this approach makes</span>
+<span class="c"># sense.  Plus, the y height is usually the same as the x width, so</span>
+<span class="c"># it&#39;s not usually a problem that the y height is not respected.  The</span>
+<span class="c"># disadvantage is that the user&#39;s area can only be trusted in one</span>
+<span class="c"># dimension, because of wanting to avoid the complication of separate</span>
+<span class="c"># xdensity and ydensity, which makes this approach very difficult to</span>
+<span class="c"># explain to the user.</span>
+<span class="c">#</span>
+<span class="c"># The other approach is density-master: trust the user&#39;s specified</span>
+<span class="c"># density as-is, and simply choose the nearest area that fits that</span>
+<span class="c"># density.  The advantages are that (a) it&#39;s very simple to describe</span>
+<span class="c"># and reason about, and (b) if a user asks for a different area, they</span>
+<span class="c"># get a true subsection of the same simulation they would have gotten</span>
+<span class="c"># at the larger area.  The disadvantage is that the simulation isn&#39;t</span>
+<span class="c"># the best approximation of the given area that it could be -- e.g. at</span>
+<span class="c"># low densities, the sheet area could be quite significantly different</span>
+<span class="c"># than the one the user requested.  Plus, if we took this approach</span>
+<span class="c"># seriously, then we&#39;d let the density specify the matrix coordinate</span>
+<span class="c"># system entirely, including the origin, which would mean that the</span>
+<span class="c"># actual area would often be offset from the intended one, which is</span>
+<span class="c"># even worse.  Differences between the area and the offset could cause</span>
+<span class="c"># severe problems in the alignment of projections between sheets with</span>
+<span class="c"># different densities, which would make low-density versions of</span>
+<span class="c"># hierarchical models behave very strangely.</span>
+
+
+
+
+<div class="viewcode-block" id="SheetCoordinateSystem"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem">[docs]</a><span class="k">class</span> <span class="nc">SheetCoordinateSystem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides methods to allow conversion between sheet and matrix</span>
+<span class="sd">    coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__get_xdensity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xdensity</span>
+    <span class="k">def</span> <span class="nf">__get_ydensity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ydensity</span>
+    <span class="k">def</span> <span class="nf">__get_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shape</span>
+
+    <span class="c">#### These are all properties so that they can&#39;t be set ####</span>
+    <span class="c"># CB: unnecessary? if we&#39;re going to keep this, what about bounds and lbrt?</span>
+    <span class="n">xdensity</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_xdensity</span><span class="p">,</span>
+                        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The spacing between elements in an underlying</span>
+<span class="s">                        matrix representation, in the x direction.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">ydensity</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_ydensity</span><span class="p">,</span>
+                        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The spacing between elements in an underlying</span>
+<span class="s">                        matrix representation, in the y direction.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">shape</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_shape</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">xdensity</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store the bounds (as l,b,r,t in an array), xdensity, and</span>
+<span class="sd">        ydensity.</span>
+
+<span class="sd">        If ydensity is not specified, it is assumed that the specified</span>
+<span class="sd">        xdensity is nominal and that the true xdensity should be</span>
+<span class="sd">        calculated. The top and bottom bounds are adjusted so that</span>
+<span class="sd">        the ydensity is equal to the xdensity.</span>
+
+<span class="sd">        If both xdensity and ydensity are specified, these and the bounds</span>
+<span class="sd">        are taken to be exact and are not adjusted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ydensity</span><span class="p">:</span>
+            <span class="n">bounds</span><span class="p">,</span><span class="n">xdensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__equalize_densities</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">xdensity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_xdensity</span><span class="p">(</span><span class="n">xdensity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_ydensity</span><span class="p">(</span><span class="n">ydensity</span> <span class="ow">or</span> <span class="n">xdensity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">())</span>
+
+        <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span> <span class="o">=</span> <span class="n">Slice</span><span class="o">.</span><span class="n">_boundsspec2slicespec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">r2</span><span class="o">-</span><span class="n">r1</span><span class="p">,</span><span class="n">c2</span><span class="o">-</span><span class="n">c1</span><span class="p">)</span>
+
+
+    <span class="c">### we use xstep and ystep so that the repeatedly performed</span>
+    <span class="c">### calculations in matrix2sheet() use multiplications rather than</span>
+    <span class="c">### divisions, for speed</span>
+    <span class="k">def</span> <span class="nf">__set_xdensity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">density</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__xdensity</span><span class="o">=</span><span class="n">density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__xstep</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">density</span>
+
+    <span class="k">def</span> <span class="nf">__set_ydensity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">density</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ydensity</span><span class="o">=</span><span class="n">density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ystep</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">density</span>
+
+
+    <span class="k">def</span> <span class="nf">__equalize_densities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nominal_bounds</span><span class="p">,</span><span class="n">nominal_density</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the true density along x, and adjust the top and</span>
+<span class="sd">        bottom bounds so that the density along y will be equal.</span>
+
+<span class="sd">        Returns (adjusted_bounds,true_density)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="n">nominal_bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">right</span><span class="o">-</span><span class="n">left</span><span class="p">;</span> <span class="n">height</span> <span class="o">=</span> <span class="n">top</span><span class="o">-</span><span class="n">bottom</span>
+        <span class="n">center_y</span> <span class="o">=</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">height</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="c"># The true density is not equal to the nominal_density</span>
+        <span class="c"># when nominal_density*(right-left) is not an integer.</span>
+        <span class="n">true_density</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">*</span><span class="p">(</span><span class="n">width</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="n">n_cells</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">height</span><span class="o">*</span><span class="n">true_density</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">adjusted_half_height</span> <span class="o">=</span> <span class="n">n_cells</span><span class="o">/</span><span class="n">true_density</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="c"># (The above might be clearer as (step*n_units)/2.0, where</span>
+        <span class="c"># step=1.0/density.)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="n">left</span><span class="p">,</span>  <span class="n">center_y</span><span class="o">-</span><span class="n">adjusted_half_height</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">center_y</span><span class="o">+</span><span class="n">adjusted_half_height</span><span class="p">))),</span>
+                <span class="n">true_density</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SheetCoordinateSystem.sheet2matrix"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem.sheet2matrix">[docs]</a>    <span class="k">def</span> <span class="nf">sheet2matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a point (x,y) in Sheet coordinates to continuous matrix</span>
+<span class="sd">        coordinates.</span>
+
+<span class="sd">        Returns (float_row,float_col), where float_row corresponds to y,</span>
+<span class="sd">        and float_col to x.</span>
+
+<span class="sd">        Valid for scalar or array x and y.</span>
+
+<span class="sd">        Note about Bounds</span>
+<span class="sd">        For a Sheet with BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))</span>
+<span class="sd">        and density=3, x=-0.5 corresponds to float_col=0.0 and x=0.5</span>
+<span class="sd">        corresponds to float_col=3.0.  float_col=3.0 is not inside the</span>
+<span class="sd">        matrix representing this Sheet, which has the three columns</span>
+<span class="sd">        (0,1,2). That is, x=-0.5 is inside the BoundingBox but x=0.5</span>
+<span class="sd">        is outside. Similarly, y=0.5 is inside (at row 0) but y=-0.5</span>
+<span class="sd">        is outside (at row 3) (it&#39;s the other way round for y because</span>
+<span class="sd">        the matrix row index increases as y decreases).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># First translate to (left,top), which is [0,0] in the matrix,</span>
+        <span class="c"># then scale to the size of the matrix. The y coordinate needs</span>
+        <span class="c"># to be flipped, because the points are moving down in the</span>
+        <span class="c"># sheet as the y index increases in the matrix.</span>
+        <span class="n">float_col</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xdensity</span>
+        <span class="n">float_row</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ydensity</span>
+        <span class="k">return</span> <span class="n">float_row</span><span class="p">,</span> <span class="n">float_col</span>
+
+</div>
+<div class="viewcode-block" id="SheetCoordinateSystem.sheet2matrixidx"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem.sheet2matrixidx">[docs]</a>    <span class="k">def</span> <span class="nf">sheet2matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a point (x,y) in sheet coordinates to the integer row and</span>
+<span class="sd">        column index of the matrix cell in which that point falls, given a</span>
+<span class="sd">        bounds and density.  Returns (row,column).</span>
+
+<span class="sd">        Note that if coordinates along the right or bottom boundary are</span>
+<span class="sd">        passed into this function, the returned matrix coordinate of the</span>
+<span class="sd">        boundary will be just outside the matrix, because the right and</span>
+<span class="sd">        bottom boundaries are exclusive.</span>
+
+<span class="sd">        Valid for scalar or array x and y.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+        <span class="c"># CB: was it better to have two different methods?</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="s">&#39;astype&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">c</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">),</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SheetCoordinateSystem.matrix2sheet"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem.matrix2sheet">[docs]</a>    <span class="k">def</span> <span class="nf">matrix2sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">float_row</span><span class="p">,</span><span class="n">float_col</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a floating-point location (float_row,float_col) in matrix</span>
+<span class="sd">        coordinates to its corresponding location (x,y) in sheet</span>
+<span class="sd">        coordinates.</span>
+
+<span class="sd">        Valid for scalar or array float_row and float_col.</span>
+
+<span class="sd">        Inverse of sheet2matrix().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">float_col</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__xstep</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">float_row</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__ystep</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+
+</div>
+<div class="viewcode-block" id="SheetCoordinateSystem.matrixidx2sheet"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem.matrixidx2sheet">[docs]</a>    <span class="k">def</span> <span class="nf">matrixidx2sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return (x,y) where x and y are the floating point coordinates of</span>
+<span class="sd">        the *center* of the given matrix cell (row,col). If the matrix cell</span>
+<span class="sd">        represents a 0.2 by 0.2 region, then the center location returned</span>
+<span class="sd">        would be 0.1,0.1.</span>
+
+<span class="sd">        NOTE: This is NOT the strict mathematical inverse of</span>
+<span class="sd">        sheet2matrixidx(), because sheet2matrixidx() discards all but the integer</span>
+<span class="sd">        portion of the continuous matrix coordinate.</span>
+
+<span class="sd">        Valid only for scalar or array row and col.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">((</span><span class="n">row</span><span class="o">+</span><span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="n">col</span><span class="o">+</span><span class="mf">0.5</span><span class="p">))</span>
+
+        <span class="c"># Rounding is useful for comparing the result with a floating point number</span>
+        <span class="c"># that we specify by typing the number out (e.g. fp = 0.5).</span>
+        <span class="c"># Round eliminates any precision errors that have been compounded</span>
+        <span class="c"># via floating point operations so that the rounded number will better</span>
+        <span class="c"># match the floating number that we type in.</span>
+        <span class="k">return</span> <span class="n">round_</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span><span class="n">round_</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SheetCoordinateSystem.closest_cell_center"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem.closest_cell_center">[docs]</a>    <span class="k">def</span> <span class="nf">closest_cell_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given arbitary sheet coordinates, return the sheet coordinates</span>
+<span class="sd">        of the center of the closest unit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="SheetCoordinateSystem.sheetcoordinates_of_matrixidx"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem.sheetcoordinates_of_matrixidx">[docs]</a>    <span class="k">def</span> <span class="nf">sheetcoordinates_of_matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return x,y where x is a vector of sheet coordinates</span>
+<span class="sd">        representing the x-center of each matrix cell, and y</span>
+<span class="sd">        represents the corresponding y-center of the cell.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">arange</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span><span class="n">arange</span><span class="p">(</span><span class="n">cols</span><span class="p">))</span>
+
+
+
+
+
+
+
+<span class="c"># Needs cleanup/rename:</span>
+<span class="c">#</span>
+<span class="c"># since it&#39;s different from a Python slice.  It&#39;s our special slice</span>
+<span class="c"># that&#39;s an array specifying row_start,row_stop,col_start,col_stop for</span>
+<span class="c"># a Sheet (2d array).</span>
+<span class="c">#</span>
+<span class="c"># In python, a[slice(0,2)] (where a is a list/array/similar) is</span>
+<span class="c"># equivalent to a[0:2].</span>
+<span class="c">#</span>
+<span class="c"># So, not sure what to call this class. (Will need to rename some</span>
+<span class="c"># methods, too.) SCSSlice? SheetSlice?</span>
+</div></div>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">int32</span><span class="p">,</span><span class="n">ndarray</span>
+
+<div class="viewcode-block" id="Slice"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice">[docs]</a><span class="k">class</span> <span class="nc">Slice</span><span class="p">(</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a slice of a SheetCoordinateSystem; i.e., an array</span>
+<span class="sd">    specifying the row and column start and end points for a submatrix</span>
+<span class="sd">    of the SheetCoordinateSystem.</span>
+
+<span class="sd">    The slice is created from the supplied bounds by calculating the</span>
+<span class="sd">    slice that corresponds most closely to the specified bounds.</span>
+<span class="sd">    Therefore, the slice does not necessarily correspond exactly to</span>
+<span class="sd">    the specified bounds. The bounds that do exactly correspond to the</span>
+<span class="sd">    slice are available via the &#39;bounds&#39; attribute.</span>
+
+<span class="sd">    Note that the slice does not respect the bounds of the</span>
+<span class="sd">    SheetCoordinateSystem, and that actions such as translate() also</span>
+<span class="sd">    do not respect the bounds. To ensure that the slice is within the</span>
+<span class="sd">    SheetCoordinateSystem&#39;s bounds, use crop_to_sheet().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">compute_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scs</span><span class="p">):</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slicespec2boundsspec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
+
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">sheet_coordinate_system</span><span class="p">,</span> <span class="n">force_odd</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">min_matrix_radius</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span> <span class="c"># CEBALERT: min_matrix_radius only used for odd slice.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a slice of the given sheet_coordinate_system from the</span>
+<span class="sd">        specified bounds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># I couldn&#39;t find documentation on subclassing array; I used</span>
+        <span class="c"># the following as reference:</span>
+        <span class="c"># http://scipy.org/scipy/numpy/browser/branches/maskedarray/</span>
+        <span class="c">#  numpy/ma/tests/test_subclassing.py?rev=4577</span>
+        <span class="k">if</span> <span class="n">force_odd</span><span class="p">:</span>
+            <span class="n">slicespec</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_createoddslicespec</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">sheet_coordinate_system</span><span class="p">,</span>
+                                                <span class="n">min_matrix_radius</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">slicespec</span><span class="o">=</span><span class="n">Slice</span><span class="o">.</span><span class="n">_boundsspec2slicespec</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">sheet_coordinate_system</span><span class="p">)</span>
+        <span class="c"># numpy.int32 is specified explicitly in Slice to avoid having</span>
+        <span class="c"># it default to numpy.int. int32 saves memory (and is expected</span>
+        <span class="c"># by optimized C functions).</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">slicespec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span>
+
+
+<div class="viewcode-block" id="Slice.submatrix"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice.submatrix">[docs]</a>    <span class="k">def</span> <span class="nf">submatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the submatrix of the given matrix specified by this</span>
+<span class="sd">        slice.</span>
+
+<span class="sd">        Equivalent to computing the intersection between the</span>
+<span class="sd">        SheetCoordinateSystem&#39;s bounds and the bounds, and</span>
+<span class="sd">        returning the corresponding submatrix of the given matrix.</span>
+
+<span class="sd">        The submatrix is just a view into the sheet_matrix; it is not</span>
+<span class="sd">        an independent copy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">matrix</span><span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span><span class="bp">self</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+
+    <span class="c"># CB: not sure if this is a good idea or not. In some ways, I</span>
+    <span class="c"># think matrix[slice_()] would be clearer than</span>
+    <span class="c"># slice.submatrix(matrix), but I&#39;m not sure. cf.py is where</span>
+    <span class="c"># to look to see this in action.</span>
+<span class="c">##     def __call__(self):</span>
+<span class="c">##         return slice(self[0],self[1]),slice(self[2],self[3])</span>
+
+    <span class="c">### CLEANUP ###</span>
+
+    <span class="c"># CEBALERT: unnecessary? use translate and crop and back. or is</span>
+    <span class="c"># that more steps? rename</span></div>
+<div class="viewcode-block" id="Slice.positionlesscrop"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice.positionlesscrop">[docs]</a>    <span class="k">def</span> <span class="nf">positionlesscrop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sheet_coord_system</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the correct slice for a weights/mask matrix at this</span>
+<span class="sd">        ConnectionField&#39;s location on the sheet (i.e. for getting</span>
+<span class="sd">        the correct submatrix of the weights or mask in case the</span>
+<span class="sd">        unit is near the edge of the sheet).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sheet_rows</span><span class="p">,</span><span class="n">sheet_cols</span> <span class="o">=</span> <span class="n">sheet_coord_system</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c"># get size of weights matrix</span>
+        <span class="n">n_rows</span><span class="p">,</span><span class="n">n_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_on_sheet</span><span class="p">()</span>
+
+        <span class="c"># get slice for the submatrix</span>
+        <span class="n">center_row</span><span class="p">,</span><span class="n">center_col</span> <span class="o">=</span> <span class="n">sheet_coord_system</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">c1</span> <span class="o">=</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">center_col</span><span class="o">-</span><span class="n">n_cols</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>  <span class="c"># assume odd weight matrix so can use n_cols/2</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">center_row</span><span class="o">-</span><span class="n">n_rows</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>  <span class="c"># for top and bottom</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">n_cols</span><span class="p">,</span> <span class="n">center_col</span><span class="o">-</span><span class="n">sheet_cols</span><span class="o">-</span><span class="n">n_cols</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">center_row</span><span class="o">-</span><span class="n">sheet_rows</span><span class="o">-</span><span class="n">n_rows</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">((</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">))</span>
+
+    <span class="c"># CBALERT: assumes the user wants the bounds to be centered about</span>
+    <span class="c"># the unit, which might not be true.</span></div>
+<div class="viewcode-block" id="Slice.positionedcrop"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice.positionedcrop">[docs]</a>    <span class="k">def</span> <span class="nf">positionedcrop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sheet_coord_system</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Offset the bounds_template to this cf&#39;s location and store the</span>
+<span class="sd">        result in the &#39;bounds&#39; attribute.</span>
+
+<span class="sd">        Also stores the input_sheet_slice for access by C.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># translate to this cf&#39;s location</span>
+        <span class="n">cf_row</span><span class="p">,</span><span class="n">cf_col</span> <span class="o">=</span> <span class="n">sheet_coord_system</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c"># should result in same no. of comps of right bounds as before during init,</span>
+        <span class="c"># since i removed one calc from init</span>
+
+        <span class="n">bounds_x</span><span class="p">,</span><span class="n">bounds_y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_bounds</span><span class="p">(</span><span class="n">sheet_coord_system</span><span class="p">)</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span>
+
+        <span class="n">b_row</span><span class="p">,</span><span class="n">b_col</span><span class="o">=</span><span class="n">sheet_coord_system</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">bounds_x</span><span class="p">,</span><span class="n">bounds_y</span><span class="p">)</span>
+
+        <span class="n">row_offset</span> <span class="o">=</span> <span class="n">cf_row</span><span class="o">-</span><span class="n">b_row</span>
+        <span class="n">col_offset</span> <span class="o">=</span> <span class="n">cf_col</span><span class="o">-</span><span class="n">b_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">row_offset</span><span class="p">,</span><span class="n">col_offset</span><span class="p">)</span>
+
+    <span class="c">###############</span>
+
+</div>
+<div class="viewcode-block" id="Slice.translate"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice.translate">[docs]</a>    <span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Translate the slice by the specified number of rows</span>
+<span class="sd">        and columns.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">+=</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Slice.set"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">slice_specification</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set this slice from some iterable that specifies (r1,r2,c1,c2).&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">put</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">slice_specification</span><span class="p">)</span> <span class="c"># pylint: disable-msg=E1101</span>
+</div>
+<div class="viewcode-block" id="Slice.shape_on_sheet"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice.shape_on_sheet">[docs]</a>    <span class="k">def</span> <span class="nf">shape_on_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the shape of the array that this Slice would give on its sheet.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Slice.crop_to_sheet"><a class="viewcode-back" href="../../Reference_Manual/imagen.sheetcoords-module.html#imagen.sheetcoords.Slice.crop_to_sheet">[docs]</a>    <span class="k">def</span> <span class="nf">crop_to_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sheet_coord_system</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Crop the slice to the SheetCoordinateSystem&#39;s bounds.&quot;&quot;&quot;</span>
+        <span class="n">maxrow</span><span class="p">,</span><span class="n">maxcol</span> <span class="o">=</span> <span class="n">sheet_coord_system</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">maxrow</span><span class="p">,</span><span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">maxcol</span><span class="p">,</span><span class="bp">self</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+
+    <span class="c">### CB: working on methods below here</span>
+    <span class="c"># (+ not keeping these names)</span>
+
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_createoddslicespec</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">scs</span><span class="p">,</span><span class="n">min_matrix_radius</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the &#39;odd&#39; Slice that best approximates the specifed</span>
+<span class="sd">        sheet-coordinate bounds.</span>
+
+<span class="sd">        The supplied bounds are translated to have a center at the</span>
+<span class="sd">        center of one of the sheet&#39;s units (we arbitrarily use the</span>
+<span class="sd">        center unit), and then these bounds are converted to a slice</span>
+<span class="sd">        in such a way that the slice exactly includes all units whose</span>
+<span class="sd">        centers are within the bounds (see boundsspec2slicespec()).</span>
+<span class="sd">        However, to ensure that the bounds are treated symmetrically,</span>
+<span class="sd">        we take the right and bottom bounds and reflect these about</span>
+<span class="sd">        the center of the slice (i.e. we take the &#39;xradius&#39; to be</span>
+<span class="sd">        right_col-center_col and the &#39;yradius&#39; to be</span>
+<span class="sd">        bottom_col-center_row). Hence, if the bounds happen to go</span>
+<span class="sd">        through units, if the units are included on the right and</span>
+<span class="sd">        bottom bounds, they will be included on the left and top</span>
+<span class="sd">        bounds. This ensures that the slice has odd dimensions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bounds_xcenter</span><span class="p">,</span><span class="n">bounds_ycenter</span><span class="o">=</span><span class="n">bounds</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span>
+        <span class="n">sheet_rows</span><span class="p">,</span><span class="n">sheet_cols</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c"># arbitrary (e.g. could use 0,0)</span>
+        <span class="n">center_row</span><span class="p">,</span><span class="n">center_col</span> <span class="o">=</span> <span class="n">sheet_rows</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">sheet_cols</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">unit_xcenter</span><span class="p">,</span><span class="n">unit_ycenter</span><span class="o">=</span><span class="n">scs</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">center_row</span><span class="p">,</span>
+                                                      <span class="n">center_col</span><span class="p">)</span>
+
+        <span class="n">bounds</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">unit_xcenter</span><span class="o">-</span><span class="n">bounds_xcenter</span><span class="p">,</span>
+                         <span class="n">unit_ycenter</span><span class="o">-</span><span class="n">bounds_ycenter</span><span class="p">)</span>
+
+        <span class="c">########## CEBALERT: assumes weights are to be centered about each unit.</span>
+        <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span> <span class="o">=</span> <span class="n">Slice</span><span class="o">.</span><span class="n">_boundsspec2slicespec</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">(),</span><span class="n">scs</span><span class="p">)</span>
+
+        <span class="c"># use the calculated radius unless it&#39;s smaller than the min</span>
+        <span class="n">xrad</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">c2</span><span class="o">-</span><span class="n">center_col</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+        <span class="n">yrad</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">r2</span><span class="o">-</span><span class="n">center_row</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+
+        <span class="n">r2</span><span class="o">=</span><span class="n">center_row</span><span class="o">+</span><span class="n">yrad</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">c2</span><span class="o">=</span><span class="n">center_col</span><span class="o">+</span><span class="n">xrad</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">r1</span><span class="o">=</span><span class="n">center_row</span><span class="o">-</span><span class="n">yrad</span>
+        <span class="n">c1</span><span class="o">=</span><span class="n">center_col</span><span class="o">-</span><span class="n">xrad</span>
+        <span class="c">##########</span>
+
+        <span class="c"># weights matrix must be odd (otherwise this method has an error)</span>
+        <span class="c"># CEBALERT: this test should move to a test file.</span>
+<span class="c">##         if rows%2!=1 or cols%2!=1:</span>
+<span class="c">##             raise AssertionError(&quot;nominal_bounds_template yielded even-height or even-width weights matrix (%s rows, %s columns) - weights matrix must have odd dimensions.&quot;%(rows,cols))</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">)</span>
+
+
+<span class="c">##         # CEBALERT: with min_matrix_radius, this test is unnecessary? (check)</span>
+<span class="c">##         # user-supplied bounds must lead to a weights matrix of at least 1x1</span>
+<span class="c">##         rows,cols = weights_slice.shape_on_sheet()</span>
+<span class="c">##         if rows==0 or cols==0:</span>
+<span class="c">##             raise ValueError(&quot;nominal_bounds_template results in a zero-sized weights matrix (%s,%s) - you may need to supply a larger nominal_bounds_template or increase the density of the sheet.&quot;%(rows,cols))</span>
+
+
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_boundsspec2slicespec</span><span class="p">(</span><span class="n">boundsspec</span><span class="p">,</span><span class="n">scs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert an iterable boundsspec (supplying l,b,r,t of a</span>
+<span class="sd">        BoundingRegion) into a Slice specification.</span>
+
+<span class="sd">        Includes all units whose centers are within the specified</span>
+<span class="sd">        sheet-coordinate bounds specified by boundsspec.</span>
+
+<span class="sd">        Exact inverse of _slicespec2boundsspec().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">boundsspec</span>
+
+        <span class="n">t_m</span><span class="p">,</span><span class="n">l_m</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">b_m</span><span class="p">,</span><span class="n">r_m</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">l_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="n">l_m</span><span class="o">-</span><span class="mf">0.5</span><span class="p">))</span>
+        <span class="n">t_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="n">t_m</span><span class="o">-</span><span class="mf">0.5</span><span class="p">))</span>
+        <span class="c"># CBENHANCEMENT: Python 2.6&#39;s math.trunc()?</span>
+        <span class="n">r_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">floor</span><span class="p">(</span><span class="n">r_m</span><span class="o">+</span><span class="mf">0.5</span><span class="p">))</span>
+        <span class="n">b_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">floor</span><span class="p">(</span><span class="n">b_m</span><span class="o">+</span><span class="mf">0.5</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">t_idx</span><span class="p">,</span><span class="n">b_idx</span><span class="p">,</span><span class="n">l_idx</span><span class="p">,</span><span class="n">r_idx</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_slicespec2boundsspec</span><span class="p">(</span><span class="n">slicespec</span><span class="p">,</span><span class="n">scs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert an iterable slicespec (supplying r1,r2,c1,c2 of a</span>
+<span class="sd">        Slice) into a BoundingRegion specification.</span>
+
+<span class="sd">        Exact inverse of _boundsspec2slicespec().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span> <span class="o">=</span> <span class="n">slicespec</span>
+
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">)</span>
+        <span class="n">right</span><span class="p">,</span> <span class="n">top</span>  <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">c2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">((</span><span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">),(</span><span class="n">right</span><span class="p">,</span><span class="n">top</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/imagen/sheetcoords.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" >imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Jan 25, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

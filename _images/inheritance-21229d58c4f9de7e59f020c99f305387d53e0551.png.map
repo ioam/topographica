@@ -1,0 +1,8 @@
+<map id="inheritancefe104bf3e4" name="inheritancefe104bf3e4">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,79,264,105"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.functionfamily.LearningFn" title="Abstract base class for learning functions that plug into" alt="" coords="312,79,563,105"/>
+<area shape="rect" id="node3" href="#topo.learningfn.BCMFixed" title="Bienenstock, Cooper, and Munro (1982) learning rule with a fixed threshold." alt="" coords="617,5,799,30"/>
+<area shape="rect" id="node4" href="#topo.learningfn.CPCA" title="CPCA (Conditional Principal Component Analysis) rule." alt="" coords="629,54,787,79"/>
+<area shape="rect" id="node5" href="#topo.learningfn.Covariance" title="Covariance learning rule supporting either input or unit thresholds." alt="" coords="611,103,805,129"/>
+<area shape="rect" id="node6" href="#topo.learningfn.Oja" title="Oja&#39;s rule (Oja, 1982; Dayan and Abbott, 2001, equation 8.16.)" alt="" coords="637,153,779,178"/>
+</map>

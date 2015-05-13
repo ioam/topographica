@@ -1,0 +1,14 @@
+***************
+.gitattributes
+***************
+
+.. inheritance-diagram:: .gitattributes
+
+
+
+Module
+======
+
+.. automodule:: .gitattributes
+   :members:
+   :show-inheritance:

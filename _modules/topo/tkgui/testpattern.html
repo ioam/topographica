@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui.testpattern &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" accesskey="U">topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tkgui.testpattern</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The Test Pattern window allows input patterns to be previewed.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">## Notes:</span>
+<span class="c"># * need to remove audigen pgs</span>
+<span class="c"># * missing disparity flip hack (though see JABHACKALERT below)</span>
+<span class="c"># * values like pi are written over</span>
+<span class="c"># * need to sort the list of Pattern generators</span>
+
+<span class="c"># CBENHANCEMENT: add &#39;use for learning&#39; to install current pattern</span>
+<span class="c"># (saving previous ones)?</span>
+
+<span class="kn">from</span> <span class="nn">Tkinter</span> <span class="kn">import</span> <span class="n">Frame</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">paramtk</span> <span class="kn">as</span> <span class="nn">tk</span>
+
+<span class="kn">from</span> <span class="nn">holoviews.core</span> <span class="kn">import</span> <span class="n">NdMapping</span>
+<span class="kn">from</span> <span class="nn">holoviews.element</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.patterngenerator</span> <span class="kn">import</span> <span class="n">PatternGenerator</span><span class="p">,</span> <span class="n">Constant</span>
+<span class="kn">from</span> <span class="nn">topo.base.generatorsheet</span> <span class="kn">import</span> <span class="n">GeneratorSheet</span>
+<span class="kn">from</span> <span class="nn">topo.misc.attrdict</span> <span class="kn">import</span> <span class="n">AttrDict</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.plot</span> <span class="kn">import</span> <span class="n">make_template_plot</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.plotgroup</span> <span class="kn">import</span> <span class="n">SheetPlotGroup</span>
+<span class="kn">from</span> <span class="nn">topo.analysis.featureresponses</span> <span class="kn">import</span> <span class="n">pattern_present</span>
+
+<span class="kn">from</span> <span class="nn">plotgrouppanel</span> <span class="kn">import</span> <span class="n">SheetPanel</span>
+
+
+<span class="c"># CEBALERT: this uses make_template_plot(), so how is it not a</span>
+<span class="c"># TemplatePlotGroup?</span>
+<div class="viewcode-block" id="TestPatternPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.testpattern.TestPatternPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">TestPatternPlotGroup</span><span class="p">(</span><span class="n">SheetPlotGroup</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">sheets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;_sheets&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheets</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TestPatternPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">sheets</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_generate_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dynamic_plots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">sheet</span><span class="o">=</span><span class="n">sheet</span><span class="p">)</span> <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">()]:</span>
+            <span class="n">sheet</span> <span class="o">=</span> <span class="n">kw</span><span class="p">[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span>
+            <span class="n">views</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">Maps</span>
+
+            <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="n">sheet</span><span class="o">.</span><span class="n">input_generator</span><span class="p">(),</span> <span class="n">bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+            <span class="n">im</span><span class="o">.</span><span class="n">metadata</span><span class="o">=</span><span class="n">AttrDict</span><span class="p">(</span><span class="n">timestamp</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="s">&#39;Activity&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">views</span><span class="p">:</span>
+                <span class="n">views</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NdMapping</span><span class="p">((</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="n">im</span><span class="p">))</span>
+                <span class="n">views</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">AttrDict</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span>
+                                                      <span class="n">row_precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                                                      <span class="n">src_name</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                      <span class="n">timestamp</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">views</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">][</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()]</span> <span class="o">=</span> <span class="n">im</span>
+            <span class="n">channels</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span> <span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
+
+            <span class="n">view</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">Maps</span>
+            <span class="n">view_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="n">view</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="n">view</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="n">view</span><span class="p">}</span>
+            <span class="c">### JCALERT! it is not good to have to pass &#39;&#39; here... maybe a test in plot would be better</span>
+            <span class="n">dynamic_plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">make_template_plot</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span> <span class="n">view_dict</span><span class="p">,</span>
+                                                    <span class="n">sheet</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span><span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_plots</span><span class="p">[:]</span><span class="o">+</span><span class="n">dynamic_plots</span>
+
+
+</div>
+<div class="viewcode-block" id="TestPattern"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.testpattern.TestPattern">[docs]</a><span class="k">class</span> <span class="nc">TestPattern</span><span class="p">(</span><span class="n">SheetPanel</span><span class="p">):</span>
+
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">GeneratorSheet</span>
+
+    <span class="n">dock</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">edit_sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Sheet for which to edit pattern properties.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">plastic</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to enable plasticity during presentation.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">10.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        How long to run the simulation for each presentation.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">Present</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Present this pattern to the simulation.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">pattern_generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">Constant</span><span class="p">(),</span> <span class="n">class_</span><span class="o">=</span><span class="n">PatternGenerator</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Type of pattern to present. Each type has various parameters that can be changed.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">plotgroup</span> <span class="o">=</span> <span class="n">plotgroup</span> <span class="ow">or</span> <span class="n">TestPatternPlotGroup</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">TestPattern</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotcommand_frame</span><span class="o">.</span><span class="n">pack_forget</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;pre_plot_hooks&#39;</span><span class="p">,</span><span class="s">&#39;plot_hooks&#39;</span><span class="p">,</span><span class="s">&#39;Fwd&#39;</span><span class="p">,</span><span class="s">&#39;Back&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_param</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">edit_sheet_param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter_object</span><span class="p">(</span><span class="s">&#39;edit_sheet&#39;</span><span class="p">)</span>
+        <span class="n">edit_sheet_param</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheets</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pg_control_pane</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="c">#,bd=1,relief=&quot;sunken&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pg_control_pane</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s">&quot;top&quot;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="s">&#39;yes&#39;</span><span class="p">,</span><span class="n">fill</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">ParametersFrame</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pg_control_pane</span><span class="p">,</span>
+            <span class="n">parameterized_object</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_generator</span><span class="p">,</span>
+            <span class="n">on_modify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">conditional_refresh</span><span class="p">,</span>
+            <span class="n">msg_handler</span><span class="o">=</span><span class="n">master</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_frame</span><span class="o">.</span><span class="n">hide_param</span><span class="p">(</span><span class="s">&#39;Close&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_frame</span><span class="o">.</span><span class="n">hide_param</span><span class="p">(</span><span class="s">&#39;Refresh&#39;</span><span class="p">)</span>
+
+        <span class="c"># CEB: &#39;new_default=True&#39; is temporary so that the current</span>
+        <span class="c"># behavior is the same as before; shoudl make None the</span>
+        <span class="c"># default and mean &#39;apply to all sheets&#39;.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;edit_sheet&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pg_control_pane</span><span class="p">,</span><span class="n">on_modify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_sheet</span><span class="p">,</span><span class="n">widget_options</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;new_default&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span><span class="s">&#39;sort_fn_args&#39;</span><span class="p">:{</span><span class="s">&#39;cmp&#39;</span><span class="p">:</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">.</span><span class="n">precedence</span><span class="p">)}})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;pattern_generator&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pg_control_pane</span><span class="p">,</span>
+                        <span class="n">on_modify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">change_pattern_generator</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&quot;top&quot;</span><span class="p">)</span>
+
+        <span class="n">present_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">present_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;plastic&#39;</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">present_frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="s">&#39;yes&#39;</span><span class="p">,</span><span class="n">fill</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;duration&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">present_frame</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;Present&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">present_frame</span><span class="p">,</span><span class="n">on_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">present_pattern</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&quot;right&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TestPattern</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup_plotgroup</span><span class="p">()</span>
+
+        <span class="c"># CB: could copy the sheets instead (deleting connections etc)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">_sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">GeneratorSheet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">gs</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                 <span class="n">nominal_bounds</span><span class="o">=</span><span class="n">gs</span><span class="o">.</span><span class="n">nominal_bounds</span><span class="p">,</span>
+                                                 <span class="n">nominal_density</span><span class="o">=</span><span class="n">gs</span><span class="o">.</span><span class="n">nominal_density</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">gs</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">_set_name</span><span class="p">(</span><span class="s">&quot;Test Pattern&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">switch_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_sheet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pattern_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_sheet</span><span class="o">.</span><span class="n">input_generator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">change_pattern_generator</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="TestPattern.change_pattern_generator"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.testpattern.TestPattern.change_pattern_generator">[docs]</a>    <span class="k">def</span> <span class="nf">change_pattern_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the current PatternGenerator to the one selected and get the</span>
+<span class="sd">        ParametersFrameWithApply to draw the relevant widgets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># CEBALERT: if pattern generator is set to None, there will be</span>
+        <span class="c"># an error. Need to handle None in the appropriate place</span>
+        <span class="c"># (presumably tk.py).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_frame</span><span class="o">.</span><span class="n">set_PO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_generator</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheets</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">sheet</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_sheet</span><span class="p">:</span>
+                <span class="n">sheet</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_generator</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">conditional_refresh</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="TestPattern.refresh"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.testpattern.TestPattern.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simply update the plots: skip all handling of history.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_plots</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="TestPattern.present_pattern"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.testpattern.TestPattern.present_pattern">[docs]</a>    <span class="k">def</span> <span class="nf">present_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move the user created patterns into the GeneratorSheets, run for</span>
+<span class="sd">        the specified length of time, then restore the original</span>
+<span class="sd">        patterns.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">input_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">sheet</span><span class="o">.</span><span class="n">input_generator</span><span class="p">)</span> \
+                           <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheets</span><span class="p">()])</span>
+        <span class="n">pattern_present</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">durations</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">],</span>
+                        <span class="n">plastic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">,</span> <span class="n">overwrite_previous</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                        <span class="n">install_sheetview</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">restore_state</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">auto_refresh</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/tkgui/testpattern.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" >topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

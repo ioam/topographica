@@ -1,0 +1,314 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.unit.testcfsom &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tests.unit.testcfsom</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">See test_cfsom(self) and ImagePoster for an example of how to use and call</span>
+<span class="sd">the PlotEngine system from a simulation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.pattern</span> <span class="kn">import</span> <span class="n">Gaussian</span>
+<span class="kn">from</span> <span class="nn">topo.plotting</span> <span class="kn">import</span> <span class="n">plot</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.bitmap</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span><span class="p">,</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">topo.base</span> <span class="kn">import</span> <span class="n">patterngenerator</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFProjection</span><span class="p">,</span> <span class="n">CFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.learningfn.optimized</span> <span class="kn">import</span> <span class="n">CFPLF_Hebbian_opt</span>
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">numbergen</span>
+
+<span class="c">### Only for ImageSaver</span>
+<span class="kn">from</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">import</span> <span class="n">resize</span><span class="p">,</span><span class="n">array</span><span class="p">,</span><span class="n">zeros</span>
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">EventProcessor</span>
+<span class="kn">from</span> <span class="nn">topo.misc.util</span> <span class="kn">import</span> <span class="n">NxN</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">Image</span><span class="o">,</span> <span class="nn">ImageOps</span>
+
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">istest</span><span class="p">,</span> <span class="n">nottest</span>
+<span class="c">### JABALERT: The ImageSaver class should probably be deleted,</span>
+<span class="c">### but it is currently used in this test.</span>
+
+<span class="nd">@nottest</span>
+<div class="viewcode-block" id="ImageSaver"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testcfsom-module.html#topo.tests.unit.testcfsom.ImageSaver">[docs]</a><span class="k">class</span> <span class="nc">ImageSaver</span><span class="p">(</span><span class="n">EventProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    A Sheet that receives activity matrices and saves them as bitmaps.</span>
+<span class="sd">    Each time an ImageSaver sheet receives an input event on any input</span>
+<span class="sd">    port, it saves it to a file.  The file name is determined by:</span>
+
+<span class="sd">      &lt;file_prefix&gt;&lt;name&gt;_&lt;port&gt;_&lt;time&gt;.&lt;file_format&gt;</span>
+
+<span class="sd">    Where &lt;name&gt; is the name of the ImageSaver object, &lt;port&gt; is the</span>
+<span class="sd">    name of the input port used, and &lt;time&gt; is the current simulation time.</span>
+
+<span class="sd">    Parameters::</span>
+<span class="sd">      file_prefix = (default &#39;&#39;) A path or other prefix for the</span>
+<span class="sd">                    filename.</span>
+<span class="sd">      file_format = (default &#39;ppm&#39;) The file type to use when saving</span>
+<span class="sd">                    the image. (can be any image format understood by PIL)</span>
+<span class="sd">      time_format = (default &#39;%f&#39;) The format string for the time.</span>
+<span class="sd">      pixel_scale = (default 255) The amount to scale the</span>
+<span class="sd">                     activity. Used as parameter to PIL&#39;s Image.putdata().</span>
+<span class="sd">      pixel_offset = (default 0) The zero-offset for each pixel. Used as</span>
+<span class="sd">                     parameter to PIL&#39;s Image.putdata()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">file_prefix</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">file_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;ppm&#39;</span><span class="p">)</span>
+    <span class="n">time_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%f</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">pixel_offset</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Received </span><span class="si">%s</span><span class="s">  input from </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">NxN</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span><span class="n">conn</span><span class="o">.</span><span class="n">src</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;input max value = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+        <span class="c"># assemble the filename</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_prefix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">conn</span><span class="o">.</span><span class="n">dest_port</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">+=</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">dest_port</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">+=</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_format</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">filename</span> <span class="o">+=</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_format</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;filename = &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="c"># make and populate the image</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s">&#39;L&#39;</span><span class="p">,(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;image size = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">NxN</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">putdata</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                   <span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
+                   <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_offset</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;put image data.&quot;</span><span class="p">)</span>
+
+        <span class="c">#save the image</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">file_format</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<span class="nd">@istest</span>
+<span class="k">class</span> <span class="nc">TestCFSom</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet1</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet2</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">()</span>
+
+
+<span class="c"># CEBALERT: replace with an equivalent example that uses Image</span>
+<span class="c">##     def test_imagegenerator(self):</span>
+<span class="c">##         &quot;&quot;&quot;</span>
+<span class="c">##         Code moved from __main__ block of cfsom.py.  Gives a tight example</span>
+<span class="c">##         of running a cfsom simulation.</span>
+<span class="c">##         &quot;&quot;&quot;</span>
+<span class="c">##         from testsheetview import ImageGenerator</span>
+
+<span class="c">##         s = Simulation(step_mode=True)</span>
+
+<span class="c">##         ImageGenerator.nominal_density = 100</span>
+<span class="c">##         ImageGenerator.nominal_bounds = BoundingBox(points=((-0.8,-0.8),(0.8,0.8)))</span>
+<span class="c">##         input = ImageGenerator(filename=&#39;images/ellen_arthur.pgm&#39;)</span>
+
+
+<span class="c">##         save = ImageSaver(pixel_scale=1.5)</span>
+<span class="c">##         som = CFSheet()</span>
+
+<span class="c">##         s.add(som,input,save)</span>
+<span class="c">##         s.connect(input,som,connection_type=CFProjection,learning_fn=CFPLF_Hebbian_opt())</span>
+<span class="c">##         s.connect(som,save)</span>
+<span class="c">##         s.run(duration=10)</span>
+
+
+
+    <span class="k">def</span> <span class="nf">test_cfsom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">gaussian_width</span> <span class="o">=</span> <span class="mf">0.02</span>
+        <span class="n">gaussian_height</span> <span class="o">=</span> <span class="mf">0.9</span>
+
+        <span class="n">input_pattern</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.8</span><span class="p">,</span><span class="o">-</span><span class="mf">0.8</span><span class="p">),(</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.8</span><span class="p">))),</span>
+            <span class="n">scale</span><span class="o">=</span><span class="n">gaussian_height</span><span class="p">,</span>
+            <span class="n">aspect_ratio</span><span class="o">=</span><span class="n">gaussian_width</span><span class="o">/</span><span class="n">gaussian_height</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span><span class="n">ubound</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span><span class="n">ubound</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">200</span><span class="p">),</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="n">pi</span><span class="p">,</span><span class="n">ubound</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">300</span><span class="p">))</span>
+
+
+        <span class="c"># input generation params</span>
+        <span class="n">GeneratorSheet</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">GeneratorSheet</span><span class="o">.</span><span class="n">nominal_density</span> <span class="o">=</span> <span class="mi">5</span>
+
+
+        <span class="c"># cf som parameters</span>
+        <span class="n">CFSheet</span><span class="o">.</span><span class="n">nominal_density</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="c">###########################################</span>
+        <span class="c"># build simulation</span>
+
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Creating simulation objects...&quot;</span><span class="p">)</span>
+        <span class="n">s</span><span class="p">[</span><span class="s">&#39;retina&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">GeneratorSheet</span><span class="p">(</span><span class="n">input_generator</span><span class="o">=</span><span class="n">input_pattern</span><span class="p">)</span>
+
+        <span class="n">s</span><span class="p">[</span><span class="s">&#39;V1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFSheet</span><span class="p">()</span>
+
+        <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&#39;retina&#39;</span><span class="p">,</span><span class="s">&#39;V1&#39;</span><span class="p">,</span><span class="n">delay</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">connection_type</span><span class="o">=</span><span class="n">CFProjection</span><span class="p">,</span>
+                  <span class="n">learning_fn</span><span class="o">=</span><span class="n">CFPLF_Hebbian_opt</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="s">&#39;V1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">projections</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;retinaToV1&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="s">&#39;V1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">projections</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;retinaToV1&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">nose</span>
+	<span class="n">nose</span><span class="o">.</span><span class="n">runmodule</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../News/index.html">News</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../../Links/index.html">Links</a></li>
+<li><a href="../../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/tests/unit/testcfsom.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

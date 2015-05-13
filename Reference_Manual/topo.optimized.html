@@ -1,0 +1,825 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.optimized Package &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-optimized-package">
+<h1>topo.optimized Package<a class="headerlink" href="#topo-optimized-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="optimized-package">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">optimized</span></tt> Package<a class="headerlink" href="#optimized-package" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-topo.optimized"></span></div>
+<div class="section" id="compile-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">compile</span></tt> Module<a class="headerlink" href="#compile-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-topo.optimized.compile"></span></div>
+<div class="section" id="unoptimized-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">unoptimized</span></tt> Module<a class="headerlink" href="#unoptimized-module" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+<img src="../_images/inheritance-522013a3ab8747d7e2542c39dd8b76a5adebb3ae.png" alt="Inheritance diagram of topo.optimized.unoptimized" usemap="#inheritancecfedd44b41" class="inheritance"/>
+<map id="inheritancecfedd44b41" name="inheritancecfedd44b41">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="4,63,214,84"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFPLearningFn" title="params(name=String)" alt="" coords="255,23,416,44"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.cf.CFPOutputFn" title="params(name=String)" alt="" coords="260,63,411,84"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.cf.CFPResponseFn" title="params(name=String)" alt="" coords="253,103,418,124"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="557,23,708,44"/>
+<area shape="rect" id="node7" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="851,4,1143,24"/>
+<area shape="rect" id="node8" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="854,44,1140,64"/>
+<area shape="rect" id="node9" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="458,63,806,84"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.cf.CFPRF_Plugin" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="556,103,708,124"/>
+<area shape="rect" id="node10" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="846,103,1148,124"/>
+</map>
+</p>
+<span class="target" id="module-topo.optimized.unoptimized"></span><p>Provides unoptimized fallbacks for Cython optimized components.</p>
+<dl class="class">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython">
+<em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPLF_BCMFixed_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPLF_BCMFixed_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="topo.base.cf.CFPLF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPLF_Plugin</span></tt></a></p>
+<p>params(single_cf_fn=ClassSelector, name=String)
+Same as CFPLF_Plugin(single_cf_fn=BCMFixed()); just for non-optimized fallback.
+[1;32mParameters of &#8216;CFPLF_BCMFixed_cython&#8217;
+=====================================
+[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName                            Value                         Type      Mode [0m</p>
+<p>single_cf_fn   BCMFixed(name=&#8217;BCMFixed00852&#8217;, unit_t...  ClassSelector  C RO</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34msingle_cf_fn: Accepts a LearningFn that will be applied to each CF individually.[0m</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;BCMFixed BCMFixed00852&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=True</em>)</dt>
+<dd>Accepts a LearningFn that will be applied to each CF individually.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.constant_sum_connection_rate">
+<tt class="descname">constant_sum_connection_rate</tt><big>(</big><em>n_units</em>, <em>learning_rate</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.constant_sum_connection_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the learning rate for a single connection assuming that
+the total rate is to be divided evenly among all the units in
+the connection field.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666c00&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666d08&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666d60&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f64c158&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f64c1b0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the most recently saved state.</p>
+<p>See state_push() for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this instance&#8217;s state.</p>
+<p>For Parameterized instances, this includes the state of
+dynamically generated values.</p>
+<p>Subclasses that maintain short-term state should additionally
+save and restore that state using state_push() and
+state_pop().</p>
+<p>Generally, this method is used by operations that need to test
+something without permanently altering the objects&#8217; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython">
+<em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPLF_Hebbian_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPLF_Hebbian_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="topo.base.cf.CFPLF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPLF_Plugin</span></tt></a></p>
+<p>params(single_cf_fn=ClassSelector, name=String)
+Same as CFPLF_Plugin(single_cf_fn=Hebbian()); just for non-optimized fallback.
+[1;32mParameters of &#8216;CFPLF_Hebbian_cython&#8217;
+====================================
+[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName                      Value                   Type      Mode [0m</p>
+<p>single_cf_fn   Hebbian(name=&#8217;Hebbian00851&#8217;)  ClassSelector  C RO</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34msingle_cf_fn: Accepts a LearningFn that will be applied to each CF individually.[0m</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;Hebbian Hebbian00851&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=True</em>)</dt>
+<dd>Accepts a LearningFn that will be applied to each CF individually.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.constant_sum_connection_rate">
+<tt class="descname">constant_sum_connection_rate</tt><big>(</big><em>n_units</em>, <em>learning_rate</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.constant_sum_connection_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the learning rate for a single connection assuming that
+the total rate is to be divided evenly among all the units in
+the connection field.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666e68&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666ec0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666f70&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f6551b0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f655208&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the most recently saved state.</p>
+<p>See state_push() for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this instance&#8217;s state.</p>
+<p>For Parameterized instances, this includes the state of
+dynamically generated values.</p>
+<p>Subclasses that maintain short-term state should additionally
+save and restore that state using state_push() and
+state_pop().</p>
+<p>Generally, this method is used by operations that need to test
+something without permanently altering the objects&#8217; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython">
+<em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPOF_DivisiveNormalizeL1_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPOF_DivisiveNormalizeL1_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPOutputFn" title="topo.base.cf.CFPOutputFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPOutputFn</span></tt></a></p>
+<p>params(single_cf_fn=ClassSelector, name=String)</p>
+<blockquote>
+<div><p>Non-optimized version of CFPOF_DivisiveNormalizeL1_cython.</p>
+<p>Same as CFPOF_Plugin(single_cf_fn=DivisiveNormalizeL1()), except
+that it supports joint normalization using the norm_total
+property of ConnectionField.</p>
+</div></blockquote>
+<p>[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName                            Value                         Type      Mode [0m</p>
+<p>single_cf_fn   DivisiveNormalizeL1(init_keys=[], nam...  ClassSelector  C RW</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34msingle_cf_fn: &lt; No docstring available &gt;[0m</p>
+<p><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;DivisiveNormalizeL1 DivisiveNormalizeL100853&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666c58&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666e10&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666fc8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666f18&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666838&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the most recently saved state.</p>
+<p>See state_push() for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this instance&#8217;s state.</p>
+<p>For Parameterized instances, this includes the state of
+dynamically generated values.</p>
+<p>Subclasses that maintain short-term state should additionally
+save and restore that state using state_push() and
+state_pop().</p>
+<p>Generally, this method is used by operations that need to test
+something without permanently altering the objects&#8217; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython">
+<em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPRF_DotProduct_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPRF_DotProduct_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPRF_Plugin" title="topo.base.cf.CFPRF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPRF_Plugin</span></tt></a></p>
+<p>params(single_cf_fn=ClassSelector, name=String)</p>
+<blockquote>
+<div>Wrapper written to allow transparent non-optimized fallback;
+equivalent to CFPRF_Plugin(single_cf_fn=DotProduct()).</div></blockquote>
+<p>[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName                         Value                      Type      Mode [0m</p>
+<p>single_cf_fn   DotProduct(name=&#8217;DotProduct00850&#8217;)  ClassSelector  C RO</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34msingle_cf_fn: Accepts a ResponseFn that will be applied to each CF individually.[0m</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;DotProduct DotProduct00850&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=True</em>)</dt>
+<dd>Accepts a ResponseFn that will be applied to each CF individually.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666a48&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666e10&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666db8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666d08&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666940&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the most recently saved state.</p>
+<p>See state_push() for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this instance&#8217;s state.</p>
+<p>For Parameterized instances, this includes the state of
+dynamically generated values.</p>
+<p>Subclasses that maintain short-term state should additionally
+save and restore that state using state_push() and
+state_pop().</p>
+<p>Generally, this method is used by operations that need to test
+something without permanently altering the objects&#8217; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">topo.optimized Package</a><ul>
+<li><a class="reference internal" href="#optimized-package"><tt class="docutils literal"><span class="pre">optimized</span></tt> Package</a></li>
+<li><a class="reference internal" href="#compile-module"><tt class="docutils literal"><span class="pre">compile</span></tt> Module</a></li>
+<li><a class="reference internal" href="#unoptimized-module"><tt class="docutils literal"><span class="pre">unoptimized</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/topo.optimized.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

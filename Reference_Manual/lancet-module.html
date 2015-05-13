@@ -1,0 +1,225 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lancet">
+<h1>lancet<a class="headerlink" href="#lancet" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance73beadcb5f.svg" usemap="#inheritance73beadcb5f" class="inheritance"/></div><map id="inheritance73beadcb5f" name="inheritance73beadcb5f">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="lancet.__init__.pyc-module.html">lancet.__init__.pyc</a></li>
+<li><a class="reference external" href="lancet.dynamic-module.html">lancet.dynamic</a></li>
+<li><a class="reference external" href="lancet.core-module.html">lancet.core</a></li>
+<li><a class="reference external" href="lancet.launch-module.html">lancet.launch</a></li>
+<li><a class="reference external" href="lancet.filetypes.pyc-module.html">lancet.filetypes.pyc</a></li>
+<li><a class="reference external" href="lancet.dynamic.pyc-module.html">lancet.dynamic.pyc</a></li>
+<li><a class="reference external" href="lancet.launch.pyc-module.html">lancet.launch.pyc</a></li>
+<li><a class="reference external" href="lancet.filetypes-module.html">lancet.filetypes</a></li>
+<li><a class="reference external" href="lancet.core.pyc-module.html">lancet.core.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-lancet">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-lancet" title="Permalink to this headline">¶</a></h2>
+<p>Lancet consists of three fundamental class types: Argument Specifiers,
+Command Templates and Launchers. The review_and_launch decorator is a
+helper utility that helps coordinate the use of these objects.</p>
+<div class="section" id="argument-specifiers">
+<h3>Argument Specifiers<a class="headerlink" href="#argument-specifiers" title="Permalink to this headline">¶</a></h3>
+<p>Argument specifiers are intended to offer a succinct, declarative and
+composable way of specifying large parameter sets. High-dimensional
+parameter sets are typical of large-scale scientific models and can
+make specifying such models and simulations difficult. Using argument
+specifiers, you can document how the parameters of your model vary
+across runs without extended lists of arguments or requiring deeply
+nested loops.</p>
+<p>Argument specifiers can be freely intermixed with Python code,
+simplifying the use of scientific software with a Python
+interface. They also invoke commandline programs using CommandTemplate
+objects to build commands and Launcher objects to execute
+them. Argument specifiers can compose together using Cartesian
+Products or Concatenation to express huge numbers of argument sets
+concisely. In this way they can help simplify the management of
+simulation, analysis and visualisation tools with Python.</p>
+</div>
+<div class="section" id="command-templates">
+<h3>Command Templates<a class="headerlink" href="#command-templates" title="Permalink to this headline">¶</a></h3>
+<p>When working with external tools, a command template is needed to turn
+an argument specifier into an executable command. These objects are
+designed to be customisable with sensible defaults to reduce
+boilerplate. They may require argument specifiers with a certain
+structure (certain argument names and value types) to operate
+correctly.</p>
+</div>
+<div class="section" id="launchers">
+<h3>Launchers<a class="headerlink" href="#launchers" title="Permalink to this headline">¶</a></h3>
+<p>A Launcher is designed to execute commands on a given computational
+platform, making use of as much concurrency where possible. The
+default Launcher class executes commands locally while the QLauncher
+class is designed to launch commands on Sun Grid Engine clusters.</p>
+</div>
+<div class="section" id="the-review-and-launch-decorator">
+<h3>The review_and_launch decorator<a class="headerlink" href="#the-review-and-launch-decorator" title="Permalink to this headline">¶</a></h3>
+<p>This decorator helps codify a pattern of Lancet use that checks for
+consistency and offers an in-depth review of all settings before
+launch. The goal is to help users identify mistakes early before
+consuming computational time and resources.</p>
+<dl class="class">
+<dt id="lancet.vcs_metadata">
+<em class="property">class </em><tt class="descclassname">lancet.</tt><tt class="descname">vcs_metadata</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/lancet.html#vcs_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.vcs_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<p>Simple utility to capture basic version control information for
+Git, SVN and Mercurial. Returns a dictionary with the version,
+latest commit message and the diffs relative to the current
+working directories. Can be customized by setting the commands
+dictionary at the class level.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">paths</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of repositories to generate version control information from.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">commands</span></tt> (<em>allow_None=False, constant=False, default={&#8216;.hg&#8217;: ([&#8216;hg&#8217;, &#8216;parents&#8217;, &#8216;&#8211;template&#8217;, &#8216;&#8221;{rev}:{node}&#8221;&#8217;], [&#8216;hg&#8217;, &#8216;log&#8217;, &#8216;-l&#8217;, &#8216;1&#8217;], [&#8216;hg&#8217;, &#8216;diff&#8217;]), &#8216;.git&#8217;: ([&#8216;git&#8217;, &#8216;rev-parse&#8217;, &#8216;HEAD&#8217;], [&#8216;git&#8217;, &#8216;log&#8217;, &#8216;&#8211;oneline&#8217;, &#8216;-n&#8217;, &#8216;1&#8217;], [&#8216;git&#8217;, &#8216;diff&#8217;]), &#8216;.svn&#8217;: ([&#8216;svnversion&#8217;], [&#8216;svn&#8217;, &#8216;log&#8217;, &#8216;-l&#8217;, &#8216;1&#8217;, &#8216;-q&#8217;], [&#8216;svn&#8217;, &#8216;diff&#8217;])}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The subprocess command lists to get the version, commit
+       message and diffs for different version control systems. The
+       commands are executed if a subdirectory matching the dictionary
+       key exists</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">lancet</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-lancet">Module</a><ul>
+<li><a class="reference internal" href="#argument-specifiers">Argument Specifiers</a></li>
+<li><a class="reference internal" href="#command-templates">Command Templates</a></li>
+<li><a class="reference internal" href="#launchers">Launchers</a></li>
+<li><a class="reference internal" href="#the-review-and-launch-decorator">The review_and_launch decorator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/lancet-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

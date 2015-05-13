@@ -1,0 +1,19 @@
+<map id="inheritance0509d66467" name="inheritance0509d66467">
+<area shape="rect" id="node1" title="Function object to modify a matrix in place, e.g. for normalization." alt="" coords="243,216,403,235"/>
+<area shape="rect" id="node4" href="#topo.transferfn.TransferFnWithState" title="Abstract base class for TransferFns that need to maintain a self.plastic parameter." alt="" coords="445,62,638,82"/>
+<area shape="rect" id="node5" href="#topo.transferfn.ExpLinear" title="Transfer function that is exponential until t from which point it is linear." alt="" coords="470,100,613,120"/>
+<area shape="rect" id="node6" href="#topo.transferfn.GeneralizedLogistic" title="The generalized logistic curve (Richards&#39; curve): y = l + (u /(1 + b * exp(&#45;r*(x&#45;2*m))^(1/b)))." alt="" coords="446,139,637,159"/>
+<area shape="rect" id="node7" href="#topo.transferfn.HalfRectifyAndPower" title="Transfer function that applies a half&#45;wave rectification (i.e.," alt="" coords="444,177,639,197"/>
+<area shape="rect" id="node8" href="#topo.transferfn.HalfRectifyAndSquare" title="Transfer function that applies a half&#45;wave rectification (clips at zero)" alt="" coords="441,216,643,235"/>
+<area shape="rect" id="node12" href="#topo.transferfn.NakaRushton" title="Naka&#45;Rushton curve." alt="" coords="462,254,622,274"/>
+<area shape="rect" id="node13" href="#topo.transferfn.PiecewiseLinear" title="Piecewise&#45;linear TransferFn with lower and upper thresholds." alt="" coords="455,293,628,312"/>
+<area shape="rect" id="node16" href="#topo.transferfn.Sigmoid" title="Sigmoidal (logistic) transfer function: 1/(1+exp&#45;(r*x+k))." alt="" coords="474,331,609,351"/>
+<area shape="rect" id="node17" href="#topo.transferfn.Square" title="Transfer function that applies a squaring nonlinearity." alt="" coords="477,370,607,389"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="4,216,206,235"/>
+<area shape="rect" id="node3" href="#topo.transferfn.ActivityAveragingTF" title="Calculates the average of the input activity." alt="" coords="702,5,893,24"/>
+<area shape="rect" id="node10" href="#topo.transferfn.TransferFnWithRandomState" title="Abstract base class for TransferFns that use a random number generator." alt="" coords="680,43,915,63"/>
+<area shape="rect" id="node11" href="#topo.transferfn.Hysteresis" title="Smoothly interpolates a matrix between simulation time steps, with" alt="" coords="724,82,871,101"/>
+<area shape="rect" id="node15" href="#topo.transferfn.ScalingTF" title="Scales input activity based on the current average activity (x_avg)." alt="" coords="727,120,868,140"/>
+<area shape="rect" id="node9" href="#topo.transferfn.HomeostaticMaxEnt" title="Implementation of homeostatic intrinsic plasticity from Jochen Triesch," alt="" coords="952,24,1148,44"/>
+<area shape="rect" id="node14" href="#topo.transferfn.PoissonSample" title="Simulate Poisson&#45;distributed activity with specified mean values." alt="" coords="965,63,1135,83"/>
+</map>

@@ -1,0 +1,995 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sparse.sparsecf &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sparse.sparsecf</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Basic SparseCFProjection with associated sparse CFs and output,</span>
+<span class="sd">response, and learning function. If sparse component cannot be imported,</span>
+<span class="sd">SparseCFProjection will fall back to a basic dense CFProjection.</span>
+
+<span class="sd">CFSOF and CFSLF Plugin function allow any single CF output function to</span>
+<span class="sd">be applied to the sparse CFs, but may suffer a serious performance</span>
+<span class="sd">loss.  For real work, such functions should be implemented at the</span>
+<span class="sd">Cython or C++ level.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage.filters</span> <span class="kn">import</span> <span class="n">gaussian_filter</span>
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFProjection</span><span class="p">,</span> <span class="n">NullCFError</span><span class="p">,</span> <span class="n">_create_mask</span><span class="p">,</span> <span class="n">simple_vectorize</span>
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">pattern</span>
+<span class="kn">from</span> <span class="nn">imagen</span> <span class="kn">import</span> <span class="n">patterngenerator</span>
+<span class="kn">from</span> <span class="nn">imagen.patterngenerator</span> <span class="kn">import</span> <span class="n">PatternGenerator</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">TransferFn</span><span class="p">,</span> <span class="n">IdentityTF</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">LearningFn</span><span class="p">,</span> <span class="n">Hebbian</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">ResponseFn</span><span class="p">,</span> <span class="n">DotProduct</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheetcoords</span> <span class="kn">import</span> <span class="n">Slice</span>
+
+<span class="n">use_sparse</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sparse</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">use_sparse</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="n">sparse_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+
+
+<div class="viewcode-block" id="CFSPLF_Plugin"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPLF_Plugin">[docs]</a><span class="k">class</span> <span class="nc">CFSPLF_Plugin</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;CFSPLearningFunction applying the specified single_cf_fn to each Sparse CF.&quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Accepts a LearningFn that will be applied to each CF individually.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CFSPLF_Plugin.constant_sum_connection_rate"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPLF_Plugin.constant_sum_connection_rate">[docs]</a>    <span class="k">def</span> <span class="nf">constant_sum_connection_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the learning rate for a single connection assuming that</span>
+<span class="sd">        the total rate is to be divided evenly among all the units in</span>
+<span class="sd">        the connection field.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">)</span><span class="o">/</span><span class="n">n_units</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the specified single_cf_fn to every sparse CF.&quot;&quot;&quot;</span>
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">n_units</span><span class="p">,</span><span class="n">projection</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="c"># avoid evaluating these references each time in the loop</span>
+        <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span>
+
+        <span class="k">for</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">projection</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">:</span>
+            <span class="n">temp_weights</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span>
+            <span class="n">single_cf_fn</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">get_input_matrix</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">),</span>
+                         <span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">cf</span><span class="o">.</span><span class="n">oned_idx</span><span class="p">],</span> <span class="n">temp_weights</span><span class="p">,</span>
+                         <span class="n">single_connection_learning_rate</span><span class="p">)</span>
+            <span class="n">temp_weights</span> <span class="o">*=</span> <span class="n">cf</span><span class="o">.</span><span class="n">mask</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">temp_weights</span>
+
+
+</div>
+<div class="viewcode-block" id="CFSPOF_Plugin"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPOF_Plugin">[docs]</a><span class="k">class</span> <span class="nc">CFSPOF_Plugin</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies the specified single_cf_fn to each SparseCF in the SparseCFProjection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">IdentityTF</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Accepts a TransferFn that will be applied to each CF individually.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IdentityTF</span><span class="p">:</span>
+            <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span>
+
+            <span class="k">for</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">projection</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">:</span>
+                <span class="n">temp_weights</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span>
+                <span class="n">single_cf_fn</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+                <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">temp_weights</span>
+                <span class="k">del</span> <span class="n">cf</span><span class="o">.</span><span class="n">norm_total</span>
+
+
+</div>
+<div class="viewcode-block" id="CFSPOF_Prune"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPOF_Prune">[docs]</a><span class="k">class</span> <span class="nc">CFSPOF_Prune</span><span class="p">(</span><span class="n">CFSPOF_Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prunes specified percentage of connections from CFs in SparseCFProjection</span>
+<span class="sd">    at specified interval.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Time interval at which pruning step will be applied.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">percentile</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Percentile boundary below which connections will be pruned.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&quot;initial_conns&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">initial_conns</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_conns</span><span class="p">[</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">n_conns</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">time</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">projection</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">:</span>
+                <span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">temp_weights</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span>
+                <span class="n">percentile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">[</span><span class="n">temp_weights</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()],</span><span class="bp">self</span><span class="o">.</span><span class="n">percentile</span><span class="p">)</span>
+                <span class="n">temp_weights</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">temp_weights</span><span class="o">&lt;=</span><span class="n">percentile</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">temp_weights</span>
+            <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">prune</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> has </span><span class="si">%f%%</span><span class="s"> of initial connections&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">n_conns</span><span class="p">())</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_conns</span><span class="p">[</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">])</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="CFSPOF_SproutRetract"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPOF_SproutRetract">[docs]</a><span class="k">class</span> <span class="nc">CFSPOF_SproutRetract</span><span class="p">(</span><span class="n">CFSPOF_Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sprouting and retraction weights output function. At a preset time</span>
+<span class="sd">    interval, the function removes and adds connections based on a</span>
+<span class="sd">    piecewise function, which determines the number of connections to</span>
+<span class="sd">    alter and the sprouting and retraction ratios, eventually allowing</span>
+<span class="sd">    connections to converge on the target_sparsity. The function</span>
+<span class="sd">    ensures the full turnover_rate is applied at the maximal distances</span>
+<span class="sd">    from the target sparsity, i.e. at 0% and 100% density. As the</span>
+<span class="sd">    projection approaches the target sparsity, it will asymptote, but a</span>
+<span class="sd">    residual turnover will ensure that a fixed amount of connections</span>
+<span class="sd">    will continue to sprout and retract.</span>
+
+<span class="sd">    Retraction deletes the x lowest weights, while sprouting applies a</span>
+<span class="sd">    convolution with a Gaussian kernel to the existing connections,</span>
+<span class="sd">    growing connections at locations with the highest probabilities.</span>
+
+<span class="sd">    Still experimental and not scientifically validated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Time interval between sprout/retract steps.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">residual_turnover</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Constant turnover rate independent of current sparsity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">turnover_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Percentage of weights to change per interval, assuming</span>
+<span class="s">        currently fully dense and target is fully sparse.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">target_sparsity</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Sparsity level at which sprouting and retraction cancel out.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">kernel_sigma</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">10.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Gaussian spatial variance for weights to diffuse per interval.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">disk_mask</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Limits connection sprouting to a disk.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk_mask</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disk</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">Disk</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">smoothing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="c"># Get CF and src sheet shapes</span>
+        <span class="n">cf_x</span><span class="p">,</span><span class="n">cf_y</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">src_x</span><span class="p">,</span><span class="n">src_y</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c"># Initialize sparse triplet arrays</span>
+        <span class="n">y_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">src_x</span><span class="o">*</span><span class="n">src_y</span><span class="o">*</span><span class="n">cf_y</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">x_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">src_x</span><span class="o">*</span><span class="n">src_y</span><span class="o">*</span><span class="n">cf_y</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">val_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">src_x</span><span class="o">*</span><span class="n">src_y</span><span class="o">*</span><span class="n">cf_y</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">sparse_type</span><span class="p">)</span>
+
+        <span class="c"># Create new sparse matrix to accumulate into</span>
+        <span class="n">sum_sparse</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csarray_float</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="c"># Counters for logging</span>
+        <span class="n">sprout_sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">prune_sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">unit_total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_total</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&quot;initial_conns&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">initial_conns</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_conns</span><span class="p">[</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">n_conns</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">time</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">idx</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">for</span> <span class="n">cidx</span><span class="p">,</span><span class="n">cf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">):</span>
+                <span class="n">temp_weights</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span>
+                <span class="n">dense_unit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">temp_weights</span><span class="o">&gt;</span><span class="mf">0.0</span><span class="p">))</span>
+                <span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span> <span class="o">=</span> <span class="n">temp_weights</span><span class="o">.</span><span class="n">shape</span>
+
+                <span class="n">sprout_count</span><span class="p">,</span><span class="n">prune_idx</span><span class="p">,</span><span class="n">nnz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_ratios</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">,</span><span class="n">prune_idx</span><span class="p">)</span>
+                <span class="n">nnz_pp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">)</span>
+                <span class="n">prune_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">nnz_pp</span><span class="o">-</span><span class="n">nnz</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">sprout</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">,</span><span class="n">dense_unit_mask</span><span class="p">,</span><span class="n">sprout_count</span><span class="p">)</span>
+                <span class="n">nnz_ps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">)</span>
+                <span class="n">sprout_sum</span> <span class="o">+=</span> <span class="n">nnz_ps</span> <span class="o">-</span> <span class="n">nnz_pp</span>
+                <span class="n">unit_total</span> <span class="o">+=</span> <span class="n">nnz_ps</span>
+
+                <span class="c"># Populate sparse array chunk</span>
+                <span class="n">temp_sparse</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csarray_float</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">cnx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim1</span><span class="p">):</span>
+                    <span class="n">val_array</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">dim2</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_weights</span><span class="p">[</span><span class="n">cnx</span><span class="p">,:]</span>
+                    <span class="n">x_val</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="o">+</span><span class="n">cnx</span><span class="p">)</span> <span class="o">*</span> <span class="n">src_y</span> <span class="o">+</span> <span class="n">y1</span>
+                    <span class="n">x_array</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">dim2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span><span class="n">x_val</span><span class="o">+</span><span class="n">dim2</span><span class="p">)</span>
+                    <span class="n">y_array</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">dim2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cidx</span>
+                    <span class="n">idx</span> <span class="o">+=</span> <span class="n">dim2</span>
+
+                <span class="c"># Populate combined sparse array with sparse array chunk</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">cidx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">cf_y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">nnz_idx</span> <span class="o">=</span> <span class="n">val_array</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()</span>
+                    <span class="n">temp_sparse</span><span class="o">.</span><span class="n">setTriplets</span><span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">nnz_idx</span><span class="p">],</span><span class="n">y_array</span><span class="p">[</span><span class="n">nnz_idx</span><span class="p">],</span><span class="n">val_array</span><span class="p">[</span><span class="n">nnz_idx</span><span class="p">])</span>
+                    <span class="n">sum_sparse</span> <span class="o">+=</span> <span class="n">temp_sparse</span>
+                    <span class="n">x_array</span> <span class="o">*=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y_array</span> <span class="o">*=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">val_array</span> <span class="o">*=</span> <span class="mf">0.0</span>
+                    <span class="n">idx</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">projection</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">sum_sparse</span>
+            <span class="k">del</span> <span class="n">temp_sparse</span><span class="p">,</span> <span class="n">sum_sparse</span>
+            <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">compress</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> pruned by </span><span class="si">%d</span><span class="s"> and sprouted </span><span class="si">%d</span><span class="s">, connection is now </span><span class="si">%f%%</span><span class="s"> dense&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">prune_sum</span><span class="p">,</span><span class="n">sprout_sum</span><span class="p">,(</span><span class="nb">float</span><span class="p">(</span><span class="n">unit_total</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_total</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="CFSPOF_SproutRetract.sprout"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPOF_SproutRetract.sprout">[docs]</a>    <span class="k">def</span> <span class="nf">sprout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_weights</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">sprout_count</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a Gaussian blur to the existing connection field,</span>
+<span class="sd">        selecting the n units with the highest probabilities to sprout</span>
+<span class="sd">        new connections, where n is set by the sprout_count. New</span>
+<span class="sd">        connections are initialized at the minimal strength of the</span>
+<span class="sd">        current CF.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span> <span class="o">=</span> <span class="n">temp_weights</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">init_weight</span> <span class="o">=</span> <span class="n">temp_weights</span><span class="p">[</span><span class="n">temp_weights</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">blurred_weights</span> <span class="o">=</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_sigma</span><span class="p">)</span>
+        <span class="n">blurred_weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">blurred_weights</span> <span class="o">-</span> <span class="n">blurred_weights</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="n">blurred_weights</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">sprout_prob_map</span> <span class="o">=</span> <span class="p">(</span><span class="n">blurred_weights</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span><span class="p">))</span> <span class="o">*</span> <span class="n">mask</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk_mask</span><span class="p">:</span>
+            <span class="n">sprout_prob_map</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk</span><span class="p">(</span><span class="n">xdensity</span><span class="o">=</span><span class="n">dim2</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="n">dim1</span><span class="p">)</span>
+        <span class="n">sprout_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">sprout_prob_map</span><span class="o">.</span><span class="n">flatten</span><span class="p">())[</span><span class="o">-</span><span class="n">sprout_count</span><span class="p">:],(</span><span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span><span class="p">))</span>
+        <span class="n">temp_weights</span><span class="p">[</span><span class="n">sprout_inds</span><span class="p">]</span> <span class="o">=</span> <span class="n">init_weight</span>
+
+</div>
+<div class="viewcode-block" id="CFSPOF_SproutRetract.prune"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPOF_SproutRetract.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_weights</span><span class="p">,</span> <span class="n">prune_idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retracts n connections with the lowest weights, where n is</span>
+<span class="sd">        determined by the piecewise linear function in the calc_ratios</span>
+<span class="sd">        method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sorted_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">temp_weights</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">sorted_weights</span><span class="p">[</span><span class="n">prune_idx</span><span class="p">]</span>
+        <span class="n">temp_weights</span><span class="p">[</span><span class="n">temp_weights</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+</div>
+<div class="viewcode-block" id="CFSPOF_SproutRetract.calc_ratios"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPOF_SproutRetract.calc_ratios">[docs]</a>    <span class="k">def</span> <span class="nf">calc_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">temp_weights</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses a piecewise linear function to determine the unit</span>
+<span class="sd">        proportion of sprouting and retraction and the associated</span>
+<span class="sd">        turnover rates.</span>
+
+<span class="sd">        Above the target sparsity the sprout/retract ratio scales</span>
+<span class="sd">        linearly up to maximal density, i.e. at full density 100% of</span>
+<span class="sd">        the turnover is put into retraction while at full sparsity</span>
+<span class="sd">        all the turnover is put into sprouting new connections. At</span>
+<span class="sd">        the target density sprouting and retraction are equal.</span>
+
+<span class="sd">        The turnover is determined also determined by the piecewise</span>
+<span class="sd">        linear function. At maximal distance from the target sparsity,</span>
+<span class="sd">        i.e. at full sparsity or density, the full turnover rate will</span>
+<span class="sd">        be used and as the target sparsity is approached from either</span>
+<span class="sd">        side this term decays to zero. Therefore, a residual turnover</span>
+<span class="sd">        is introduced to ensure that even at the target sparsity some</span>
+<span class="sd">        connections continue to sprout and retract.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span> <span class="o">=</span> <span class="n">temp_weights</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk_mask</span><span class="p">:</span>
+            <span class="n">masked_units</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disk</span><span class="p">(</span><span class="n">xdensity</span><span class="o">=</span><span class="n">dim2</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="n">dim1</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masked_units</span> <span class="o">=</span> <span class="n">dim1</span><span class="o">*</span><span class="n">dim2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_total</span> <span class="o">+=</span> <span class="n">masked_units</span>
+        <span class="n">max_units</span> <span class="o">=</span> <span class="n">dim1</span><span class="o">*</span><span class="n">dim2</span>
+        <span class="n">nnz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">temp_weights</span><span class="p">)</span>
+        <span class="n">cf_sparsity</span> <span class="o">=</span> <span class="n">nnz</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">masked_units</span><span class="p">)</span>
+        <span class="n">delta_sparsity</span> <span class="o">=</span> <span class="n">cf_sparsity</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_sparsity</span>
+        <span class="k">if</span> <span class="n">delta_sparsity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">relative_sparsity</span> <span class="o">=</span> <span class="n">delta_sparsity</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_sparsity</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">relative_sparsity</span> <span class="o">=</span> <span class="n">delta_sparsity</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">target_sparsity</span>
+
+        <span class="c"># Total number of units to modify, broken down into units for pruning and sprouting</span>
+        <span class="n">delta_units</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">turnover_rate</span> <span class="o">*</span> <span class="n">relative_sparsity</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual_turnover</span><span class="p">)</span> <span class="o">*</span> <span class="n">masked_units</span>
+        <span class="n">prune_factor</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">relative_sparsity</span><span class="p">)</span>
+        <span class="n">prune_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_units</span> <span class="o">*</span> <span class="n">prune_factor</span><span class="p">)</span>
+        <span class="n">prune_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_units</span><span class="o">-</span><span class="n">nnz</span><span class="p">)</span><span class="o">+</span><span class="n">prune_count</span>
+        <span class="n">sprout_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_units</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">prune_factor</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">sprout_count</span><span class="p">,</span> <span class="n">prune_idx</span><span class="p">,</span> <span class="n">nnz</span>
+
+
+</div></div>
+<div class="viewcode-block" id="CFSPRF_Plugin"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFSPRF_Plugin">[docs]</a><span class="k">class</span> <span class="nc">CFSPRF_Plugin</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic large-scale response function based on a simple single-CF function.</span>
+
+<span class="sd">    Applies the single_cf_fn to each CF in turn.  For the default single_cf_fn</span>
+<span class="sd">    of DotProduct(), does a basic dot product of each CF with the corresponding</span>
+<span class="sd">    slice of the input array.  This function is likely to be slow to run, but</span>
+<span class="sd">    it is easy to extend with any arbitrary single-CF response function.</span>
+
+<span class="sd">    The single_cf_fn must be a function f(X,W) that takes two identically</span>
+<span class="sd">    shaped matrices X (the input) and W (the CF weights) and computes a scalar</span>
+<span class="sd">    activation value based on those weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">ResponseFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">DotProduct</span><span class="p">(),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Accepts a ResponseFn that will be applied to each CF individually.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">cf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">submatrix</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+            <span class="n">projection</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_cf_fn</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="n">projection</span><span class="o">.</span><span class="n">strength</span>
+
+</div>
+<div class="viewcode-block" id="compute_sparse_joint_norm_totals"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.compute_sparse_joint_norm_totals">[docs]</a><span class="k">def</span> <span class="nf">compute_sparse_joint_norm_totals</span><span class="p">(</span><span class="n">projlist</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute norm_total for each CF in each projection from a group to be</span>
+<span class="sd">    normalized jointly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Assumes that all Projections in the list have the same r,c size</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">projlist</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">1</span>
+    <span class="n">joint_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">projlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">has_norm_total</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">norm_total</span> <span class="o">*=</span> <span class="mf">0.0</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">CFWeightTotals</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">norm_total</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">has_norm_total</span><span class="o">=</span><span class="bp">True</span>
+    <span class="n">joint_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">reduce</span><span class="p">([</span><span class="n">proj</span><span class="o">.</span><span class="n">norm_total</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">norm_total</span> <span class="o">=</span> <span class="n">joint_sum</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+
+</div>
+<div class="viewcode-block" id="CFPOF_DivisiveNormalizeL1_Sparse"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFPOF_DivisiveNormalizeL1_Sparse">[docs]</a><span class="k">def</span> <span class="nf">CFPOF_DivisiveNormalizeL1_Sparse</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sparse CF Projection output function applying L1 divisive normalization</span>
+<span class="sd">    to individual CFs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">projection</span><span class="o">.</span><span class="n">has_norm_total</span><span class="p">:</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">CFWeightTotals</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span><span class="p">)</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">DivisiveNormalizeL1</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span><span class="p">)</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">has_norm_total</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+</div>
+<div class="viewcode-block" id="CFPLF_Hebbian_Sparse"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFPLF_Hebbian_Sparse">[docs]</a><span class="k">def</span> <span class="nf">CFPLF_Hebbian_Sparse</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sparse CF Projection learning function applying Hebbian learning</span>
+<span class="sd">    to the weights in a projection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_conn_lr</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">learning_rate</span><span class="o">/</span><span class="n">projection</span><span class="o">.</span><span class="n">n_units</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span> <span class="o">*=</span> <span class="mf">0.0</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">Hebbian</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span><span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span>
+                               <span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span><span class="p">,</span><span class="n">single_conn_lr</span><span class="p">)</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">has_norm_total</span> <span class="o">=</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="CFPLF_Hebbian_Sparse_opt"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFPLF_Hebbian_Sparse_opt">[docs]</a><span class="k">def</span> <span class="nf">CFPLF_Hebbian_Sparse_opt</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sparse CF Projection learning function, which calls an optimized Hebbian</span>
+<span class="sd">    learning function while skipping over inactive units.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_conn_lr</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">learning_rate</span><span class="o">/</span><span class="n">projection</span><span class="o">.</span><span class="n">n_units</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span> <span class="o">*=</span> <span class="mf">0.0</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">Hebbian_opt</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span><span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span>
+                                   <span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span><span class="p">,</span><span class="n">single_conn_lr</span><span class="p">,</span><span class="n">projection</span><span class="o">.</span><span class="n">initialized</span><span class="p">)</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">has_norm_total</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+</div>
+<div class="viewcode-block" id="CFPRF_DotProduct_Sparse"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFPRF_DotProduct_Sparse">[docs]</a><span class="k">def</span> <span class="nf">CFPRF_DotProduct_Sparse</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sparse CF Projection response function calculating the dot-product</span>
+<span class="sd">    between incoming activities and CF weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">DotProduct</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">strength</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">input_buffer</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="CFPRF_DotProduct_Sparse_opt"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.CFPRF_DotProduct_Sparse_opt">[docs]</a><span class="k">def</span> <span class="nf">CFPRF_DotProduct_Sparse_opt</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sparse CF Projection response function calculating the dot-product</span>
+<span class="sd">    between incoming activities and CF weights. Optimization skips</span>
+<span class="sd">    inactive units if a certain percentage of neurons is inactive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nnz_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">nnz_ratio</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">DotProduct_opt</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">strength</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">DotProduct</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">strength</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="SparseConnectionField"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.SparseConnectionField">[docs]</a><span class="k">class</span> <span class="nc">SparseConnectionField</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A set of weights on one input Sheet.</span>
+
+<span class="sd">    Each ConnectionField contributes to the activity of one unit on</span>
+<span class="sd">    the output sheet, and is normally used as part of a Projection</span>
+<span class="sd">    including many other ConnectionFields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># ALERT: need bounds, more docs</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Sheet X coordinate of CF&quot;</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Sheet Y coordinate of CF&quot;</span><span class="p">)</span>
+
+    <span class="n">weights_generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">PatternGenerator</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">patterngenerator</span><span class="o">.</span><span class="n">Constant</span><span class="p">(),</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Generates initial weights values.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">min_matrix_radius</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">class_</span><span class="o">=</span><span class="n">TransferFn</span><span class="p">,</span><span class="n">precedence</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Optional function(s) to apply to the pattern array after it has been created.</span>
+<span class="s">        Can be used for normalization, thresholding, etc.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_sheet</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">input_sheet</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">compute_bounds</span><span class="p">(</span><span class="n">input_sheet</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">compute_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_shape_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cf_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">cf_shape</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">bounds_template</span>
+        <span class="n">xdensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">xdensity</span>
+        <span class="n">ydensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">xdensity</span>
+        <span class="n">center_r</span><span class="p">,</span><span class="n">center_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">center_x</span><span class="p">,</span><span class="n">center_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">center_r</span><span class="p">,</span><span class="n">center_c</span><span class="p">)</span>
+        <span class="n">cf_mask</span> <span class="o">=</span> <span class="n">cf_shape</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">center_x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">center_y</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span><span class="n">xdensity</span><span class="o">=</span><span class="n">xdensity</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="n">ydensity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cf_mask</span>
+
+    <span class="n">shape_mask</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_shape_mask</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_norm_total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">__set_norm_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">new_norm_total</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">new_norm_total</span>
+
+    <span class="k">def</span> <span class="nf">__del_norm_total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="n">norm_total</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_norm_total</span><span class="p">,</span><span class="n">__set_norm_total</span><span class="p">,</span><span class="n">__del_norm_total</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span><span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">nz_flat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">inds</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">oned_idx</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+        <span class="n">nz_inds</span> <span class="o">=</span> <span class="n">nz_flat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span><span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()</span>
+        <span class="n">mask</span><span class="p">[</span><span class="n">nz_inds</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">mask</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_mask</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The mask property returns an array of bools representing the</span>
+<span class="sd">        zero weights in the CF weights array.</span>
+
+<span class="sd">        It is useful when applying additive functions on the weights</span>
+<span class="sd">        array, to ensure zero values are not accidentally overwritten.</span>
+
+<span class="sd">        The mask cannot be changed via the property, only by changing</span>
+<span class="sd">        the weights directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get_weights accesses the sparse CF matrix and returns the CF</span>
+<span class="sd">        in dense form.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_slice</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">inds</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">oned_idx</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span><span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">arr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes an input array, which has to match the CF shape, and</span>
+<span class="sd">        creates an mgrid of the appropriate size, adds the proper</span>
+<span class="sd">        offsets and passes the values and indices to the sparse matrix</span>
+<span class="sd">        representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_slice</span>
+        <span class="p">(</span><span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span><span class="p">)</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span><span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">),</span> <span class="s">&quot;Array does not match CF shape.&quot;</span>
+        <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">dim1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">dim2</span><span class="p">]</span> <span class="c"># Create mgrid of CF size</span>
+        <span class="n">x_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">x1</span><span class="p">;</span> <span class="n">y_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="n">y1</span><span class="p">;</span> <span class="c"># Add slice offsets</span>
+        <span class="n">row_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">((</span><span class="n">x_ind</span><span class="p">,</span><span class="n">y_ind</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">col_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">oned_idx</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">row_inds</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">row_inds</span><span class="p">,</span><span class="n">col_inds</span><span class="p">)</span>
+
+    <span class="n">weights</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_weights</span><span class="p">,</span><span class="n">__set_weights</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">template</span><span class="p">,</span><span class="n">input_sheet</span><span class="p">,</span><span class="n">projection</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the CF object and stores meta information about the CF&#39;s</span>
+<span class="sd">        shape and position in the SparseCFProjection to allow for easier</span>
+<span class="sd">        initialization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">SparseConnectionField</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span> <span class="o">=</span> <span class="n">input_sheet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oned_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">template</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template</span><span class="p">,</span><span class="n">Slice</span><span class="p">):</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">template</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">,</span><span class="n">force_odd</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                             <span class="n">min_matrix_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_input_sheet_slice</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_slice</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+
+    <span class="k">def</span> <span class="nf">_init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mask_template</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mask_template</span><span class="p">,</span><span class="s">&#39;view&#39;</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">_create_mask</span><span class="p">(</span><span class="n">mask_template</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_slice</span><span class="o">.</span><span class="n">compute_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">,</span><span class="bp">True</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_slice</span><span class="o">.</span><span class="n">submatrix</span><span class="p">(</span><span class="n">mask_template</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_generator</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">),</span>
+                                   <span class="n">xdensity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                   <span class="n">ydensity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">ydensity</span><span class="p">,</span>
+                                   <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">sparse_type</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="n">of</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">w</span>
+
+
+    <span class="k">def</span> <span class="nf">_create_input_sheet_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">template</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the input_sheet_slice, which provides the appropriate</span>
+<span class="sd">        Slice for this CF on the input_sheet (as well as providing</span>
+<span class="sd">        this CF&#39;s exact bounds).</span>
+
+<span class="sd">        Also creates the weights_slice, which provides the Slice for</span>
+<span class="sd">        this weights matrix (in case it must be cropped at an edge).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># copy required because the template gets modified here but</span>
+        <span class="c"># needs to be used again</span>
+        <span class="n">input_sheet_slice</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+        <span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">positionedcrop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">)</span>
+        <span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">crop_to_sheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">)</span>
+
+        <span class="c"># weights matrix cannot have a zero-sized dimension (could</span>
+        <span class="c"># happen at this stage because of cropping)</span>
+        <span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span> <span class="o">=</span> <span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">shape_on_sheet</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">nrows</span><span class="o">&lt;</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">ncols</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NullCFError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">,</span><span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_slice</span> <span class="o">=</span> <span class="n">input_sheet_slice</span>
+
+        <span class="c"># not copied because we don&#39;t use again</span>
+        <span class="n">template</span><span class="o">.</span><span class="n">positionlesscrop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">template</span>
+
+
+    <span class="k">def</span> <span class="nf">get_input_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">activity</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">submatrix</span><span class="p">(</span><span class="n">activity</span><span class="p">)</span>
+
+
+</div>
+<span class="k">class</span> <span class="nc">SparseCFProjection</span><span class="p">(</span><span class="n">CFProjection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A projection composed of SparseConnectionFields from a Sheet into</span>
+<span class="sd">    a ProjectionSheet.</span>
+
+<span class="sd">    SparseCFProjection computes its activity using a response_fn which</span>
+<span class="sd">    can either be an optimized function implemented as part of the</span>
+<span class="sd">    sparse matrix class or an unoptimized function, which requests the</span>
+<span class="sd">    weights in dense format.  The initial contents of the</span>
+<span class="sd">    SparseConnectionFields mapping from the input Sheet into the</span>
+<span class="sd">    target ProjectionSheet are controlled by the weights_generator,</span>
+<span class="sd">    cf_shape, and weights_output_fn parameters, while the location of</span>
+<span class="sd">    the ConnectionField is controlled by the coord_mapper parameter.</span>
+
+<span class="sd">    Any subclass has to implement the interface activate(self) that</span>
+<span class="sd">    computes the response from the input and stores it in the activity</span>
+<span class="sd">    array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cf_type</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">SparseConnectionField</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Type of ConnectionField to use when creating individual CFs.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">learning_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">CFPLF_Hebbian_Sparse</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function for computing changes to the weights based on one activation step.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">response_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">CFPRF_DotProduct_Sparse</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function for computing the Projection response to an input pattern.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">weights_output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">CFPOF_DivisiveNormalizeL1_Sparse</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Functions applied to each CF after learning.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">initialized</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">initialize_cfs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the Projection with a set of cf_type objects</span>
+<span class="sd">        (typically SparseConnectionFields), each located at the</span>
+<span class="sd">        location in the source sheet corresponding to the unit in the</span>
+<span class="sd">        target sheet. The cf_type objects are stored in the &#39;cfs&#39;</span>
+<span class="sd">        array.</span>
+
+<span class="sd">        The nominal_bounds_template specified may be altered: the</span>
+<span class="sd">        bounds must be fitted to the Sheet&#39;s matrix, and the weights</span>
+<span class="sd">        matrix must have odd dimensions. These altered bounds are</span>
+<span class="sd">        passed to the individual connection fields.</span>
+
+<span class="sd">        A mask for the weights matrix is constructed. The shape is</span>
+<span class="sd">        specified by cf_shape; the size defaults to the size</span>
+<span class="sd">        of the nominal_bounds_template.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_generator</span><span class="o">.</span><span class="n">set_dynamic_time_fn</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="n">sublistattr</span><span class="o">=</span><span class="s">&#39;generators&#39;</span><span class="p">)</span>
+        <span class="c"># get the actual bounds_template by adjusting a copy of the</span>
+        <span class="c"># nominal_bounds_template to ensure an odd slice, and to be</span>
+        <span class="c"># cropped to sheet if necessary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_slice_template</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nominal_bounds_template</span><span class="p">),</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span><span class="n">force_odd</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                     <span class="n">min_matrix_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slice_template</span><span class="o">.</span><span class="n">compute_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_template</span> <span class="o">=</span> <span class="n">_create_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cf_shape</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds_template</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">autosize_mask</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">mask_threshold</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_n_units</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_norm_total</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">initialize_cfs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_cfs</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns_init</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_learn_output_fns</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to support pickling of sparse weights object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s">&#39;triplets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s">&#39;weights&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">getTriplets</span><span class="p">()</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s">&#39;weight_shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">state_dict</span><span class="p">[</span><span class="s">&#39;weights&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to support unpickling of sparse weights object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csarray_float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">rowInds</span><span class="p">,</span> <span class="n">colInds</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">triplets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">setTriplets</span><span class="p">(</span><span class="n">rowInds</span><span class="p">,</span><span class="n">colInds</span><span class="p">,</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">triplets</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_shape</span>
+
+
+    <span class="k">def</span> <span class="nf">_create_cfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the CF objects, initializing the weights one by one</span>
+<span class="sd">        and adding them to the sparse weights object in chunks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vectorized_create_cf</span> <span class="o">=</span> <span class="n">simple_vectorize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_cf</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfs</span> <span class="o">=</span> <span class="n">vectorized_create_cf</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_coords</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flatcfs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfs</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csarray_float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">cf_x</span><span class="p">,</span><span class="n">cf_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">src_x</span><span class="p">,</span><span class="n">src_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">y_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">src_x</span><span class="o">*</span><span class="n">src_y</span><span class="o">*</span><span class="n">cf_y</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">x_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">src_x</span><span class="o">*</span><span class="n">src_y</span><span class="o">*</span><span class="n">cf_y</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">val_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">src_x</span><span class="o">*</span><span class="n">src_y</span><span class="o">*</span><span class="n">cf_y</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="c"># Iterate over the CFs</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cf_x</span><span class="p">):</span>
+            <span class="n">temp_sparse</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csarray_float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cf_y</span><span class="p">):</span>
+                <span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfs</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">same_cf_shape_for_all_cfs</span><span class="p">:</span>
+                    <span class="n">mask_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_template</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mask_template</span> <span class="o">=</span> <span class="n">_create_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cf_shape</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds_template</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">autosize_mask</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">mask_threshold</span><span class="p">)</span>
+                <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfs</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">_init_weights</span><span class="p">(</span><span class="n">mask_template</span><span class="p">)</span>
+                <span class="n">cn_x</span><span class="p">,</span><span class="n">cn_y</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">y_val</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">cf_y</span> <span class="o">+</span> <span class="n">y</span>
+                <span class="k">for</span> <span class="n">cnx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cn_x</span><span class="p">):</span>
+                    <span class="n">val_array</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">cn_y</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">cnx</span><span class="p">,:]</span>
+                    <span class="n">x_val</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="o">+</span><span class="n">cnx</span><span class="p">)</span> <span class="o">*</span> <span class="n">src_y</span> <span class="o">+</span> <span class="n">y1</span>
+                    <span class="n">x_array</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">cn_y</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span><span class="n">x_val</span><span class="o">+</span><span class="n">cn_y</span><span class="p">)</span>
+                    <span class="n">y_array</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">cn_y</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_val</span>
+                    <span class="n">idx</span> <span class="o">+=</span> <span class="n">cn_y</span>
+            <span class="n">nnz_idx</span> <span class="o">=</span> <span class="n">val_array</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()</span>
+            <span class="n">temp_sparse</span><span class="o">.</span><span class="n">setTriplets</span><span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">nnz_idx</span><span class="p">],</span><span class="n">y_array</span><span class="p">[</span><span class="n">nnz_idx</span><span class="p">],</span><span class="n">val_array</span><span class="p">[</span><span class="n">nnz_idx</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">+=</span> <span class="n">temp_sparse</span>
+            <span class="n">x_array</span> <span class="o">*=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y_array</span> <span class="o">*=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">val_array</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="k">del</span> <span class="n">temp_sparse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">compress</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Sparse projection </span><span class="si">%r</span><span class="s"> loaded&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_create_cf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a ConnectionField at x,y in the src sheet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">CF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_type</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_slice_template</span><span class="p">,</span><span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span><span class="n">input_sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                              <span class="n">weights_generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_generator</span><span class="p">,</span>
+                              <span class="n">min_matrix_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NullCFError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_null_cfs</span><span class="p">:</span>
+                <span class="n">CF</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="k">return</span> <span class="n">CF</span>
+
+    <span class="k">def</span> <span class="nf">get_sheet_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_active_units_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SparseCFProjection.activate"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.SparseCFProjection.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_activity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Activate using the specified response_fn and output_fn.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_fns</span><span class="p">:</span>
+            <span class="n">input_activity</span> <span class="o">=</span> <span class="n">input_activity</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">iaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_fns</span><span class="p">:</span>
+            <span class="n">iaf</span><span class="p">(</span><span class="n">input_activity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="n">input_activity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span><span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SparseCFProjection.learn"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.SparseCFProjection.learn">[docs]</a>    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For a SparseCFProjection, learn consists of calling the learning_fn.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Learning is performed if the input_buffer has already been set,</span>
+        <span class="c"># i.e. there is an input to the Projection.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">learning_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SparseCFProjection.apply_learn_output_fns"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.SparseCFProjection.apply_learn_output_fns">[docs]</a>    <span class="k">def</span> <span class="nf">apply_learn_output_fns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply the weights_output_fns to each unit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_output_fns</span><span class="p">:</span> <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SparseCFProjection.n_bytes"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.SparseCFProjection.n_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimates the size on the basis of the number non-zeros in the</span>
+<span class="sd">        sparse matrix, asssuming indices and values are stored using</span>
+<span class="sd">        32-bit integers and floats respectively.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_conns</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SparseCFProjection.n_conns"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.SparseCFProjection.n_conns">[docs]</a>    <span class="k">def</span> <span class="nf">n_conns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns number of nonzero weights.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">getnnz</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">use_sparse</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;WARNING: Sparse component could not be imported, replacing SparseCFProjection with regular CFProjection&quot;</span>
+<div class="viewcode-block" id="SparseCFProjection"><a class="viewcode-back" href="../../../Reference_Manual/topo.sparse.html#topo.sparse.sparsecf.SparseCFProjection">[docs]</a>    <span class="k">def</span> <span class="nf">SparseCFProjection</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="c"># pyflakes:ignore (optimized version provided)</span>
+        <span class="k">return</span> <span class="n">CFProjection</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/sparse/sparsecf.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

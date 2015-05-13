@@ -1,0 +1,890 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.lancext &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.lancext</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The Topographica Lancet extension allows Topographica simulations to</span>
+<span class="sd">be easily integrated into a Lancet workflow (see</span>
+<span class="sd">github.com/ioam/lancet). The TopoCommand is appropriate for simple</span>
+<span class="sd">runs using the default analysis function, whereas the RunBatchCommand</span>
+<span class="sd">allow for more sophisticated measurements and analysis to be executed</span>
+<span class="sd">during a simulation run using a holoviews Collector object.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span><span class="p">,</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">numpy.version</span> <span class="kn">as</span> <span class="nn">np_version</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">holoviews</span> <span class="kn">import</span> <span class="n">NdMapping</span><span class="p">,</span> <span class="n">Layout</span>
+<span class="kn">from</span> <span class="nn">holoviews.interface.collector</span> <span class="kn">import</span> <span class="n">Collector</span>
+<span class="kn">from</span> <span class="nn">holoviews.core.element</span> <span class="kn">import</span> <span class="n">Collator</span>
+<span class="kn">from</span> <span class="nn">holoviews.core.io</span> <span class="kn">import</span> <span class="n">Pickler</span>
+
+<span class="kn">from</span> <span class="nn">lancet</span> <span class="kn">import</span> <span class="n">PrettyPrinted</span><span class="p">,</span> <span class="n">vcs_metadata</span>
+<span class="kn">from</span> <span class="nn">lancet</span> <span class="kn">import</span> <span class="n">Command</span>
+<span class="kn">from</span> <span class="nn">lancet</span> <span class="kn">import</span> <span class="n">Launcher</span><span class="p">,</span> <span class="n">review_and_launch</span>
+<span class="kn">from</span> <span class="nn">lancet</span> <span class="kn">import</span> <span class="n">Log</span><span class="p">,</span> <span class="n">FileInfo</span><span class="p">,</span> <span class="n">FileType</span>
+<span class="kn">from</span> <span class="nn">lancet</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Args</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+<span class="k">try</span><span class="p">:</span>
+   <span class="kn">from</span> <span class="nn">external</span> <span class="kn">import</span> <span class="n">sys_paths</span>
+   <span class="n">submodule_paths</span> <span class="o">=</span> <span class="n">sys_paths</span><span class="p">()</span>
+   <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;topographica&#39;</span><span class="p">,</span> <span class="s">&#39;param&#39;</span><span class="p">,</span> <span class="s">&#39;paramtk&#39;</span><span class="p">,</span> <span class="s">&#39;imagen&#39;</span><span class="p">,</span> <span class="s">&#39;lancet&#39;</span><span class="p">]</span>
+   <span class="n">summarized</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;topographica&#39;</span><span class="p">,</span> <span class="s">&#39;param&#39;</span><span class="p">,</span> <span class="s">&#39;imagen&#39;</span><span class="p">,</span> <span class="s">&#39;lancet&#39;</span><span class="p">]</span>
+   <span class="n">submodules</span> <span class="o">=</span> <span class="p">[[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">submodule_paths</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">name</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ordering</span><span class="p">]</span>
+<span class="k">except</span><span class="p">:</span>
+   <span class="n">submodules</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="kn">from</span> <span class="nn">topo.misc.commandline</span> <span class="kn">import</span> <span class="n">default_output_path</span>
+<span class="n">review_and_launch</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">=</span> <span class="n">default_output_path</span><span class="p">()</span>
+<span class="n">Launcher</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">=</span> <span class="n">default_output_path</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="topo_metadata"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.topo_metadata">[docs]</a><span class="k">class</span> <span class="nc">topo_metadata</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Topographica specific helper function that expands on Lancet&#39;s</span>
+<span class="sd">   vcs_metadata function to generate suitable metadata information for</span>
+<span class="sd">   logging with Lancet. Records Topographica version control</span>
+<span class="sd">   information as well as information about all relevant submodules</span>
+<span class="sd">   and the current numpy version.</span>
+
+<span class="sd">   No arguments should be necessary when either contructing or calling</span>
+<span class="sd">   this object as the default behaviour is designed to be useful. The</span>
+<span class="sd">   summary method prints out the key information collected to assist</span>
+<span class="sd">   with reproducibility. For instance, this may be called to print all</span>
+<span class="sd">   the relevant git revisions in an IPython Notebook before launching</span>
+<span class="sd">   jobs.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+   <span class="n">max_log_length</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">      Maximum number of characters that will be shown per message in</span>
+<span class="s">      the printed summary.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">paths</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="n">submodules</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">   List of git repositories including Topographica and relevant</span>
+<span class="s">   submodules. Version control information from these repositories</span>
+<span class="s">   will be returned as a dictionary when called. The most important</span>
+<span class="s">   information is pretty printed when the summary method is called.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">repository_names</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">ordering</span><span class="p">],</span>
+     <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Names of the repositories corresponding to the supplied paths&quot;</span><span class="p">)</span>
+
+   <span class="n">summarized</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">summarized</span><span class="p">],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">     The repositories to summarize as a subset of the repository names.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">commands</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;.git&#39;</span><span class="p">:([</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;rev-parse&#39;</span><span class="p">,</span> <span class="s">&#39;HEAD&#39;</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="s">&#39;--oneline&#39;</span><span class="p">,</span> <span class="s">&#39;-n&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;diff&#39;</span><span class="p">])},</span>
+      <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The git commands to pass to subprocess to extract the</span>
+<span class="s">      necessary version control information. Uses the same</span>
+<span class="s">      specification format as the lancet.vsc_metdata helper function.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">topo_metadata</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repository_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params_to_override</span><span class="p">):</span>
+      <span class="n">p</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params_to_override</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">vcs_metadata</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span>
+                                <span class="n">commands</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">commands</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">[</span><span class="s">&#39;numpy_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np_version</span><span class="o">.</span><span class="n">full_version</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">[</span><span class="s">&#39;numpy_git_revision&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np_version</span><span class="o">.</span><span class="n">git_revision</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span>
+
+   <span class="k">def</span> <span class="nf">_modified_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diff</span><span class="p">):</span>
+      <span class="s">&quot;Returns the set of files mentioned in a given git diff string.&quot;</span>
+      <span class="n">modified_files</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">diff_marker</span> <span class="o">=</span> <span class="s">&#39;diff --git &#39;</span>
+      <span class="n">diff_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">diff_marker</span><span class="p">)]</span>
+
+      <span class="k">for</span> <span class="n">diff_line</span> <span class="ow">in</span> <span class="n">diff_lines</span><span class="p">:</span>
+         <span class="n">bfilepath</span> <span class="o">=</span> <span class="n">diff_line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">diff_marker</span><span class="p">):]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39; b/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+         <span class="n">bfile</span> <span class="o">=</span> <span class="n">bfilepath</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+         <span class="n">modified_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bfile</span><span class="p">)</span>
+      <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">modified_files</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="topo_metadata.summary"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.topo_metadata.summary">[docs]</a>   <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="s">&quot;Printed summary of the versioning information captured via git.&quot;</span>
+      <span class="n">np_name</span> <span class="o">=</span> <span class="s">&#39;Numpy&#39;</span>
+      <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="k">else</span> <span class="bp">self</span><span class="p">()</span>
+
+      <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;vcs_messages&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="p">[</span><span class="n">repo</span><span class="p">]]</span> <span class="k">for</span> <span class="n">repo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">summarized</span><span class="p">]</span>
+      <span class="n">diffs</span> <span class="o">=</span> <span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;vcs_diffs&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="p">[</span><span class="n">repo</span><span class="p">]]</span> <span class="k">for</span> <span class="n">repo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">summarized</span><span class="p">]</span>
+
+      <span class="n">diff_message</span> <span class="o">=</span> <span class="s">&quot;   </span><span class="si">%s</span><span class="s">  [</span><span class="si">%d</span><span class="s"> files have uncommited changes as captured by git diff]&quot;</span>
+      <span class="n">longest_name</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">summarized</span> <span class="o">+</span> <span class="p">[</span><span class="n">np_name</span><span class="p">])</span>
+
+      <span class="k">print</span> <span class="s">&quot;Topographica version control summary:</span><span class="se">\n</span><span class="s">&quot;</span>
+      <span class="k">for</span> <span class="n">repo_name</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">diff</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summarized</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">diffs</span><span class="p">):</span>
+         <span class="n">truncate_len</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_log_length</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span>
+         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">truncate_len</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">message</span><span class="p">[:</span><span class="n">truncate_len</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;...&#39;</span>
+
+         <span class="n">sha_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+         <span class="n">modified_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modified_files</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
+         <span class="k">print</span> <span class="s">&#39;   </span><span class="si">%s</span><span class="s">: </span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">repo_name</span><span class="p">,</span>
+                                <span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">longest_name</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">repo_name</span><span class="p">)),</span>
+                                <span class="n">message</span><span class="p">)</span>
+         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">modified_files</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">diff_message</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">sha_len</span><span class="o">+</span><span class="n">longest_name</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                                  <span class="nb">len</span><span class="p">(</span><span class="n">modified_files</span><span class="p">))</span>
+
+      <span class="n">numpy_sha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">[</span><span class="s">&#39;numpy_git_revision&#39;</span><span class="p">][:</span><span class="mi">7</span><span class="p">]</span>
+      <span class="n">np_info</span> <span class="o">=</span> <span class="p">(</span><span class="n">np_name</span><span class="p">,</span>   <span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">longest_name</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">np_name</span><span class="p">)),</span>
+                 <span class="n">numpy_sha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">[</span><span class="s">&#39;numpy_version&#39;</span><span class="p">],</span>
+                 <span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">np_version</span><span class="o">.</span><span class="n">release</span> <span class="k">else</span> <span class="s">&#39;Non-&#39;</span><span class="p">)</span>
+      <span class="k">print</span> <span class="s">&#39;   </span><span class="si">%s</span><span class="s">: </span><span class="si">%s%s</span><span class="s"> Version </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">release)&#39;</span> <span class="o">%</span> <span class="n">np_info</span>
+
+</div></div>
+<div class="viewcode-block" id="param_formatter"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.param_formatter">[docs]</a><span class="k">class</span> <span class="nc">param_formatter</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   This class is closely related to the param_formatter class in</span>
+<span class="sd">   topo/command/__init__.py.  Like that default class, it formats</span>
+<span class="sd">   parameters as a string for use in a directory name. Unlike that</span>
+<span class="sd">   default class, it does not use the parameters repr methods but the</span>
+<span class="sd">   exact, succinct commandline representation as returned by a Lancet</span>
+<span class="sd">   Args object.</span>
+
+<span class="sd">   This version has several advantages over the default:</span>
+
+<span class="sd">   - It formats values exactly as they appear in a command. For</span>
+<span class="sd">   example, a value specified as 6.00 on the commandline remains this</span>
+<span class="sd">   way and is never represented to higher precision or with floating</span>
+<span class="sd">   point error.</span>
+
+<span class="sd">   - Parameters are sorted from slowest to fastest varying or</span>
+<span class="sd">   (optionally) alphanumerically by default.</span>
+
+<span class="sd">   - It allows for a custom separator and an optional trunctation</span>
+<span class="sd">   length for values.</span>
+
+<span class="sd">   - By default, formats a string only for the parameters that are</span>
+<span class="sd">   varying (may be toggled).</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+   <span class="n">abbreviations</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">       A dictionary of abbreviations to use of type {&lt;key&gt;:&lt;abbrev&gt;}.</span>
+<span class="s">       If a specifier key has an entry in the dictionary, the</span>
+<span class="s">       abbreviation is used.  Useful for shortening long parameter</span>
+<span class="s">       names in the directory structure.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">alphanumeric_sort</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        Whether to sort the (potentially abbreviated) keys</span>
+<span class="s">        alphabetically or not. By default, keys are ordered from</span>
+<span class="s">        slowest varying to fastest varying using thr information</span>
+<span class="s">        provided by Lancet&#39;s Args object.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">format_constant_keys</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        Whether to represent parameters that are known to be constant</span>
+<span class="s">        across batches.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">truncation_limit</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">        If None, no truncation is performed, otherwise specifies the</span>
+<span class="s">        maximum length of any given specification value.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">separator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">          The separator to use between &lt;key&gt;=&lt;value&gt; pairs.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constant_keys</span><span class="p">,</span> <span class="n">varying_keys</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+
+      <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="n">constant_keys</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_constant_keys</span> <span class="k">else</span> <span class="p">[])</span> <span class="o">+</span> <span class="n">varying_keys</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphanumeric_sort</span><span class="p">:</span>  <span class="n">ordering</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ordering</span><span class="p">)</span>
+      <span class="n">abbreved</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">abbreviations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">),</span> <span class="n">spec</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ordering</span><span class="p">]</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">truncation_limit</span><span class="p">])</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">abbreved</span><span class="p">])</span>
+
+
+</div>
+<div class="viewcode-block" id="TopoCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.TopoCommand">[docs]</a><span class="k">class</span> <span class="nc">TopoCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   TopoCommand is designed to to format Lancet Args objects into</span>
+<span class="sd">   run_batch commands in a general way. Note that Topographica is</span>
+<span class="sd">   always invoked with the -a flag so all of topo.command is imported.</span>
+
+<span class="sd">   Some of the parameters duplicate those in run_batch to ensure</span>
+<span class="sd">   consistency with previous run_batch usage in Topographica. As a</span>
+<span class="sd">   consequence, this class sets all the necessary options for</span>
+<span class="sd">   run_batch except the &#39;times&#39; parameter which may vary specified</span>
+<span class="sd">   arbitrarily by the Lancet Args object.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+   <span class="n">tyfile</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;The Topographica model file to run.&quot;</span><span class="p">)</span>
+
+   <span class="n">analysis_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;default_analysis_function&quot;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The name of the analysis_fn to run. If modified from the</span>
+<span class="s">       default, the named callable will need to be imported into the</span>
+<span class="s">       namespace using a &#39;-c&#39; command in topo_flag_options.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">tag</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Whether to label the run_batch generated directory with the</span>
+<span class="s">       batch name and batch tag.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">topo_switches</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;-a&#39;</span><span class="p">],</span> <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">          Specifies the Topographica qsub switches (flags without</span>
+<span class="s">          arguments) as a list of strings. Note the that the -a switch</span>
+<span class="s">          is always used to auto import commands.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">topo_flag_options</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">          Specifies Topographica flags and their corresponding options</span>
+<span class="s">          as a dictionary.  This parameter is suitable for setting -c</span>
+<span class="s">          and -p flags for Topographica. This parameter is important</span>
+<span class="s">          for introducing the callable named by the analysis_fn</span>
+<span class="s">          parameter into the namespace.</span>
+
+<span class="s">          Tuples can be used to indicate groups of options using the</span>
+<span class="s">          same flag:</span>
+<span class="s">          {&#39;-p&#39;:&#39;retina_density=5&#39;} =&gt; -p retina_density=5</span>
+<span class="s">          {&#39;-p&#39;:(&#39;retina_density=5&#39;, &#39;scale=2&#39;) =&gt; -p retina_density=5 -p scale=2</span>
+
+<span class="s">          If a plain Python dictionary is used, the keys are</span>
+<span class="s">          alphanumerically sorted, otherwise the dictionary is assumed</span>
+<span class="s">          to be an OrderedDict (Python 2.7+, Python3 or</span>
+<span class="s">          param.external.OrderedDict) and the key ordering will be</span>
+<span class="s">          preserved. Note that the &#39;-&#39; is prefixed to the key if</span>
+<span class="s">          missing (to ensure a valid flag). This allows keywords to be</span>
+<span class="s">          specified with the dict constructor eg.. dict(key1=value1,</span>
+<span class="s">          key2=value2).&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">param_formatter</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">param_formatter</span><span class="o">.</span><span class="n">instance</span><span class="p">(),</span>
+      <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Used to specify run_batch formatting.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">max_name_length</span><span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+      <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Matches run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">snapshot</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+      <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Matches run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">vc_info</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+      <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Matches run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">save_global_params</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+     <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Matches run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;disabled&#39;</span><span class="p">,</span>
+     <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Matches run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">progress_interval</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+     <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Matches run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tyfile</span><span class="p">,</span> <span class="n">executable</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+      <span class="n">auto_executable</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span>
+         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">__file__</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;topographica&#39;</span><span class="p">))</span>
+
+      <span class="n">executable</span> <span class="o">=</span> <span class="n">executable</span> <span class="k">if</span> <span class="n">executable</span> <span class="k">else</span> <span class="n">auto_executable</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">TopoCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">tyfile</span><span class="o">=</span><span class="n">tyfile</span><span class="p">,</span> <span class="n">executable</span><span class="o">=</span><span class="n">executable</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;executable&#39;</span><span class="p">,</span> <span class="s">&#39;tyfile&#39;</span><span class="p">,</span> <span class="s">&#39;analysis_fn&#39;</span><span class="p">],[</span><span class="s">&#39;topo_switches&#39;</span><span class="p">,</span> <span class="s">&#39;snapshot&#39;</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_typath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tyfile</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executable</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Cannot find the topographica script relative to topo/__init__.py.&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_typath</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Tyfile doesn&#39;t exist! Cannot proceed.&quot;</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_fn</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&quot;default_analysis_function&quot;</span><span class="p">)</span>
+          <span class="ow">and</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="n">TopoCommand</span><span class="p">)</span>
+          <span class="ow">and</span> <span class="p">(</span><span class="s">&#39;-c&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">)):</span>
+         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">,</span> <span class="s">&#39;Please use -c option to introduce the appropriate analysis into the namespace.&#39;</span>
+
+
+   <span class="k">def</span> <span class="nf">_topo_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">switch_override</span><span class="o">=</span><span class="p">[]):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Method to generate Popen style argument list for Topographica</span>
+<span class="sd">      using the topo_switches and topo_flag_options</span>
+<span class="sd">      parameters. Switches are returned first, sorted</span>
+<span class="sd">      alphanumerically.  The qsub_flag_options follow in the order</span>
+<span class="sd">      given by keys() which may be controlled if an OrderedDict is</span>
+<span class="sd">      used (eg. in Python 2.7+ or using param.external</span>
+<span class="sd">      OrderedDict). Otherwise the keys are sorted alphanumerically.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">opt_dict</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">)()</span>
+      <span class="n">opt_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">)</span>
+
+      <span class="c"># Alphanumeric sort if vanilla Python dictionary</span>
+      <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">ordered_options</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">opt_dict</span><span class="p">)]</span>
+      <span class="k">else</span><span class="p">:</span>
+         <span class="n">ordered_options</span> <span class="o">=</span>  <span class="nb">list</span><span class="p">(</span><span class="n">opt_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+      <span class="c"># Unpack tuple values so flag:(v1, v2,...)) =&gt; ..., flag:v1, flag:v2, ...</span>
+      <span class="n">unpacked_groups</span> <span class="o">=</span> <span class="p">[[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">==</span><span class="nb">tuple</span> <span class="k">else</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">val</span><span class="p">)]</span>
+                           <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ordered_options</span><span class="p">]</span>
+      <span class="n">unpacked_kvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">unpacked_groups</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+      <span class="c"># Adds &#39;-&#39; if missing (eg, keywords in dict constructor) and flattens lists.</span>
+      <span class="n">ordered_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="s">&#39;-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span>  <span class="n">unpacked_kvs</span><span class="p">]</span>
+      <span class="n">ordered_options</span> <span class="o">=</span> <span class="p">[[</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="p">([</span><span class="n">v</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="k">else</span> <span class="n">v</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ordered_pairs</span><span class="p">]</span>
+      <span class="n">flattened_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">kvs</span> <span class="ow">in</span> <span class="n">ordered_options</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">kvs</span><span class="p">]</span>
+      <span class="n">switches</span> <span class="o">=</span>  <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">switch_override</span>
+                   <span class="k">if</span> <span class="p">(</span><span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_switches</span><span class="p">)]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_switches</span>
+      <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">switches</span><span class="p">)</span> <span class="o">+</span> <span class="n">flattened_options</span>
+
+
+   <span class="k">def</span> <span class="nf">_run_batch_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Defines the keywords accepted by run_batch and so specifies</span>
+<span class="sd">      run_batch behaviour. These keywords are those consumed by</span>
+<span class="sd">      run_batch for controlling run_batch behaviour.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="c"># Direct options for controlling run_batch.</span>
+      <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name_time_format&#39;</span><span class="p">:</span>   <span class="nb">repr</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;timestamp_format&#39;</span><span class="p">]),</span>
+                 <span class="s">&#39;max_name_length&#39;</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">max_name_length</span><span class="p">,</span>
+                 <span class="s">&#39;snapshot&#39;</span><span class="p">:</span>           <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="p">,</span>
+                 <span class="s">&#39;vc_info&#39;</span><span class="p">:</span>            <span class="bp">self</span><span class="o">.</span><span class="n">vc_info</span><span class="p">,</span>
+                 <span class="s">&#39;save_global_params&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_global_params</span><span class="p">,</span>
+                 <span class="s">&#39;progress_interval&#39;</span><span class="p">:</span>  <span class="bp">self</span><span class="o">.</span><span class="n">progress_interval</span><span class="p">,</span>
+                 <span class="s">&#39;progress_bar&#39;</span><span class="p">:</span>       <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">),</span>
+                 <span class="s">&#39;metadata_dir&#39;</span><span class="p">:</span>       <span class="nb">repr</span><span class="p">(</span><span class="s">&#39;metadata&#39;</span><span class="p">),</span>
+                 <span class="s">&#39;compress_metadata&#39;</span><span class="p">:</span>  <span class="nb">repr</span><span class="p">(</span><span class="s">&#39;zip&#39;</span><span class="p">),</span>
+                 <span class="s">&#39;save_script_repr&#39;</span><span class="p">:</span>   <span class="nb">repr</span><span class="p">(</span><span class="s">&#39;first&#39;</span><span class="p">)}</span>
+
+      <span class="c"># Settings inferred using information from launcher (&#39;info&#39;)</span>
+      <span class="n">tag_info</span> <span class="o">=</span> <span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_name&#39;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_tag&#39;</span><span class="p">])</span>
+      <span class="n">tag</span> <span class="o">=</span> <span class="s">&#39;[</span><span class="si">%s</span><span class="s">]_&#39;</span> <span class="o">%</span> <span class="s">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">tag_info</span> <span class="k">if</span> <span class="n">el</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+
+      <span class="n">derived_options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;dirname_prefix&#39;</span><span class="p">:</span>  <span class="nb">repr</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                         <span class="s">&#39;tag&#39;</span><span class="p">:</span>             <span class="nb">repr</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">t</span><span class="si">%s</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">tid</span><span class="p">)),</span>
+                         <span class="s">&#39;output_directory&#39;</span><span class="p">:</span><span class="nb">repr</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">])}</span>
+
+      <span class="c"># Use fixed timestamp argument to run_batch if available.</span>
+      <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+         <span class="n">derived_options</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span>
+
+      <span class="c"># The analysis_fn is set my self.analysis_fn</span>
+      <span class="n">derived_options</span><span class="p">[</span><span class="s">&#39;analysis_fn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_fn</span>
+
+      <span class="c"># Use the specified param_formatter to create the suitably named</span>
+      <span class="c"># lambda (returning the desired string) in run_batch.</span>
+      <span class="n">dir_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_formatter</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;constant_keys&#39;</span><span class="p">],</span>
+                                        <span class="n">info</span><span class="p">[</span><span class="s">&#39;varying_keys&#39;</span><span class="p">],</span> <span class="n">spec</span><span class="p">)</span>
+
+      <span class="n">dir_formatter</span> <span class="o">=</span> <span class="s">&#39;lambda p: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">dir_format</span><span class="p">)</span>
+      <span class="n">derived_options</span><span class="p">[</span><span class="s">&#39;dirname_params_filter&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">dir_formatter</span>
+
+      <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">derived_options</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Returns a Popen argument list to invoke Topographica and execute</span>
+<span class="sd">      run_batch with all options appropriately set (in alphabetical</span>
+<span class="sd">      order). Keywords that are not run_batch options are also in</span>
+<span class="sd">      alphabetical order at the end of the keyword list.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+
+      <span class="n">kwarg_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_batch_kwargs</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+      <span class="c"># Override spec values if mistakenly included.</span>
+      <span class="n">allopts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span><span class="o">**</span><span class="n">kwarg_opts</span><span class="p">)</span>
+
+      <span class="n">keywords</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">allopts</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span>
+                            <span class="nb">sorted</span><span class="p">(</span><span class="n">kwarg_opts</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">+</span><span class="nb">sorted</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span>
+
+      <span class="n">run_batch_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;run_batch(</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_typath</span><span class="p">),</span> <span class="n">keywords</span><span class="p">)]</span>
+      <span class="n">topo_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topo_args</span><span class="p">([</span><span class="s">&#39;-a&#39;</span><span class="p">])</span>
+      <span class="k">return</span>  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">executable</span><span class="p">]</span> <span class="o">+</span> <span class="n">topo_args</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;-c&#39;</span><span class="p">,</span>  <span class="s">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_batch_list</span><span class="p">)]</span>
+
+
+
+</div>
+<div class="viewcode-block" id="BatchCollector"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollector">[docs]</a><span class="k">class</span> <span class="nc">BatchCollector</span><span class="p">(</span><span class="n">PrettyPrinted</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   BatchCollector is a wrapper class used to execute a Collector in a</span>
+<span class="sd">   Topographica run_batch context, saving the holoviews to disk as</span>
+<span class="sd">   *.view files.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+   <span class="n">metadata</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Spec keys or collector paths to include as metadata in the</span>
+<span class="s">       output file along with &#39;time&#39; (simulation time).</span>
+
+<span class="s">       Layout paths are specified by dotted paths</span>
+<span class="s">       e.g. &#39;PinwheelAnalysis.V1&#39; would add the pinwheel analysis on</span>
+<span class="s">       V1 to the metadata.</span>
+<span class="s">       &quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BatchCollector.pickle_path"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollector.pickle_path">[docs]</a>   <span class="k">def</span> <span class="nf">pickle_path</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">,</span> <span class="n">batch_name</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Locates the pickle file based on the given launch info</span>
+<span class="sd">      dictionary. Used by load as a classmethod and by save as an</span>
+<span class="sd">      instance method.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_directory</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.collector&#39;</span> <span class="o">%</span> <span class="n">batch_name</span><span class="p">)</span>
+
+</div>
+   <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BatchCollector.load"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollector.load">[docs]</a>   <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">specs</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">,</span> <span class="n">batch_name</span><span class="p">,</span> <span class="n">batch_tag</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Classmethod used to load the RunBatchCommand callable into a</span>
+<span class="sd">      Topographica run_batch context. Loads the pickle file based on</span>
+<span class="sd">      the batch_name and root directory in batch_info.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">pkl_path</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">pickle_path</span><span class="p">(</span><span class="n">root_directory</span><span class="p">,</span> <span class="n">batch_name</span><span class="p">)</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl_path</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pkl</span><span class="p">:</span>
+         <span class="n">collectorfn</span> <span class="o">=</span>  <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pkl</span><span class="p">)</span>
+
+      <span class="n">info</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;info&#39;</span><span class="p">,[</span><span class="s">&#39;tid&#39;</span><span class="p">,</span> <span class="s">&#39;specs&#39;</span><span class="p">,</span> <span class="s">&#39;batch_name&#39;</span><span class="p">,</span> <span class="s">&#39;batch_tag&#39;</span><span class="p">])</span>
+      <span class="n">collectorfn</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">info</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">specs</span><span class="p">,</span> <span class="n">batch_name</span><span class="p">,</span> <span class="n">batch_tag</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">collectorfn</span>
+
+</div>
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+      <span class="kn">from</span> <span class="nn">topo.analysis</span> <span class="kn">import</span> <span class="n">Collector</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_pprint_args</span> <span class="o">=</span> <span class="p">([],[],</span><span class="bp">None</span><span class="p">,{})</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">BatchCollector</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="n">Collector</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Please supply a Collector to BatchCollector&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">collector</span> <span class="o">=</span> <span class="n">collector</span>
+      <span class="c"># The _info attribute holds information about the batch.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="p">()</span>
+
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Calls the collector specified by the user in the run_batch</span>
+<span class="sd">      context. Invoked as an analysis function by RunBatchCommand.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">collector</span><span class="o">.</span><span class="n">interval_hook</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span>
+
+      <span class="n">topo_time</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+      <span class="n">filename</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span>
+                              <span class="p">(</span><span class="s">&#39;[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">batch_tag</span>
+                               <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">batch_tag</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+                              <span class="n">topo_time</span><span class="p">)</span>
+
+      <span class="n">viewtree</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">()</span>
+      <span class="n">viewtree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collector</span><span class="p">(</span><span class="n">viewtree</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="p">[</span><span class="n">topo_time</span><span class="p">])</span>
+
+      <span class="n">spec_metadata</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">specs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                       <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
+
+
+      <span class="n">path_metadata</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">viewtree</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;nan&#39;</span><span class="p">)))</span>
+                       <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
+
+
+      <span class="n">Pickler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">viewtree</span><span class="p">,</span>
+                   <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
+                   <span class="n">key</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec_metadata</span> <span class="o">+</span> <span class="n">path_metadata</span> <span class="o">+</span> <span class="p">[(</span><span class="s">&#39;time&#39;</span><span class="p">,</span><span class="n">topo_time</span><span class="p">)]))</span>
+
+
+<div class="viewcode-block" id="BatchCollector.verify"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollector.verify">[docs]</a>   <span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specs</span><span class="p">,</span> <span class="n">model_params</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Check that a times list has been supplied, call verify_times on</span>
+<span class="sd">      the Collator and if model_params has been supplied, check that a</span>
+<span class="sd">      valid parameter set has been used.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="c"># Note: Parameter types could also be checked...</span>
+      <span class="n">unknown_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+      <span class="n">known_params</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">model_params</span> <span class="k">if</span> <span class="n">model_params</span> <span class="k">else</span> <span class="p">[])</span> <span class="c"># Model</span>
+                      <span class="o">|</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;times&#39;</span><span class="p">]))</span>                         <span class="c"># Extras</span>
+
+      <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">:</span>
+         <span class="k">if</span> <span class="s">&#39;times&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spec</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;BatchCollector requires a times argument.&quot;</span><span class="p">)</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">collector</span><span class="o">.</span><span class="n">verify_times</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s">&#39;times&#39;</span><span class="p">],</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+         <span class="k">if</span> <span class="ow">not</span> <span class="n">model_params</span><span class="p">:</span> <span class="k">continue</span>
+
+         <span class="n">unknown_params</span> <span class="o">=</span> <span class="n">unknown_params</span> <span class="o">|</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">-</span> <span class="n">known_params</span><span class="p">)</span>
+
+         <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Metadata keys not always available: </span><span class="si">%s</span><span class="s">&quot;</span>
+                            <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+
+      <span class="k">if</span> <span class="n">unknown_params</span><span class="p">:</span>
+         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;The following keys do not belong to &quot;</span>
+                        <span class="s">&quot;the model parameters or RunBatchCommand: </span><span class="si">%s</span><span class="s">&quot;</span>
+                        <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">unknown_params</span><span class="p">))</span>
+</div>
+   <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">print</span> <span class="s">&quot;Collector definition summary:</span><span class="se">\n\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">collector</span>
+
+   <span class="k">def</span> <span class="nf">_pprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">onlychanged</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tab</span> <span class="o">=</span> <span class="s">&#39;   &#39;</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Pretty print the collector in a declarative style.&quot;&quot;&quot;</span>
+      <span class="n">split</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tab</span><span class="o">*</span><span class="p">(</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+      <span class="n">spec_strs</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collector</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+         <span class="n">key</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s">&#39;None&#39;</span>
+         <span class="n">spec_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;(</span><span class="si">%s</span><span class="s">,</span><span class="si">%s%s%r</span><span class="s">),&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">tab</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+
+      <span class="k">return</span> <span class="s">&#39;Collector([</span><span class="si">%s%s%s</span><span class="s">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">split</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spec_strs</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">split</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="BatchCollator"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollator">[docs]</a><span class="k">class</span> <span class="nc">BatchCollator</span><span class="p">(</span><span class="n">Collator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    BatchCollator provides a convenient interface to load the output</span>
+<span class="sd">    of a BatchCollector run, which is spread across a number of</span>
+<span class="sd">    files. As input it takes a Lancet FileInfo object, an NdMapping or</span>
+<span class="sd">    a Pandas DataFrame, which contains all the filenames indexed by</span>
+<span class="sd">    the parameter space values. The regular NdMapping slicing and</span>
+<span class="sd">    selecting syntax can be used to narrow down the parameter space</span>
+<span class="sd">    and load just the data that is needed.</span>
+
+<span class="sd">    By supplying a log, BatchCollector can also find missing data</span>
+<span class="sd">    files and return an Args object to relaunch them.</span>
+
+<span class="sd">    Internally it uses Pandas operations, making Pandas a core</span>
+<span class="sd">    dependency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">filekey</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;filename&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The column key in which file paths are stored.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filetype</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">FileType</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       FileType object required to load data files, can be passed directly</span>
+<span class="s">       or via the FileInfo object.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">fileinfo</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">FileInfo</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       FileInfo object contains the filenames and associated metadata of all</span>
+<span class="s">       files to be loaded.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">log</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">Log</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The Log object contains information about the full batch and may be</span>
+<span class="s">        passed optionally to find missing data files.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">_deep_indexable</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filekey</span><span class="o">=</span><span class="s">&#39;filename&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">FileInfo</span><span class="p">)</span> <span class="ow">and</span> <span class="n">filetype</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;BatchCollator requires a FileType &#39;</span>
+                            <span class="s">&#39;to be specified.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">OrderedDict</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;dimensions&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">FileInfo</span><span class="p">):</span>
+                <span class="n">params</span><span class="p">[</span><span class="s">&#39;fileinfo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="n">filekey</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">key</span>
+                <span class="n">filetype</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">filetype</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dframe</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">NdMapping</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dframe</span><span class="p">()</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_dframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">filekey</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Input data contains no items.&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">BatchCollator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span>
+                                            <span class="n">filetype</span><span class="o">=</span><span class="n">filetype</span><span class="p">,</span> <span class="n">filekey</span><span class="o">=</span><span class="n">filekey</span><span class="p">,</span>
+                                            <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileinfo</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing_args</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Missing data files. Use .missing_args method &quot;</span>
+                             <span class="s">&quot;to view missing entries.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">data_key</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">_process_dframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dframe</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">filekey</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a dframe as input, merges it with the log dframe if</span>
+<span class="sd">        supplied, and converts it to an OrderedDict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;tid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dframe</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Without a tid field, missing runs cannot be determined.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dframe</span> <span class="o">=</span> <span class="n">dframe</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">dframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s">&#39;times&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">dframe</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">filekey</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">filekey</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="n">filename</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">dimensions</span>
+
+
+<div class="viewcode-block" id="BatchCollator.missing_args"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollator.missing_args">[docs]</a>    <span class="k">def</span> <span class="nf">missing_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds any missing data by merging the FileInfo and Log,</span>
+<span class="sd">        returning an Args object, which can be used to fill in the</span>
+<span class="sd">        missing runs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileinfo</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Lancet FileInfo and Lancet log required &#39;</span>
+                            <span class="s">&#39;to determine missing args.&#39;</span><span class="p">)</span>
+
+        <span class="c"># Expand &#39;times&#39; list into &#39;time&#39;</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">expanded_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">*</span> <span class="n">List</span><span class="p">(</span><span class="s">&#39;time&#39;</span><span class="p">,</span> <span class="n">specs</span><span class="p">[</span><span class="s">&#39;times&#39;</span><span class="p">])</span>
+
+        <span class="c"># Expand fileinfo with constant dims</span>
+        <span class="n">expanded_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileinfo</span>
+        <span class="n">constant_args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="o">**</span><span class="nb">dict</span><span class="p">((</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_values</span><span class="p">(</span><span class="n">d</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                                        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_dims</span>
+                                        <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expanded_info</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">constant_args</span><span class="p">:</span>
+           <span class="n">expanded_info</span> <span class="o">*=</span> <span class="n">constant_args</span>
+
+        <span class="c"># Compute set of sorted log and file spec tuples</span>
+        <span class="n">sort_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dimension_index</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">log_specs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">tuple</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                        <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s">&#39;times&#39;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">sort_fn</span><span class="p">))</span>
+                     <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">expanded_log</span><span class="o">.</span><span class="n">specs</span><span class="p">]</span>
+        <span class="n">file_specs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">tuple</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                         <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s">&#39;filename&#39;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">sort_fn</span><span class="p">))</span>
+                      <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">expanded_info</span><span class="o">.</span><span class="n">specs</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">Args</span><span class="p">([</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">log_specs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">file_specs</span><span class="p">))])</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+
+
+
+</div>
+<div class="viewcode-block" id="RunBatchCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.RunBatchCommand">[docs]</a><span class="k">class</span> <span class="nc">RunBatchCommand</span><span class="p">(</span><span class="n">TopoCommand</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Runs a custom analysis function specified by a Collector using</span>
+<span class="sd">   run_batch. This command is far more flexible for regular usage than</span>
+<span class="sd">   TopoCommand as it allows you to build a run_batch analysis</span>
+<span class="sd">   incrementally.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+   <span class="n">metadata</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Keys to include as metadata in the output file along with</span>
+<span class="s">       &#39;time&#39; (Topographica simulation time).&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">analysis</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="p">(</span><span class="n">Collector</span><span class="p">,</span> <span class="n">BatchCollector</span><span class="p">),</span>
+                                  <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">      The object used to define the analysis executed in</span>
+<span class="s">      RunBatch. This object may be a Topographica Collector or a</span>
+<span class="s">      BatchCollector which is a wrapper of a Collector.&quot;&quot;&quot;</span> <span class="p">)</span>
+
+   <span class="n">model_params</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">     A list or dictionary of model parameters to be passed to the</span>
+<span class="s">     model via run_batch. This is used to validate the parameter names</span>
+<span class="s">     specified. If set to an empty container, no checking is applied</span>
+<span class="s">     (default).&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tyfile</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">RunBatchCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">tyfile</span><span class="o">=</span><span class="n">tyfile</span><span class="p">,</span>
+                                            <span class="n">analysis_fn</span> <span class="o">=</span> <span class="s">&#39;analysis_fn&#39;</span><span class="p">,</span>
+                                            <span class="n">analysis</span> <span class="o">=</span> <span class="n">analysis</span><span class="p">,</span>
+                                            <span class="n">do_format</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                            <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;executable&#39;</span><span class="p">,</span> <span class="s">&#39;tyfile&#39;</span><span class="p">,</span> <span class="s">&#39;analysis&#39;</span><span class="p">],</span> <span class="p">[])</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="p">,</span> <span class="n">Collector</span><span class="p">):</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span> <span class="o">=</span> <span class="n">BatchCollector</span><span class="p">(</span><span class="n">analysis</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Generates the appropriate Topographica run_batch command to make</span>
+<span class="sd">      use of the pickled RunBatchCommand object.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+
+      <span class="n">formatted_spec</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+                            <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+      <span class="n">kwarg_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_batch_kwargs</span><span class="p">(</span><span class="n">formatted_spec</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+      <span class="n">allopts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">formatted_spec</span><span class="p">,</span><span class="o">**</span><span class="n">kwarg_opts</span><span class="p">)</span> <span class="c"># Override spec values if</span>
+                                                  <span class="c"># mistakenly included.</span>
+
+      <span class="c"># Load and configure the analysis</span>
+      <span class="n">prelude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;from topo.misc.lancext import BatchCollector&#39;</span><span class="p">]</span>
+      <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;analysis_fn=BatchCollector.load(</span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">)&quot;</span>
+                  <span class="o">%</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">],</span>
+                     <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_name&#39;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_tag&#39;</span><span class="p">])</span> <span class="p">]</span>
+
+      <span class="c"># Create the keyword representation to pass into run_batch</span>
+      <span class="n">keywords</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">allopts</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span>
+                            <span class="nb">sorted</span><span class="p">(</span><span class="n">kwarg_opts</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                            <span class="o">+</span><span class="nb">sorted</span><span class="p">(</span><span class="n">formatted_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span>
+      <span class="n">run_batch_list</span> <span class="o">=</span> <span class="n">prelude</span> <span class="o">+</span> <span class="p">[</span><span class="s">&quot;run_batch(</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">)&quot;</span>
+                                  <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tyfile</span><span class="p">),</span> <span class="n">keywords</span><span class="p">)]</span>
+      <span class="n">topo_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topo_args</span><span class="p">([</span><span class="s">&#39;-a&#39;</span><span class="p">])</span>
+      <span class="k">return</span>  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">executable</span><span class="p">]</span> <span class="o">+</span> <span class="n">topo_args</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;-c&#39;</span><span class="p">,</span>  <span class="s">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_batch_list</span><span class="p">)]</span>
+
+
+<div class="viewcode-block" id="RunBatchCommand.verify"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.RunBatchCommand.verify">[docs]</a>   <span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Check that the supplied arguments make sense given the specified</span>
+<span class="sd">      analysis.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">specs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="RunBatchCommand.finalize"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.RunBatchCommand.finalize">[docs]</a>   <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Pickle the analysis before launch.&quot;&quot;&quot;</span>
+      <span class="n">pkl_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">pickle_path</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">],</span>
+                                           <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_name&#39;</span><span class="p">])</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl_path</span><span class="p">,</span><span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pkl</span><span class="p">:</span>
+         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="p">,</span> <span class="n">pkl</span><span class="p">)</span>
+
+</div>
+   <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">print</span><span class="p">(</span><span class="s">&quot;Command executable: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/misc/lancext.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

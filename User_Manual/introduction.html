@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>The cerebral cortex of mammals primarily consists of a set of brain
+areas organized as topographic maps (<a class="reference external" href="#references">Kaas et al. 1997</a>, <a class="reference external" href="#references">Vanessen
+et al. 2001</a>). These maps contain systematic two-dimensional
+representations of features relevant to sensory, motor, and/or
+associative processing, such as retinal position, sound frequency,
+line orientation, or sensory or motor motion direction (<a class="reference external" href="#references">Blasdel
+1992</a>, <a class="reference external" href="#references">Merzenich et al. 1975</a>, <a class="reference external" href="#references">Weliky et al. 1996</a>).
+Understanding the development and function of topographic maps is
+crucial for understanding brain function, and will require
+integrating large-scale experimental imaging results with
+single-unit studies of individual neurons and their connections.</p>
+<p>Computational simulations have proven to be a powerful tool in this
+endeavor. In a simulation, it is possible to explore how topographic
+maps can emerge from the behavior of single neurons, both during
+development and during perceptual and motor processing in the adult.
+(For a review of this class of models, see <a class="reference external" href="#references">Swindale et al. 1996</a>.)
+However, the models to date have been limited in size and scope
+because existing simulation tools do not provide specific support
+for biologically realistic, densely interconnected topographic maps.
+Existing biological neural simulators, such as <a class="reference external" href="http://kacy.neuro.duke.edu/">Neuron</a> (<a class="reference external" href="#references">Hines et
+al. 1997</a>) and <a class="reference external" href="http://www.genesis-sim.org/GENESIS/">GENESIS</a> (<a class="reference external" href="#references">Bower et al. 1998</a>), primarily focus
+on detailed studies of individual neurons or very small networks of
+them. Tools for simulating large populations of abstract units, such
+as PDP++ (<a class="reference external" href="#references">O&#8217;Reilly et al, 2000</a>) and <a class="reference external" href="http://www.mathworks.com/">Matlab</a> focus primarily on
+engineering or cognitive science rather than neurobiological
+applications. Other simulators also lack specific support for
+measuring topographic map structure or generating input patterns at
+the topographic map level.</p>
+<p>The Topographica map-level simulator is designed to make it
+practical to simulate large-scale, detailed models of topographic
+maps. Topographica complements the existing low-level and abstract
+simulators, focusing on biologically realistic networks of tens or
+hundreds of thousands of neurons, forming topographic maps
+containing tens or hundreds of millions of connections. The goals of
+models at this level include understanding how topographic maps
+develop, how much of this development is driven by the environment,
+what computations the adult maps perform, how high-level
+capabilities are implemented by these maps, and how to relate
+large-scale phenomena to the activity of single units in maps. The
+overall goal is generally to understand the brain at a scale that is
+directly relevant to behavior.</p>
+<p>Topographica was developed through a collaboration between the
+<a class="reference external" href="http://www.cs.utexas.edu/">University of Texas at Austin</a> and the <a class="reference external" href="http://www.anc.ed.ac.uk/">University of Edinburgh</a>,
+funded by the <a class="reference external" href="http://www.nimh.nih.gov/neuroinformatics/">Human Brain Project</a> of the <a class="reference external" href="http://www.nimh.nih.gov">National Institutes of
+Mental Health</a>. Now that the simulator has been released, it is a
+fully open source project managed by <a class="reference external" href="http://homepages.inf.ed.ac.uk/jbednar/">James A. Bednar</a>, who
+coordinates contributions from all users. Binaries and source code
+are all freely available through the internet at
+<a class="reference external" href="http://topographica.org">topographica.org</a>, and volunteers are encouraged to join as
+Topographica users and developers.</p>
+<p>In the sections below, we describe the models and modeling
+approaches supported by Topographica, how the simulator is designed,
+and how it can be used to advance the field of computational
+neuroscience.</p>
+<div class="section" id="scope-and-modeling-approach">
+<h2>Scope and modeling approach<a class="headerlink" href="#scope-and-modeling-approach" title="Permalink to this headline">¶</a></h2>
+<p>Topographica is designed to simulate topographic maps in any
+two-dimensional cortical or subcortical region, such as visual,
+auditory, somatosensory, proprioceptive, and motor maps, plus the
+relevant parts of the external environment. Typically, models will
+include multiple brain regions, such as a part of an auditory or
+visual processing pathway, and simulate a large enough area to allow
+the organization and function of each map to be studied.</p>
+<p>To make it practical to model topographic maps at this large scale,
+the fundamental neural unit in the simulator is a two-dimensional
+<em>sheet</em> of neurons, rather than a neuron or a part of a neuron.
+Conceptually, a sheet is a continuous, two-dimensional area (as in
+<a class="reference external" href="#references">Amari</a>, <a class="reference external" href="#references">Roque da Silva Filho et al. 1992</a>), which is typically
+approximated by a finite array of individual neurons. Topographica
+models consist of an interconnected set of such sheets, where each
+brain region is represented by one or more sheets.</p>
+<div class="figure align-right" id="generic-model">
+<img alt="Topographica model of the visual system" src="../_images/generic-cortical-hierarchy-model.png" />
+<p class="caption">Sample Topographica model of the visual system</p>
+</div>
+<p>The figure at right shows a sample Topographica model of the early
+visual system (<a class="reference external" href="#references">Bednar et al. 2003</a>, <a class="reference external" href="#references">Bednar et al. 2004</a>). In
+this model, the eye is represented by three sheets: a sheet
+representing an array of photoreceptors, plus two sheets
+representing different types of retinal ganglion cells. The lateral
+geniculate nucleus of the thalamus is represented by two sheets, and
+three cortical areas are represented by one sheet each. Each of
+these sheets can be coarse or detailed, plastic or fixed, and simple
+or complex, as needed for a particular study.</p>
+<p>Sheets can be connected to other sheets in any combination,
+including lateral connections from the same sheet to itself, and
+recurrent feedback between sheets. Sheet-to-sheet connections are
+called <em>projections</em>; these typically consist of a large set of
+individual connections between units in each sheet. For one unit in
+each sheet in the figure, example connections are shown for each
+projection, including lateral projections in V1 and higher areas.
+Each circular patch of connections is called a <em>connection field</em>,
+consisting of input connections from a spatially restricted region
+of a sheet.</p>
+<p>Similar models can be used for topographic maps in somatosensory,
+auditory, and motor cortex. Current biologically realistic models
+include only a small number of sheets starting with a sensory area,
+but Topographica is designed to make larger, more complex models
+possible to simulate and to understand. Explicitly formulating
+models at the sheet level is crucial to the simulator design,
+because it allows user parameters, model specifications, and
+interfaces to be independent of the details of how each sheet is
+implemented.</p>
+<p>As a result, the user can easily trade off between simulation detail
+and computational requirements, depending on the specific phenomena
+under study in a given simulator run. (See <a class="reference external" href="#references">Bednar et al. 2004</a> for
+more details on model scaling.) If enough computational power and
+experimental measurements are available, models can be simulated at
+full scale, with as many neurons and connections as in the animal
+system being studied. More typically, a less-dense approximation
+will be used, requiring only ordinary PC workstations. Because the
+same model specifications and parameters can be used in each case,
+switching between levels of analysis does not require extensive
+parameter tuning or debugging, as would be required in neuron-level
+or engineering-oriented simulators.</p>
+<p>For most simulations, the individual neuron models within sheets can
+be implemented at a high level, consisting of single-compartment
+firing-rate or integrate-and-fire units. More detailed neuron models
+can also be used, when required for experimental validation or to
+simulate specific phenomena. We plan for these models to be
+implemented using interfaces to existing low-level simulators such
+as NEURON and GENESIS, and have implemented preliminary versions
+using NEST.</p>
+</div>
+<div class="section" id="software-architecture-and-implementation">
+<h2>Software architecture and implementation<a class="headerlink" href="#software-architecture-and-implementation" title="Permalink to this headline">¶</a></h2>
+<p>Topographica is implemented as a set of <a class="reference external" href="../Reference_Manual/index.html#core">packages providing the core
+functionality</a>, including the graphical user interface (GUI), plus
+an <a class="reference external" href="../Reference_Manual/index.html#library">extensible library of models, analysis routines, and
+visualizations</a>. The model primitives library consists of objects
+useful in constructing a model, such as sheets, projections, neural
+response functions, and learning rules. Many predefined objects are
+included, and adding new object types is designed to be
+straightforward. These building blocks are combined into a model
+using either the GUI or the Python scripting language.</p>
+<p>The analysis and visualization libraries include measurement and
+plotting capabilities geared towards large, two-dimensional areas.
+They also focus on data displays that can be compared with
+experimental results, such as optical imaging recordings, for
+validating models and for generating predictions.</p>
+<div class="figure align-right">
+<img alt="Screenshot of Topographica visualisations" src="../_images/060220_topographica_screen_shot_small.png" />
+<p class="caption">Screenshot of Topographica visualisations</p>
+</div>
+<p>The figure at right shows a Topographica 0.9.1 screenshot with
+examples of the visualization types supported in that version; the
+exact contents of each window will vary in other Topographica
+versions. Here the user is studying the behavior of an orientation
+map in the primary visual cortex (V1), using a model similar to the
+one depicted <a class="reference internal" href="#generic-model"><em>above</em></a>. The window at the bottom labeled
+``Orientation Preference&#8217;&#8217; shows the self-organized orientation
+map in V1; each pixel represents the preferred orientation of cells
+at that location in the V1 sheet, color-coded using the key at the
+left. The window labeled ``Activity&#8217;&#8217; shows a sample visual image
+on the left, along with the responses of the OFF-center and
+ON-center retinal ganglia and LGN (labeled ``LGNOff&#8217;&#8217; and
+``LGNOn&#8217;&#8216;, and V1 (labeled ``Primary&#8217;&#8216;). The input pattern was
+generated using the ``Preview&#8217;&#8217; dialog in the center, currently
+displaying a Gabor-shaped pattern yet to be presented. The window
+labeled ``Connection Fields&#8217;&#8217; shows the strengths of the LGN
+connections to one neuron in V1. The color-coded lateral inhibitory
+weights for a regular sampling of the V1 neurons are shown in the
+``Projection&#8217;&#8217; window at the top; neurons tend to connect to their
+immediate neighbors and to distant neurons of the same orientation.
+Distortions in the mapping from retina to V1 are shown in the
+``Topographic mapping&#8217;&#8217; window, which visualizes the preferred
+location in retinal space of each V1 neuron. This type of
+large-scale analysis is difficult with existing simulators, but
+Topographica is well suited for it.</p>
+<p>To allow large models to be executed quickly, the numerically
+intensive portions of the simulator are implemented in C++. Equally
+important, however, is that prototyping be fast and flexible, and
+that new architectures and other extensions be easy to explore and
+test. Although C++ allows the fine control over machine resources
+that is necessary for peak performance, it is difficult to write,
+debug and maintain complex systems in C++ or other similarly high
+performance languages.</p>
+<p>To provide flexibility, the bulk of the simulator is implemented in
+the <a class="reference external" href="http://www.python.org">Python scripting language</a>. Python is an interactive
+high-level language that allows rapid software development and
+interactive debugging, and includes a wide variety of widely
+supported software libraries for tasks such as data analysis,
+statistical measurements, and visualization. Unlike the script
+languages typically included in simulators, Python is a complete,
+well-defined, mature language with a strong user base. As a result,
+it enjoys strong support outside of the field of computational
+neuroscience, which provides much greater flexibility for users, and
+also makes the task of future maintenance easier.</p>
+<p>The following sections will introduce specific features of
+Topographica, focusing on how they can be used to construct
+large-scale models of topographic areas. A good way to make this
+material more concrete is to work through one or more of the
+<a class="reference external" href="../Tutorials/">Topographica tutorials</a>, to gain experience using Topographica for
+a particular task. More details about the specific objects discussed
+can be found in the <a class="reference external" href="../Reference_Manual/">reference manual</a>.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Shun-ichi Amari. <a class="reference external" href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=retrieve&amp;db=pubmed&amp;dopt=abstract&amp;list_uids=6246997">Topographic organization of nerve fields</a>.
+Bulletin of Mathematical Biology, 42:339-364, 1980.</li>
+<li>James&nbsp;A. Bednar and Risto Miikkulainen. <a class="reference external" href="http://nn.cs.utexas.edu/keyword?bednar:nc03">Learning innate face
+preferences</a>. Neural Computation, 15(7):1525-1557, 2003.</li>
+<li>James&nbsp;A. Bednar and Risto Miikkulainen. <a class="reference external" href="http://nn.cs.utexas.edu/keyword?bednar:neurocomputing04-or">Prenatal and postnatal
+development of laterally connected orientation maps</a>.
+Neurocomputing, pages 985-992, 2004.</li>
+<li>James&nbsp;A. Bednar, Amol Kelkar, and Risto Miikkulainen. <a class="reference external" href="http://nn.cs.utexas.edu/keyword?bednar:neuroinformatics04">Scaling
+self-organizing maps to model large cortical networks</a>.
+Neuroinformatics, 2:275-302, 2004.</li>
+<li>Gary&nbsp;G. Blasdel. <a class="reference external" href="http://www.jneurosci.org/cgi/content/abstract/12/8/3139">Orientation selectivity, preference, and
+continuity in monkey striate cortex</a>. The Journal of
+Neuroscience, 12:3139-3161, August 1992.</li>
+<li>James&nbsp;M. Bower and D.&nbsp;Beeman. The Book of GENESIS: Exploring
+Realistic Neural Models with the GEneral NEural SImulation
+System. Telos, Santa Clara, CA, second edition, 1998.</li>
+<li>Michael&nbsp;L. Hines and N.&nbsp;T. Carnevale. <a class="reference external" href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=retrieve&amp;db=pubmed&amp;dopt=abstract&amp;list_uids=9248061">The NEURON simulation
+environment</a>. Neural Computation, 9:1179-1209, 1997.</li>
+<li>Jon&nbsp;H. Kaas. Theories of visual cortex organization in primates.
+Cerebral Cortex, 12:91-125, 1997.</li>
+<li>M.&nbsp;M. Merzenich, P.&nbsp;L. Knight, and G.&nbsp;L. Roth. <a class="reference external" href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=retrieve&amp;db=pubmed&amp;dopt=abstract&amp;list_uids=1092814">Representation of
+cochlea within primary auditory cortex in the cat</a>. Journal of
+Neurophysiology, 38(2):231-249, 1975.</li>
+<li>Randall&nbsp;C. O&#8217;Reilly and Yuko Munakata. Computational Explorations
+in Cognitive Neuroscience: Understanding the Mind by Simulating
+the Brain. MIT Press, Cambridge, MA, 2000.</li>
+<li>Antonio&nbsp;Carlos Roque Da Silva Filho. Investigation of a
+Generalized Version of Amari&#8217;s Continuous Model for Neural
+Networks. PhD thesis, School of Cognitive and Computing Sciences,
+University of Sussex, Brighton, UK, 1992.</li>
+<li>N.&nbsp;V. Swindale. <a class="reference external" href="http://www.iop.org/EJ/S/3/251/kxtGlJZKth350bhDwPkibw/article/0954-898X/7/2/002/ne62r2.pdf">The development of topography in the visual
+cortex: A review of models</a>. Network: Computation in Neural
+Systems, 7:161-247, 1996.</li>
+<li>D.&nbsp;C. Van Essen, J.&nbsp;W. Lewis, H.&nbsp;A. Drury, N.&nbsp;Hadjikhani,
+R.&nbsp;B.&nbsp;H. Tootell, M.&nbsp;Bakircioglu, and M.&nbsp;I. Miller. <a class="reference external" href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=retrieve&amp;db=pubmed&amp;dopt=abstract&amp;list_uids=11322980">Mapping
+visual cortex in monkeys and humans using surface-based
+atlases</a>. Vision Research, 41(10-11):1359-1378, 2001.</li>
+<li>Michael Weliky, William&nbsp;H. Bosking, and David Fitzpatrick. <a class="reference external" href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=retrieve&amp;db=pubmed&amp;dopt=abstract&amp;list_uids=8602218">A
+systematic map of direction preference in primary visual
+cortex</a>. Nature, 379:725-728, 1996.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#scope-and-modeling-approach">Scope and modeling approach</a></li>
+<li><a class="reference internal" href="#software-architecture-and-implementation">Software architecture and implementation</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/User_Manual/introduction.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

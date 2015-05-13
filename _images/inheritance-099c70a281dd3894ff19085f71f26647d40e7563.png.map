@@ -1,0 +1,10 @@
+<map id="inheritance50e9782c42" name="inheritance50e9782c42">
+<area shape="rect" id="node1" title="Function object to modify a matrix in place, e.g. for normalization." alt="" coords="306,101,507,126"/>
+<area shape="rect" id="node3" href="#topo.transferfn.TransferFnWithState" title="Abstract base class for TransferFns that need to maintain a self.plastic parameter." alt="" coords="559,28,802,53"/>
+<area shape="rect" id="node5" href="#topo.transferfn.misc.HalfRectify" title="Transfer function that applies a half&#45;wave rectification (clips at zero)" alt="" coords="572,76,789,101"/>
+<area shape="rect" id="node7" href="#topo.transferfn.misc.KernelMax" title="Replaces the given matrix with a kernel function centered around the maximum value." alt="" coords="573,125,788,150"/>
+<area shape="rect" id="node8" href="#topo.transferfn.misc.PatternCombine" title="Combine the supplied pattern with one generated using a" alt="" coords="554,173,807,198"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="5,101,259,126"/>
+<area shape="rect" id="node4" href="#topo.transferfn.misc.AttributeTrackingTF" title="Keeps track of attributes of a specified Parameterized over time, for analysis or plotting." alt="" coords="865,5,1136,29"/>
+<area shape="rect" id="node6" href="#topo.transferfn.misc.HomeostaticResponse" title="Adapts the parameters of a linear threshold function to maintain a" alt="" coords="854,53,1147,78"/>
+</map>

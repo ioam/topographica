@@ -1,0 +1,36 @@
+topo.command Package
+====================
+
+:mod:`command` Package
+----------------------
+
+.. inheritance-diagram:: topo.command
+
+
+.. automodule:: topo.command
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`analysis` Module
+----------------------
+
+.. inheritance-diagram:: topo.command.analysis
+
+
+.. automodule:: topo.command.analysis
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`pylabplot` Module
+-----------------------
+
+.. inheritance-diagram:: topo.command.pylabplot
+
+
+.. automodule:: topo.command.pylabplot
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

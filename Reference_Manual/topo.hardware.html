@@ -1,0 +1,1605 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.hardware Package &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-hardware-package">
+<h1>topo.hardware Package<a class="headerlink" href="#topo-hardware-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="opencvcamera-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">opencvcamera</span></tt> Module<a class="headerlink" href="#opencvcamera-module" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+<img src="../_images/inheritance-5d5431ce64e6ccd73dd8b561b99a765f5f5c2bd4.png" alt="Inheritance diagram of topo.hardware.opencvcamera" usemap="#inheritance1b0934e756" class="inheritance"/>
+<map id="inheritance1b0934e756" name="inheritance1b0934e756">
+<area shape="rect" id="node1" title="params(aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="737,3,887,22"/>
+<area shape="rect" id="node5" href="#topo.hardware.opencvcamera.CameraImage" title="params(aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="923,3,1148,22"/>
+<area shape="rect" id="node2" title="params(channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="480,3,701,22"/>
+<area shape="rect" id="node3" title="params(bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="227,3,445,22"/>
+<area shape="rect" id="node4" title="params(name=String)" alt="" coords="4,3,192,22"/>
+</map>
+</p>
+<span class="target" id="module-topo.hardware.opencvcamera"></span><p>A class for grabbing frames from the camera.
+In order to grab frames, you need to install Opencv, and python-opencv
+(Python bindings for the computer vision library).</p>
+<p>This class was tested with Opencv 2.0.0 and Ubuntu 10.04 LTS.</p>
+<dl class="class">
+<dt id="topo.hardware.opencvcamera.CameraImage">
+<em class="property">class </em><tt class="descclassname">topo.hardware.opencvcamera.</tt><tt class="descname">CameraImage</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/opencvcamera.html#CameraImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://ioam.github.io/imagen/Reference_Manual/imagen.html#imagen.image.GenericImage" title="(in ImaGen v1.0)"><tt class="xref py py-class docutils literal"><span class="pre">imagen.image.GenericImage</span></tt></a></p>
+<p>params(aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)
+[1;32mParameters of &#8216;CameraImage&#8217;
+===========================
+[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName                                  Value                              Type                  Bounds           Mode  [0m</p>
+<p>aspect_ratio                           1.0                              Number               (0.0,[1;36m 2.0[0m)         V RW  
+bounds                       BoundingBox(radius=0.5)           BoundingRegionParameter                          V RW  
+cache_image                           False                            Boolean                 (0, 1)           V RW  
+channel_transforms                      []                             HookList              (0, None)          V RW  
+group                               &#8216;Pattern&#8217;                           String                                  V RW  
+mask                                   None                           Parameter                               V RW AN 
+mask_shape                             None                         ClassSelector                             V RW AN 
+offset                                 0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+orientation                            0.0                              Number          ([1;36m0.0[0m,[1;36m 6.28318530718[0m)    V RW  
+output_fns                              []                             HookList              (0, None)          V RW  
+pattern_sampler      PatternSampler(background_value_fn=&lt;f...       ClassSelector                               V RW  
+position                               None                           Composite                               V RW AN 
+scale                                  1.0                              Number               ([1;36m0.0[0m,[1;36m 2.0[0m)         V RW  
+size                                   1.0                              Number               (0.0,[1;36m 2.0[0m)         V RW  
+x                                      0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+xdensity                               256                              Number               (0, None)          V RW  
+y                                      0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+ydensity                               256                              Number               (0, None)          V RW  
+z                                      None                         ClassSelector                             V RW AN</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34maspect_ratio:       Ratio of width to height; size*aspect_ratio gives the width.[0m
+[1;31mbounds:             BoundingBox of the area in which the pattern is generated.[0m
+[1;34mcache_image:        If False, discards the image and pattern_sampler after drawing[0m
+[1;34m                    the pattern each time, to make it possible to use very large[0m
+[1;34m                    databases of images without running out of memory.[0m
+[1;31mchannel_transforms: Optional functions to apply post processing to the set of channels.[0m
+[1;34mgroup:              The group name assigned to the returned HoloViews object.[0m
+[1;31mmask:               Optional object (expected to be an array) with which to multiply the[0m
+[1;31m                    pattern array after it has been created, before any output_fns are[0m
+[1;31m                    applied. This can be used to shape the pattern.[0m
+[1;34mmask_shape:         Optional PatternGenerator used to construct a mask to be applied to[0m
+[1;34m                    the pattern.[0m
+[1;31moffset:             Additive offset to input pattern, defaulting to 0.0[0m
+[1;34morientation:        Polar angle of pattern, i.e., the orientation in the Cartesian coordinate[0m
+[1;34m                    system, with zero at 3 o&#8217;clock and increasing counterclockwise.[0m
+[1;31moutput_fns:         Optional function(s) to apply to the pattern array after it has been created.[0m
+[1;31m                    Can be used for normalization, thresholding, etc.[0m
+[1;34mpattern_sampler:    The PatternSampler to use to resample/resize the image.[0m
+[1;31mposition:           Coordinates of location of pattern center.[0m
+[1;31m                    Provides a convenient way to set the x and y parameters together[0m
+[1;31m                    as a tuple (x,y), but shares the same actual storage as x and y[0m
+[1;31m                    (and thus only position OR x and y need to be specified).[0m
+[1;34mscale:              Multiplicative strength of input pattern, defaulting to 1.0[0m
+[1;31msize:               Height of the image.[0m
+[1;34mx:                  X-coordinate location of pattern center.[0m
+[1;31mxdensity:           Density (number of samples per 1.0 length) in the x direction.[0m
+[1;34my:                  Y-coordinate location of pattern center.[0m
+[1;31mydensity:           Density (number of samples per 1.0 length) in the y direction.[0m
+[1;31m                    Typically the same as the xdensity.[0m
+[1;34mz:                  The Dimension object associated with the z-values generated by[0m
+[1;34m                    the PatternGenerator . If None, uses the default set by[0m
+[1;34m                    HoloViews.Image.[0m</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>X-coordinate location of pattern center.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Multiplicative strength of input pattern, defaulting to 1.0</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">group</span></tt> (<em>allow_None=False, basestring=&lt;type &#8216;basestring&#8217;&gt;, constant=False, default=Pattern, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>The group name assigned to the returned HoloViews object.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">pattern_sampler</span></tt> (<em>allow_None=False, constant=False, default=&lt;PatternSampler PatternSampler00071&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The PatternSampler to use to resample/resize the image.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">cache_image</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If False, discards the image and pattern_sampler after drawing
+        the pattern each time, to make it possible to use very large
+        databases of images without running out of memory.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">orientation</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.4, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Polar angle of pattern, i.e., the orientation in the Cartesian coordinate
+        system, with zero at 3 o&#8217;clock and increasing counterclockwise.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">channel_transforms</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional functions to apply post processing to the set of channels.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">z</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>The Dimension object associated with the z-values generated by
+        the PatternGenerator . If None, uses the default set by
+        HoloViews.Image.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Optional object (expected to be an array) with which to multiply the
+        pattern array after it has been created, before any output_fns are
+        applied. This can be used to shape the pattern.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>BoundingBox of the area in which the pattern is generated.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">xdensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=256, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the x direction.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Y-coordinate location of pattern center.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=0.08, readonly=False</em>)</dt>
+<dd>Optional function(s) to apply to the pattern array after it has been created.
+        Can be used for normalization, thresholding, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.11, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Additive offset to input pattern, defaulting to 0.0</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">mask_shape</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=0.06, readonly=False</em>)</dt>
+<dd>Optional PatternGenerator used to construct a mask to be applied to
+        the pattern.</dd>
+<dt><em>param Composite</em> <tt class="docutils literal"><span class="pre">position</span></tt> (<em>allow_None=True, attribs=[&#8216;x&#8217;, &#8216;y&#8217;], constant=False, default=None, instantiate=False, objtype=&lt;class &#8216;imagen.patterngenerator.PatternGenerator&#8217;&gt;, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Coordinates of location of pattern center.
+        Provides a convenient way to set the x and y parameters together
+        as a tuple (x,y), but shares the same actual storage as x and y
+        (and thus only position OR x and y need to be specified).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ydensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=256, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the y direction.
+        Typically the same as the xdensity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">aspect_ratio</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.31, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Ratio of width to height; size*aspect_ratio gives the width.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.3, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Height of the image.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.anim">
+<tt class="descname">anim</tt><big>(</big><em>duration</em>, <em>offset=0</em>, <em>timestep=1</em>, <em>label=None</em>, <em>unit=None</em>, <em>time_fn=Time(label='Time'</em>, <em>name='Time00001'</em>, <em>time_type=&lt;built-in function mpq&gt;</em>, <em>timestep=1.0</em>, <em>unit=None</em>, <em>until=Infinity())</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.anim" title="Permalink to this definition">¶</a></dt>
+<dd><p>duration: The temporal duration to animate in the units
+defined on the global time function.</p>
+<p>offset: The temporal offset from which the animation is
+generated given the supplied pattern</p>
+<p>timestep: The time interval between successive frames. The
+duration must be an exact multiple of the timestep.</p>
+<p>label: A label string to override the label of the global time
+function (if not None).</p>
+<p>unit: The unit string to override the unit value of the global
+time function (if not None).</p>
+<p>time_fn: The global time function object that is shared across
+the time-varying objects that are being sampled.</p>
+<p>Note that the offset, timestep and time_fn only affect
+patterns parameterized by time-dependent number
+generators. Otherwise, the frames are generated by successive
+call to the pattern which may or may not be varying (e.g to
+view the patterns contained within a Selector).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.opencvcamera.CameraImage.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d326788&gt;</em><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.opencvcamera.CameraImage.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d326890&gt;</em><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.opencvcamera.CameraImage.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d3266d8&gt;</em><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.opencvcamera.CameraImage.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.opencvcamera.CameraImage.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.opencvcamera.CameraImage.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.opencvcamera.CameraImage.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d326680&gt;</em><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.set_matrix_dimensions">
+<tt class="descname">set_matrix_dimensions</tt><big>(</big><em>bounds</em>, <em>xdensity</em>, <em>ydensity</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.set_matrix_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the dimensions of the matrix into which the pattern
+will be drawn.  Users of this class should call this method
+rather than changing the bounds, xdensity, and ydensity
+parameters directly.  Subclasses can override this method to
+update any internal data structures that may depend on the
+matrix dimensions.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.opencvcamera.CameraImage.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d326730&gt;</em><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the state of the output functions saved by state_push.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the state of the output functions, to be restored with state_pop.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.opencvcamera.CameraImage.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.opencvcamera.CameraImage.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="playerrobot-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">playerrobot</span></tt> Module<a class="headerlink" href="#playerrobot-module" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+<img src="../_images/inheritance-9fb924b8ee06601ac880fb962ceb6b72e8ebc9c5.png" alt="Inheritance diagram of topo.hardware.playerrobot" usemap="#inheritancefa9f2f7953" class="inheritance"/>
+<map id="inheritancefa9f2f7953" name="inheritancefa9f2f7953">
+<area shape="rect" id="node1" href="#topo.hardware.playerrobot.CameraDevice" title="A Player camera device." alt="" coords="675,54,965,79"/>
+<area shape="rect" id="node2" href="#topo.hardware.playerrobot.PlayerDevice" title="Generic Player device object." alt="" coords="349,78,627,103"/>
+<area shape="rect" id="node3" href="#topo.hardware.playerrobot.PTZDevice" title="Player Pan/Tilt/Zoom (PTZ) device." alt="" coords="689,103,951,129"/>
+<area shape="rect" id="node4" href="#topo.hardware.playerrobot.PlayerClient" title="Player object wrapper for playerc.client objects." alt="" coords="353,127,623,153"/>
+<area shape="rect" id="node5" href="#topo.hardware.playerrobot.PlayerObject" title="A generic threadsafe wrapper for client and proxy objects" alt="" coords="16,103,291,129"/>
+<area shape="rect" id="node7" href="#topo.hardware.playerrobot.PlayerRobot" title="Player Robot interface." alt="" coords="18,5,289,30"/>
+</map>
+</p>
+<span class="target" id="module-topo.hardware.playerrobot"></span><p>High-level interface to the Player client libraries.</p>
+<p>The Player client libraries allow Python code to communicate with
+hardware devices such as robots, cameras, and range sensors.</p>
+<p>This is a temporary home for this file until it finds a permanent home
+(maybe in the PlayerStage project or in PLASTK?)</p>
+<dl class="class">
+<dt id="topo.hardware.playerrobot.CameraDevice">
+<em class="property">class </em><tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">CameraDevice</tt><big>(</big><em>proxy</em>, <em>lock</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#CameraDevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.CameraDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.hardware.playerrobot.PlayerDevice" title="topo.hardware.playerrobot.PlayerDevice"><tt class="xref py py-class docutils literal"><span class="pre">topo.hardware.playerrobot.PlayerDevice</span></tt></a></p>
+<p>A Player camera device.</p>
+<p>The synchronized method get_image grabs an uncompressed snapshot,
+along with the additional formatting information needed to make an
+image.</p>
+<dl class="method">
+<dt id="topo.hardware.playerrobot.CameraDevice.get_image">
+<tt class="descname">get_image</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#CameraDevice.get_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.CameraDevice.get_image" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns the tuple:</dt>
+<dd>(format,width,height,bpp,fdiv,data)</dd>
+</dl>
+<p>Where data is a copy of the uncompressed image data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.playerrobot.CameraDevice.image">
+<tt class="descname">image</tt><a class="headerlink" href="#topo.hardware.playerrobot.CameraDevice.image" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns the tuple:</dt>
+<dd>(format,width,height,bpp,fdiv,data)</dd>
+</dl>
+<p>Where data is a copy of the uncompressed image data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.hardware.playerrobot.PTZDevice">
+<em class="property">class </em><tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">PTZDevice</tt><big>(</big><em>proxy</em>, <em>lock</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#PTZDevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.PTZDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.hardware.playerrobot.PlayerDevice" title="topo.hardware.playerrobot.PlayerDevice"><tt class="xref py py-class docutils literal"><span class="pre">topo.hardware.playerrobot.PlayerDevice</span></tt></a></p>
+<p>Player Pan/Tilt/Zoom (PTZ) device.</p>
+<p>Adds the following to the original proxy interface:</p>
+<p>state = The tuple (pan,tilt,zoom) indicating the current state of
+the PTZ device.</p>
+<p>state_deg = Same as state, but returns values in  degrees instead
+of radians</p>
+<p>set_deg() and set_ws_deg() methods.  Same as .set() and .set_ws(),
+using degrees instead of radians.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.hardware.playerrobot.PlayerClient">
+<em class="property">class </em><tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">PlayerClient</tt><big>(</big><em>proxy</em>, <em>lock</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#PlayerClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.PlayerClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.hardware.playerrobot.PlayerObject" title="topo.hardware.playerrobot.PlayerObject"><tt class="xref py py-class docutils literal"><span class="pre">topo.hardware.playerrobot.PlayerObject</span></tt></a></p>
+<p>Player object wrapper for playerc.client objects.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.hardware.playerrobot.PlayerDevice">
+<em class="property">class </em><tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">PlayerDevice</tt><big>(</big><em>proxy</em>, <em>lock</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#PlayerDevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.PlayerDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.hardware.playerrobot.PlayerObject" title="topo.hardware.playerrobot.PlayerObject"><tt class="xref py py-class docutils literal"><span class="pre">topo.hardware.playerrobot.PlayerObject</span></tt></a></p>
+<p>Generic Player device object.</p>
+<p>Overrides the default proxy .subscribe method so that the mode defaults
+to PLAYERC_OPEN_MODE.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.hardware.playerrobot.PlayerObject">
+<em class="property">class </em><tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">PlayerObject</tt><big>(</big><em>proxy</em>, <em>lock</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#PlayerObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.PlayerObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>A generic threadsafe wrapper for client and proxy objects
+from the playerc library.</p>
+<p>PlayerObject wrappers are constructed automatically by PlayerRobot
+objects.  Each PlayerObject instance wraps a playerc device proxy
+or client object, and publishes a thread-safe version of each of
+proxy&#8217;s methods, that is synchronized with the PlayerRobot
+instance&#8217;s run-loop thread, and that catches playerc error
+conditions and raises them as PlayerExceptions.  The original
+playerc proxy object is available via the attribute .proxy.
+Specialized subclasses of PlayerObject can have additional
+interfaces for getting device state or setting commands specific
+to that device.</p>
+<p>Developer note: the PlayerObject base class __init__ method
+automatically wraps each method on the proxy that (a) doesn&#8217;t
+begin with &#8216;__&#8217; and (b) is not already in dir(self).  This way,
+subclasses can override the wrapping process by defining their own
+wrappers <em>before</em> the base class __init__ method is called.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.hardware.playerrobot.PlayerRobot">
+<em class="property">class </em><tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">PlayerRobot</tt><big>(</big><em>host='localhost'</em>, <em>port=6665</em>, <em>speed=20</em>, <em>devices=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#PlayerRobot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.PlayerRobot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>Player Robot interface.</p>
+<p>A PlayerRobot instance encapsulates an interface to a Player
+robot. It creates and manages a playerc.client object and a set of
+device proxies wrapped in PlayerDevice objects.  In addition, it
+maintains a run-loop in a separate thread that calls the client&#8217;s
+.read() method at regular intervals.  The devices are published
+through standard interfaces on the PlayerRobot instance, and their
+methods and properties are synchronized with the run thread
+through a mutex.</p>
+<p>Example:</p>
+<blockquote>
+<div><p># set up a robot object with position, laser, and camera objects
+robot = PlayerRobot(host=&#8217;myrobot.mydomain.edu&#8217;,port=6665,</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>devices = [(&#8216;position2d&#8217;,0),</dt>
+<dd>(&#8216;laser&#8217;,0),
+(&#8216;camera&#8217;,1)])</dd>
+</dl>
+</div></blockquote>
+<p># start the run thread, devices will be subscribed
+# automatically.
+robot.start()</p>
+<p># start the robot turning at 30 deg/sec
+robot.position2d[0].set_cmd_vel(0, 0, 30*pi/180)</p>
+<p># wait for a while
+time.sleep(5.0)</p>
+<p># all stop
+robot.position2d[0].set_cmd_vel(0,0,0)</p>
+<p># shut down the robot&#8217;s thread, unsubscribing all devices and
+# disconnecting the client
+robot.stop()</p>
+</div></blockquote>
+<dl class="method">
+<dt id="topo.hardware.playerrobot.PlayerRobot.run_queues">
+<tt class="descname">run_queues</tt><big>(</big><em>run_state</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#PlayerRobot.run_queues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.PlayerRobot.run_queues" title="Permalink to this definition">¶</a></dt>
+<dd><p>When using queues for communication with devices, this method
+toggles queue processing.  It is often useful to turn off
+queue processing, e.g. when a client does not plan on using queued
+data for a while.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.hardware.playerrobot.player_fn">
+<tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">player_fn</tt><big>(</big><em>error_op=&lt;built-in function ne&gt;</em>, <em>error_val=0</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#player_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.player_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Player function decorator.  Adds error checking.</p>
+<p>Takes an operator and a value, and compares the result
+of the function call with the value using the operator.
+If the result is true, a PlayerException is raised.  The
+default error condition is error_op = ne, error_value = 0,
+which raises an exception if fn(<a href="#id1"><span class="problematic" id="id2">*</span></a>args) != 0.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.hardware.playerrobot.synched_method">
+<tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">synched_method</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#synched_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.synched_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Synchronized method decorator.</p>
+<p>Like synchronized() decorator, except synched_method assumes
+that the first argument of the function is an instance containing
+a Lock object, and this lock is used for synchronization.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.hardware.playerrobot.synchronized">
+<tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">synchronized</tt><big>(</big><em>lock</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#synchronized"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.synchronized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple synchronization decorator.</p>
+<p>Takes an existing lock and synchronizes a function or
+method on that lock.  Code taken from the Python Wiki
+PythonDecoratorLibrary:</p>
+<p><a class="reference external" href="http://wiki.python.org/moin/PythonDecoratorLibrary">http://wiki.python.org/moin/PythonDecoratorLibrary</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.hardware.playerrobot.use_processing">
+<tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">use_processing</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#use_processing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.use_processing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the module to use the processing library for asynchronous
+process support. Use of the processing library requires the use of
+queues for communication with robot devices.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.hardware.playerrobot.use_threading">
+<tt class="descclassname">topo.hardware.playerrobot.</tt><tt class="descname">use_threading</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/hardware/playerrobot.html#use_threading"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.playerrobot.use_threading" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the module to use the threading library for asynchronous
+process support. (the default)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="ptz-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">ptz</span></tt> Module<a class="headerlink" href="#ptz-module" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+<img src="../_images/inheritance-b4a858a2b3d66a7d9fcb03fe28afb36f7244beed.png" alt="Inheritance diagram of topo.hardware.ptz" usemap="#inheritance03b2a56d5d" class="inheritance"/>
+<map id="inheritance03b2a56d5d" name="inheritance03b2a56d5d">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,5,264,30"/>
+<area shape="rect" id="node2" href="#topo.hardware.ptz.PTZ" title="params(name=String)" alt="" coords="313,5,479,30"/>
+</map>
+</p>
+<span class="target" id="module-topo.hardware.ptz"></span><p>A class for controlling pan/tilt and pan/tilt reset of a camera.
+In order to move the camera, you need to install UVCDYNCTRL,
+it is a Logitech software for webcam.</p>
+<p>This class was tested with uvcdynctrl and Ubuntu 10.04 LTS.</p>
+<dl class="class">
+<dt id="topo.hardware.ptz.PTZ">
+<em class="property">class </em><tt class="descclassname">topo.hardware.ptz.</tt><tt class="descname">PTZ</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/ptz.html#PTZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.ptz.PTZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.Parameterized" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>params(name=String)
+[1;32mParameters of &#8216;PTZ&#8217;
+===================
+[0m
+Object has no parameters.</p>
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.ptz.PTZ.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c4e38e8&gt;</em><a class="headerlink" href="#topo.hardware.ptz.PTZ.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.ptz.PTZ.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c4e3b50&gt;</em><a class="headerlink" href="#topo.hardware.ptz.PTZ.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.ptz.PTZ.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c4e3c00&gt;</em><a class="headerlink" href="#topo.hardware.ptz.PTZ.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.ptz.PTZ.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.ptz.PTZ.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.ptz.PTZ.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.ptz.PTZ.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c4e3ba8&gt;</em><a class="headerlink" href="#topo.hardware.ptz.PTZ.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.ptz.PTZ.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c4e3cb0&gt;</em><a class="headerlink" href="#topo.hardware.ptz.PTZ.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the most recently saved state.</p>
+<p>See state_push() for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this instance&#8217;s state.</p>
+<p>For Parameterized instances, this includes the state of
+dynamically generated values.</p>
+<p>Subclasses that maintain short-term state should additionally
+save and restore that state using state_push() and
+state_pop().</p>
+<p>Generally, this method is used by operations that need to test
+something without permanently altering the objects&#8217; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.ptz.PTZ.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.ptz.PTZ.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="robotics-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">robotics</span></tt> Module<a class="headerlink" href="#robotics-module" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+<img src="../_images/inheritance-4688334b5de84fe1a5fb1234ab8746a6806ff5ce.png" alt="Inheritance diagram of topo.hardware.robotics" usemap="#inheritance317af4f87e" class="inheritance"/>
+<map id="inheritance317af4f87e" name="inheritance317af4f87e">
+<area shape="rect" id="node1" title="params(aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="614,3,739,18"/>
+<area shape="rect" id="node6" href="#topo.hardware.robotics.CameraImage" title="params(camera=ClassSelector, aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="769,3,929,18"/>
+<area shape="rect" id="node2" title="params(channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="400,3,584,18"/>
+<area shape="rect" id="node3" title="params(bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="189,3,371,18"/>
+<area shape="rect" id="node4" title="params(name=String)" alt="" coords="3,18,160,34"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.simulation.EventProcessor" title="params(name=String)" alt="" coords="201,33,358,48"/>
+<area shape="rect" id="node8" href="#topo.hardware.robotics.PTZ" title="params(invert_amplitude=Boolean, ptz=ClassSelector, speed=Number, zoom=Number, name=String)" alt="" coords="432,33,552,48"/>
+<area shape="rect" id="node7" href="#topo.hardware.robotics.CameraImageQueued" title="params(camera=ClassSelector, aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)" alt="" coords="958,3,1149,18"/>
+</map>
+</p>
+<span class="target" id="module-topo.hardware.robotics"></span><p>Classes for using robotic or other hardware using Topographica.</p>
+<p>This module contains several classes for constructing robotics
+interfaces to Topographica simulations.  It includes modules that read
+input from or send output to robot devices, and a (quasi) real-time
+simulation object that attempts to maintain a correspondence between
+simulation time and real time.</p>
+<p>This module requires the PlayerStage robot interface system (from
+playerstage.sourceforge.net), and the playerrobot module for
+high-level communications with Player robots.</p>
+<dl class="class">
+<dt id="topo.hardware.robotics.CameraImage">
+<em class="property">class </em><tt class="descclassname">topo.hardware.robotics.</tt><tt class="descname">CameraImage</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/robotics.html#CameraImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.robotics.CameraImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://ioam.github.io/imagen/Reference_Manual/imagen.html#imagen.image.GenericImage" title="(in ImaGen v1.0)"><tt class="xref py py-class docutils literal"><span class="pre">imagen.image.GenericImage</span></tt></a></p>
+<p>params(camera=ClassSelector, aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)</p>
+<blockquote>
+<div>An image pattern generator that gets its image from a Player
+camera device.</div></blockquote>
+<p>[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName                                  Value                              Type                  Bounds           Mode  [0m</p>
+<p>aspect_ratio                           1.0                              Number               (0.0,[1;36m 2.0[0m)         V RW  
+bounds                       BoundingBox(radius=0.5)           BoundingRegionParameter                          V RW  
+cache_image                           False                            Boolean                 (0, 1)           V RW  
+camera                                 None                         ClassSelector                             V RW AN 
+channel_transforms                      []                             HookList              (0, None)          V RW  
+group                               &#8216;Pattern&#8217;                           String                                  V RW  
+mask                                   None                           Parameter                               V RW AN 
+mask_shape                             None                         ClassSelector                             V RW AN 
+offset                                 0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+orientation                            0.0                              Number          ([1;36m0.0[0m,[1;36m 6.28318530718[0m)    V RW  
+output_fns                              []                             HookList              (0, None)          V RW  
+pattern_sampler      PatternSampler(background_value_fn=&lt;f...       ClassSelector                               V RW  
+position                               None                           Composite                               V RW AN 
+scale                                  1.0                              Number               ([1;36m0.0[0m,[1;36m 2.0[0m)         V RW  
+size                                   1.0                              Number               (0.0,[1;36m 2.0[0m)         V RW  
+x                                      0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+xdensity                               256                              Number               (0, None)          V RW  
+y                                      0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+ydensity                               256                              Number               (0, None)          V RW  
+z                                      None                         ClassSelector                             V RW AN</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34maspect_ratio:       Ratio of width to height; size*aspect_ratio gives the width.[0m
+[1;31mbounds:             BoundingBox of the area in which the pattern is generated.[0m
+[1;34mcache_image:        If False, discards the image and pattern_sampler after drawing[0m
+[1;34m                    the pattern each time, to make it possible to use very large[0m
+[1;34m                    databases of images without running out of memory.[0m
+[1;31mcamera:             An instance of playerrobot.CameraDevice to be used[0m
+[1;31m                    to generate images.[0m
+[1;34mchannel_transforms: Optional functions to apply post processing to the set of channels.[0m
+[1;31mgroup:              The group name assigned to the returned HoloViews object.[0m
+[1;34mmask:               Optional object (expected to be an array) with which to multiply the[0m
+[1;34m                    pattern array after it has been created, before any output_fns are[0m
+[1;34m                    applied. This can be used to shape the pattern.[0m
+[1;31mmask_shape:         Optional PatternGenerator used to construct a mask to be applied to[0m
+[1;31m                    the pattern.[0m
+[1;34moffset:             Additive offset to input pattern, defaulting to 0.0[0m
+[1;31morientation:        Polar angle of pattern, i.e., the orientation in the Cartesian coordinate[0m
+[1;31m                    system, with zero at 3 o&#8217;clock and increasing counterclockwise.[0m
+[1;34moutput_fns:         Optional function(s) to apply to the pattern array after it has been created.[0m
+[1;34m                    Can be used for normalization, thresholding, etc.[0m
+[1;31mpattern_sampler:    The PatternSampler to use to resample/resize the image.[0m
+[1;34mposition:           Coordinates of location of pattern center.[0m
+[1;34m                    Provides a convenient way to set the x and y parameters together[0m
+[1;34m                    as a tuple (x,y), but shares the same actual storage as x and y[0m
+[1;34m                    (and thus only position OR x and y need to be specified).[0m
+[1;31mscale:              Multiplicative strength of input pattern, defaulting to 1.0[0m
+[1;34msize:               Height of the image.[0m
+[1;31mx:                  X-coordinate location of pattern center.[0m
+[1;34mxdensity:           Density (number of samples per 1.0 length) in the x direction.[0m
+[1;31my:                  Y-coordinate location of pattern center.[0m
+[1;34mydensity:           Density (number of samples per 1.0 length) in the y direction.[0m
+[1;34m                    Typically the same as the xdensity.[0m
+[1;31mz:                  The Dimension object associated with the z-values generated by[0m
+[1;31m                    the PatternGenerator . If None, uses the default set by[0m
+[1;31m                    HoloViews.Image.[0m</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>X-coordinate location of pattern center.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Multiplicative strength of input pattern, defaulting to 1.0</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">group</span></tt> (<em>allow_None=False, basestring=&lt;type &#8216;basestring&#8217;&gt;, constant=False, default=Pattern, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>The group name assigned to the returned HoloViews object.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">pattern_sampler</span></tt> (<em>allow_None=False, constant=False, default=&lt;PatternSampler PatternSampler00071&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The PatternSampler to use to resample/resize the image.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">cache_image</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If False, discards the image and pattern_sampler after drawing
+        the pattern each time, to make it possible to use very large
+        databases of images without running out of memory.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">orientation</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.4, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Polar angle of pattern, i.e., the orientation in the Cartesian coordinate
+        system, with zero at 3 o&#8217;clock and increasing counterclockwise.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">channel_transforms</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional functions to apply post processing to the set of channels.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">z</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>The Dimension object associated with the z-values generated by
+        the PatternGenerator . If None, uses the default set by
+        HoloViews.Image.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Optional object (expected to be an array) with which to multiply the
+        pattern array after it has been created, before any output_fns are
+        applied. This can be used to shape the pattern.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>BoundingBox of the area in which the pattern is generated.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">xdensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=256, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the x direction.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Y-coordinate location of pattern center.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=0.08, readonly=False</em>)</dt>
+<dd>Optional function(s) to apply to the pattern array after it has been created.
+        Can be used for normalization, thresholding, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.11, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Additive offset to input pattern, defaulting to 0.0</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">mask_shape</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=0.06, readonly=False</em>)</dt>
+<dd>Optional PatternGenerator used to construct a mask to be applied to
+        the pattern.</dd>
+<dt><em>param Composite</em> <tt class="docutils literal"><span class="pre">position</span></tt> (<em>allow_None=True, attribs=[&#8216;x&#8217;, &#8216;y&#8217;], constant=False, default=None, instantiate=False, objtype=&lt;class &#8216;imagen.patterngenerator.PatternGenerator&#8217;&gt;, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Coordinates of location of pattern center.
+        Provides a convenient way to set the x and y parameters together
+        as a tuple (x,y), but shares the same actual storage as x and y
+        (and thus only position OR x and y need to be specified).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ydensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=256, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the y direction.
+        Typically the same as the xdensity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">aspect_ratio</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.31, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Ratio of width to height; size*aspect_ratio gives the width.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">camera</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>An instance of playerrobot.CameraDevice to be used
+       to generate images.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.3, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Height of the image.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.anim">
+<tt class="descname">anim</tt><big>(</big><em>duration</em>, <em>offset=0</em>, <em>timestep=1</em>, <em>label=None</em>, <em>unit=None</em>, <em>time_fn=Time(label='Time'</em>, <em>name='Time00001'</em>, <em>time_type=&lt;built-in function mpq&gt;</em>, <em>timestep=1.0</em>, <em>unit=None</em>, <em>until=Infinity())</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.anim" title="Permalink to this definition">¶</a></dt>
+<dd><p>duration: The temporal duration to animate in the units
+defined on the global time function.</p>
+<p>offset: The temporal offset from which the animation is
+generated given the supplied pattern</p>
+<p>timestep: The time interval between successive frames. The
+duration must be an exact multiple of the timestep.</p>
+<p>label: A label string to override the label of the global time
+function (if not None).</p>
+<p>unit: The unit string to override the unit value of the global
+time function (if not None).</p>
+<p>time_fn: The global time function object that is shared across
+the time-varying objects that are being sampled.</p>
+<p>Note that the offset, timestep and time_fn only affect
+patterns parameterized by time-dependent number
+generators. Otherwise, the frames are generated by successive
+call to the pattern which may or may not be varying (e.g to
+view the patterns contained within a Selector).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImage.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b940&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImage.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImage.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57ba48&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImage.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImage.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b890&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImage.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.CameraImage.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.CameraImage.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.CameraImage.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImage.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b838&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImage.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.set_matrix_dimensions">
+<tt class="descname">set_matrix_dimensions</tt><big>(</big><em>bounds</em>, <em>xdensity</em>, <em>ydensity</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.set_matrix_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the dimensions of the matrix into which the pattern
+will be drawn.  Users of this class should call this method
+rather than changing the bounds, xdensity, and ydensity
+parameters directly.  Subclasses can override this method to
+update any internal data structures that may depend on the
+matrix dimensions.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImage.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b8e8&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImage.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the state of the output functions saved by state_push.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the state of the output functions, to be restored with state_pop.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImage.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImage.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.hardware.robotics.CameraImageQueued">
+<em class="property">class </em><tt class="descclassname">topo.hardware.robotics.</tt><tt class="descname">CameraImageQueued</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/robotics.html#CameraImageQueued"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.hardware.robotics.CameraImage" title="topo.hardware.robotics.CameraImage"><tt class="xref py py-class docutils literal"><span class="pre">topo.hardware.robotics.CameraImage</span></tt></a></p>
+<p>params(camera=ClassSelector, aspect_ratio=Number, cache_image=Boolean, pattern_sampler=ClassSelector, channel_transforms=HookList, bounds=BoundingRegionParameter, group=String, mask=Parameter, mask_shape=ClassSelector, offset=Number, orientation=Number, output_fns=HookList, position=Composite, scale=Number, size=Number, x=Number, xdensity=Number, y=Number, ydensity=Number, z=ClassSelector, name=String)</p>
+<blockquote>
+<div>A version of CameraImage that gets the image from the camera&#8217;s image queue,
+rather than directly from the camera object.  Using queues is
+necessary when running the playerrobot in a separate process
+without shared memory.  When getting an image, this pattern
+generator will fetch every image in the image queue and use the
+most recent as the current pattern.</div></blockquote>
+<p>[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName                                  Value                              Type                  Bounds           Mode  [0m</p>
+<p>aspect_ratio                           1.0                              Number               (0.0,[1;36m 2.0[0m)         V RW  
+bounds                       BoundingBox(radius=0.5)           BoundingRegionParameter                          V RW  
+cache_image                           False                            Boolean                 (0, 1)           V RW  
+camera                                 None                         ClassSelector                             V RW AN 
+channel_transforms                      []                             HookList              (0, None)          V RW  
+group                               &#8216;Pattern&#8217;                           String                                  V RW  
+mask                                   None                           Parameter                               V RW AN 
+mask_shape                             None                         ClassSelector                             V RW AN 
+offset                                 0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+orientation                            0.0                              Number          ([1;36m0.0[0m,[1;36m 6.28318530718[0m)    V RW  
+output_fns                              []                             HookList              (0, None)          V RW  
+pattern_sampler      PatternSampler(background_value_fn=&lt;f...       ClassSelector                               V RW  
+position                               None                           Composite                               V RW AN 
+scale                                  1.0                              Number               ([1;36m0.0[0m,[1;36m 2.0[0m)         V RW  
+size                                   1.0                              Number               (0.0,[1;36m 2.0[0m)         V RW  
+x                                      0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+xdensity                               256                              Number               (0, None)          V RW  
+y                                      0.0                              Number              ([1;36m-1.0[0m,[1;36m 1.0[0m)         V RW  
+ydensity                               256                              Number               (0, None)          V RW  
+z                                      None                         ClassSelector                             V RW AN</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34maspect_ratio:       Ratio of width to height; size*aspect_ratio gives the width.[0m
+[1;31mbounds:             BoundingBox of the area in which the pattern is generated.[0m
+[1;34mcache_image:        If False, discards the image and pattern_sampler after drawing[0m
+[1;34m                    the pattern each time, to make it possible to use very large[0m
+[1;34m                    databases of images without running out of memory.[0m
+[1;31mcamera:             An instance of playerrobot.CameraDevice to be used[0m
+[1;31m                    to generate images.[0m
+[1;34mchannel_transforms: Optional functions to apply post processing to the set of channels.[0m
+[1;31mgroup:              The group name assigned to the returned HoloViews object.[0m
+[1;34mmask:               Optional object (expected to be an array) with which to multiply the[0m
+[1;34m                    pattern array after it has been created, before any output_fns are[0m
+[1;34m                    applied. This can be used to shape the pattern.[0m
+[1;31mmask_shape:         Optional PatternGenerator used to construct a mask to be applied to[0m
+[1;31m                    the pattern.[0m
+[1;34moffset:             Additive offset to input pattern, defaulting to 0.0[0m
+[1;31morientation:        Polar angle of pattern, i.e., the orientation in the Cartesian coordinate[0m
+[1;31m                    system, with zero at 3 o&#8217;clock and increasing counterclockwise.[0m
+[1;34moutput_fns:         Optional function(s) to apply to the pattern array after it has been created.[0m
+[1;34m                    Can be used for normalization, thresholding, etc.[0m
+[1;31mpattern_sampler:    The PatternSampler to use to resample/resize the image.[0m
+[1;34mposition:           Coordinates of location of pattern center.[0m
+[1;34m                    Provides a convenient way to set the x and y parameters together[0m
+[1;34m                    as a tuple (x,y), but shares the same actual storage as x and y[0m
+[1;34m                    (and thus only position OR x and y need to be specified).[0m
+[1;31mscale:              Multiplicative strength of input pattern, defaulting to 1.0[0m
+[1;34msize:               Height of the image.[0m
+[1;31mx:                  X-coordinate location of pattern center.[0m
+[1;34mxdensity:           Density (number of samples per 1.0 length) in the x direction.[0m
+[1;31my:                  Y-coordinate location of pattern center.[0m
+[1;34mydensity:           Density (number of samples per 1.0 length) in the y direction.[0m
+[1;34m                    Typically the same as the xdensity.[0m
+[1;31mz:                  The Dimension object associated with the z-values generated by[0m
+[1;31m                    the PatternGenerator . If None, uses the default set by[0m
+[1;31m                    HoloViews.Image.[0m</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>X-coordinate location of pattern center.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Multiplicative strength of input pattern, defaulting to 1.0</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">group</span></tt> (<em>allow_None=False, basestring=&lt;type &#8216;basestring&#8217;&gt;, constant=False, default=Pattern, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>The group name assigned to the returned HoloViews object.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">pattern_sampler</span></tt> (<em>allow_None=False, constant=False, default=&lt;PatternSampler PatternSampler00071&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The PatternSampler to use to resample/resize the image.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">cache_image</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If False, discards the image and pattern_sampler after drawing
+        the pattern each time, to make it possible to use very large
+        databases of images without running out of memory.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">orientation</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.4, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Polar angle of pattern, i.e., the orientation in the Cartesian coordinate
+        system, with zero at 3 o&#8217;clock and increasing counterclockwise.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">channel_transforms</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional functions to apply post processing to the set of channels.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">z</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>The Dimension object associated with the z-values generated by
+        the PatternGenerator . If None, uses the default set by
+        HoloViews.Image.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Optional object (expected to be an array) with which to multiply the
+        pattern array after it has been created, before any output_fns are
+        applied. This can be used to shape the pattern.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>BoundingBox of the area in which the pattern is generated.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">xdensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=256, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the x direction.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Y-coordinate location of pattern center.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=0.08, readonly=False</em>)</dt>
+<dd>Optional function(s) to apply to the pattern array after it has been created.
+        Can be used for normalization, thresholding, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.11, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Additive offset to input pattern, defaulting to 0.0</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">mask_shape</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=0.06, readonly=False</em>)</dt>
+<dd>Optional PatternGenerator used to construct a mask to be applied to
+        the pattern.</dd>
+<dt><em>param Composite</em> <tt class="docutils literal"><span class="pre">position</span></tt> (<em>allow_None=True, attribs=[&#8216;x&#8217;, &#8216;y&#8217;], constant=False, default=None, instantiate=False, objtype=&lt;class &#8216;imagen.patterngenerator.PatternGenerator&#8217;&gt;, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Coordinates of location of pattern center.
+        Provides a convenient way to set the x and y parameters together
+        as a tuple (x,y), but shares the same actual storage as x and y
+        (and thus only position OR x and y need to be specified).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ydensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=256, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the y direction.
+        Typically the same as the xdensity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">aspect_ratio</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.31, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Ratio of width to height; size*aspect_ratio gives the width.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">camera</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>An instance of playerrobot.CameraDevice to be used
+       to generate images.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.3, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Height of the image.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.anim">
+<tt class="descname">anim</tt><big>(</big><em>duration</em>, <em>offset=0</em>, <em>timestep=1</em>, <em>label=None</em>, <em>unit=None</em>, <em>time_fn=Time(label='Time'</em>, <em>name='Time00001'</em>, <em>time_type=&lt;built-in function mpq&gt;</em>, <em>timestep=1.0</em>, <em>unit=None</em>, <em>until=Infinity())</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.anim" title="Permalink to this definition">¶</a></dt>
+<dd><p>duration: The temporal duration to animate in the units
+defined on the global time function.</p>
+<p>offset: The temporal offset from which the animation is
+generated given the supplied pattern</p>
+<p>timestep: The time interval between successive frames. The
+duration must be an exact multiple of the timestep.</p>
+<p>label: A label string to override the label of the global time
+function (if not None).</p>
+<p>unit: The unit string to override the unit value of the global
+time function (if not None).</p>
+<p>time_fn: The global time function object that is shared across
+the time-varying objects that are being sampled.</p>
+<p>Note that the offset, timestep and time_fn only affect
+patterns parameterized by time-dependent number
+generators. Otherwise, the frames are generated by successive
+call to the pattern which may or may not be varying (e.g to
+view the patterns contained within a Selector).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImageQueued.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b940&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImageQueued.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b8e8&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImageQueued.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b6d8&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.CameraImageQueued.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.CameraImageQueued.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of __repr__ designed for generating a runnable script.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.CameraImageQueued.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImageQueued.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b7e0&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.set_matrix_dimensions">
+<tt class="descname">set_matrix_dimensions</tt><big>(</big><em>bounds</em>, <em>xdensity</em>, <em>ydensity</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.set_matrix_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the dimensions of the matrix into which the pattern
+will be drawn.  Users of this class should call this method
+rather than changing the bounds, xdensity, and ydensity
+parameters directly.  Subclasses can override this method to
+update any internal data structures that may depend on the
+matrix dimensions.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.CameraImageQueued.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b730&gt;</em><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the state of the output functions saved by state_push.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the state of the output functions, to be restored with state_pop.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.CameraImageQueued.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.CameraImageQueued.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.hardware.robotics.PTZ">
+<em class="property">class </em><tt class="descclassname">topo.hardware.robotics.</tt><tt class="descname">PTZ</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/hardware/robotics.html#PTZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.hardware.robotics.PTZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.simulation.EventProcessor" title="topo.base.simulation.EventProcessor"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.simulation.EventProcessor</span></tt></a></p>
+<p>params(invert_amplitude=Boolean, ptz=ClassSelector, speed=Number, zoom=Number, name=String)</p>
+<blockquote>
+<div><p>Pan/Tilt/Zoom control.</p>
+<p>This event processor takes input events on its &#8216;Saccade&#8217; input
+port in the form of (amplitude,direction) saccade commands (as
+produced by the topo.sheet.saccade.SaccadeController class) and
+appropriately servoes the attached PTZ object.  There is not
+currently any dynamic zoom control, though the static zoom level
+can be set as a parameter.</p>
+</div></blockquote>
+<p>[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName               Value       Type        Bounds     Mode  [0m</p>
+<p>invert_amplitude   False     Boolean       (0, 1)     V RW  
+ptz                 None  ClassSelector             V RW AN 
+speed               200       Number     (0, None)    V RW  
+zoom                120       Number     (0, None)    V RW</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34minvert_amplitude: Invert the sense of the amplitude signal, in order to get the[0m
+[1;34m                  appropriate ipsi-/contralateral sense of saccades.[0m
+[1;31mptz:              An instance of playerrobot.PTZDevice to be controlled.[0m
+[1;34mspeed:            Desired max pan/tilt speed in deg/sec.[0m
+[1;31mzoom:             Desired FOV width in degrees.[0m</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">speed</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=200, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Desired max pan/tilt speed in deg/sec.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">invert_amplitude</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Invert the sense of the amplitude signal, in order to get the
+       appropriate ipsi-/contralateral sense of saccades.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">ptz</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>An instance of playerrobot.PTZDevice to be controlled.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">zoom</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=120, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Desired FOV width in degrees.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.debug">
+<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a debugging statement.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.defaults">
+<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return {parameter_name:parameter.default} for all non-constant
+Parameters.</p>
+<p>Note that a Parameter for which instantiate==True has its default
+instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.PTZ.force_new_dynamic_value">
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b890&gt;</em><a class="headerlink" href="#topo.hardware.robotics.PTZ.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.get_param_values">
+<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.get_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of name,value pairs for all Parameters of this
+object.</p>
+<p>If onlychanged is True, will only return values that are not
+equal to the default value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.PTZ.get_value_generator">
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57ba48&gt;</em><a class="headerlink" href="#topo.hardware.robotics.PTZ.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.PTZ.inspect_value">
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b6d8&gt;</em><a class="headerlink" href="#topo.hardware.robotics.PTZ.inspect_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.message">
+<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.PTZ.params">
+<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameters of this class as the
+dictionary {name: parameter_object}</p>
+<p>Includes Parameters from this class and its
+superclasses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Experimental) Pretty printed representation that may be
+evaluated with eval. See pprint() function for more details.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.PTZ.print_param_defaults">
+<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.print_param_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.print_param_values">
+<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.print_param_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the values of all this object&#8217;s Parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.process_current_time">
+<tt class="descname">process_current_time</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.process_current_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by the simulation before advancing the simulation
+time.  Allows the event processor to do any computation that
+requires that all events for this time have been delivered.
+Computations performed in this method should not generate any
+events with a zero time delay, or else causality could be
+violated. (By default, does nothing.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.script_repr">
+<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a runnable command for creating this EventProcessor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.send_output">
+<tt class="descname">send_output</tt><big>(</big><em>src_port=None</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.send_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send some data out to all connections on the given src_port.
+The data is deepcopied before it is sent out, to ensure that
+future changes to the data are not reflected in events from
+the past.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.hardware.robotics.PTZ.set_default">
+<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.set_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default value of param_name.</p>
+<p>Equivalent to setting param_name on the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.PTZ.set_dynamic_time_fn">
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b998&gt;</em><a class="headerlink" href="#topo.hardware.robotics.PTZ.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="topo.hardware.robotics.PTZ.set_param">
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c57b9f0&gt;</em><a class="headerlink" href="#topo.hardware.robotics.PTZ.set_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the most recently saved state.</p>
+<p>See state_push() for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this instance&#8217;s state.</p>
+<p>For Parameterized instances, this includes the state of
+dynamically generated values.</p>
+<p>Subclasses that maintain short-term state should additionally
+save and restore that state using state_push() and
+state_pop().</p>
+<p>Generally, this method is used by operations that need to test
+something without permanently altering the objects&#8217; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.verbose">
+<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a verbose message.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.hardware.robotics.PTZ.warning">
+<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.hardware.robotics.PTZ.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print msg merged with args as a warning, unless module variable
+warnings_as_exceptions is True, then raise an Exception
+containing the arguments.</p>
+<p>See Python&#8217;s logging module for details of message formatting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">topo.hardware Package</a><ul>
+<li><a class="reference internal" href="#opencvcamera-module"><tt class="docutils literal"><span class="pre">opencvcamera</span></tt> Module</a></li>
+<li><a class="reference internal" href="#playerrobot-module"><tt class="docutils literal"><span class="pre">playerrobot</span></tt> Module</a></li>
+<li><a class="reference internal" href="#ptz-module"><tt class="docutils literal"><span class="pre">ptz</span></tt> Module</a></li>
+<li><a class="reference internal" href="#robotics-module"><tt class="docutils literal"><span class="pre">robotics</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/topo.hardware.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

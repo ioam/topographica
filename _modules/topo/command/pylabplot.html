@@ -1,0 +1,885 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.command.pylabplot &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.command" href="../command.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../command.html" accesskey="U">topo.command</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.command.pylabplot</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Line-based and matrix-based plotting commands using MatPlotLib.</span>
+
+<span class="sd">Before importing this file, you will probably want to do something</span>
+<span class="sd">like:</span>
+
+<span class="sd">  from matplotlib import rcParams</span>
+<span class="sd">  rcParams[&#39;backend&#39;]=&#39;TkAgg&#39;</span>
+
+<span class="sd">to select a backend, or else select an appropriate one in your</span>
+<span class="sd">matplotlib.rc file (if any).  There are many backends available for</span>
+<span class="sd">different GUI or non-GUI uses.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pylab</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">param</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Could not import matplotlib; module will not be useable.&quot;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">ImportErrorRaisingFakeModule</span>
+    <span class="n">plt</span> <span class="o">=</span> <span class="n">ImportErrorRaisingFakeModule</span><span class="p">(</span><span class="s">&quot;matplotlib&quot;</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (try/except import)</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.fft.fftpack</span> <span class="kn">import</span> <span class="n">fft2</span>
+<span class="kn">from</span> <span class="nn">numpy.fft.helper</span> <span class="kn">import</span> <span class="n">fftshift</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">wrap</span>
+
+<span class="kn">from</span> <span class="nn">topo.plotting.plot</span> <span class="kn">import</span> <span class="n">make_template_plot</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">ParameterizedFunction</span><span class="p">,</span> <span class="n">normalize_path</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">ParamOverrides</span>
+
+<span class="kn">from</span> <span class="nn">holoviews</span> <span class="kn">import</span> <span class="n">HoloMap</span>
+<span class="kn">from</span> <span class="nn">holoviews.core.overlay</span> <span class="kn">import</span> <span class="n">CompositeOverlay</span>
+<span class="kn">from</span> <span class="nn">holoviews.plotting</span> <span class="kn">import</span> <span class="n">NdLayout</span><span class="p">,</span> <span class="n">CurvePlot</span>
+<span class="kn">from</span> <span class="nn">holoviews.plotting.element</span> <span class="kn">import</span> <span class="n">OverlayPlot</span>
+
+<span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">Command</span>
+
+
+
+<div class="viewcode-block" id="PylabPlotCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.PylabPlotCommand">[docs]</a><span class="k">class</span> <span class="nc">PylabPlotCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameterized command for plotting using Matplotlib/Pylab.&quot;&quot;&quot;</span>
+
+    <span class="n">file_dpi</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Default DPI when rendering to a bitmap.</span>
+<span class="s">        The nominal size * the dpi gives the final image size in pixels.</span>
+<span class="s">        E.g.: 4&quot;x4&quot; image * 80 dpi ==&gt; 320x320 pixel image.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">file_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;png&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Which image format to use when saving images.</span>
+<span class="s">        The output can be png, ps, pdf, svg, or any other format</span>
+<span class="s">        supported by Matplotlib.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># JABALERT: Should replace this with a filename_format and</span>
+    <span class="c"># associated parameters, as in PlotGroupSaver.</span>
+    <span class="c"># Also should probably allow interactive display to be controlled</span>
+    <span class="c"># separately from the filename, to make things work more similarly</span>
+    <span class="c"># with and without a GUI.</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Optional base of the filename to use when saving images;</span>
+<span class="s">        if None the plot will be displayed interactively.</span>
+
+<span class="s">        The actual name is constructed from the filename base plus the</span>
+<span class="s">        suffix plus the current simulator time plus the file_format.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filename_suffix</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Optional suffix to be used for disambiguation of the filename.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Optional title to be used when displaying the plot interactively.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">display_window</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to open a display window containing the plot when</span>
+<span class="s">        Topographica is running in a non-batch mode.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">_set_windowtitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">title</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function to set the title (if not None) of this PyLab plot window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># At the moment, PyLab does not offer a window-manager-independent</span>
+        <span class="c"># means for controlling the window title, so what we do is to try</span>
+        <span class="c"># what should work with Tkinter, and then suppress all errors.  That</span>
+        <span class="c"># way we should be ok when rendering to a file-based backend, but</span>
+        <span class="c"># will get nice titles in Tk windows.  If other toolkits are in use,</span>
+        <span class="c"># the title can be set here using a similar try/except mechanism, or</span>
+        <span class="c"># else there can be a switch based on the backend type.</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">manager</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_current_fig_manager</span><span class="p">()</span>
+                <span class="n">manager</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+
+    <span class="k">def</span> <span class="nf">_generate_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function to display a figure on screen or save to a file.</span>
+
+<span class="sd">        p should be a ParamOverrides instance containing the current</span>
+<span class="sd">        set of parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">_needmain</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># JABALERT: need to reformat this as for other plots</span>
+            <span class="n">fullname</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span><span class="o">+</span><span class="n">p</span><span class="o">.</span><span class="n">filename_suffix</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="n">p</span><span class="o">.</span><span class="n">file_format</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">fullname</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">file_dpi</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">display_window</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_windowtitle</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">())</span>
+
+
+</div>
+<div class="viewcode-block" id="vectorplot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.vectorplot">[docs]</a><span class="k">class</span> <span class="nc">vectorplot</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple line plotting for any vector or list of numbers.</span>
+
+<span class="sd">    Intended for interactive debugging or analyzing from the command</span>
+<span class="sd">    prompt.  See MatPlotLib&#39;s pylab functions to create more elaborate</span>
+<span class="sd">    or customized plots; this is just a simple example.</span>
+
+<span class="sd">    An optional string can be supplied as a title for the figure, if</span>
+<span class="sd">    desired.  At present, this is only used for the window, not the</span>
+<span class="sd">    actual body of the figure (and will thus not appear when the</span>
+<span class="sd">    figure is saved).</span>
+
+<span class="sd">    The style argument allows different line/linespoints style for</span>
+<span class="sd">    the plot: &#39;r-&#39; for red solid line, &#39;bx&#39; for blue x-marks, etc.</span>
+<span class="sd">    See http://matplotlib.sourceforge.net/matplotlib.pylab.html#-plot</span>
+<span class="sd">    for more possibilities.</span>
+
+<span class="sd">    The label argument can be used to identify the line in a figure legend.</span>
+
+<span class="sd">    Ordinarily, the x value for each point on the line is the index of</span>
+<span class="sd">    that point in the vec array, but a explicit list of xvalues can be</span>
+<span class="sd">    supplied; it should be the same length as vec.</span>
+
+<span class="sd">    Execution of multiple vectorplot() commands with different styles</span>
+<span class="sd">    will result in all those styles overlaid on a single plot window.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JABALERT: All but the first two arguments should probably be Parameters</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vec</span><span class="p">,</span><span class="n">xvalues</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="s">&#39;-&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">xvalues</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span>
+
+
+</div>
+<div class="viewcode-block" id="matrixplot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.matrixplot">[docs]</a><span class="k">class</span> <span class="nc">matrixplot</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple plotting for any matrix as a bitmap with axes.</span>
+
+<span class="sd">    Like MatLab&#39;s imagesc, scales the values to fit in the range 0 to 1.0.</span>
+<span class="sd">    Intended for interactive debugging or analyzing from the command</span>
+<span class="sd">    prompt.  See MatPlotLib&#39;s pylab functions to create more elaborate</span>
+<span class="sd">    or customized plots; this is just a simple example.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plot_type</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gray</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">extent</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Subregion of the matrix to plot, as a tuple (l,b,r,t).&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># JABALERT: All but the first two should probably be Parameters</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">plot_type</span><span class="p">()</span>
+
+        <span class="c"># Swap lbrt to lrbt to match pylab</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">extent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">extent</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">extent</span>
+            <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="n">aspect</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">colorbar</span> <span class="ow">and</span> <span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">!=</span> <span class="n">mat</span><span class="o">.</span><span class="n">max</span><span class="p">()):</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span>
+
+</div>
+<div class="viewcode-block" id="matrixplot3d"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.matrixplot3d">[docs]</a><span class="k">class</span> <span class="nc">matrixplot3d</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple plotting for any matrix as a 3D wireframe with axes.</span>
+
+<span class="sd">    Uses Matplotlib&#39;s beta-quality features for 3D plotting.  These</span>
+<span class="sd">    usually work fine for wireframe plots, although they don&#39;t always</span>
+<span class="sd">    format the axis labels properly, and do not support removal of</span>
+<span class="sd">    hidden lines.  Note that often the plot can be rotated within the</span>
+<span class="sd">    window to make such problems go away, and then the best result can</span>
+<span class="sd">    be saved if needed.</span>
+
+<span class="sd">    Other than the default &quot;wireframe&quot;, the type can be &quot;contour&quot; to</span>
+<span class="sd">    get a contour plot, or &quot;surface&quot; to get a solid surface plot, but</span>
+<span class="sd">    surface plots currently fail in many cases, e.g. for small</span>
+<span class="sd">    matrices.</span>
+
+<span class="sd">    If you have trouble, you can try matrixplot3d_gnuplot instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&quot;wireframe&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">axes3d</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">axes3d</span><span class="o">.</span><span class="n">Axes3D</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+        <span class="c"># Construct matrices for r and c values</span>
+        <span class="n">rn</span><span class="p">,</span> <span class="n">cn</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">rn</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cn</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rn</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cn</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;wireframe&quot;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot_wireframe</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">mat</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;surface&quot;</span><span class="p">:</span>
+            <span class="c"># Sometimes fails for no obvious reason</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">mat</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;contour&quot;</span><span class="p">:</span>
+            <span class="c"># Works but not usually very useful</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">contour3D</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">mat</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Unknown plot type &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;R&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s">&#39;Value&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="matrixplot3dx3"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.matrixplot3dx3">[docs]</a><span class="k">class</span> <span class="nc">matrixplot3dx3</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot three matching matrices x,y,z as a 3D wireframe with axes.</span>
+<span class="sd">    See matrixplot3d for caveats and description; this plot is the</span>
+<span class="sd">    same but instead of using implicit r,c values of the matrix, allows</span>
+<span class="sd">    them to be specified directly, thus plotting a series of 3D points.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;X&quot;</span><span class="p">,</span><span class="s">&quot;Y&quot;</span><span class="p">,</span><span class="s">&quot;Z&quot;</span><span class="p">],</span><span class="nb">type</span><span class="o">=</span><span class="s">&quot;wireframe&quot;</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">axes3d</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">axes3d</span><span class="o">.</span><span class="n">Axes3D</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;wireframe&quot;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot_wireframe</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;surface&quot;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;contour&quot;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">contour3D</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Unknown plot type &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span>
+
+</div>
+<div class="viewcode-block" id="histogramplot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.histogramplot">[docs]</a><span class="k">class</span> <span class="nc">histogramplot</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute and plot the histogram of the supplied data.</span>
+
+<span class="sd">    See help(plt.hist) for help on the histogram function itself.</span>
+
+<span class="sd">    If given, colors is an iterable collection of matplotlib.colors</span>
+<span class="sd">    (see help (matplotlib.colors) ) specifying the bar colors.</span>
+
+<span class="sd">    Example use:</span>
+<span class="sd">        histogramplot([1,1,1,2,2,3,4,5],title=&#39;hist&#39;,colors=&#39;rgb&#39;,bins=3,normed=1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JABALERT: All but the first two arguments should probably be Parameters</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">allow_extra_keywords</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">bars</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">extra_keywords</span><span class="p">()))</span>
+
+        <span class="c"># if len(bars)!=len(colors), any extra bars won&#39;t have their</span>
+        <span class="c"># colors changed, or any extra colors will be ignored.</span>
+        <span class="k">if</span> <span class="n">colors</span><span class="p">:</span> <span class="p">[</span><span class="n">bar</span><span class="o">.</span><span class="n">set_fc</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="k">for</span> <span class="n">bar</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bars</span><span class="p">,</span> <span class="n">colors</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span>
+
+</div>
+<div class="viewcode-block" id="gradientplot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.gradientplot">[docs]</a><span class="k">class</span> <span class="nc">gradientplot</span><span class="p">(</span><span class="n">matrixplot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute and show the gradient plot of the supplied data.</span>
+<span class="sd">    Translated from Octave code originally written by Yoonsuck Choe.</span>
+
+<span class="sd">    If the data is specified to be cyclic, negative differences will</span>
+<span class="sd">    be wrapped into the range specified (1.0 by default).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JABALERT: All but the first two arguments should probably be Parameters</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">cyclic_range</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">c</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">c</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">cyclic_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="c"># Wrap into the specified range</span>
+            <span class="c"># Convert negative differences to an equivalent positive value</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">wrap</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cyclic_range</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">wrap</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cyclic_range</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+            <span class="c">#</span>
+            <span class="c"># Make it increase as gradient reaches the halfway point,</span>
+            <span class="c"># and decrease from there</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">cyclic_range</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dx</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">cyclic_range</span><span class="p">)</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">cyclic_range</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dy</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">cyclic_range</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">gradientplot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span><span class="o">*</span><span class="n">dy</span><span class="p">),</span> <span class="o">**</span><span class="n">p</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="fftplot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.fftplot">[docs]</a><span class="k">class</span> <span class="nc">fftplot</span><span class="p">(</span><span class="n">matrixplot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute and show the 2D Fast Fourier Transform (FFT) of the supplied data.</span>
+
+<span class="sd">    Example:: fftplot(topo.sim[&quot;V1&quot;].views.Maps[&quot;OrientationPreference&quot;].data,filename=&quot;out&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="n">fft_plot</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fftshift</span><span class="p">(</span><span class="n">fft2</span><span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))))</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">fftplot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">fft_plot</span><span class="p">,</span> <span class="o">**</span><span class="n">p</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="autocorrelationplot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.autocorrelationplot">[docs]</a><span class="k">class</span> <span class="nc">autocorrelationplot</span><span class="p">(</span><span class="n">matrixplot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute and show the 2D autocorrelation of the supplied data.</span>
+<span class="sd">    Requires the external SciPy package.</span>
+
+<span class="sd">    Example:: autocorrelationplot(topo.sim[&quot;V1&quot;].views.Maps[&quot;OrientationPreference&quot;].data,filename=&quot;out&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plot_type</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">autumn</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">scipy.signal</span>
+
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">correlate2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">autocorrelationplot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="o">**</span><span class="n">p</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="activityplot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.activityplot">[docs]</a><span class="k">class</span> <span class="nc">activityplot</span><span class="p">(</span><span class="n">matrixplot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the activity in a sheet with axis labels in Sheet (not matrix) coordinates.</span>
+
+<span class="sd">    Same as matrixplot, but only for matrices associated with a Sheet.</span>
+<span class="sd">    By default plots the Sheet&#39;s activity, but any other matrix of the</span>
+<span class="sd">    same size may be supplied for plotting in these coordinates instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">mat</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">extent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">mat</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">mat</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">activity</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">activityplot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="o">**</span><span class="n">p</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="xy_grid"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.xy_grid">[docs]</a><span class="k">class</span> <span class="nc">xy_grid</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    By default, plot the x and y coordinate preferences as a grid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+   <span class="n">axis</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Four-element list of the plot bounds, i.e. [xmin, xmax, ymin, ymax].&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">skip</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="bp">None</span><span class="p">],</span><span class="n">softbounds</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Plot every skipth line in each direction.</span>
+<span class="s">        E.g. skip=4 means to keep only every fourth horizontal line</span>
+<span class="s">        and every fourth vertical line, except that the first and last</span>
+<span class="s">        are always included. The default is to include all data points.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">x</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Numpy array of x positions in the grid.&quot;</span><span class="p">)</span>
+
+   <span class="n">y</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span> <span class="s">&quot;Numpy array of y positions in the grid.&quot;</span> <span class="p">)</span>
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+       <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+       <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+       <span class="c"># This one-liner works in Octave, but in matplotlib it</span>
+       <span class="c"># results in lines that are all connected across rows and columns,</span>
+       <span class="c"># so here we plot each line separately:</span>
+       <span class="c">#   plt.plot(x,y,&quot;k-&quot;,transpose(x),transpose(y),&quot;k-&quot;)</span>
+       <span class="c"># Here, the &quot;k-&quot; means plot in black using solid lines;</span>
+       <span class="c"># see matplotlib for more info.</span>
+       <span class="n">isint</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">isinteractive</span><span class="p">()</span> <span class="c"># Temporarily make non-interactive for</span>
+       <span class="c"># plotting</span>
+       <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+       <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">[::</span><span class="n">p</span><span class="o">.</span><span class="n">skip</span><span class="p">],</span> <span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">[::</span><span class="n">p</span><span class="o">.</span><span class="n">skip</span><span class="p">]):</span>
+           <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="s">&quot;k-&quot;</span><span class="p">)</span>
+       <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">)[::</span><span class="n">p</span><span class="o">.</span><span class="n">skip</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">)[::</span><span class="n">p</span><span class="o">.</span><span class="n">skip</span><span class="p">]):</span>
+           <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="s">&quot;k-&quot;</span><span class="p">)</span>
+
+       <span class="c"># Force last line avoid leaving cells open</span>
+       <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">skip</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+           <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s">&quot;k-&quot;</span><span class="p">)</span>
+           <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s">&quot;k-&quot;</span><span class="p">)</span>
+
+       <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+       <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+       <span class="c"># Currently sets the input range arbitrarily; should presumably figure out</span>
+       <span class="c"># what the actual possible range is for this simulation (which would presumably</span>
+       <span class="c"># be the maximum size of any GeneratorSheet?).</span>
+       <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">axis</span><span class="p">)</span>
+
+       <span class="k">if</span> <span class="n">isint</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+       <span class="k">return</span> <span class="n">fig</span>
+
+</div>
+<div class="viewcode-block" id="topographic_grid"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.topographic_grid">[docs]</a><span class="k">class</span> <span class="nc">topographic_grid</span><span class="p">(</span><span class="n">xy_grid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    By default, plot the XPreference and YPreference preferences for all</span>
+<span class="sd">    Sheets for which they are defined, using MatPlotLib.</span>
+
+<span class="sd">    If sheet_views other than XPreference and YPreference are desired,</span>
+<span class="sd">    the names of these can be passed in as arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">xsheet_view_name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;XPreference&#39;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the Image holding the X position locations.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">ysheet_view_name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;YPreference&#39;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the Image holding the Y position locations.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># Disable and hide parameters inherited from the base class</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">precedence</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">precedence</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">p</span><span class="o">.</span><span class="n">xsheet_view_name</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">)</span> <span class="ow">and</span>
+                    <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">ysheet_view_name</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">)):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">xsheet_view_name</span><span class="p">]</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">data</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">ysheet_view_name</span><span class="p">]</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">data</span>
+
+                <span class="n">filename_suffix</span> <span class="o">=</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="n">sheet</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Topographic mapping to &#39;</span> <span class="o">+</span> <span class="n">sheet</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; at time &#39;</span> \
+                        <span class="o">+</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">()</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">topographic_grid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                                       <span class="n">filename_suffix</span><span class="o">=</span><span class="n">filename_suffix</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="overlaid_plot"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.overlaid_plot">[docs]</a><span class="k">class</span> <span class="nc">overlaid_plot</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Use matplotlib to make a plot combining a bitmap and line-based</span>
+<span class="sd">    overlays for a single plot template and sheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+   <span class="n">plot_template</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span> <span class="s">&#39;OrientationPreference&#39;</span><span class="p">},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Template for the underlying bitmap plot.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">overlay</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[(</span><span class="s">&#39;contours&#39;</span><span class="p">,</span> <span class="s">&#39;OcularPreference&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s">&#39;arrows&#39;</span><span class="p">,</span> <span class="s">&#39;DirectionPreference&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;DirectionSelectivity&#39;</span><span class="p">,</span> <span class="s">&#39;white&#39;</span><span class="p">)],</span>
+                        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of overlaid plots, where each list item may be a 4-tuple</span>
+<span class="s">        specifying either a contour line or a field of arrows::</span>
+
+<span class="s">          (&#39;contours&#39;,map-name,contour-value,line-color)</span>
+
+<span class="s">          (&#39;arrows&#39;,arrow-location-map-name,arrow-size-map-name,arrow-color)</span>
+
+<span class="s">        Any number or combination of contours and arrows may be supplied.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">normalize</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;Individually&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Type of normalization, if any, to use. Options include &#39;None&#39;,</span>
+<span class="s">        &#39;Individually&#39;, and &#39;AllTogether&#39;. See</span>
+<span class="s">        topo.plotting.plotgroup.TemplatePlotGroup.normalize for more</span>
+<span class="s">        details.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">Sheet</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The sheet from which sheetViews are to be obtained for plotting.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+       <span class="n">p</span><span class="o">=</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">)</span>
+       <span class="n">name</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">plot_template</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+       <span class="n">plot</span><span class="o">=</span><span class="n">make_template_plot</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">plot_template</span><span class="p">,</span>
+                               <span class="n">p</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                               <span class="n">p</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">plot_template</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+       <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+       <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+           <span class="n">bitmap</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">bitmap</span>
+           <span class="n">isint</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">isinteractive</span><span class="p">()</span> <span class="c"># Temporarily make non-interactive for plotting</span>
+           <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>                                         <span class="c"># Turn interactive mode off</span>
+
+           <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">bitmap</span><span class="o">.</span><span class="n">image</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="s">&#39;lower&#39;</span><span class="p">,</span><span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">)</span>
+           <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+
+           <span class="k">for</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">pref</span><span class="p">,</span><span class="n">sel</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">overlay</span><span class="p">:</span>
+               <span class="n">v</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">[</span><span class="n">pref</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+               <span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">==</span><span class="s">&#39;contours&#39;</span><span class="p">):</span>
+                   <span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">v</span><span class="p">,[</span><span class="n">sel</span><span class="p">,</span><span class="n">sel</span><span class="p">],</span><span class="n">colors</span><span class="o">=</span><span class="n">c</span><span class="p">,</span><span class="n">linewidths</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">==</span><span class="s">&#39;arrows&#39;</span><span class="p">):</span>
+                   <span class="n">s</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                   <span class="n">scale</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">))))</span>
+                   <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="n">scale</span><span class="p">)])</span>
+                   <span class="n">v_sc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="n">scale</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="n">scale</span><span class="p">))</span>
+                   <span class="n">s_sc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="n">scale</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="n">scale</span><span class="p">))</span>
+                   <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+                       <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+                           <span class="n">v_sc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">scale</span><span class="o">*</span><span class="n">i</span><span class="p">][</span><span class="n">scale</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+                           <span class="n">s_sc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">scale</span><span class="o">*</span><span class="n">i</span><span class="p">][</span><span class="n">scale</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+                   <span class="n">plt</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="n">scale</span><span class="o">*</span><span class="n">X</span><span class="p">,</span> <span class="n">scale</span><span class="o">*</span><span class="n">X</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">v_sc</span><span class="p">)</span><span class="o">*</span><span class="n">s_sc</span><span class="p">,</span>
+                              <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">v_sc</span><span class="p">)</span><span class="o">*</span><span class="n">s_sc</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
+                              <span class="n">edgecolors</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">minshaft</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+           <span class="n">p</span><span class="o">.</span><span class="n">title</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> overlaid with </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">pref</span><span class="p">,</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+           <span class="k">if</span> <span class="n">isint</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
+           <span class="n">p</span><span class="o">.</span><span class="n">filename_suffix</span><span class="o">=</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="n">p</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+           <span class="k">return</span> <span class="n">fig</span>
+
+
+</div>
+<div class="viewcode-block" id="overlaid_plots"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.overlaid_plots">[docs]</a><span class="k">class</span> <span class="nc">overlaid_plots</span><span class="p">(</span><span class="n">overlaid_plot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Use matplotlib to make a plot combining a bitmap and line-based overlays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plot_template</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[{</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="s">&#39;OrientationPreference&#39;</span><span class="p">}],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Template for the underlying bitmap plot.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># Disable and hide parameters inherited from the base class</span>
+    <span class="n">sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">Sheet</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="n">precedence</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">template</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">plot_template</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span> <span class="s">&quot;measure_maps&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                    <span class="nb">super</span><span class="p">(</span><span class="n">overlaid_plots</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">sheet</span><span class="o">=</span><span class="n">sheet</span><span class="p">,</span> <span class="n">plot_template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
+                                                         <span class="n">overlay</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">overlay</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">normalize</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="tuning_curve"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.tuning_curve">[docs]</a><span class="k">class</span> <span class="nc">tuning_curve</span><span class="p">(</span><span class="n">PylabPlotCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot a tuning curve for a feature, such as orientation, contrast, or size.</span>
+
+<span class="sd">    The curve datapoints are collected from the curve_dict for</span>
+<span class="sd">    the units at the specified coordinates in the specified sheet</span>
+<span class="sd">    (where the units and sheet may be set by a GUI, using</span>
+<span class="sd">    topo.analysis.featureresponses.UnitCurveCommand.sheet and</span>
+<span class="sd">    topo.analysis.featureresponses.UnitCurveCommand.coords,</span>
+<span class="sd">    or by hand).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">center</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Centers the tuning curve around the maximally responding feature.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span> <span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of coordinates of units to measure.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">group_by</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Contrast&#39;</span><span class="p">],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Feature dimensions for which curves are overlaid.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">legend</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether or not to include a legend in the plot.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">relative_labels</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Relabel the x-axis with values relative to the preferred.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the sheet to use in measurements.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">x_axis</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Feature to plot on the x axis of the tuning curve&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># Disable and hide parameters inherited from the base class</span>
+    <span class="n">coord</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">NumericTuple</span><span class="p">(</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="n">precedence</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">allow_extra_keywords</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">x_axis</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">x_axis</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+        <span class="n">vmap</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Curves</span><span class="p">[</span><span class="n">x_axis</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="o">+</span><span class="s">&quot;Tuning&quot;</span><span class="p">]</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">vmap</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="s">&#39;Time&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">curves</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">vmap</span><span class="o">.</span><span class="n">dimensions</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;X&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coord</span>
+                <span class="n">current_map</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="n">curve_map</span> <span class="o">=</span> <span class="n">current_map</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">collate</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x_axis</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+                <span class="n">curves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curve_map</span><span class="o">.</span><span class="n">overlay</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">group_by</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_map</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="n">curve_map</span> <span class="o">=</span> <span class="n">current_map</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">curve</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x_axis</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span> <span class="s">&#39;Response&#39;</span><span class="p">)</span>
+            <span class="n">overlaid_curves</span> <span class="o">=</span> <span class="n">curve_map</span><span class="o">.</span><span class="n">overlay</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curves</span><span class="p">,</span> <span class="n">NdLayout</span><span class="p">):</span> <span class="n">curves</span> <span class="o">=</span> <span class="p">[</span><span class="n">overlaid_curves</span><span class="p">]</span>
+
+        <span class="n">figs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">coord</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span><span class="n">curves</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">HoloMap</span><span class="p">):</span> <span class="n">curve</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">last</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="n">OverlayPlot</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">CompositeOverlay</span><span class="p">)</span> <span class="k">else</span> <span class="n">CurvePlot</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">relative_labels</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">relative_labels</span><span class="p">,</span>
+                       <span class="n">show_legend</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">legend</span><span class="p">)()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_figure</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">fig</span><span class="p">)</span>
+            <span class="n">figs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">coord</span><span class="p">,</span> <span class="n">fig</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">figs</span>
+
+
+    <span class="k">def</span> <span class="nf">_generate_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function to display a figure on screen or save to a file.</span>
+
+<span class="sd">        p should be a ParamOverrides instance containing the current</span>
+<span class="sd">        set of parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">_needmain</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># JABALERT: need to reformat this as for other plots</span>
+            <span class="n">fullname</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span><span class="o">+</span><span class="n">p</span><span class="o">.</span><span class="n">filename_suffix</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="n">p</span><span class="o">.</span><span class="n">file_format</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">fullname</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">file_dpi</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">display_window</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_windowtitle</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<span class="n">cyclic_tuning_curve</span> <span class="o">=</span> <span class="n">tuning_curve</span>
+
+<span class="k">def</span> <span class="nf">cyclic_unit_tuning_curve</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tuning_curve</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="p">[</span><span class="n">coord</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+
+
+<div class="viewcode-block" id="plot_cfproj_mapping"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.plot_cfproj_mapping">[docs]</a><span class="k">def</span> <span class="nf">plot_cfproj_mapping</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span><span class="n">proj</span><span class="o">=</span><span class="s">&#39;Afferent&#39;</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="s">&#39;b-&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a CF sheet receiving a CFProjection, plot</span>
+<span class="sd">    the mapping of the dests CF centers on the src sheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sim</span>
+        <span class="n">dest</span> <span class="o">=</span> <span class="n">sim</span><span class="p">[</span><span class="n">dest</span><span class="p">]</span>
+    <span class="n">plot_coord_mapping</span><span class="p">(</span><span class="n">dest</span><span class="o">.</span><span class="n">projections</span><span class="p">()[</span><span class="n">proj</span><span class="p">]</span><span class="o">.</span><span class="n">coord_mapper</span><span class="p">,</span>
+                       <span class="n">dest</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">)</span>
+
+
+<span class="c"># JABALERT: not sure whether this is currently used</span></div>
+<div class="viewcode-block" id="plot_coord_mapping"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.html#topo.command.pylabplot.plot_coord_mapping">[docs]</a><span class="k">def</span> <span class="nf">plot_coord_mapping</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span><span class="n">sheet</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="s">&#39;b-&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot a coordinate mapping for a sheet.</span>
+
+<span class="sd">    Given a CoordinateMapperFn (as for a CFProjection) and a sheet</span>
+<span class="sd">    of the projection, plot a grid showing where the sheet&#39;s units</span>
+<span class="sd">    are mapped.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">plot</span><span class="p">,</span><span class="n">hold</span><span class="p">,</span><span class="n">ishold</span>
+
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">sheet_rows</span><span class="p">()</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">sheet_cols</span><span class="p">()</span>
+
+    <span class="n">hold_on</span> <span class="o">=</span> <span class="n">ishold</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hold_on</span><span class="p">:</span>
+        <span class="n">plot</span><span class="p">()</span>
+    <span class="n">hold</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ys</span><span class="p">:</span>
+        <span class="n">pts</span> <span class="o">=</span> <span class="p">[</span><span class="n">mapper</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+        <span class="n">plot</span><span class="p">([</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">],</span>
+             <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">],</span>
+             <span class="n">style</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">:</span>
+        <span class="n">pts</span> <span class="o">=</span> <span class="p">[</span><span class="n">mapper</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ys</span><span class="p">]</span>
+        <span class="n">plot</span><span class="p">([</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">],</span>
+             <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">],</span>
+             <span class="n">style</span><span class="p">)</span>
+
+    <span class="n">hold</span><span class="p">(</span><span class="n">hold_on</span><span class="p">)</span>
+</div>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">ParameterizedFunction</span><span class="p">))</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)]))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/command/pylabplot.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../command.html" >topo.command</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

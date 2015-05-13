@@ -1,0 +1,716 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>numbergen &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for numbergen</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Callable objects that generate numbers according to different distributions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__version__</span><span class="o">=</span><span class="s">&#39;$Revision: 8943 $&#39;</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">e</span><span class="p">,</span><span class="n">pi</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+
+
+<span class="k">class</span> <span class="nc">TimeAware</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class of objects that have access to a global time function</span>
+<span class="sd">    and have the option of using it to generate time-dependent values</span>
+<span class="sd">    as necessary.</span>
+
+<span class="sd">    In the simplest case, an object could act as a strict function of</span>
+<span class="sd">    time, returning the current time transformed according to a fixed</span>
+<span class="sd">    equation.  Other objects may support locking their results to a</span>
+<span class="sd">    timebase, but also work without time.  For instance, objects with</span>
+<span class="sd">    random state could return a new random value for every call, with</span>
+<span class="sd">    no notion of time, or could always return the same value until the</span>
+<span class="sd">    global time changes.  Subclasses should thus provide an ability to</span>
+<span class="sd">    return a time-dependent value, but may not always do so.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">time_dependent</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>  <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Whether the given time_fn should be used to constrain the</span>
+<span class="s">       results generated.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">time_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Dynamic</span><span class="o">.</span><span class="n">time_fn</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Callable used to specify the time that determines the state</span>
+<span class="s">        and return value of the object, if time_dependent=True.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TimeAware</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_time_fn</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_check_time_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_instance</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If time_fn is the global time function supplied by</span>
+<span class="sd">        param.Dynamic.time_fn, make sure Dynamic parameters are using</span>
+<span class="sd">        this time function to control their behaviour.</span>
+
+<span class="sd">        If time_instance is True, time_fn must be a param.Time instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">time_instance</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">Time</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> requires a Time object&quot;</span>
+                                 <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span>
+            <span class="n">global_timefn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span> <span class="ow">is</span> <span class="n">param</span><span class="o">.</span><span class="n">Dynamic</span><span class="o">.</span><span class="n">time_fn</span>
+            <span class="k">if</span> <span class="n">global_timefn</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">param</span><span class="o">.</span><span class="n">Dynamic</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Cannot use Dynamic.time_fn as&quot;</span>
+                                     <span class="s">&quot; parameters are ignoring time.&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TimeDependent</span><span class="p">(</span><span class="n">TimeAware</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Objects that have access to a time function that determines the</span>
+<span class="sd">    output value. As a function of time, this type of object should</span>
+<span class="sd">    allow time values to be randomly jumped forwards or backwards,</span>
+<span class="sd">    but for a given time point, the results should remain constant.</span>
+
+<span class="sd">    The time_fn must be an instance of param.Time, to ensure all the</span>
+<span class="sd">    facilities necessary for safely navigating the timeline are</span>
+<span class="sd">    available.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">time_dependent</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Read-only parameter that is always True.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_time_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TimeDependent</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_check_time_fn</span><span class="p">(</span><span class="n">time_instance</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="NumberGenerator"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.NumberGenerator">[docs]</a><span class="k">class</span> <span class="nc">NumberGenerator</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for any object that when called produces a number.</span>
+
+<span class="sd">    Primarily provides support for using NumberGenerators in simple</span>
+<span class="sd">    arithmetic expressions, such as abs((x+y)/z), where x,y,z are</span>
+<span class="sd">    NumberGenerators or numbers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="c"># Could define any of Python&#39;s operators here, esp. if they have operator or ufunc equivalents</span>
+    <span class="k">def</span> <span class="nf">__add__</span>      <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__sub__</span>      <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__mul__</span>      <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__mod__</span>      <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">mod</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__pow__</span>      <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">pow</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__div__</span>      <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">div</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__truediv__</span>  <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">truediv</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__floordiv__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">floordiv</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__radd__</span>     <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rsub__</span>     <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rmul__</span>     <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rmod__</span>     <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">mod</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rpow__</span>     <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">pow</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rdiv__</span>     <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">div</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rtruediv__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">truediv</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rfloordiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">):</span> <span class="k">return</span> <span class="n">BinaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">floordiv</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__neg__</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="n">UnaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">neg</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__pos__</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="n">UnaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__abs__</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="n">UnaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operator</span><span class="o">.</span><span class="n">abs</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="BinaryOperator"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.BinaryOperator">[docs]</a><span class="k">class</span> <span class="nc">BinaryOperator</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Applies any binary operator to NumberGenerators or numbers to yield a NumberGenerator.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">lhs</span><span class="p">,</span><span class="n">rhs</span><span class="p">,</span><span class="n">operator</span><span class="p">,</span><span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Accepts two NumberGenerator operands, an operator, and</span>
+<span class="sd">        optional arguments to be provided to the operator when calling</span>
+<span class="sd">        it on the two operands.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Note that it&#39;s currently not possible to set</span>
+        <span class="c"># parameters in the superclass when creating an instance,</span>
+        <span class="c"># because **args is used by this class itself.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BinaryOperator</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lhs</span><span class="o">=</span><span class="n">rhs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rhs</span><span class="o">=</span><span class="n">lhs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lhs</span><span class="o">=</span><span class="n">lhs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rhs</span><span class="o">=</span><span class="n">rhs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">=</span><span class="n">operator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">=</span><span class="n">args</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span> <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lhs</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">rhs</span><span class="p">()</span> <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rhs</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="UnaryOperator"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.UnaryOperator">[docs]</a><span class="k">class</span> <span class="nc">UnaryOperator</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Applies any unary operator to a NumberGenerator to yield another NumberGenerator.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operand</span><span class="p">,</span><span class="n">operator</span><span class="p">,</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Accepts a NumberGenerator operand, an operator, and</span>
+<span class="sd">        optional arguments to be provided to the operator when calling</span>
+<span class="sd">        it on the operand.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Note that it&#39;s currently not possible to set</span>
+        <span class="c"># parameters in the superclass when creating an instance,</span>
+        <span class="c"># because **args is used by this class itself.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnaryOperator</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">operand</span><span class="o">=</span><span class="n">operand</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">=</span><span class="n">operator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">=</span><span class="n">args</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operand</span><span class="p">(),</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="RandomDistribution"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.RandomDistribution">[docs]</a><span class="k">class</span> <span class="nc">RandomDistribution</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">,</span> <span class="n">TimeAware</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Python&#39;s random module provides the Random class, which can be</span>
+<span class="sd">    instantiated to give an object that can be asked to generate</span>
+<span class="sd">    numbers from any of several different random distributions</span>
+<span class="sd">    (e.g. uniform, Gaussian).</span>
+
+<span class="sd">    To make it easier to use these, Numbergen provides here a</span>
+<span class="sd">    hierarchy of classes, each tied to a particular random</span>
+<span class="sd">    distribution. RandomDistributions support setting parameters on</span>
+<span class="sd">    creation rather than passing them each call, and allow pickling to</span>
+<span class="sd">    work properly.  Code that uses these classes will be independent</span>
+<span class="sd">    of how many parameters are used by the underlying distribution,</span>
+<span class="sd">    and can simply treat them as a generic source of random numbers.</span>
+
+<span class="sd">    The underlying random.Random() instance and all its methods can be</span>
+<span class="sd">    accessed from the &#39;random_generator&#39; attribute.</span>
+
+<span class="sd">    RandomDistributions are TimeAware, and thus can be locked to</span>
+<span class="sd">    a global time if desired.  By default, time_dependent=False, and</span>
+<span class="sd">    so a new random value will be generated each time these objects</span>
+<span class="sd">    are called.  If you have a global time function, you can set</span>
+<span class="sd">    time_dependent=True, so that the random values will instead be</span>
+<span class="sd">    constant at any given time, changing only when the time changes.</span>
+<span class="sd">    Using time_dependent values can help you obtain fully reproducible</span>
+<span class="sd">    streams of random numbers, even if you e.g. move time forwards and</span>
+<span class="sd">    backwards for testing.</span>
+
+<span class="sd">    If declared time_dependent, a hash is generated for seeding the</span>
+<span class="sd">    random state on each call, using a triple consisting of the object</span>
+<span class="sd">    name, the time returned by time_fn and the global value of</span>
+<span class="sd">    param.random_seed. As a consequence, for a given name and fixed</span>
+<span class="sd">    value of param.random_seed, the random values generated will be a</span>
+<span class="sd">    fixed function of time.</span>
+
+<span class="sd">    If the object name has not been set and time_dependent is True, a</span>
+<span class="sd">    message is generated warning that the default object name is</span>
+<span class="sd">    dependent on the order of instantiation.  To ensure that the</span>
+<span class="sd">    random number stream will remain constant even if other objects</span>
+<span class="sd">    are added or reordered in your file, supply a unique name</span>
+<span class="sd">    explicitly when you construct the RandomDistribution object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a new Random() instance and store the supplied</span>
+<span class="sd">        positional and keyword arguments.</span>
+
+<span class="sd">        If seed=X is specified, sets the Random() instance&#39;s seed.</span>
+<span class="sd">        Otherwise, calls the instance&#39;s jumpahead() method to get a</span>
+<span class="sd">        state very likely to be different from any just used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">()</span>
+
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;seed&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RandomDistribution</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">jumpahead</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verify_constrained_hash</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hash_and_seed</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_verify_constrained_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">changed_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">(</span><span class="n">onlychanged</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_dependent</span> <span class="ow">and</span> <span class="p">(</span><span class="s">&#39;name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">changed_params</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Default object name used to set the seed: &quot;</span>
+                         <span class="s">&quot;random values conditional on object instantiation order.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_hash_and_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="s">&#39;numer&#39;</span><span class="p">):</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">numer</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">denom</span><span class="p">()))</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Cannot generate known hash format for time type &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">hashval</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">random_seed</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">hashval</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hash_and_seed</span><span class="p">()</span>
+
+
+</div>
+<div class="viewcode-block" id="UniformRandom"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.UniformRandom">[docs]</a><span class="k">class</span> <span class="nc">UniformRandom</span><span class="p">(</span><span class="n">RandomDistribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specified with lbound and ubound; when called, return a random</span>
+<span class="sd">    number in the range [lbound, ubound).</span>
+
+<span class="sd">    See the random module for further details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lbound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;inclusive lower bound&quot;</span><span class="p">)</span>
+
+    <span class="n">ubound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;exclusive upper bound&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UniformRandom</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lbound</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ubound</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="UniformRandomOffset"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.UniformRandomOffset">[docs]</a><span class="k">class</span> <span class="nc">UniformRandomOffset</span><span class="p">(</span><span class="n">RandomDistribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identical to UniformRandom, but specified by mean and range.</span>
+<span class="sd">    When called, return a random number in the range</span>
+<span class="sd">    [mean - range/2, mean + range/2).</span>
+
+<span class="sd">    See the random module for further details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Mean value&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Difference of maximum and minimum value&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UniformRandomOffset</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="UniformRandomInt"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.UniformRandomInt">[docs]</a><span class="k">class</span> <span class="nc">UniformRandomInt</span><span class="p">(</span><span class="n">RandomDistribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specified with lbound and ubound; when called, return a random</span>
+<span class="sd">    number in the inclusive range [lbound, ubound].</span>
+
+<span class="sd">    See the randint function in the random module for further details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lbound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;inclusive lower bound&quot;</span><span class="p">)</span>
+    <span class="n">ubound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;inclusive upper bound&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UniformRandomInt</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lbound</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ubound</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+
+</div>
+<div class="viewcode-block" id="Choice"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.Choice">[docs]</a><span class="k">class</span> <span class="nc">Choice</span><span class="p">(</span><span class="n">RandomDistribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a random element from the specified list of choices.</span>
+
+<span class="sd">    Accepts items of any type, though they are typically numbers.</span>
+<span class="sd">    See the choice() function in the random module for further details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">choices</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;List of items from which to select.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Choice</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="NormalRandom"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.NormalRandom">[docs]</a><span class="k">class</span> <span class="nc">NormalRandom</span><span class="p">(</span><span class="n">RandomDistribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normally distributed (Gaussian) random number.</span>
+
+<span class="sd">    Specified with mean mu and standard deviation sigma.</span>
+<span class="sd">    See the random module for further details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Mean value.&quot;</span><span class="p">)</span>
+
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Standard deviation.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NormalRandom</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">normalvariate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="VonMisesRandom"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.VonMisesRandom">[docs]</a><span class="k">class</span> <span class="nc">VonMisesRandom</span><span class="p">(</span><span class="n">RandomDistribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Circularly normal distributed random number.</span>
+
+<span class="sd">    If kappa is zero, this distribution reduces to a uniform random</span>
+<span class="sd">    angle over the range 0 to 2*pi.  Otherwise, it is concentrated to</span>
+<span class="sd">    a greater or lesser degree (determined by kappa) around the mean</span>
+<span class="sd">    mu.  For large kappa (narrow peaks), this distribution approaches</span>
+<span class="sd">    the Gaussian (normal) distribution with variance 1/kappa.  See the</span>
+<span class="sd">    random module for further details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Mean value, typically in the range 0 to 2*pi.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">kappa</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">50.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Concentration (inverse variance).&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VonMisesRandom</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">vonmisesvariate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">kappa</span><span class="p">)</span>
+
+
+
+</div>
+<div class="viewcode-block" id="ScaledTime"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.ScaledTime">[docs]</a><span class="k">class</span> <span class="nc">ScaledTime</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">,</span> <span class="n">TimeDependent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The current time multiplied by some conversion factor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">factor</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The factor to be multiplied by the current time value.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="BoxCar"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.BoxCar">[docs]</a><span class="k">class</span> <span class="nc">BoxCar</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">,</span> <span class="n">TimeDependent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The boxcar function over the specified time interval. The bounds</span>
+<span class="sd">    are exclusive: zero is returned at the onset time and at the</span>
+<span class="sd">    offset (onset+duration).</span>
+
+<span class="sd">    If duration is None, then this reduces to a step function around the</span>
+<span class="sd">    onset value with no offset.</span>
+
+<span class="sd">    See http://en.wikipedia.org/wiki/Boxcar_function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">onset</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Time of onset.&quot;</span><span class="p">)</span>
+
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Duration of step value.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onset</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">onset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+
+
+</div>
+<div class="viewcode-block" id="SquareWave"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.SquareWave">[docs]</a><span class="k">class</span> <span class="nc">SquareWave</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">,</span> <span class="n">TimeDependent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a square wave with &#39;on&#39; periods returning 1.0 and</span>
+<span class="sd">    &#39;off&#39;periods returning 0.0 of specified duration(s). By default</span>
+<span class="sd">    the portion of time spent in the high state matches the time spent</span>
+<span class="sd">    in the low state (a duty cycle of 50%), but the duty cycle can be</span>
+<span class="sd">    controlled if desired.</span>
+
+<span class="sd">    The &#39;on&#39; state begins after a time specified by the &#39;onset&#39;</span>
+<span class="sd">    parameter.  The onset duration supplied must be less than the off</span>
+<span class="sd">    duration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">onset</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Time of onset of the first &#39;on&#39;</span>
+<span class="s">        state relative to time 0. Must be set to a value less than the</span>
+<span class="s">        &#39;off_duration&#39; parameter.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">         Duration of the &#39;on&#39; state during which a value of 1.0 is</span>
+<span class="s">         returned.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">off_duration</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+                                <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Duration of the &#39;off&#39; value state during which a value of 0.0</span>
+<span class="s">        is returned. By default, this duration matches the value of</span>
+<span class="s">        the &#39;duration&#39; parameter.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SquareWave</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">off_duration</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">off_duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">onset</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">off_duration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Onset value needs to be less than </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">onset</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">phase_offset</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">onset</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">off_duration</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">phase_offset</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+
+</div>
+<div class="viewcode-block" id="ExponentialDecay"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.ExponentialDecay">[docs]</a><span class="k">class</span> <span class="nc">ExponentialDecay</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">,</span> <span class="n">TimeDependent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function object that provides a value that decays according to an</span>
+<span class="sd">    exponential function, based on a given time function.</span>
+
+<span class="sd">    Returns starting_value*base^(-time/time_constant).</span>
+
+<span class="sd">    See http://en.wikipedia.org/wiki/Exponential_decay.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">starting_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Value used for time zero.&quot;</span><span class="p">)</span>
+
+    <span class="n">ending_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Value used for time infinity.&quot;</span><span class="p">)</span>
+
+    <span class="n">time_constant</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Time scale for the exponential; large values give slow decay.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Base of the exponent; the default yields starting_value*exp(-t/time_constant).</span>
+<span class="s">        Another popular choice of base is 2, which allows the</span>
+<span class="s">        time_constant to be interpreted as a half-life.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Vi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">starting_value</span>
+        <span class="n">Vm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ending_value</span>
+        <span class="k">return</span> <span class="n">Vm</span> <span class="o">+</span> <span class="p">(</span><span class="n">Vi</span> <span class="o">-</span> <span class="n">Vm</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">())</span><span class="o">/</span>
+                                                 <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_constant</span><span class="p">))</span>
+
+
+</div>
+<div class="viewcode-block" id="TimeSampledFn"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.TimeSampledFn">[docs]</a><span class="k">class</span> <span class="nc">TimeSampledFn</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">,</span> <span class="n">TimeDependent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Samples the values supplied by a time_dependent callable at</span>
+<span class="sd">    regular intervals of duration &#39;period&#39;, with the sampled value</span>
+<span class="sd">    held constant within each interval.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">period</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> 
+        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span> <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The periodicity with which the values of fn are sampled.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> 
+                          <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The offset from time 0.0 at which the first sample will be drawn.</span>
+<span class="s">        Must be less than the value of period.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The time-dependent function used to generate the sampled values.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TimeSampledFn</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span><span class="s">&#39;time_dependent&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;The function &#39;fn&#39; needs to be time dependent.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">time_fn</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Objects do not share the same time_fn&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;The onset value must be less than the period.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span><span class="p">()</span>
+        <span class="n">current_time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
+        <span class="n">difference</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_fn</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">(</span><span class="n">current_time</span> <span class="o">-</span> <span class="n">difference</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+
+</div>
+<div class="viewcode-block" id="BoundedNumber"><a class="viewcode-back" href="../Reference_Manual/numbergen-module.html#numbergen.BoundedNumber">[docs]</a><span class="k">class</span> <span class="nc">BoundedNumber</span><span class="p">(</span><span class="n">NumberGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function object that silently enforces numeric bounds on values</span>
+<span class="sd">    returned by a callable object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Object to call to generate values.&quot;</span><span class="p">)</span>
+
+    <span class="n">bounds</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">((</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Legal range for the value returned, as a pair.</span>
+
+<span class="s">        The default bounds are (None,None), meaning there are actually</span>
+<span class="s">        no bounds.  One or both bounds can be set by specifying a</span>
+<span class="s">        value.  For instance, bounds=(None,10) means there is no lower</span>
+<span class="s">        bound, and an upper bound of 10.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">()</span>
+        <span class="n">min_</span><span class="p">,</span> <span class="n">max_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="k">if</span>   <span class="n">min_</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="n">min_</span><span class="p">:</span> <span class="k">return</span> <span class="n">min_</span>
+        <span class="k">elif</span> <span class="n">max_</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">&gt;</span> <span class="n">max_</span><span class="p">:</span> <span class="k">return</span> <span class="n">max_</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<span class="n">_public</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">_k</span> <span class="k">for</span> <span class="n">_k</span><span class="p">,</span><span class="n">_v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="n">NumberGenerator</span><span class="p">)]))</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="n">_public</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/numbergen.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

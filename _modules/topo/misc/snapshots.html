@@ -1,0 +1,355 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.snapshots &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.snapshots</h1><div class="highlight"><pre>
+<span class="c">###################################################################################</span>
+<span class="c"># SNAPSHOT STUFF</span>
+<span class="c">###################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">__main__</span>
+
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">Parameterized</span><span class="p">,</span> <span class="n">Parameter</span>
+
+<span class="c"># CEBALERT: Can&#39;t this stuff move to the ParameterizedMetaclass?</span>
+<span class="k">class</span> <span class="nc">PicklableClassAttributes</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PicklableClassAttributes"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.snapshots.PicklableClassAttributes">[docs]</a><span class="sd">    Supports pickling of Parameterized class attributes for a given module.</span>
+
+<span class="sd">    When requested to be pickled, stores a module&#39;s PO classes&#39; attributes,</span>
+<span class="sd">    and any given startup_commands. On unpickling, executes the startup</span>
+<span class="sd">    commands and sets the class attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># classes that aren&#39;t parameterized any more</span>
+    <span class="n">do_not_restore</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">deleted_params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;Simulation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;time_type&quot;</span><span class="p">,</span><span class="s">&quot;time_type_args&quot;</span><span class="p">]}</span>
+
+
+    <span class="c"># Support for changing parameter names</span>
+    <span class="c"># CEBALERT: doesn&#39;t support things like changing output_fn to output_fns,</span>
+    <span class="c"># where we also need to do output_fn=x -&gt; output_fns=[x].</span>
+    <span class="c"># Should implement fuller support in legacy, and remove this from here.</span>
+    <span class="n">param_name_changes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c"># e.g. you change imagen.Gaussian.aspect_ratio to aspect_ration</span>
+    <span class="c"># _param_name_changes[&#39;imagen.Gaussian&#39;]={&#39;aspect_ratio&#39;:&#39;aspect_ration&#39;}</span>
+    <span class="c">#</span>
+    <span class="c"># (not yet finished - do we need to add information about version numbers?)</span>
+
+    <span class="c"># CEBALERT: same comments as above about doing this more cleanly</span>
+    <span class="n">param_moves</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># pylint: disable-msg=R0903</span>
+
+    <span class="c"># CB: might have mixed up module and package in the docs.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">module</span><span class="p">,</span><span class="n">exclusions</span><span class="o">=</span><span class="p">(),</span><span class="n">startup_commands</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        module: a module object, such as topo</span>
+
+<span class="sd">        Any submodules listed by name in exclusions will not have their</span>
+<span class="sd">        classes&#39; attributes saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">=</span><span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclusions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startup_commands</span><span class="o">=</span><span class="n">startup_commands</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionary of self.module&#39;s PO classes&#39; attributes, plus</span>
+<span class="sd">        self.startup_commands.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">class_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_PO_class_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span><span class="n">class_attributes</span><span class="p">,[],</span><span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">)</span>
+
+        <span class="c"># CB: we don&#39;t want to pickle anything about this object except what</span>
+        <span class="c"># we want to have executed on unpickling (this object&#39;s not going to be hanging around).</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;class_attributes&#39;</span><span class="p">:</span><span class="n">class_attributes</span><span class="p">,</span>
+                <span class="s">&#39;startup_commands&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">startup_commands</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute the startup commands and set class attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startup_commands</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s">&#39;startup_commands&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">startup_commands</span><span class="p">:</span>
+            <span class="k">exec</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span>
+
+        <span class="n">to_restore</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c">########## pre-processing (renames, moves, etc)</span>
+        <span class="k">for</span> <span class="n">class_path</span><span class="p">,</span><span class="n">state</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="s">&#39;class_attributes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c"># from e.g. &quot;topo.base.parameter.Parameter&quot;, we want &quot;topo.base.parameter&quot;</span>
+
+            <span class="k">if</span> <span class="n">class_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_not_restore</span><span class="p">:</span>
+                <span class="c">#print &quot;Did not restore:&quot;,class_path</span>
+                <span class="k">break</span>
+
+            <span class="k">for</span> <span class="n">p_name</span><span class="p">,</span><span class="n">p_obj</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">p_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_moves</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">class_path</span><span class="p">,{}):</span>
+                    <span class="k">assert</span> <span class="n">p_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_name_changes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">class_path</span><span class="p">,{})</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_moves</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">new_class_path</span><span class="p">,</span><span class="n">new_p_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_moves</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_moves</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">new_class_path</span><span class="p">,</span><span class="n">new_p_name</span><span class="p">,</span><span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_moves</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">]</span>
+                        <span class="n">p_obj</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">p_obj</span><span class="p">)</span>
+
+
+                    <span class="k">if</span> <span class="n">new_class_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">to_restore</span><span class="p">:</span>
+                        <span class="n">to_restore</span><span class="p">[</span><span class="n">new_class_path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                    <span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> has been moved to </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">class_path</span><span class="p">,</span><span class="n">p_name</span><span class="p">,</span><span class="n">new_class_path</span><span class="p">,</span><span class="n">new_p_name</span><span class="p">))</span>
+                    <span class="k">assert</span> <span class="n">new_p_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">to_restore</span><span class="p">[</span><span class="n">new_class_path</span><span class="p">]</span>
+                    <span class="n">to_restore</span><span class="p">[</span><span class="n">new_class_path</span><span class="p">][</span><span class="n">new_p_name</span><span class="p">]</span><span class="o">=</span><span class="n">p_obj</span>
+
+
+                <span class="k">elif</span> <span class="n">p_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_name_changes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">class_path</span><span class="p">,{}):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_name_changes</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">],</span><span class="nb">tuple</span><span class="p">):</span>
+                        <span class="n">new_p_name</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_name_changes</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">]</span>
+                        <span class="n">p_obj</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">p_obj</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_p_name</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_name_changes</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">class_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">to_restore</span><span class="p">:</span>
+                        <span class="n">to_restore</span><span class="p">[</span><span class="n">class_path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                    <span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&#39;s </span><span class="si">%s</span><span class="s"> parameter has been renamed to </span><span class="si">%s</span><span class="s">.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">class_path</span><span class="p">,</span><span class="n">p_name</span><span class="p">,</span><span class="n">new_p_name</span><span class="p">))</span>
+                    <span class="n">to_restore</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">new_p_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_obj</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">class_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">to_restore</span><span class="p">:</span>
+                        <span class="n">to_restore</span><span class="p">[</span><span class="n">class_path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">to_restore</span><span class="p">[</span><span class="n">class_path</span><span class="p">][</span><span class="n">p_name</span><span class="p">]</span><span class="o">=</span> <span class="n">p_obj</span>
+
+
+        <span class="c">########## restoring</span>
+        <span class="k">for</span> <span class="n">class_path</span> <span class="ow">in</span> <span class="n">to_restore</span><span class="p">:</span>
+            <span class="n">module_path</span> <span class="o">=</span> <span class="n">class_path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">class_path</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)]</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">class_path</span><span class="p">[</span><span class="n">class_path</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">::]</span>
+            <span class="n">deleted_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deleted_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_path</span><span class="p">,</span><span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="n">module_path</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Could not find module &#39;</span><span class="si">%s</span><span class="s">&#39; to restore parameter values of &#39;</span><span class="si">%s</span><span class="s">&#39; (module might have been moved or renamed; if you are using this module, please file a support request via topographica.org&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">module_path</span><span class="p">,</span><span class="n">class_path</span><span class="p">))</span>
+                <span class="k">break</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">class_</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span><span class="n">class_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Could not find class &#39;</span><span class="si">%s</span><span class="s">&#39; to restore its parameter values (class might have been removed or renamed; if you are using this class, please file a support request via topographica.org).&quot;</span><span class="o">%</span><span class="n">class_path</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="k">for</span> <span class="n">p_name</span><span class="p">,</span><span class="n">p_obj</span> <span class="ow">in</span> <span class="n">to_restore</span><span class="p">[</span><span class="n">class_path</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">p_name</span> <span class="ow">in</span> <span class="n">deleted_params</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">elif</span> <span class="n">p_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">class_</span><span class="o">.</span><span class="n">params</span><span class="p">():</span>
+                        <span class="c"># CEBALERT: GlobalParams&#39;s source code never has</span>
+                        <span class="c"># parameters. If we move Parameter saving and</span>
+                        <span class="c"># restoring to Parameterized, could allow</span>
+                        <span class="c"># individual classes to customize Parameter</span>
+                        <span class="c"># restoration.</span>
+                        <span class="k">if</span> <span class="n">class_</span><span class="o">.</span><span class="n">__name__</span><span class="o">!=</span><span class="s">&#39;GlobalParams&#39;</span><span class="p">:</span>
+                            <span class="n">Parameterized</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;load_snapshot&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> found in snapshot, but &#39;</span><span class="si">%s</span><span class="s">&#39; is no longer defined as a Parameter by the current version of </span><span class="si">%s</span><span class="s">. If you are using this class, please file a support request via topographica.org.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">class_</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">p_name</span><span class="p">,</span><span class="n">p_name</span><span class="p">,</span><span class="n">class_</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span><span class="n">p_name</span><span class="p">,</span><span class="n">p_obj</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">Parameterized</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;load_snapshot&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> found in snapshot, but &#39;</span><span class="si">%s</span><span class="s">&#39; but could not be restored to the current version of </span><span class="si">%s</span><span class="s">. If you are using this class, please file a support request via topographica.org.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">class_</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">p_name</span><span class="p">,</span><span class="n">p_name</span><span class="p">,</span><span class="n">class_</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+
+    <span class="c"># CB: I guess this could be simplified</span>
+    <span class="k">def</span> <span class="nf">get_PO_class_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">module</span><span class="p">,</span><span class="n">class_attributes</span><span class="p">,</span><span class="n">processed_modules</span><span class="p">,</span><span class="n">exclude</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PicklableClassAttributes.get_PO_class_attributes"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.snapshots.PicklableClassAttributes.get_PO_class_attributes">[docs]</a><span class="sd">        Recursively search module and get attributes of Parameterized classes within it.</span>
+
+<span class="sd">        class_attributes is a dictionary {module.path.and.Classname: state}, where state</span>
+<span class="sd">        is the dictionary {attribute: value}.</span>
+
+<span class="sd">        Something is considered a module for our purposes if inspect says it&#39;s a module,</span>
+<span class="sd">        and it defines __all__. We only search through modules listed in __all__.</span>
+
+<span class="sd">        Keeps a list of processed modules to avoid looking at the same one</span>
+<span class="sd">        more than once (since e.g. __main__ contains __main__ contains</span>
+<span class="sd">        __main__...)</span>
+
+<span class="sd">        Modules can be specifically excluded if listed in exclude.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">__dict__</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">dict_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s">&#39;__all__&#39;</span> <span class="ow">in</span> <span class="n">dict_</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismodule</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict_</span><span class="p">[</span><span class="s">&#39;__all__&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_modules</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">get_PO_class_attributes</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">class_attributes</span><span class="p">,</span><span class="n">processed_modules</span><span class="p">,</span><span class="n">exclude</span><span class="p">)</span>
+                    <span class="n">processed_modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">Parameterized</span><span class="p">):</span>
+
+                    <span class="c"># Note: we take the class name as v.__name__, not</span>
+                    <span class="c"># k, because k might be just a label for the true</span>
+                    <span class="c"># class. For example, if someone imports a class</span>
+                    <span class="c"># using &#39;as&#39;, the name in the local namespace</span>
+                    <span class="c"># could be different from the name when the class</span>
+                    <span class="c"># was defined.  It is correct to set the</span>
+                    <span class="c"># attributes on the true class.</span>
+                    <span class="n">full_class_path</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">__module__</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="n">v</span><span class="o">.</span><span class="n">__name__</span>
+                    <span class="n">class_attributes</span><span class="p">[</span><span class="n">full_class_path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="c"># Parameterized classes always have parameters in</span>
+                    <span class="c"># __dict__, never in __slots__</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">Parameter</span><span class="p">)</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">pickle_default_value</span><span class="p">:</span>
+                            <span class="n">class_attributes</span><span class="p">[</span><span class="n">full_class_path</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/misc/snapshots.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

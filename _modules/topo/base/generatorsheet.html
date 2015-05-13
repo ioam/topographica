@@ -1,0 +1,442 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.generatorsheet &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.base.generatorsheet</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">GeneratorSheet: a sheet with a pattern generator.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.base.patterngenerator</span> <span class="kn">import</span> <span class="n">PatternGenerator</span><span class="p">,</span><span class="n">Constant</span>
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">FunctionEvent</span><span class="p">,</span> <span class="n">PeriodicEventSequence</span>
+
+<span class="kn">from</span> <span class="nn">holoviews.interface.collector</span> <span class="kn">import</span> <span class="n">AttrDict</span>
+<span class="kn">from</span> <span class="nn">holoviews</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+<span class="c"># JLALERT: This sheet should have override_plasticity_state/restore_plasticity_state</span>
+<span class="c"># functions that call override_plasticity_state/restore_plasticty_state on the</span>
+<span class="c"># sheet output_fn and input_generator output_fn.</span>
+<div class="viewcode-block" id="GeneratorSheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.GeneratorSheet">[docs]</a><span class="k">class</span> <span class="nc">GeneratorSheet</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sheet for generating a series of 2D patterns.</span>
+
+<span class="sd">    Typically generates the patterns by choosing parameters from a</span>
+<span class="sd">    random distribution, but can use any mechanism.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">src_ports</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+
+    <span class="n">period</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+                          <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Delay (in Simulation time) between generating new input patterns.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">phase</span>  <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Delay after the start of the Simulation (at time zero) before</span>
+<span class="s">        generating an input pattern.  For a clocked, feedforward</span>
+<span class="s">        simulation, one would typically want to use a small nonzero</span>
+<span class="s">        phase and use delays less than the user-visible step size</span>
+<span class="s">        (typically 1.0), so that inputs are generated and processed</span>
+<span class="s">        before this step is complete.</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">input_generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">PatternGenerator</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Constant</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Specifies a particular PatternGenerator type to use when creating patterns.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_generator_stack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GeneratorSheet.set_input_generator"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.GeneratorSheet.set_input_generator">[docs]</a>    <span class="k">def</span> <span class="nf">set_input_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">new_ig</span><span class="p">,</span><span class="n">push_existing</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the input_generator, overwriting the existing one by</span>
+<span class="sd">        default.</span>
+
+<span class="sd">        If push_existing is false, the existing input_generator is</span>
+<span class="sd">        discarded permanently.  Otherwise, the existing one is put</span>
+<span class="sd">        onto a stack, and can later be restored by calling</span>
+<span class="sd">        pop_input_generator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">push_existing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">push_input_generator</span><span class="p">()</span>
+
+        <span class="c"># CEBALERT: replaces any bounds specified for the</span>
+        <span class="c"># PatternGenerator with this sheet&#39;s own bounds. When</span>
+        <span class="c"># PatternGenerators can draw patterns into supplied</span>
+        <span class="c"># boundingboxes, should remove this.</span>
+        <span class="n">new_ig</span><span class="o">.</span><span class="n">set_matrix_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydensity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span> <span class="o">=</span> <span class="n">new_ig</span>
+
+</div>
+<div class="viewcode-block" id="GeneratorSheet.push_input_generator"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.GeneratorSheet.push_input_generator">[docs]</a>    <span class="k">def</span> <span class="nf">push_input_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Push the current input_generator onto a stack for future retrieval.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_generator_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span><span class="p">)</span>
+
+        <span class="c"># CEBALERT: would be better to reorganize code so that</span>
+        <span class="c"># push_input_generator must be supplied with a new generator.</span>
+        <span class="c"># CEBALERT: presumably we can remove this import.</span>
+        <span class="kn">from</span> <span class="nn">topo.base.patterngenerator</span> <span class="kn">import</span> <span class="n">Constant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">(</span><span class="n">Constant</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="GeneratorSheet.pop_input_generator"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.GeneratorSheet.pop_input_generator">[docs]</a>    <span class="k">def</span> <span class="nf">pop_input_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discard the current input_generator, and retrieve the previous one from the stack.</span>
+
+<span class="sd">        Warns if no input_generator is available on the stack.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_generator_stack</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_generator_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;There is no previous input generator to restore.&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GeneratorSheet.generate"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.GeneratorSheet.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the output and send it out the Activity port.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Generating a new pattern&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="c"># Note that a generator may raise an exception</span>
+            <span class="c"># StopIteration if it runs out of patterns.  Example is if</span>
+            <span class="c"># the patterns are files that are loaded sequentially and</span>
+            <span class="c"># are not re-used (e.g. the constructors are discarded to</span>
+            <span class="c"># save memory).</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Pattern generator {0} returned None. Unable to generate Activity pattern.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">ac</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+                    <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># if it has a positive period, then schedule a repeating event to trigger it</span>
+            <span class="n">e</span><span class="o">=</span><span class="n">FunctionEvent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">)</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">enqueue_event</span><span class="p">(</span><span class="n">PeriodicEventSequence</span><span class="p">(</span><span class="n">now</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">),[</span><span class="n">e</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+
+</div>
+<div class="viewcode-block" id="ChannelGeneratorSheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.ChannelGeneratorSheet">[docs]</a><span class="k">class</span> <span class="nc">ChannelGeneratorSheet</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A GeneratorSheet that handles input patterns with multiple</span>
+<span class="sd">    simultaneous channels.</span>
+
+<span class="sd">    Accepts either a single-channel or an NChannel input_generator.</span>
+<span class="sd">    If the input_generator stores separate channel patterns, it is</span>
+<span class="sd">    used as-is; if other (single-channel) PatternGenerators are used,</span>
+<span class="sd">    the Class behaves like a normal GeneratorSheet.</span>
+
+<span class="sd">    When a pattern is generated, the average of the channels is sent</span>
+<span class="sd">    out on the Activity port as usual for a GeneratorSheet, and</span>
+<span class="sd">    channel activities are sent out on the Activity0, Activity1, ...,</span>
+<span class="sd">    ActivityN-1 ports.  Thus this class can be used just like</span>
+<span class="sd">    GeneratorSheet, but with optional color channels available, too.</span>
+
+
+<span class="sd">    If the input_generator is NChannel, this GeneratorSheet will</span>
+<span class="sd">    handle the separate channels and create the specific output</span>
+<span class="sd">    ports. If the input_generator is single-channel (eg, a monochrome</span>
+<span class="sd">    image) then this GeneratorSheet will behave as a normal</span>
+<span class="sd">    non-NChannel GeneratorSheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">constant_mean_total_channels_output</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If set, it enforces the average of the mean channel values to</span>
+<span class="s">        be fixed. Eg, M = ( activity0+activity1+...+activity(N-1)</span>
+<span class="s">        ).mean() / N = constant_mean_total_channels_output&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">channel_output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Dictionary with arrays of channel-specific output functions:</span>
+<span class="s">        eg, {0:[fnc1, fnc2],3:[fnc3]}.  The dictionary isn&#39;t required</span>
+<span class="s">        to specify every channel, but rather only those required.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="c"># We need to setup our datastructures before calling</span>
+        <span class="c"># super.init, as that will automatically call</span>
+        <span class="c"># set_input_generator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChannelGeneratorSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ChannelGeneratorSheet.set_input_generator"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.ChannelGeneratorSheet.set_input_generator">[docs]</a>    <span class="k">def</span> <span class="nf">set_input_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">new_ig</span><span class="p">,</span><span class="n">push_existing</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If single-channel generators are used, the Class reverts to a</span>
+<span class="sd">        simple GeneratorSheet behavior.  If NChannel inputs are used,</span>
+<span class="sd">        it will update the number of channels of the</span>
+<span class="sd">        ChannelGeneratorSheet to match those of the input. If the</span>
+<span class="sd">        number of channels doesn&#39;t change, there&#39;s no need to reset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">num_channels</span> <span class="o">=</span> <span class="n">new_ig</span><span class="o">.</span><span class="n">num_channels</span><span class="p">()</span>
+
+        <span class="k">if</span><span class="p">(</span> <span class="n">num_channels</span><span class="o">&gt;</span><span class="mi">1</span> <span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span> <span class="n">num_channels</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)</span> <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">src_ports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_channels</span><span class="p">):</span>
+                    <span class="c"># TODO: in order to add support for generic naming</span>
+                    <span class="c">#       of Activity ports, it&#39;s necessary to</span>
+                    <span class="c">#       implement a .get_channel_names method.</span>
+                    <span class="c">#       Calling .channels() and inspecting the</span>
+                    <span class="c">#       returned dictionary in fact could change</span>
+                    <span class="c">#       the state of the input generator.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">src_ports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&#39;Activity&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+        <span class="k">else</span><span class="p">:</span> <span class="c"># monochrome</span>
+            <span class="c"># Reset channels to match single-channel inputs.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">src_ports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChannelGeneratorSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">(</span><span class="n">new_ig</span><span class="p">,</span><span class="n">push_existing</span><span class="o">=</span><span class="n">push_existing</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ChannelGeneratorSheet.generate"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.generatorsheet.ChannelGeneratorSheet.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Works as in the superclass, but also generates NChannel output and sends</span>
+<span class="sd">        it out on the Activity0, Activity1, ..., ActivityN ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">channels_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span><span class="o">.</span><span class="n">channels</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="c"># Note that a generator may raise an exception</span>
+            <span class="c"># StopIteration if it runs out of patterns.  Example is if</span>
+            <span class="c"># the patterns are files that are loaded sequentially and</span>
+            <span class="c"># are not re-used (e.g. the constructors are discarded to</span>
+            <span class="c"># save memory).</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Pattern generator {0} returned None.&quot;</span>
+            <span class="s">&quot;Unable to generate Activity pattern.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">channels_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+                    <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+
+
+            <span class="c">## These loops are safe: if the pattern doesn&#39;t provide</span>
+            <span class="c">## further channels, self._channel_data = []</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">[</span><span class="n">i</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">channels_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+                <span class="c">## Default output_fns are applied to all channels</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)):</span>
+                        <span class="n">f</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span>
+
+               <span class="c"># Channel specific output functions, defined as a</span>
+               <span class="c"># dictionary {chn_number:[functions]}</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)):</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_output_fns</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_output_fns</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                            <span class="n">f</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span>
+
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_mean_total_channels_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">act</span> <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">M</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_mean_total_channels_output</span><span class="o">/</span><span class="n">M</span>
+                    <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">:</span>
+                        <span class="n">act</span> <span class="o">*=</span> <span class="n">p</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">act</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="n">act</span><span class="p">)</span>
+
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">src_ports</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">AttrDict</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span>
+                            <span class="n">row_precedence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                            <span class="n">timestamp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">:</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                   <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&#39; Activity&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">)[</span><span class="n">coords</span><span class="p">]</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span>
+        <span class="k">return</span> <span class="n">im</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/base/generatorsheet.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

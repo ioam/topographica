@@ -1,0 +1,47 @@
+topo.transferfn Package
+=======================
+
+:mod:`transferfn` Package
+-------------------------
+
+.. inheritance-diagram:: topo.transferfn
+
+
+.. automodule:: topo.transferfn
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`misc` Module
+------------------
+
+.. inheritance-diagram:: topo.transferfn.misc
+
+
+.. automodule:: topo.transferfn.misc
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`optimized` Module
+-----------------------
+
+.. inheritance-diagram:: topo.transferfn.optimized
+
+
+.. automodule:: topo.transferfn.optimized
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`projfn` Module
+--------------------
+
+.. inheritance-diagram:: topo.transferfn.projfn
+
+
+.. automodule:: topo.transferfn.projfn
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

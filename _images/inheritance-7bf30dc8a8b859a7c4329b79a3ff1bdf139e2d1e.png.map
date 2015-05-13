@@ -1,0 +1,7 @@
+<map id="inheritance156ba0059b" name="inheritance156ba0059b">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,54,264,79"/>
+<area shape="rect" id="node3" href="#topo.submodel.specifications.Specification" title="Specifications are templates for sheet or projection objects which" alt="" coords="312,54,605,79"/>
+<area shape="rect" id="node2" href="#topo.submodel.specifications.ModelSpec" title="ModelSpec acts as a template for Topographica model including" alt="" coords="665,5,948,30"/>
+<area shape="rect" id="node4" href="#topo.submodel.specifications.ProjectionSpec" title="ProjectionSpec acts as a template for projection objects." alt="" coords="653,54,960,79"/>
+<area shape="rect" id="node5" href="#topo.submodel.specifications.SheetSpec" title="SheetSpec acts as a template for sheet objects." alt="" coords="665,103,948,129"/>
+</map>

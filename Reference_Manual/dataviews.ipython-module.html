@@ -1,0 +1,243 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.ipython &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataviews-ipython">
+<h1>dataviews.ipython<a class="headerlink" href="#dataviews-ipython" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance36d83ca3f9.svg" usemap="#inheritance36d83ca3f9" class="inheritance"/></div><map id="inheritance36d83ca3f9" name="inheritance36d83ca3f9">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="dataviews.ipython.pyc-module.html">dataviews.ipython.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-dataviews.ipython">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-dataviews.ipython" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dataviews.ipython.OptsMagic">
+<em class="property">class </em><tt class="descclassname">dataviews.ipython.</tt><tt class="descname">OptsMagic</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#OptsMagic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.OptsMagic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">IPython.core.magic.Magics</span></tt></p>
+<p>The %opts and %%opts line and cell magics allow customization of
+how dataviews are displayed. The %opts line magic updates or
+creates new options for either StyleOpts (i.e. matplotlib options)
+or in the PlotOpts (plot settings). The %%opts cell magic sets
+custom display options associated on the displayed view object
+which will persist every time that object is displayed.</p>
+<dl class="classmethod">
+<dt id="dataviews.ipython.OptsMagic.collect">
+<em class="property">classmethod </em><tt class="descname">collect</tt><big>(</big><em>obj</em>, <em>attr='style'</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#OptsMagic.collect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.OptsMagic.collect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a composite view object, build a dictionary of either
+the &#8216;style&#8217; or &#8216;label&#8217; attributes across all contained
+atoms. This method works across overlays, grid layouts and
+stacks. The return is a dictionary with the collected string
+values as keys for the the associated view type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.ipython.OptsMagic.labels">
+<tt class="descname">labels</tt><big>(</big><em>line</em>, <em>cell=None</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#OptsMagic.labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.OptsMagic.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple magic to see the full list of defined labels for the
+displayed view object.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="dataviews.ipython.OptsMagic.option_completer">
+<em class="property">classmethod </em><tt class="descname">option_completer</tt><big>(</big><em>k</em>, <em>v</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#OptsMagic.option_completer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.OptsMagic.option_completer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tab completion hook for the %opts and %%opts magic.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.ipython.OptsMagic.opts">
+<tt class="descname">opts</tt><big>(</big><em>line=''</em>, <em>cell=None</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#OptsMagic.opts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.OptsMagic.opts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set custom display options unique to the displayed view. The
+keyword-value pairs in the square brackets (if present) set
+the plot parameters. Keyword-value pairs outside the square
+brackets are matplotlib style options.</p>
+<p>Usage: %%opts &lt;Key&gt; [ [&lt;keyword&gt;=&lt;value&gt;...] ] [&lt;keyword&gt;=&lt;value&gt;...]</p>
+<p>Multiple keys may be listed, setting plot and style options in
+this way.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="dataviews.ipython.OptsMagic.set_view_options">
+<em class="property">classmethod </em><tt class="descname">set_view_options</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#OptsMagic.set_view_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.OptsMagic.set_view_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be called by the display hook which supplies the view
+object to be displayed. Any custom options are defined on the
+object as necessary and if there is an error, an HTML message
+is returned.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.ipython.ViewMagic">
+<em class="property">class </em><tt class="descclassname">dataviews.ipython.</tt><tt class="descname">ViewMagic</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#ViewMagic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.ViewMagic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">IPython.core.magic.Magics</span></tt></p>
+<p>Magic to allow easy control over the display of dataviews. The
+figure and animation output formats, the animation frame rate and
+figure size can all be controlled.</p>
+<p>Usage: %view [png|svg] [webm|h264|gif[:&lt;fps&gt;]] [&lt;percent size&gt;]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dataviews.ipython.first_frame">
+<tt class="descclassname">dataviews.ipython.</tt><tt class="descname">first_frame</tt><big>(</big><em>plot</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#first_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.first_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only display the first frame of an animated plot</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dataviews.ipython.last_frame">
+<tt class="descclassname">dataviews.ipython.</tt><tt class="descname">last_frame</tt><big>(</big><em>plot</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#last_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.last_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only display the last frame of an animated plot</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dataviews.ipython.middle_frame">
+<tt class="descclassname">dataviews.ipython.</tt><tt class="descname">middle_frame</tt><big>(</big><em>plot</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#middle_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.middle_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only display the (approximately) middle frame of an animated plot</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dataviews.ipython.process_view_magics">
+<tt class="descclassname">dataviews.ipython.</tt><tt class="descname">process_view_magics</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#process_view_magics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.process_view_magics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook into %%opts and %%channels magics to process display view</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dataviews.ipython.update_matplotlib_rc">
+<tt class="descclassname">dataviews.ipython.</tt><tt class="descname">update_matplotlib_rc</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/ipython.html#update_matplotlib_rc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.ipython.update_matplotlib_rc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default changes to the matplotlib rc used by IPython Notebook.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">dataviews.ipython</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-dataviews.ipython">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/dataviews.ipython-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

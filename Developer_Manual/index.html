@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Developer Manual &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="developer-manual">
+<h1>Developer Manual<a class="headerlink" href="#developer-manual" title="Permalink to this headline">¶</a></h1>
+<p>This manual gives guidelines for developers working on the source
+code for the Topographica simulator. Users will not usually need to
+refer to this material, unless they plan to submit significant
+blocks of code to the project (which is, of course, strongly
+<a class="reference external" href="#joining">encouraged</a>!).</p>
+<p>By default, all the text in this manual refers to program code
+written in the Python language. There are also some bits of C/C++
+code in the simulator, which use different conventions.</p>
+<p>Note that Topographica&#8217;s documentation may change between releases,
+so developers should usually be reading either their locally built
+copy of the documentation, or the online <a class="reference external" href="http://buildbot.topographica.org/doc/Developer_Manual/index.html">nightly documentation
+build</a>. The documentation at topographica.org applies to the
+previous release, so may be out of date with respect to the current
+version of Topographica in Git.</p>
+<dl class="docutils">
+<dt><a class="reference external" href="installation.html">Installation instructions</a></dt>
+<dd>Before starting, you will need a version-controlled copy of
+Topographica.</dd>
+<dt><a class="reference external" href="revisioncontrol.html">Revision control</a></dt>
+<dd>How we keep track of changes to the code and other files</dd>
+<dt><a class="reference external" href="coding.html">General guidelines</a></dt>
+<dd>General info on writing Python, plus Topographica-specific
+conventions such as guidelines for naming, comments,
+documentation, parameters, units, and external imports.</dd>
+<dt><a class="reference external" href="ood.html">Object-oriented design</a></dt>
+<dd>How to design well-structured code</dd>
+<dt><a class="reference external" href="imports.html">Importing files and packages</a></dt>
+<dd>How to import Topographica and external code</dd>
+<dt><a class="reference external" href="alerts.html">ALERTs</a></dt>
+<dd>How to flag incorrect or confusing code or documentation</dd>
+<dt><a class="reference external" href="gui.html">GUI programming</a></dt>
+<dd>How to add functionality to the GUI</dd>
+<dt><a class="reference external" href="optimization.html">Performance optimization</a></dt>
+<dd>When (and when not!) to optimize for performance, and how to do
+it</dd>
+<dt><a class="reference external" href="memuse.html">Memory usage</a></dt>
+<dd>How to measure memory usage and reduce it</dd>
+<dt><a class="reference external" href="refactoring.html">Refactoring/testing tips</a></dt>
+<dd>Tips for improving existing code by refactoring</dd>
+<dt><a class="reference external" href="testing.html">Test suite</a></dt>
+<dd>Rationale behind unit tests; should eventually include
+information about how to set up tests</dd>
+<dt><a class="reference external" href="releases.html">Releases</a></dt>
+<dd>How to make a new public release of Topographica</dd>
+</dl>
+<div class="section" id="joining">
+<h2>Joining<a class="headerlink" href="#joining" title="Permalink to this headline">¶</a></h2>
+<p>Anyone interested in Topographica is welcome to join as a
+Topographica developer to get read/write access, so that your
+changes can become part of the main distribution. Just sign up
+for a free account at <a class="reference external" href="http://github.com/">GitHub.com</a>, then email <a class="reference external" href="mailto:jbednar&#37;&#52;&#48;inf&#46;ed&#46;ac&#46;uk?subject=Request%20to%20be%20a%20Topographica%20developer">Jim</a> your
+username and what you want to do, and he&#8217;ll tell you how to
+proceed from there. Alternatively, you can start immediately by
+cloning Topographica, developing your feature, and <a class="reference external" href="git.html#pullrequest">submitting
+it as a public pull request</a> only once it&#8217;s done.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="#">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">Developer Manual</a><ul>
+<li><a class="reference internal" href="#joining">Joining</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Developer_Manual/index.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

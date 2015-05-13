@@ -1,0 +1,5 @@
+<map id="inheritancec2708a0c37" name="inheritancec2708a0c37">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,5,264,30"/>
+<area shape="rect" id="node3" href="#topo.plotting.plotfilesaver.PlotGroupSaver" title="Allows a PlotGroup to be saved as a set of bitmap files on disk." alt="" coords="313,5,599,30"/>
+<area shape="rect" id="node2" href="#topo.plotting.plotfilesaver.CFProjectionPlotGroupSaver" title="Allows a CFProjectionPlotGroup to be saved as a bitmap file," alt="" coords="649,5,1015,30"/>
+</map>

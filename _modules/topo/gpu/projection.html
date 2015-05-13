@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.gpu.projection &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.gpu.projection</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.sparse.sparsecf</span> <span class="kn">import</span> <span class="n">SparseCFProjection</span><span class="p">,</span> <span class="n">SparseConnectionField</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pycuda.gpuarray</span> <span class="kn">as</span> <span class="nn">gpuarray</span>
+    <span class="kn">from</span> <span class="nn">pycuda.elementwise</span> <span class="kn">import</span> <span class="n">ElementwiseKernel</span>
+    <span class="kn">import</span> <span class="nn">pycuda.driver</span> <span class="kn">as</span> <span class="nn">cuda</span>
+    <span class="kn">import</span> <span class="nn">pycuda.autoinit</span>                   <span class="c"># pyflakes:ignore (API import)</span>
+    <span class="kn">import</span> <span class="nn">scikits.cuda.cusparse</span> <span class="kn">as</span> <span class="nn">cusparse</span>
+
+    <span class="n">cusparse</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="CFPOF_DivisiveNormalizeL1_Sparse_GPU"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.projection.CFPOF_DivisiveNormalizeL1_Sparse_GPU">[docs]</a><span class="k">def</span> <span class="nf">CFPOF_DivisiveNormalizeL1_Sparse_GPU</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Divisive normalisation computed on the GPU</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">projection</span><span class="o">.</span><span class="n">has_norm_total</span><span class="p">:</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">mv</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_ones_gpu</span><span class="p">,</span>
+                                  <span class="n">y</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total_gpu</span><span class="p">,</span> <span class="n">autosync</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">projection</span><span class="o">.</span><span class="n">norm_total_gpu</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total_gpu</span>
+
+    <span class="n">projection</span><span class="o">.</span><span class="n">normalize_kernel</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">nzrows_gpu</span><span class="p">,</span>
+                                <span class="n">projection</span><span class="o">.</span><span class="n">norm_total_gpu</span><span class="p">,</span>
+                                <span class="n">projection</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">Val</span><span class="p">,</span>
+                                <span class="nb">range</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">nzcount</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">projection</span><span class="o">.</span><span class="n">has_norm_total</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="CFPLF_Hebbian_Sparse_GPU"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.projection.CFPLF_Hebbian_Sparse_GPU">[docs]</a><span class="k">def</span> <span class="nf">CFPLF_Hebbian_Sparse_GPU</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sparse CF Projection learning function applying Hebbian learning</span>
+<span class="sd">    to the weights in a projection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_conn_lr</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">learning_rate</span><span class="o">/</span><span class="n">projection</span><span class="o">.</span><span class="n">n_units</span>
+    <span class="c"># Transfering source and destination activities:</span>
+    <span class="n">src_activity_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu_async</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+    <span class="n">dest_activity_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu_async</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+    <span class="c"># Computing Hebbian learning weights:</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">hebbian_kernel</span><span class="p">(</span><span class="n">single_conn_lr</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">nzrows_gpu</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">nzcols_gpu</span><span class="p">,</span>
+                              <span class="n">src_activity_gpu</span><span class="p">,</span> <span class="n">dest_activity_gpu</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">Val</span><span class="p">,</span>
+                              <span class="nb">range</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">projection</span><span class="o">.</span><span class="n">nzcount</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c"># Normalisation values:</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">mv</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_ones_gpu</span><span class="p">,</span>
+                              <span class="n">y</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">norm_total_gpu</span><span class="p">,</span> <span class="n">autosync</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">projection</span><span class="o">.</span><span class="n">has_norm_total</span> <span class="o">=</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="CFPRF_DotProduct_Sparse_GPU"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.projection.CFPRF_DotProduct_Sparse_GPU">[docs]</a><span class="k">def</span> <span class="nf">CFPRF_DotProduct_Sparse_GPU</span><span class="p">(</span><span class="n">projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sparse CF Projection response function calculating the dot-product</span>
+<span class="sd">    between incoming activities and CF weights. Uses GPU.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">input_buffer_pagelocked</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">input_buffer</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">input_buffer_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu_async</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">input_buffer_pagelocked</span><span class="p">,</span>
+                                                        <span class="n">stream</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">pycuda_stream</span><span class="p">)</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">mv</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">input_buffer_gpu</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">strength</span><span class="p">,</span>
+                              <span class="n">y</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">activity_gpu_buffer</span><span class="p">,</span> <span class="n">autosync</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">stream</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">pycuda_stream</span><span class="p">)</span>
+    <span class="n">projection</span><span class="o">.</span><span class="n">activity_gpu_buffer</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">ary</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span>
+                                             <span class="n">stream</span><span class="o">=</span><span class="n">projection</span><span class="o">.</span><span class="n">pycuda_stream</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="GPUSparseCFProjection"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.projection.GPUSparseCFProjection">[docs]</a><span class="k">class</span> <span class="nc">GPUSparseCFProjection</span><span class="p">(</span><span class="n">SparseCFProjection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A projection composed of SparseConnectionFields from a Sheet into</span>
+<span class="sd">    a ProjectionSheet, calculated using a GPU.</span>
+
+<span class="sd">    Any subclass has to implement the interface activate(self) that</span>
+<span class="sd">    computes the response from the input and stores it in the activity</span>
+<span class="sd">    array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cf_type</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">SparseConnectionField</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Type of ConnectionField to use when creating individual CFs.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">learning_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">CFPLF_Hebbian_Sparse_GPU</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function for computing changes to the weights based on one activation step.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">response_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">CFPRF_DotProduct_Sparse_GPU</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function for computing the Projection response to an input pattern.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">weights_output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">CFPOF_DivisiveNormalizeL1_Sparse_GPU</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Functions applied to each CF after learning.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">initialized</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="c">#Hack-ish way to avoid initialisation until the weights are transfered:</span>
+        <span class="n">should_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns_init</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;apply_output_fns_init&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GPUSparseCFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="c"># The sparse matrix is stored in COO format, used for Hebbian learning and normalisation:</span>
+        <span class="n">nzcols</span><span class="p">,</span> <span class="n">nzrows</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">getTriplets</span><span class="p">()</span>
+        <span class="n">tups</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">nzrows</span><span class="p">,</span> <span class="n">nzcols</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+        <span class="n">nzrows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tups</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">nzcols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tups</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tups</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="c"># Getting them on the GPU:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nzcount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">getnnz</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nzrows_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">nzrows</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nzcols_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">nzcols</span><span class="p">)</span>
+        <span class="c"># Setting the projection weights in CSR format for dot product calculation:</span>
+        <span class="n">rowPtr</span> <span class="o">=</span> <span class="n">cusparse</span><span class="o">.</span><span class="n">coo2csr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nzrows_gpu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">descrA</span> <span class="o">=</span> <span class="n">cusparse</span><span class="o">.</span><span class="n">cusparseCreateMatDescr</span><span class="p">()</span>
+        <span class="n">cusparse</span><span class="o">.</span><span class="n">cusparseSetMatType</span><span class="p">(</span><span class="n">descrA</span><span class="p">,</span> <span class="n">cusparse</span><span class="o">.</span><span class="n">CUSPARSE_MATRIX_TYPE_GENERAL</span><span class="p">)</span>
+        <span class="n">cusparse</span><span class="o">.</span><span class="n">cusparseSetMatIndexBase</span><span class="p">(</span><span class="n">descrA</span><span class="p">,</span> <span class="n">cusparse</span><span class="o">.</span><span class="n">CUSPARSE_INDEX_BASE_ZERO</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_gpu</span> <span class="o">=</span> <span class="n">cusparse</span><span class="o">.</span><span class="n">CSR</span><span class="p">(</span><span class="n">descrA</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">rowPtr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nzcols_gpu</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="c"># Allocating a page-locked piece of memory for the activity so that GPU could transfer data to the</span>
+        <span class="c"># main memory without the involvment of the CPU:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">pagelocked_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity_gpu_buffer</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer_pagelocked</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">pagelocked_empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">mem_flags</span><span class="o">=</span><span class="n">cuda</span><span class="o">.</span><span class="n">host_alloc_flags</span><span class="o">.</span><span class="n">WRITECOMBINED</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_total_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="c"># Helper array for normalization:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_ones_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="c"># Kernel that applies the normalisation:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_kernel</span> <span class="o">=</span> <span class="n">ElementwiseKernel</span><span class="p">(</span>
+                        <span class="s">&quot;int *nzrows, float *norm_total, float *weights&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;weights[i] *= norm_total[nzrows[i]]&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;divisive_normalize&quot;</span><span class="p">)</span>
+        <span class="c"># Kernel that calculates the learning:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hebbian_kernel</span> <span class="o">=</span> <span class="n">ElementwiseKernel</span><span class="p">(</span>
+                        <span class="s">&quot;float single_conn_lr, int *row, int *col, float *src_activity, float *dest_activity, float *result&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;result[i] += single_conn_lr * src_activity[col[i]] * dest_activity[row[i]]&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;hebbian_learning&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pycuda_stream</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+        <span class="c"># Finishing the initialisation that might have been delayed:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;apply_output_fns_init&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">should_apply</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns_init</span> <span class="o">=</span> <span class="n">should_apply</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns_init</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_learn_output_fns</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/gpu/projection.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

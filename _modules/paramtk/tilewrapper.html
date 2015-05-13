@@ -1,0 +1,637 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>paramtk.tilewrapper &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="paramtk" href="../paramtk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../paramtk.html" accesskey="U">paramtk</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for paramtk.tilewrapper</h1><div class="highlight"><pre>
+<span class="c"># Tile wrapping copied from http://tkinter.unpythonic.net/wiki/TileWrapper.</span>
+<span class="c"># Will be able to replace with ttk from Python 2.7, eventually.</span>
+
+<span class="c"># only create these gui classes if Tkinter is available (so param does</span>
+<span class="c"># not depend on Tkinter).</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">Tkinter</span>
+    <span class="n">Tkinter_imported</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">Tkinter_imported</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">if</span> <span class="n">Tkinter_imported</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">TkVersion</span> <span class="o">&gt;=</span> <span class="mf">8.5</span><span class="p">:</span>
+
+        <span class="k">class</span> <span class="nc">Style</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Sets the default value of the specified option(s) in style&quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">map_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Sets dynamic values of the specified option(s) in style. See </span>
+<span class="sd">                &quot;STATE MAPS&quot;, below.&quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">layoutSpec</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Define the widget layout for style style. See &quot;LAYOUTS&quot; below </span>
+<span class="sd">                for the format of layoutSpec. If layoutSpec is omitted, return the </span>
+<span class="sd">                layout specification for style style. &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">element_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Creates a new element in the current theme of type type. The </span>
+<span class="sd">                only built-in element type is image (see image(n)), although </span>
+<span class="sd">                themes may define other element types (see </span>
+<span class="sd">                Ttk_RegisterElementFactory). </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">element_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns a list of all elements defined in the current theme. &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">theme_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">basedon</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Creates a new theme. It is an error if themeName already exists. </span>
+<span class="sd">                If -parent is specified, the new theme will inherit styles, elements, </span>
+<span class="sd">                and layouts from the parent theme basedon. If -settings is present, </span>
+<span class="sd">                script is evaluated in the context of the new theme as per style theme </span>
+<span class="sd">                settings. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">theme_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">script</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Temporarily sets the current theme to themeName, evaluate script, </span>
+<span class="sd">                then restore the previous theme. Typically script simply defines styles </span>
+<span class="sd">                and elements, though arbitrary Tcl code may appear. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">theme_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns a list of the available themes. &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;style&quot;</span><span class="p">,</span> <span class="s">&quot;theme&quot;</span><span class="p">,</span> <span class="s">&quot;names&quot;</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">theme_use</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theme</span><span class="p">):</span>   
+                <span class="sd">&quot;&quot;&quot;Sets the current theme to themeName, and refreshes all widgets.&quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;style&quot;</span><span class="p">,</span> <span class="s">&quot;theme&quot;</span><span class="p">,</span> <span class="s">&quot;use&quot;</span><span class="p">,</span> <span class="n">theme</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Widget</span><span class="p">(</span><span class="n">Tkinter</span><span class="o">.</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Style</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="n">widgetName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="n">kw</span><span class="o">=</span><span class="p">{},</span> <span class="n">extra</span><span class="o">=</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">widgetName</span><span class="p">:</span>
+                    <span class="c">## why you would ever want to create a Tile Widget is behond me!</span>
+                    <span class="n">widgetName</span><span class="o">=</span><span class="s">&quot;ttk::widget&quot;</span>
+                <span class="n">Tkinter</span><span class="o">.</span><span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="n">widgetName</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">instate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">spec</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Test the widget&#39;s state. If script is not specified, returns 1</span>
+<span class="sd">                if the widget state matches statespec and 0 otherwise. If script </span>
+<span class="sd">                is specified, equivalent to if {[pathName instate stateSpec]} </span>
+<span class="sd">                script. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;instate&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">script</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Modify or inquire widget state. If stateSpec is present, sets </span>
+<span class="sd">                the widget state: for each flag in stateSpec, sets the corresponding</span>
+<span class="sd">                flag or clears it if prefixed by an exclamation point. Returns a new</span>
+<span class="sd">                state spec indicating which flags were changed: &#39;&#39;set changes </span>
+<span class="sd">                [pathName state spec] ; pathName state $changes&#39;&#39; will restore </span>
+<span class="sd">                pathName to the original state. If stateSpec is not specified, </span>
+<span class="sd">                returns a list of the currently-enabled state flags. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;state&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Button</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Button</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::button&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="c">###add frame support here--KWs</span>
+        <span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::frame&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Checkbutton</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Checkbutton</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::checkbutton&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Combobox</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Entry</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+                <span class="c"># HACK to work around strange parsing of list</span>
+                <span class="k">if</span> <span class="s">&#39;values&#39;</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
+                    <span class="n">values</span> <span class="o">=</span> <span class="n">kw</span><span class="p">[</span><span class="s">&#39;values&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
+                        <span class="n">kw</span><span class="p">[</span><span class="s">&#39;values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::combobox&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">current</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;If index is supplied, sets the combobox value to the element</span>
+<span class="sd">                at position newIndex in the list of -values. Otherwise, returns </span>
+<span class="sd">                the index of the current value in the list of -values or -1 if </span>
+<span class="sd">                the current value does not appear in the list.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;current&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Entry</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Entry</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::entry&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Force revalidation, independent of the conditions specified by </span>
+<span class="sd">                the -validate option. Returns 0 if the -validatecommand returns a</span>
+<span class="sd">                false value, or 1 if it returns a true value or is not specified.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;validate&quot;</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Label</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Label</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::label&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="c">###add LabelFrame class here--KW</span>
+        <span class="k">class</span> <span class="nc">LabelFrame</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Label</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::labelframe&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Menubutton</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Menubutton</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::menubutton&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Notebook</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::notebook&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Adds a new tab to the notebook. When the tab is selected, the </span>
+<span class="sd">                child window will be displayed. child must be a direct child of </span>
+<span class="sd">                the notebook window. See TAB OPTIONS for the list of available </span>
+<span class="sd">                options. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;add&quot;</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="o">+</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">))</span>
+
+            <span class="k">def</span> <span class="nf">forget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Removes the tab specified by index, unmaps and unmanages the </span>
+<span class="sd">                associated child window. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;forget&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns the numeric index of the tab specified by index, or </span>
+<span class="sd">                the total number of tabs if index is the string &quot;end&quot;. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;index&quot;</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Selects the specified tab; the associated child pane will </span>
+<span class="sd">                be displayed, and the previously-selected pane (if different)</span>
+<span class="sd">                is unmapped. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;select&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+
+            <span class="k">def</span> <span class="nf">tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Query or modify the options of the specific tab. If no</span>
+<span class="sd">                -option is specified, returns a dictionary of the tab option </span>
+<span class="sd">                values. If one -option is specified, returns the value of tha</span>
+<span class="sd">                t option. Otherwise, sets the -options to the corresponding </span>
+<span class="sd">                values. See TAB OPTIONS for the available options. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;tab&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="n">kw</span><span class="p">))</span>
+
+            <span class="k">def</span> <span class="nf">tabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns a list of all pane windows managed by the widget.&quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;tabs&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Paned"><a class="viewcode-back" href="../../Reference_Manual/paramtk.tilewrapper-module.html#paramtk.tilewrapper.Paned">[docs]</a>        <span class="k">class</span> <span class="nc">Paned</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            WIDGET OPTIONS</span>
+<span class="sd">                Name    Database name   Database class</span>
+<span class="sd">                -orient orient  Orient</span>
+<span class="sd">                Specifies the orientation of the window. If vertical, subpanes</span>
+<span class="sd">                are stacked top-to-bottom; if horizontal, subpanes are stacked </span>
+<span class="sd">                left-to-right.</span>
+
+<span class="sd">            PANE OPTIONS</span>
+<span class="sd">                The following options may be specified for each pane:</span>
+<span class="sd">                Name    Database name   Database class</span>
+<span class="sd">                -weight weight  Weight</span>
+<span class="sd">                An integer specifying the relative stretchability of the pane.</span>
+<span class="sd">                When the paned window is resized, the extra space is added or</span>
+<span class="sd">                subracted to each pane proportionally to its -weight</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::panedwindow&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Paned.add"><a class="viewcode-back" href="../../Reference_Manual/paramtk.tilewrapper-module.html#paramtk.tilewrapper.Paned.add">[docs]</a>            <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subwindow</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Adds a new pane to the window. subwindow must be a direct child of</span>
+<span class="sd">                the paned window pathname. See PANE OPTIONS for the list of available </span>
+<span class="sd">                options. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;add&quot;</span><span class="p">,</span> <span class="n">subwindow</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="n">kw</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Paned.forget"><a class="viewcode-back" href="../../Reference_Manual/paramtk.tilewrapper-module.html#paramtk.tilewrapper.Paned.forget">[docs]</a>            <span class="k">def</span> <span class="nf">forget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">pane</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Removes the specified subpane from the widget. pane is either an </span>
+<span class="sd">                integer index or the name of a managed subwindow. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;forget&quot;</span><span class="p">,</span> <span class="n">pane</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Paned.insert"><a class="viewcode-back" href="../../Reference_Manual/paramtk.tilewrapper-module.html#paramtk.tilewrapper.Paned.insert">[docs]</a>            <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">subwindow</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Inserts a pane at the specified position. pos is either the string </span>
+<span class="sd">                end, an integer index, or the name of a managed subwindow. If subwindow </span>
+<span class="sd">                is already managed by the paned window, moves it to the specified </span>
+<span class="sd">                position. See PANE OPTIONS for the list of available options. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;insert&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">subwindow</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="n">kw</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Paned.pane"><a class="viewcode-back" href="../../Reference_Manual/paramtk.tilewrapper-module.html#paramtk.tilewrapper.Paned.pane">[docs]</a>            <span class="k">def</span> <span class="nf">pane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Query or modify the options of the specified pane, where pane is </span>
+<span class="sd">                either an integer index or the name of a managed subwindow. If no </span>
+<span class="sd">                -option is specified, returns a dictionary of the pane option values. </span>
+<span class="sd">                If one -option is specified, returns the value of that option. </span>
+<span class="sd">                Otherwise, sets the -options to the corresponding values. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;pane&quot;</span><span class="p">,</span> <span class="n">pane</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="n">kw</span><span class="p">))</span>
+
+</div></div>
+        <span class="k">class</span> <span class="nc">Progressbar</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::progressbar&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Increments the -value by amount. amount defaults to 1.0 </span>
+<span class="sd">                if omitted. &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;step&quot;</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;ttk::progressbar::start&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;ttk::progressbar::stop&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">)</span>
+
+
+
+        <span class="k">class</span> <span class="nc">Radiobutton</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Radiobutton</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::radiobutton&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Scrollbar</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Scrollbar</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::scrollbar&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Separator</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&quot;ttk::separator&quot;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">Treeview</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Listbox</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="s">&#39;ttk::treeview&#39;</span><span class="p">,</span> <span class="n">cnf</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">newchildren</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;If newchildren is not specified, returns the list of </span>
+<span class="sd">                children belonging to item.</span>
+
+<span class="sd">                If newchildren is specified, replaces item&#39;s child list </span>
+<span class="sd">                with newchildren. Items in the old child list not present </span>
+<span class="sd">                in the new child list are detached from the tree. None of </span>
+<span class="sd">                the items in newchildren may be an ancestor of item.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;children&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">newchildren</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Query or modify the options for the specified column. </span>
+<span class="sd">                If no options are specified, returns a dictionary of </span>
+<span class="sd">                option/value pairs. If a single option is specified, </span>
+<span class="sd">                returns the value of that option. Otherwise, the options</span>
+<span class="sd">                are updated with the specified values. The following </span>
+<span class="sd">                options may be set on each column:</span>
+
+<span class="sd">                -id name</span>
+<span class="sd">                    The column name. This is a read-only option. For example, </span>
+<span class="sd">                    [$pathname column #n -id] returns the data column </span>
+<span class="sd">                    associated with data column #n. </span>
+<span class="sd">                -anchor</span>
+<span class="sd">                    Specifies how the text in this column should be aligned </span>
+<span class="sd">                    with respect to the cell. One of n, ne, e, se, s, sw, w, </span>
+<span class="sd">                    nw, or center. </span>
+<span class="sd">                -width w</span>
+<span class="sd">                    The width of the column in pixels. Default is something </span>
+<span class="sd">                    reasonable, probably 200 or so. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Deletes each of the items and all of their descendants. </span>
+<span class="sd">                The root item may not be deleted. See also: detach. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;delete&quot;</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Unlinks all of the specified items from the tree. The </span>
+<span class="sd">                items and all of their descendants are still present and </span>
+<span class="sd">                may be reinserted at another point in the tree but will </span>
+<span class="sd">                not be displayed. The root item may not be detached. See</span>
+<span class="sd">                also: delete. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;detach&quot;</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns 1 if the specified item is present in the </span>
+<span class="sd">                tree, 0 otherwise. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;exists&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">focus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;If item is specified, sets the focus item to item. </span>
+<span class="sd">                Otherwise, returns the current focus item, or {} if there</span>
+<span class="sd">                is none. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="s">&quot;focus&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">heading</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Query or modify the heading options for the specified </span>
+<span class="sd">                column. Valid options are:</span>
+
+<span class="sd">                -text text</span>
+<span class="sd">                    The text to display in the column heading. </span>
+<span class="sd">                -image imageName</span>
+<span class="sd">                    Specifies an image to display to the right of the column heading. </span>
+<span class="sd">                -command script</span>
+<span class="sd">                    A script to evaluate when the heading label is pressed. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">identify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns a description of the widget component under the point given </span>
+<span class="sd">                by x and y. The return value is a list with one of the following forms:</span>
+
+<span class="sd">                heading #n</span>
+<span class="sd">                    The column heading for display column #n. </span>
+<span class="sd">                separator #n</span>
+<span class="sd">                    The border to the right of display column #n. </span>
+<span class="sd">                cell itemid #n</span>
+<span class="sd">                    The data value for item itemid in display column #n. </span>
+<span class="sd">                item itemid element</span>
+<span class="sd">                    The tree label for item itemid; element is one of text, image, or </span>
+<span class="sd">                    indicator, or another element name depending on the style. </span>
+<span class="sd">                row itemid</span>
+<span class="sd">                    The y position is over the item but x does not identify any element</span>
+<span class="sd">                    or displayed data value. </span>
+<span class="sd">                nothing</span>
+<span class="sd">                    The coordinates are not over any identifiable object. </span>
+
+<span class="sd">                See COLUMN IDENTIFIERS for a discussion of display columns and data </span>
+<span class="sd">                columns.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns the integer index of item within its parent&#39;s list of </span>
+<span class="sd">                children. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Creates a new item. parent is the item ID of the parent item, or </span>
+<span class="sd">                the empty string {} to create a new top-level item. index is an </span>
+<span class="sd">                integer, or the value end, specifying where in the list of parent&#39;s </span>
+<span class="sd">                children to insert the new item. If index is less than or equal to </span>
+<span class="sd">                zero, the new node is inserted at the beginning; if index is greater </span>
+<span class="sd">                than or equal to the current number of children, it is inserted at the </span>
+<span class="sd">                end. If -id is specified, it is used as the item identifier; id must </span>
+<span class="sd">                not already exist in the tree. Otherwise, a new unique identifier is </span>
+<span class="sd">                generated.</span>
+<span class="sd">                returns the item identifier of the newly created item. See ITEM </span>
+<span class="sd">                OPTIONS for the list of available options.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+
+            <span class="k">def</span> <span class="nf">item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Query or modify the options for the specified item. If no -option </span>
+<span class="sd">                is specified, returns a dictionary of option/value pairs. If a single </span>
+<span class="sd">                -option is specified, returns the value of that option. Otherwise, the</span>
+<span class="sd">                item&#39;s options are updated with the specified values. See ITEM OPTIONS </span>
+<span class="sd">                for the list of available options. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Moves item to position index in parent&#39;s list of children. It is </span>
+<span class="sd">                illegal to move an item under one of its descendants.</span>
+
+<span class="sd">                If index is less than or equal to zero, item is moved to the </span>
+<span class="sd">                beginning; if greater than or equal to the number of children, it&#39;s </span>
+<span class="sd">                moved to the end.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns the identifier of item&#39;s next sibling, or {} if item is the </span>
+<span class="sd">                last child of its parent. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns the ID of the parent of item, or {} if item is at the top </span>
+<span class="sd">                level of the hierarchy. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">prev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns the identifier of item&#39;s previous sibling, or {} if item is </span>
+<span class="sd">                the first child of its parent. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+
+            <span class="k">def</span> <span class="nf">selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Returns the list of selected items&quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">selection_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;items becomes the new selection. &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">selection_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Add items to the selection &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">selection_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Remove items from the selection &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">selection_toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Toggle the selection state of each item in items. &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;If value is specified, sets the value of column column in item item, </span>
+<span class="sd">                otherwise returns the current value. See COLUMN IDENTIFIERS. </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">pass</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        
+        <span class="k">print</span> <span class="s">&quot;GUI: tcl/tk version is older than 8.5; using simple back-up widgets.&quot;</span>
+
+        <span class="c"># In the future, could add more fake tile widgets (or handle more methods of</span>
+        <span class="c"># existing ones) if required.</span>
+
+        <span class="k">class</span> <span class="nc">FakeCombobox</span><span class="p">(</span><span class="n">Tkinter</span><span class="o">.</span><span class="n">OptionMenu</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">textvariable</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="c"># missing state=readonly</span>
+                <span class="c"># missing current()</span>
+                <span class="n">Tkinter</span><span class="o">.</span><span class="n">OptionMenu</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">textvariable</span><span class="p">,</span><span class="o">*</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="n">Combobox</span> <span class="o">=</span> <span class="n">FakeCombobox</span>
+
+
+        <span class="k">class</span> <span class="nc">FakeProgressbar</span><span class="p">(</span><span class="n">Tkinter</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">cnf</span><span class="o">=</span><span class="p">{},</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+                <span class="n">Tkinter</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">amount</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+        <span class="n">Progressbar</span> <span class="o">=</span> <span class="n">FakeProgressbar</span>
+
+
+        <span class="c"># CB: tix has Notebook, Combobox, and Meter, but I wouldn&#39;t</span>
+        <span class="c"># want to rely on Tix being present (even though it is</span>
+        <span class="c"># supposed to be part of Python&#39;s standard library).</span>
+        
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/paramtk/tilewrapper.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../paramtk.html" >paramtk</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

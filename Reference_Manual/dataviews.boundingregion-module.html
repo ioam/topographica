@@ -1,0 +1,300 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.boundingregion &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataviews-boundingregion">
+<h1>dataviews.boundingregion<a class="headerlink" href="#dataviews-boundingregion" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancef460e08ae4.svg" usemap="#inheritancef460e08ae4" class="inheritance"/></div><map id="inheritancef460e08ae4" name="inheritancef460e08ae4">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="dataviews.boundingregion.pyc-module.html">dataviews.boundingregion.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-dataviews.boundingregion">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-dataviews.boundingregion" title="Permalink to this headline">¶</a></h2>
+<p>Bounding regions and bounding boxes.</p>
+<dl class="class">
+<dt id="dataviews.boundingregion.AARectangle">
+<em class="property">class </em><tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">AARectangle</tt><big>(</big><em>*points</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#AARectangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.AARectangle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Axis-aligned rectangle class.</p>
+<p>Defines the smallest axis-aligned rectangle that encloses a set of
+points.</p>
+<p>Usage:  aar = AARectangle( (x1,y1),(x2,y2), ... , (xN,yN) )</p>
+<dl class="method">
+<dt id="dataviews.boundingregion.AARectangle.bottom">
+<tt class="descname">bottom</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#AARectangle.bottom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.AARectangle.bottom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the y-coordinate of the bottom of the rectangle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.AARectangle.centroid">
+<tt class="descname">centroid</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#AARectangle.centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.AARectangle.centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the centroid of the rectangle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.AARectangle.lbrt">
+<tt class="descname">lbrt</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#AARectangle.lbrt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.AARectangle.lbrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return (left,bottom,right,top) as a tuple.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.AARectangle.left">
+<tt class="descname">left</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#AARectangle.left"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.AARectangle.left" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the x-coordinate of the left side of the rectangle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.AARectangle.right">
+<tt class="descname">right</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#AARectangle.right"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.AARectangle.right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the x-coordinate of the right side of the rectangle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.AARectangle.top">
+<tt class="descname">top</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#AARectangle.top"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.AARectangle.top" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the y-coordinate of the top of the rectangle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.boundingregion.BoundingBox">
+<em class="property">class </em><tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">BoundingBox</tt><big>(</big><em>**args</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.boundingregion.BoundingRegion" title="dataviews.boundingregion.BoundingRegion"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.boundingregion.BoundingRegion</span></tt></a></p>
+<p>A rectangular bounding box defined either by two points forming
+an axis-aligned rectangle (or simply a radius for a square).</p>
+<dl class="method">
+<dt id="dataviews.boundingregion.BoundingBox.contains">
+<tt class="descname">contains</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBox.contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBox.contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given point is contained within the
+bounding box, where all boundaries of the box are
+considered to be inclusive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.BoundingBox.contains_exclusive">
+<tt class="descname">contains_exclusive</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBox.contains_exclusive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBox.contains_exclusive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the given point is contained within the
+bounding box, where the bottom and right boundaries are
+considered exclusive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.BoundingBox.containsbb_exclusive">
+<tt class="descname">containsbb_exclusive</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBox.containsbb_exclusive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBox.containsbb_exclusive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given BoundingBox x is contained within the
+bounding box, where at least one of the boundaries of the box has
+to be exclusive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.BoundingBox.containsbb_inclusive">
+<tt class="descname">containsbb_inclusive</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBox.containsbb_inclusive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBox.containsbb_inclusive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given BoundingBox x is contained within the
+bounding box, including cases of exact match.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.BoundingBox.lbrt">
+<tt class="descname">lbrt</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBox.lbrt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBox.lbrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>return left,bottom,right,top values for the BoundingBox.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.boundingregion.BoundingBox.upperexclusive_contains">
+<tt class="descname">upperexclusive_contains</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBox.upperexclusive_contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBox.upperexclusive_contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given point is contained within the
+bounding box, where the right and upper boundaries
+are exclusive, and the left and lower boundaries are
+inclusive.  Useful for tiling a plane into non-overlapping
+regions.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.boundingregion.BoundingBoxIntersection">
+<em class="property">class </em><tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">BoundingBoxIntersection</tt><big>(</big><em>*boxes</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingBoxIntersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingBoxIntersection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.boundingregion.BoundingBox" title="dataviews.boundingregion.BoundingBox"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.boundingregion.BoundingBox</span></tt></a></p>
+<p>A BoundingBox initialized as the intersection of the supplied list of BoundingBoxes.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.boundingregion.BoundingCircle">
+<em class="property">class </em><tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">BoundingCircle</tt><big>(</big><em>center=(0.0</em>, <em>0.0)</em>, <em>radius=0.5</em>, <em>**args</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingCircle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.boundingregion.BoundingRegion" title="dataviews.boundingregion.BoundingRegion"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.boundingregion.BoundingRegion</span></tt></a></p>
+<p>A circular BoundingRegion.</p>
+<p>Takes parameters center (a single 2D point (x,y)) and radius (a
+scalar radius).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.boundingregion.BoundingEllipse">
+<em class="property">class </em><tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">BoundingEllipse</tt><big>(</big><em>**args</em><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingEllipse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingEllipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.boundingregion.BoundingBox" title="dataviews.boundingregion.BoundingBox"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.boundingregion.BoundingBox</span></tt></a></p>
+<p>Similar to BoundingBox, but the region is the ellipse
+inscribed within the rectangle.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.boundingregion.BoundingRegion">
+<em class="property">class </em><tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">BoundingRegion</tt><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract bounding region class, for any portion of a 2D plane.</p>
+<p>Only subclasses can be instantiated directly.</p>
+<dl class="method">
+<dt id="dataviews.boundingregion.BoundingRegion.centroid">
+<tt class="descname">centroid</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingRegion.centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingRegion.centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the coordinates of the center of this BoundingBox</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.boundingregion.BoundingRegionParameter">
+<tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">BoundingRegionParameter</tt><a class="reference internal" href="../_modules/dataviews/boundingregion.html#BoundingRegionParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.BoundingRegionParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value can be any BoundingRegion instance, enclosing a
+region in a 2D plane.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.boundingregion.Cartesian2DPoint">
+<tt class="descclassname">dataviews.boundingregion.</tt><tt class="descname">Cartesian2DPoint</tt><a class="reference internal" href="../_modules/dataviews/boundingregion.html#Cartesian2DPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.boundingregion.Cartesian2DPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value represents a point in a 2D Cartesian plane.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">dataviews.boundingregion</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-dataviews.boundingregion">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/dataviews.boundingregion-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+<map id="inheritancefa9f2f7953" name="inheritancefa9f2f7953">
+<area shape="rect" id="node1" href="#topo.hardware.playerrobot.CameraDevice" title="A Player camera device." alt="" coords="675,54,965,79"/>
+<area shape="rect" id="node2" href="#topo.hardware.playerrobot.PlayerDevice" title="Generic Player device object." alt="" coords="349,78,627,103"/>
+<area shape="rect" id="node3" href="#topo.hardware.playerrobot.PTZDevice" title="Player Pan/Tilt/Zoom (PTZ) device." alt="" coords="689,103,951,129"/>
+<area shape="rect" id="node4" href="#topo.hardware.playerrobot.PlayerClient" title="Player object wrapper for playerc.client objects." alt="" coords="353,127,623,153"/>
+<area shape="rect" id="node5" href="#topo.hardware.playerrobot.PlayerObject" title="A generic threadsafe wrapper for client and proxy objects" alt="" coords="16,103,291,129"/>
+<area shape="rect" id="node7" href="#topo.hardware.playerrobot.PlayerRobot" title="Player Robot interface." alt="" coords="18,5,289,30"/>
+</map>

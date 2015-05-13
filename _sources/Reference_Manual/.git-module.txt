@@ -1,0 +1,14 @@
+***************
+.git
+***************
+
+.. inheritance-diagram:: .git
+
+
+
+Module
+======
+
+.. automodule:: .git
+   :members:
+   :show-inheritance:

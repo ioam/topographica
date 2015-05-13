@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tkgui</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tk-based graphical user interface (GUI).</span>
+
+<span class="sd">This package implements a Topographica GUI based on the Tk toolkit,</span>
+<span class="sd">through the Tkinter interface to Python.  The rest of Topographica</span>
+<span class="sd">does not depend on this package or any module in it, and thus other</span>
+<span class="sd">GUIs or other types of interfaces can also be used.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">Tkinter</span>
+
+<span class="kn">import</span> <span class="nn">paramtk</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+<span class="kn">from</span> <span class="nn">topoconsole</span> <span class="kn">import</span> <span class="n">TopoConsole</span><span class="p">,</span><span class="n">ControllableMenu</span>
+
+<span class="c">#### notes about tkgui ####</span>
+<span class="c">#</span>
+<span class="c">## Geometry management</span>
+<span class="c"># In several places we use pack() when grid() would probably be</span>
+<span class="c"># simpler. Check you know which fits a task better rather than copying</span>
+<span class="c"># existing code.</span>
+<span class="c">#</span>
+<span class="c">## Dialogs</span>
+<span class="c"># Don&#39;t know how to theme them (can&#39;t make them inherit from</span>
+<span class="c"># our own class, for instance). Consider making our own dialog</span>
+<span class="c"># boxes (subclass of Tkguiwindow) using transient and grab_set:</span>
+<span class="c"># http://thread.gmane.org/gmane.comp.python.tkinter/657/focus=659</span>
+<span class="c">#</span>
+<span class="c">## Mainloop</span>
+<span class="c"># Because we don&#39;t call mainloop(), it&#39;s necessary to call</span>
+<span class="c"># update() or update_idletasks() sometimes. Also, I think that sometimes</span>
+<span class="c"># current graphics do not update properly (but I&#39;m not sure - I don&#39;t</span>
+<span class="c"># have a specific example yet). Need to clean up all the scattered</span>
+<span class="c"># update() and update_idletasks()...</span>
+<span class="c">#</span>
+<span class="c">## Window or Frame?</span>
+<span class="c"># Maybe one day everything (PlotGroupPanels, ParametersFrameWithApplys,</span>
+<span class="c"># ModelEditor, ...) will be Frames inside one master window (for</span>
+<span class="c"># e.g. a matlab-like workspace).  Nobody&#39;s been worrying too much</span>
+<span class="c"># about whether something&#39;s a Frame or a window when they&#39;ve been</span>
+<span class="c"># implementing things, so &#39;close&#39; buttons, title methods, and so on</span>
+<span class="c"># are a bit of a mix. This needs to be cleaned up when we have a</span>
+<span class="c"># final window organization method in mind.</span>
+
+
+<span class="c"># When not using the GUI, Topographica does not ordinarily import any of</span>
+<span class="c"># the classes in the separate Topographica packages. For example, none</span>
+<span class="c"># of the pattern types in topo.pattern is imported in Topographica by</span>
+<span class="c"># default.  But for the GUI, we want all such things to be available</span>
+<span class="c"># as lists from which the user can select.  To do this, we import all</span>
+<span class="c"># pattern types and other such classes here. User-defined classes will</span>
+<span class="c"># also appear in the GUI menus if they are derived from any class</span>
+<span class="c"># derived from the one specified in each widget, and imported before</span>
+<span class="c"># the relevant GUI window starts.</span>
+<span class="kn">from</span> <span class="nn">imagen</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.coordmapper</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.base.ep</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.learningfn</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.projection</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.responsefn</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+<span class="kn">from</span> <span class="nn">topo.analysis</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (see comment above)</span>
+
+
+
+<span class="c">##########</span>
+<span class="c">### Which os is being used (for gui purposes)?</span>
+<span class="c">#</span>
+<span class="c"># system_platform can be:</span>
+<span class="c"># &quot;linux&quot;</span>
+<span class="c"># &quot;mac&quot;</span>
+<span class="c"># &quot;win&quot;</span>
+<span class="c"># &quot;unknown&quot;</span>
+<span class="c">#</span>
+<span class="c"># If you are programming tkgui and need to do something special</span>
+<span class="c"># for some other platform (or to further distinguish the above</span>
+<span class="c"># platforms), please modify this code.</span>
+<span class="c">#</span>
+<span class="c"># Right now tkgui only needs to detect if the platform is linux (do I</span>
+<span class="c"># mean any kind of non-OS X unix*?) or mac, because there is some</span>
+<span class="c"># special-purpose code for both those two: the mac code below, and the</span>
+<span class="c"># menu-activating code in topoconsole.  We might have some Windows-</span>
+<span class="c"># specific code for the window icons later on, too.</span>
+<span class="c"># * actually it&#39;s the window manager that&#39;s important, right?</span>
+<span class="c"># Does tkinter/tk itself give any useful information?</span>
+<span class="c"># What about root.tk.call(&quot;tk&quot;,&quot;windowingsystem&quot;)?</span>
+
+<span class="n">system_platform</span> <span class="o">=</span> <span class="s">&#39;unknown&#39;</span>
+<span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">==</span><span class="s">&#39;Linux&#39;</span><span class="p">:</span>
+    <span class="n">system_platform</span> <span class="o">=</span> <span class="s">&#39;linux&#39;</span>
+<span class="k">elif</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">==</span><span class="s">&#39;Darwin&#39;</span> <span class="ow">or</span> <span class="n">platform</span><span class="o">.</span><span class="n">mac_ver</span><span class="p">()[</span><span class="mi">0</span><span class="p">]:</span>
+    <span class="n">system_platform</span> <span class="o">=</span> <span class="s">&#39;mac&#39;</span>
+<span class="k">elif</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">==</span><span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+    <span class="n">system_platform</span> <span class="o">=</span> <span class="s">&#39;win&#39;</span>
+<span class="c">##########</span>
+
+
+
+<span class="c">#</span>
+<span class="c"># Define up the right click (context menu) events. These variables can</span>
+<span class="c"># be appended or overridden in .topographicarc, if the user has some</span>
+<span class="c"># crazy input device.</span>
+<span class="c">#</span>
+
+<span class="k">if</span> <span class="n">system_platform</span><span class="o">==</span><span class="s">&#39;mac&#39;</span><span class="p">:</span>
+    <span class="c"># if it&#39;s on the mac, these are the context-menu events</span>
+    <span class="n">right_click_events</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&lt;Button-2&gt;&#39;</span><span class="p">,</span><span class="s">&#39;&lt;Button-3&gt;&#39;</span><span class="p">,</span><span class="s">&#39;&lt;Control-Button-1&gt;&#39;</span><span class="p">]</span>
+    <span class="n">right_click_release_events</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ButtonRelease-2&#39;</span><span class="p">,</span><span class="s">&#39;ButtonRelease-3&#39;</span><span class="p">,</span><span class="s">&#39;Control-ButtonRelease-1&#39;</span><span class="p">]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c"># everywhere else (I think) it&#39;s Button-3</span>
+    <span class="n">right_click_events</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&lt;Button-3&gt;&#39;</span><span class="p">]</span>
+    <span class="n">right_click_release_events</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ButtonRelease-3&#39;</span><span class="p">]</span>
+
+
+<span class="k">global</span> <span class="n">TK_SUPPORTS_DOCK</span>
+<span class="n">TK_SUPPORTS_DOCK</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+<span class="c"># CEBALERT: this function needs some cleaning up.</span>
+<span class="c"># Some stuff should be moved out to paramtk,</span>
+<span class="c"># which could also make this file much simpler.</span>
+
+<span class="c"># gets set to the TopoConsole instance created by start.</span>
+<span class="n">console</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="start"><a class="viewcode-back" href="../../Reference_Manual/topo.tkgui.html#topo.tkgui.start">[docs]</a><span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">mainloop</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">banner</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">exit_on_quit</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start Tk and read in an options_database file (if present), then</span>
+<span class="sd">    open a TopoConsole.</span>
+
+<span class="sd">    Does nothing if the method has previously been called (i.e. the</span>
+<span class="sd">    module-level console variable is not None).</span>
+
+<span class="sd">    mainloop: If True, then the command-line is frozen while the GUI</span>
+<span class="sd">    is open.  If False, then commands can be entered at the command-line</span>
+<span class="sd">    even while the GUI is operational.  Default is False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">console</span>
+
+    <span class="c">### Return immediately if console already set</span>
+    <span class="c"># (console itself might have been destroyed but we still want to</span>
+    <span class="c"># quit this function before starting another Tk instance, etc)</span>
+    <span class="k">if</span> <span class="n">console</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">banner</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;Launching GUI&#39;</span>
+
+    <span class="c"># tcl equivalent of &#39;if not hasattr(wm,forget)&#39; would be better</span>
+    <span class="k">if</span> <span class="n">system_platform</span><span class="o">==</span><span class="s">&#39;mac&#39;</span> <span class="ow">or</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">TkVersion</span><span class="o">&lt;</span><span class="mf">8.5</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">TK_SUPPORTS_DOCK</span>
+        <span class="n">TK_SUPPORTS_DOCK</span><span class="o">=</span><span class="bp">False</span>
+
+    <span class="n">paramtk</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">menubar</span> <span class="o">=</span> <span class="n">ControllableMenu</span><span class="p">(</span><span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+    <span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">menubar</span><span class="p">)</span>
+
+    <span class="c"># default,clam,alt,classic</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;ttk::style&quot;</span><span class="p">,</span><span class="s">&quot;theme&quot;</span><span class="p">,</span><span class="s">&quot;use&quot;</span><span class="p">,</span><span class="s">&quot;classic&quot;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c"># Try to read in options from an options_database file</span>
+    <span class="c"># (see http://www.itworld.com/AppDev/1243/UIR000616regex/</span>
+    <span class="c"># or p. 49 Grayson)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">options_database</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&quot;topo&quot;</span><span class="p">,</span><span class="s">&quot;tkgui&quot;</span><span class="p">,</span><span class="s">&quot;options_database&quot;</span><span class="p">)</span>
+        <span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">option_readfile</span><span class="p">(</span><span class="n">options_database</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;Read options database from&quot;</span><span class="p">,</span><span class="n">options_database</span>
+    <span class="k">except</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">TclError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">console</span> <span class="o">=</span> <span class="n">TopoConsole</span><span class="p">(</span><span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="p">,</span><span class="n">exit_on_quit</span><span class="p">)</span>
+
+    <span class="c"># Provide a way for other code to access the GUI when necessary</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">=</span><span class="n">console</span>
+
+
+    <span class="c"># This alows context menus to work on the Mac.  Widget code should bind</span>
+    <span class="c"># contextual menus to the virtual event &lt;&lt;right-click&gt;&gt;, not</span>
+    <span class="c"># &lt;Button-3&gt;.</span>
+    <span class="n">console</span><span class="o">.</span><span class="n">event_add</span><span class="p">(</span><span class="s">&#39;&lt;&lt;right-click&gt;&gt;&#39;</span><span class="p">,</span><span class="o">*</span><span class="n">right_click_events</span><span class="p">)</span>
+    <span class="n">console</span><span class="o">.</span><span class="n">event_add</span><span class="p">(</span><span class="s">&#39;&lt;&lt;right-click-release&gt;&gt;&#39;</span><span class="p">,</span><span class="o">*</span><span class="n">right_click_release_events</span><span class="p">)</span>
+
+    <span class="c"># GUI/threads:</span>
+    <span class="c"># http://thread.gmane.org/gmane.comp.python.scientific.user/4153</span>
+    <span class="c"># (inc. ipython info)</span>
+    <span class="c"># (Also http://mail.python.org/pipermail/python-list/2000-January/021250.html)</span>
+
+    <span class="c"># mainloop() freezes the commandline until the GUI window exits.</span>
+    <span class="c"># Without this line the command-line remains responsive.</span>
+    <span class="k">if</span> <span class="n">mainloop</span><span class="p">:</span> <span class="n">paramtk</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+
+
+
+
+
+</div>
+<span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">pylabplot</span>
+<span class="c">#######################</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">start</span><span class="p">(</span><span class="n">mainloop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">pylabplot</span><span class="o">.</span><span class="n">PylabPlotCommand</span><span class="o">.</span><span class="n">display_window</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/tkgui.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

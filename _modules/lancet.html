@@ -1,0 +1,269 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for lancet</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Lancet consists of three fundamental class types: Argument Specifiers,</span>
+<span class="sd">Command Templates and Launchers. The review_and_launch decorator is a</span>
+<span class="sd">helper utility that helps coordinate the use of these objects.</span>
+
+<span class="sd">Argument Specifiers</span>
+<span class="sd">-------------------</span>
+
+<span class="sd">Argument specifiers are intended to offer a succinct, declarative and</span>
+<span class="sd">composable way of specifying large parameter sets. High-dimensional</span>
+<span class="sd">parameter sets are typical of large-scale scientific models and can</span>
+<span class="sd">make specifying such models and simulations difficult. Using argument</span>
+<span class="sd">specifiers, you can document how the parameters of your model vary</span>
+<span class="sd">across runs without extended lists of arguments or requiring deeply</span>
+<span class="sd">nested loops.</span>
+
+<span class="sd">Argument specifiers can be freely intermixed with Python code,</span>
+<span class="sd">simplifying the use of scientific software with a Python</span>
+<span class="sd">interface. They also invoke commandline programs using CommandTemplate</span>
+<span class="sd">objects to build commands and Launcher objects to execute</span>
+<span class="sd">them. Argument specifiers can compose together using Cartesian</span>
+<span class="sd">Products or Concatenation to express huge numbers of argument sets</span>
+<span class="sd">concisely. In this way they can help simplify the management of</span>
+<span class="sd">simulation, analysis and visualisation tools with Python.</span>
+
+<span class="sd">Command Templates</span>
+<span class="sd">------------------</span>
+
+<span class="sd">When working with external tools, a command template is needed to turn</span>
+<span class="sd">an argument specifier into an executable command. These objects are</span>
+<span class="sd">designed to be customisable with sensible defaults to reduce</span>
+<span class="sd">boilerplate. They may require argument specifiers with a certain</span>
+<span class="sd">structure (certain argument names and value types) to operate</span>
+<span class="sd">correctly.</span>
+
+<span class="sd">Launchers</span>
+<span class="sd">---------</span>
+
+<span class="sd">A Launcher is designed to execute commands on a given computational</span>
+<span class="sd">platform, making use of as much concurrency where possible. The</span>
+<span class="sd">default Launcher class executes commands locally while the QLauncher</span>
+<span class="sd">class is designed to launch commands on Sun Grid Engine clusters.</span>
+
+<span class="sd">The review_and_launch decorator</span>
+<span class="sd">-------------------------------</span>
+
+<span class="sd">This decorator helps codify a pattern of Lancet use that checks for</span>
+<span class="sd">consistency and offers an in-depth review of all settings before</span>
+<span class="sd">launch. The goal is to help users identify mistakes early before</span>
+<span class="sd">consuming computational time and resources.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;2013.11.2&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">lancet.core</span> <span class="kn">import</span> <span class="o">*</span>       <span class="c"># pyflakes:ignore (appropriate import)</span>
+<span class="kn">from</span> <span class="nn">lancet.dynamic</span> <span class="kn">import</span> <span class="o">*</span>    <span class="c"># pyflakes:ignore (appropriate import)</span>
+<span class="kn">from</span> <span class="nn">lancet.launch</span> <span class="kn">import</span> <span class="o">*</span>     <span class="c"># pyflakes:ignore (appropriate import)</span>
+<span class="kn">from</span> <span class="nn">lancet.filetypes</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pyflakes:ignore (appropriate import)</span>
+
+
+<div class="viewcode-block" id="vcs_metadata"><a class="viewcode-back" href="../Reference_Manual/lancet-module.html#lancet.vcs_metadata">[docs]</a><span class="k">class</span> <span class="nc">vcs_metadata</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple utility to capture basic version control information for</span>
+<span class="sd">    Git, SVN and Mercurial. Returns a dictionary with the version,</span>
+<span class="sd">    latest commit message and the diffs relative to the current</span>
+<span class="sd">    working directories. Can be customized by setting the commands</span>
+<span class="sd">    dictionary at the class level.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       List of repositories to generate version control information from.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">commands</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;.git&#39;</span><span class="p">:([</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;rev-parse&#39;</span><span class="p">,</span> <span class="s">&#39;HEAD&#39;</span><span class="p">],</span>
+                                           <span class="p">[</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="s">&#39;--oneline&#39;</span><span class="p">,</span> <span class="s">&#39;-n&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">],</span>
+                                           <span class="p">[</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;diff&#39;</span><span class="p">]),</span>
+                                   <span class="s">&#39;.svn&#39;</span><span class="p">:([</span><span class="s">&#39;svnversion&#39;</span><span class="p">],</span>
+                                           <span class="p">[</span><span class="s">&#39;svn&#39;</span><span class="p">,</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="s">&#39;-l&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;-q&#39;</span><span class="p">],</span>
+                                           <span class="p">[</span><span class="s">&#39;svn&#39;</span><span class="p">,</span> <span class="s">&#39;diff&#39;</span><span class="p">]),</span>
+                                   <span class="s">&#39;.hg&#39;</span><span class="p">:</span> <span class="p">([</span><span class="s">&#39;hg&#39;</span><span class="p">,</span> <span class="s">&#39;parents&#39;</span><span class="p">,</span> <span class="s">&#39;--template&#39;</span><span class="p">,</span> <span class="s">&#39;&quot;{rev}:{node}&quot;&#39;</span><span class="p">],</span>
+                                           <span class="p">[</span><span class="s">&#39;hg&#39;</span><span class="p">,</span> <span class="s">&#39;log&#39;</span><span class="p">,</span>  <span class="s">&#39;-l&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">],</span>
+                                           <span class="p">[</span><span class="s">&#39;hg&#39;</span><span class="p">,</span> <span class="s">&#39;diff&#39;</span><span class="p">])},</span>
+
+       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The subprocess command lists to get the version, commit</span>
+<span class="s">       message and diffs for different version control systems. The</span>
+<span class="s">       commands are executed if a subdirectory matching the dictionary</span>
+<span class="s">       key exists&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">params_to_override</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a single path string or a list of path strings and</span>
+<span class="sd">        returns the corresponing version control information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params_to_override</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">paths</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;No paths to version controlled repositories given.&quot;</span><span class="p">)</span>
+
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">paths</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">paths</span>
+
+        <span class="k">def</span> <span class="nf">_desc</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">vcs</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">vcs</span><span class="p">)):</span>
+                    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">vcs</span><span class="p">][</span><span class="n">ind</span><span class="p">],</span>
+                                            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">abspaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;vcs_versions&#39;</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">((</span><span class="n">path</span><span class="p">,</span> <span class="n">_desc</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">abspaths</span><span class="p">),</span>
+                <span class="s">&#39;vcs_messages&#39;</span><span class="p">:</span>  <span class="nb">dict</span><span class="p">((</span><span class="n">path</span><span class="p">,</span> <span class="n">_desc</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">abspaths</span><span class="p">),</span>
+                <span class="s">&#39;vcs_diffs&#39;</span><span class="p">:</span>     <span class="nb">dict</span><span class="p">((</span><span class="n">path</span><span class="p">,</span> <span class="n">_desc</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">abspaths</span><span class="p">)}</span>
+
+
+<span class="c"># IPython pretty printing support (optional)</span></div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">repr_pretty_annotated</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_pprint</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">repr_pretty_unannotated</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_pprint</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
+    <span class="n">plaintext_formatter</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">display_formatter</span><span class="o">.</span><span class="n">formatters</span><span class="p">[</span><span class="s">&#39;text/plain&#39;</span><span class="p">]</span>
+    <span class="n">plaintext_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">Args</span><span class="p">,</span> <span class="n">repr_pretty_annotated</span><span class="p">)</span>
+    <span class="n">plaintext_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">Command</span><span class="p">,</span> <span class="n">repr_pretty_unannotated</span><span class="p">)</span>
+    <span class="n">plaintext_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">Launcher</span><span class="p">,</span> <span class="n">repr_pretty_unannotated</span><span class="p">)</span>
+    <span class="n">plaintext_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">FileType</span><span class="p">,</span> <span class="n">repr_pretty_unannotated</span><span class="p">)</span>
+    <span class="n">plaintext_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">review_and_launch</span><span class="p">,</span> <span class="n">repr_pretty_unannotated</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/lancet.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+<map id="inheritance965e871ae9" name="inheritance965e871ae9">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,54,264,79"/>
+<area shape="rect" id="node2" title="Acts like a Python function, but with arguments that are Parameters." alt="" coords="312,54,624,79"/>
+<area shape="rect" id="node3" href="#topo.misc.unitsupport.Conversions" title="The UnumConversion class holds unit conversions and definitions," alt="" coords="13,5,257,30"/>
+</map>

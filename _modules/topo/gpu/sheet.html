@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.gpu.sheet &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.gpu.sheet</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">SettlingCFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFSheet</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pycuda.gpuarray</span> <span class="kn">as</span> <span class="nn">gpuarray</span>
+    <span class="kn">import</span> <span class="nn">pycuda.driver</span> <span class="kn">as</span> <span class="nn">cuda</span>
+    <span class="kn">import</span> <span class="nn">pycuda.autoinit</span>               <span class="c"># pyflakes:ignore (API import)</span>
+    <span class="kn">import</span> <span class="nn">scikits.cuda.cusparse</span> <span class="kn">as</span> <span class="nn">cusparse</span>
+
+    <span class="n">cusparse</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">compute_sparse_gpu_joint_norm_totals</span><span class="p">(</span><span class="n">projlist</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">projlist</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">1</span>
+
+    <span class="n">joint_sum</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">projlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">has_norm_total</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">norm_total_gpu</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">weights_gpu</span><span class="o">.</span><span class="n">mv</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">norm_ones_gpu</span><span class="p">,</span> <span class="n">autosync</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">has_norm_total</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">joint_sum</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">norm_total_gpu</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">norm_total_gpu</span> <span class="o">=</span> <span class="n">joint_sum</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="GPUSettlingCFSheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.sheet.GPUSettlingCFSheet">[docs]</a><span class="k">class</span> <span class="nc">GPUSettlingCFSheet</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SettlingCFSheet that makes it possible to calculate projection activities and learning in concurrent GPU streams.</span>
+<span class="sd">    This is done by placing barriers before the &#39;activate&#39; and &#39;learn&#39; methods of the sheet that synchronize GPU streams.</span>
+
+<span class="sd">    Otherwise, behaves exactly the same as SettlingCFSheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">joint_norm_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">compute_sparse_gpu_joint_norm_totals</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function to use to compute the norm_total for each CF in each</span>
+<span class="s">        gpu projection from a group to be normalized jointly.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GPUSettlingCFSheet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GPUSettlingCFSheet.process_current_time"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.sheet.GPUSettlingCFSheet.process_current_time">[docs]</a>    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pass the accumulated stimulation through self.output_fns and</span>
+<span class="sd">        send it out on the default output port.</span>
+
+<span class="sd">        We need to synchronize before processing the projection activities or their weights,</span>
+<span class="sd">        since they might be still running on the GPU.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_init_time</span><span class="p">:</span>
+                <span class="n">cuda</span><span class="o">.</span><span class="n">Context</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tsettle</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># Special case: behave just like a CFSheet</span>
+                <span class="n">cuda</span><span class="o">.</span><span class="n">Context</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tsettle</span><span class="p">:</span>
+                <span class="c"># Once we have been activated the required number of times</span>
+                <span class="c"># (determined by tsettle), reset various counters, learn</span>
+                <span class="c"># if appropriate, and avoid further activation until an</span>
+                <span class="c"># external event arrives.</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_of_iteration</span><span class="p">:</span> <span class="n">f</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span> <span class="o">=</span> <span class="bp">True</span> <span class="c"># used by input_event when it is called</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuous_learning</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cuda</span><span class="o">.</span><span class="n">Context</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuous_learning</span><span class="p">):</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="GPUCFSheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.sheet.GPUCFSheet">[docs]</a><span class="k">class</span> <span class="nc">GPUCFSheet</span><span class="p">(</span><span class="n">CFSheet</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GPUCFSheet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GPUCFSheet.process_current_time"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.sheet.GPUCFSheet.process_current_time">[docs]</a>    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called by the simulation after all the events are processed for the</span>
+<span class="sd">        current time but before time advances.  Allows the event processor</span>
+<span class="sd">        to send any events that must be sent before time advances to drive</span>
+<span class="sd">        the simulation.</span>
+
+<span class="sd">        GPUCFSheet is meant to be used with GPU projections that are called</span>
+<span class="sd">        asynchronously and might not have computed the activation. Therefore, we synchronize.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span><span class="p">:</span>
+            <span class="n">cuda</span><span class="o">.</span><span class="n">Context</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/gpu/sheet.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.transferfn &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.transferfn</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A family of function objects for transforming a matrix generated from some other function.</span>
+
+<span class="sd">Output functions are useful for neuron activation functions,</span>
+<span class="sd">normalization of matrices, etc.  They come in two varieties:</span>
+<span class="sd">OutputFunction, and CFPOutputFunction.  An OutputFunction</span>
+<span class="sd">(e.g. PiecewiseLinear) applies to one matrix of any type, such as an</span>
+<span class="sd">activity matrix or a set of weights.  To apply an OutputFunction to</span>
+<span class="sd">all of the weight matrices in an entire CFProjection, an</span>
+<span class="sd">OutputFunction can be plugged in to CFPOF_Plugin.  CFPOF_Plugin is one</span>
+<span class="sd">example of a CFPOutputFunction, which is a function that works with</span>
+<span class="sd">the entire Projection at once.</span>
+
+<span class="sd">Any new output functions added to this directory will automatically</span>
+<span class="sd">become available for any model.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span><span class="n">zeros</span><span class="p">,</span><span class="n">ones</span><span class="p">,</span><span class="n">power</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">activity_type</span>
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">clip_lower</span>
+
+<span class="kn">from</span> <span class="nn">numbergen</span> <span class="kn">import</span> <span class="n">TimeAwareRandomState</span>
+
+<span class="c"># Imported here so that all TransferFns will be in the same package</span>
+<span class="kn">from</span> <span class="nn">imagen.transferfn</span> <span class="kn">import</span> <span class="n">TransferFn</span><span class="p">,</span> <span class="n">TransferFnWithState</span>   <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">imagen.transferfn</span> <span class="kn">import</span> <span class="n">IdentityTF</span><span class="p">,</span> <span class="n">Threshold</span>             <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">imagen.transferfn</span> <span class="kn">import</span> <span class="n">BinaryThreshold</span><span class="p">,</span> <span class="n">Hysteresis</span>                <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">imagen.transferfn</span> <span class="kn">import</span> <span class="n">DivisiveNormalizeL1</span><span class="p">,</span> <span class="n">DivisiveNormalizeL2</span>   <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">imagen.transferfn</span> <span class="kn">import</span> <span class="n">DivisiveNormalizeLinf</span><span class="p">,</span> <span class="n">DivisiveNormalizeLp</span> <span class="c"># pyflakes:ignore (API import)</span>
+
+<span class="c"># CEBHACKALERT: these need to respect the mask - which will be passed in.</span>
+
+
+<div class="viewcode-block" id="PiecewiseLinear"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.PiecewiseLinear">[docs]</a><span class="k">class</span> <span class="nc">PiecewiseLinear</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Piecewise-linear TransferFn with lower and upper thresholds.</span>
+
+<span class="sd">    Values below the lower_threshold are set to zero, those above</span>
+<span class="sd">    the upper threshold are set to 1.0, and those in between are</span>
+<span class="sd">    scaled linearly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">))</span>
+    <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">fact</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper_bound</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="n">fact</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="n">out</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="Sigmoid"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.Sigmoid">[docs]</a><span class="k">class</span> <span class="nc">Sigmoid</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sigmoidal (logistic) transfer function: 1/(1+exp-(r*x+k)).</span>
+
+<span class="sd">    As defined in Jochen Triesch, ICANN 2005, LNCS 3696 pp. 65-70.</span>
+<span class="sd">    The parameters control the growth rate (r) and the x position (k)</span>
+<span class="sd">    of the exponential.</span>
+
+<span class="sd">    This function is a special case of the GeneralizedLogistic</span>
+<span class="sd">    function, with parameters r=r, l=0, u=1, m=-k/2r, and b=1.  See</span>
+<span class="sd">    Richards, F.J. (1959), A flexible growth function for empirical</span>
+<span class="sd">    use. J. Experimental Botany 10: 290--300, 1959.</span>
+<span class="sd">    http://en.wikipedia.org/wiki/Generalised_logistic_curve</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Parameter controlling the growth rate&quot;</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Parameter controlling the x-postion&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x_orig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="o">*</span><span class="n">x_orig</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)))</span>
+
+
+</div>
+<div class="viewcode-block" id="NakaRushton"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.NakaRushton">[docs]</a><span class="k">class</span> <span class="nc">NakaRushton</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="c">#JABALERT: Please write the equation into words in the docstring, as in Sigmoid.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Naka-Rushton curve.</span>
+
+<span class="sd">    From Naka, K. and Rushton, W. (1996), S-potentials from luminosity</span>
+<span class="sd">    units in the retina of fish (Cyprinidae). J. Physiology 185:587-599.</span>
+
+<span class="sd">    The Naka-Rushton curve has been shown to be a good approximation</span>
+<span class="sd">    of constrast gain control in cortical neurons.  The input of the</span>
+<span class="sd">    curve is usually contrast, but under the assumption that the</span>
+<span class="sd">    firing rate of a model neuron is directly proportional to the</span>
+<span class="sd">    contrast, it can be used as a TransferFn for a Sheet.</span>
+
+<span class="sd">    The parameter c50 corresponds to the contrast at which the half of</span>
+<span class="sd">    the maximal output is reached.  For a Sheet TransferFn this translates</span>
+<span class="sd">    to the input for which a neuron will respond with activity 0.5.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">c50</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The input of the neuron at which it responds at half of its</span>
+<span class="s">        maximal firing rate (1.0).&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">e</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The exponent of the input x.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c">#JABALERT: (pow(x_orig,self.e) should presumably be done only once, using a temporary</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="c">#print &#39;A:&#39;, x</span>
+        <span class="c">#print &#39;B:&#39;, pow(x,self.e) / (pow(x,self.e) + pow(self.c50,self.e))</span>
+        <span class="n">x_orig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mi">0</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x_orig</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="n">x_orig</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="nb">pow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c50</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">))</span>
+
+
+</div>
+<div class="viewcode-block" id="GeneralizedLogistic"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.GeneralizedLogistic">[docs]</a><span class="k">class</span> <span class="nc">GeneralizedLogistic</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The generalized logistic curve (Richards&#39; curve): y = l + (u /(1 + b * exp(-r*(x-2*m))^(1/b))).</span>
+
+<span class="sd">    The logistic curve is a flexible function for specifying a</span>
+<span class="sd">    nonlinear growth curve using five parameters:</span>
+
+<span class="sd">    * l: the lower asymptote</span>
+<span class="sd">    * u: the upper asymptote minus l</span>
+<span class="sd">    * m: the time of maximum growth</span>
+<span class="sd">    * r: the growth rate</span>
+<span class="sd">    * b: affects near which asymptote maximum growth occurs</span>
+
+<span class="sd">    From Richards, F.J. (1959), A flexible growth function for empirical</span>
+<span class="sd">    use. J. Experimental Botany 10: 290--300.</span>
+<span class="sd">    http://en.wikipedia.org/wiki/Generalised_logistic_curve</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JABALERT: Reword these to say what they are, not what they</span>
+    <span class="c"># control, if they are anything that can be expressed naturally.</span>
+    <span class="c"># E.g. is l a parameter controlling the lower asymptote, or is it</span>
+    <span class="c"># simply the lower asymptote?  If it&#39;s the lower asymptote, say</span>
+    <span class="c"># doc=&quot;Lower asymptote.&quot;.  Only if the parameter&#39;s relationship to</span>
+    <span class="c"># what it controls is very indirect should it be worded as below.</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Parameter controlling the lower asymptote.&quot;</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Parameter controlling the upper asymptote (upper asymptote minus lower asymptote.&quot;</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Parameter controlling the time of maximum growth.&quot;</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Parameter controlling the growth rate.&quot;</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Parameter which affects near which asymptote maximum growth occurs.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x_orig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="o">+</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">*</span><span class="p">(</span><span class="n">x_orig</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">))</span> <span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="HalfRectifyAndSquare"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.HalfRectifyAndSquare">[docs]</a><span class="k">class</span> <span class="nc">HalfRectifyAndSquare</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transfer function that applies a half-wave rectification (clips at zero)</span>
+<span class="sd">    and then squares the values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The threshold at which output becomes non-zero.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">clip_lower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="n">x</span>
+
+
+</div>
+<div class="viewcode-block" id="HalfRectifyAndPower"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.HalfRectifyAndPower">[docs]</a><span class="k">class</span> <span class="nc">HalfRectifyAndPower</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transfer function that applies a half-wave rectification (i.e.,</span>
+<span class="sd">    clips at zero), and then raises the result to the e-th power</span>
+<span class="sd">    (where the exponent e can be selected arbitrarily).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The exponent to which the thresholded value is raised.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The threshold level subtracted from x.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">clip_lower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">x</span><span class="o">*=</span><span class="mi">0</span>
+        <span class="n">x</span><span class="o">+=</span><span class="n">a</span>
+
+
+</div>
+<div class="viewcode-block" id="ExpLinear"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.ExpLinear">[docs]</a><span class="k">class</span> <span class="nc">ExpLinear</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transfer function that is exponential until t from which point it is linear.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">e</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The exponent of the exponetial part of the curve&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The threshold level where function becomes non-zero&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The threshold level at which curve becomes linear&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The overall scaling of the function&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span><span class="o">-=</span><span class="bp">self</span><span class="o">.</span><span class="n">t1</span>
+        <span class="n">clip_lower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">))</span><span class="o">+</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">))</span> <span class="o">+</span> \
+            <span class="p">(</span><span class="n">x</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">))</span><span class="o">-</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">)))</span>
+        <span class="n">x</span><span class="o">*=</span><span class="mi">0</span>
+        <span class="n">x</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">z</span>
+
+
+</div>
+<div class="viewcode-block" id="Square"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.Square">[docs]</a><span class="k">class</span> <span class="nc">Square</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transfer function that applies a squaring nonlinearity.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="n">x</span>
+
+
+<span class="c"># CB: it&#39;s not ideal that all TransferFnWithRandomState fns have</span>
+<span class="c"># the plastic stuff (from TransferFnWithState).</span></div>
+<div class="viewcode-block" id="TransferFnWithRandomState"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.TransferFnWithRandomState">[docs]</a><span class="k">class</span> <span class="nc">TransferFnWithRandomState</span><span class="p">(</span><span class="n">TransferFnWithState</span><span class="p">,</span> <span class="n">TimeAwareRandomState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for TransferFns that use a random</span>
+<span class="sd">    state. Inherits time-dependent control of the random state from</span>
+<span class="sd">    numbergen.TimeAwareRandomState. Consult the help of</span>
+<span class="sd">    TimeAwareRandomState for more information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">random_generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)),</span><span class="n">precedence</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Using Numpy&#39;s RandomState instead of random.Random as the</span>
+<span class="sd">        former can generate random arrays and more random</span>
+<span class="sd">        distributions. See RandomState&#39;s help for more information.</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TransferFnWithRandomState</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__random_generators_stack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_random_state</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span> <span class="n">shared</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TransferFnWithRandomState.state_push"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.TransferFnWithRandomState.state_push">[docs]</a>    <span class="k">def</span> <span class="nf">state_push</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the current random number generator (onto the stack),</span>
+<span class="sd">        replacing it with a copy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__random_generators_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TransferFnWithRandomState</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="TransferFnWithRandomState.state_pop"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.TransferFnWithRandomState.state_pop">[docs]</a>    <span class="k">def</span> <span class="nf">state_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the previous random number generator from the stack.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__random_generators_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TransferFnWithRandomState</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="PoissonSample"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.PoissonSample">[docs]</a><span class="k">class</span> <span class="nc">PoissonSample</span><span class="p">(</span><span class="n">TransferFnWithRandomState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulate Poisson-distributed activity with specified mean values.</span>
+
+<span class="sd">    This transfer function interprets each matrix value as the</span>
+<span class="sd">    (potentially scaled) rate of a Poisson process and replaces it</span>
+<span class="sd">    with a sample from the appropriate Poisson distribution.</span>
+
+<span class="sd">    To allow the matrix to contain values in a suitable range (such as</span>
+<span class="sd">    [0.0,1.0]), the input matrix is scaled by the parameter in_scale,</span>
+<span class="sd">    and the baseline_rate is added before sampling.  After sampling,</span>
+<span class="sd">    the output value is then scaled by out_scale.  The function thus</span>
+<span class="sd">    performs this transformation::</span>
+
+<span class="sd">      x &lt;- P(in_scale * x + baseline_rate) * out_scale</span>
+
+<span class="sd">    where x is a matrix value and P(r) samples from a Poisson</span>
+<span class="sd">    distribution with rate r.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">in_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Amount by which to scale the input.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">baseline_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Constant to add to the input after scaling, resulting in a baseline</span>
+<span class="s">       Poisson process rate.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">out_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Amount by which to scale the output (e.g. 1.0/in_scale).&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash_and_seed</span><span class="p">()</span>
+
+        <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_scale</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_rate</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="n">sample</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale</span>
+
+
+
+<span class="c"># CEBALERT: I think this TF is a bit misleading because it does not</span>
+<span class="c"># alter the input array. Is a TransferFn the right thing to use to</span>
+<span class="c"># record an average activity? Could consider replacing this with my</span>
+<span class="c"># &quot;attribute tracking&quot; code (some of which is not yet in SVN).</span></div>
+<div class="viewcode-block" id="ActivityAveragingTF"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.ActivityAveragingTF">[docs]</a><span class="k">class</span> <span class="nc">ActivityAveragingTF</span><span class="p">(</span><span class="n">TransferFnWithState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the average of the input activity.</span>
+
+<span class="sd">    The average is calculated as an exponential moving average, where</span>
+<span class="sd">    the weighting for each older data point decreases exponentially.</span>
+<span class="sd">    The degree of weighing for the previous values is expressed as a</span>
+<span class="sd">    constant smoothing factor.</span>
+
+<span class="sd">    The plastic parameter allows the updating of the average values</span>
+<span class="sd">    to be disabled temporarily, e.g. while presenting test patterns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        How often to update the average.</span>
+<span class="s">        For instance, step=1 means to update it every time this TF is</span>
+<span class="s">        called; step=2 means to update it every other time.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">smoothing</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.9997</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The degree of weighting for the previous average, when</span>
+<span class="s">        calculating the new average.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">initial_average</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Starting value for the average activity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ActivityAveragingTF</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span><span class="o">=</span><span class="bp">None</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_average</span><span class="o">*</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">activity_type</span><span class="p">)</span>
+
+        <span class="c"># Collect values on each appropriate step</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span>
+
+
+</div>
+<div class="viewcode-block" id="HomeostaticMaxEnt"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.HomeostaticMaxEnt">[docs]</a><span class="k">class</span> <span class="nc">HomeostaticMaxEnt</span><span class="p">(</span><span class="n">TransferFnWithRandomState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of homeostatic intrinsic plasticity from Jochen Triesch,</span>
+<span class="sd">    ICANN 2005, LNCS 3696 pp.65-70.</span>
+
+<span class="sd">    A sigmoid activation function is adapted automatically to achieve</span>
+<span class="sd">    desired average firing rate and approximately exponential</span>
+<span class="sd">    distribution of firing rates (for the maximum possible entropy).</span>
+
+<span class="sd">    Note that this TransferFn has state, so the history of calls to it</span>
+<span class="sd">    will affect future behavior.  The plastic parameter can be used</span>
+<span class="sd">    to disable changes to the state.</span>
+
+<span class="sd">    Also calculates average activity as useful debugging information,</span>
+<span class="sd">    for use with AttributeTrackingTF.  Average activity is calculated as</span>
+<span class="sd">    an exponential moving average with a smoothing factor (smoothing).</span>
+<span class="sd">    For more information see:</span>
+<span class="sd">    NIST/SEMATECH e-Handbook of Statistical Methods, Single Exponential Smoothing</span>
+<span class="sd">    http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0002</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Learning rate for homeostatic plasticity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Target average firing rate.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">smoothing</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.9997</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Weighting of previous activity vs. current activity when</span>
+<span class="s">        calculating the average.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">a_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Multiplicative parameter controlling the exponential.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">b_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Additive parameter controlling the exponential.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        How often to update the a and b parameters.</span>
+<span class="s">        For instance, step=1 means to update it every time this TF is</span>
+<span class="s">        called; step=2 means to update it every other time.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HomeostaticMaxEnt</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span><span class="o">=</span><span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash_and_seed</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_init</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_init</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_init</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_generator</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=-</span><span class="mf">4.0</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_init</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span><span class="p">)</span>
+
+        <span class="c"># Apply sigmoid function to x, resulting in what Triesch calls y</span>
+        <span class="n">x_orig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">x_orig</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)))</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span> <span class="c">#Calculate average for use in debugging only</span>
+
+                <span class="c"># Update a and b</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">x_orig</span> <span class="o">-</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">+</span> <span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span><span class="o">*</span><span class="n">x_orig</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">x_orig</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">+</span> <span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">state_push</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">),</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">),</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span><span class="p">),</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_call</span><span class="p">)))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HomeostaticMaxEnt</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">state_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_avg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_call</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__current_state_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HomeostaticMaxEnt</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_pop</span><span class="p">()</span>
+
+
+</div>
+<div class="viewcode-block" id="ScalingTF"><a class="viewcode-back" href="../../Reference_Manual/topo.transferfn.html#topo.transferfn.ScalingTF">[docs]</a><span class="k">class</span> <span class="nc">ScalingTF</span><span class="p">(</span><span class="n">TransferFnWithState</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scales input activity based on the current average activity (x_avg).</span>
+
+<span class="sd">    The scaling is calculated to bring x_avg for each unit closer to a</span>
+<span class="sd">    specified target average.  Calculates a scaling factor that is</span>
+<span class="sd">    greater than 1 if x_avg is less than the target and less than 1 if</span>
+<span class="sd">    x_avg is greater than the target, and multiplies the input</span>
+<span class="sd">    activity by this scaling factor.</span>
+
+<span class="sd">    The plastic parameter allows the updating of the average values</span>
+<span class="sd">    to be disabled temporarily, e.g. while presenting test patterns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Target average activity for each unit.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">step</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        How often to calculate the average activity and scaling factor.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">smoothing</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.9997</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Determines the degree of weighting of previous activity vs.</span>
+<span class="s">        current activity when calculating the average.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ScalingTF</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sf</span><span class="o">=</span><span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">*</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">activity_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf</span><span class="o">=</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">activity_type</span><span class="p">)</span>
+
+        <span class="c"># Collect values on each appropriate step</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="o">*=</span> <span class="mf">0.0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span>
+
+        <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf</span>
+</div>
+<span class="n">_public</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">_k</span> <span class="k">for</span> <span class="n">_k</span><span class="p">,</span><span class="n">_v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="n">TransferFn</span><span class="p">)]))</span>
+
+
+<span class="c"># Automatically discover all .py files in this directory.</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">fnmatch</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="n">_public</span> <span class="o">+</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.py&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s">&#39;[!._]*.py&#39;</span><span class="p">)]</span>
+<span class="k">del</span> <span class="n">f</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">fnmatch</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/transferfn.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

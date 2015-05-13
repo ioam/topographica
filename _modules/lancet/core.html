@@ -1,0 +1,1018 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet.core &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="lancet" href="../lancet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../lancet.html" accesskey="U">lancet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for lancet.core</h1><div class="highlight"><pre>
+<span class="c">#</span>
+<span class="c"># Lancet core</span>
+<span class="c">#</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="n">np_ftypes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sctypes</span><span class="p">[</span><span class="s">&#39;float&#39;</span><span class="p">]</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">np</span><span class="p">,</span> <span class="n">np_ftypes</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="p">[]</span>
+
+<span class="k">try</span><span class="p">:</span>    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="k">except</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">None</span> <span class="c"># pyflakes:ignore (try/except import)</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="n">float_types</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">+</span> <span class="n">np_ftypes</span>
+<span class="k">def</span> <span class="nf">identityfn</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span>
+<span class="k">def</span> <span class="nf">fp_repr</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="n">float_types</span><span class="p">)</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<div class="viewcode-block" id="set_fp_precision"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.set_fp_precision">[docs]</a><span class="k">def</span> <span class="nf">set_fp_precision</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to set the floating precision across lancet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Arguments</span><span class="o">.</span><span class="n">set_default</span><span class="p">(</span><span class="s">&#39;fp_precision&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<span class="c">#=====================#</span>
+<span class="c"># Argument Specifiers #</span>
+<span class="c">#=====================#</span>
+</div>
+<div class="viewcode-block" id="PrettyPrinted"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.PrettyPrinted">[docs]</a><span class="k">class</span> <span class="nc">PrettyPrinted</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A mixin class for generating pretty-printed representations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PrettyPrinted.pprint_args"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.PrettyPrinted.pprint_args">[docs]</a>    <span class="k">def</span> <span class="nf">pprint_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos_args</span><span class="p">,</span> <span class="n">keyword_args</span><span class="p">,</span> <span class="n">infix_operator</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">extra_params</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to define the positional arguments and keyword order</span>
+<span class="sd">        for pretty printing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">infix_operator</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pos_args</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">keyword_args</span><span class="o">==</span><span class="p">[]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Infix format requires exactly two&#39;</span>
+                            <span class="s">&#39; positional arguments and no keywords&#39;</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">kwargs</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pprint_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pprint_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">keyword_args</span> <span class="o">+</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">pos_args</span><span class="p">,</span> <span class="n">infix_operator</span><span class="p">,</span> <span class="n">extra_params</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_pprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">onlychanged</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tab</span> <span class="o">=</span> <span class="s">&#39;   &#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pretty printer that prints only the modified keywords and</span>
+<span class="sd">        generates flat representations (for repr) and optionally</span>
+<span class="sd">        annotates the top of the repr with a comment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">pos_args</span><span class="p">,</span> <span class="n">infix_operator</span><span class="p">,</span> <span class="n">extra_params</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pprint_args</span>
+        <span class="p">(</span><span class="n">br</span><span class="p">,</span> <span class="n">indent</span><span class="p">)</span>  <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">flat</span> <span class="k">else</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">flat</span> <span class="k">else</span> <span class="n">tab</span> <span class="o">*</span> <span class="n">level</span><span class="p">)</span>
+        <span class="n">prettify</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">PrettyPrinted</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">flat</span>
+        <span class="n">pretty</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">_pprint</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="n">flat</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">prettify</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">())</span>
+        <span class="n">show_lexsort</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_lexorder&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="n">modified</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">(</span><span class="n">onlychanged</span><span class="o">=</span><span class="n">onlychanged</span><span class="p">)]</span>
+        <span class="n">pkwargs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>  <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">)]</span> <span class="o">+</span> <span class="n">extra_params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">arg_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">params</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">pos_args</span><span class="p">]</span> <span class="o">+</span> <span class="n">pkwargs</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">annotate</span><span class="p">:</span> <span class="c"># Optional annotating comment</span>
+            <span class="n">len_ckeys</span><span class="p">,</span> <span class="n">len_vkeys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)</span>
+            <span class="n">info_triple</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                           <span class="s">&#39;, </span><span class="si">%d</span><span class="s"> constant key(s)&#39;</span> <span class="o">%</span> <span class="n">len_ckeys</span> <span class="k">if</span> <span class="n">len_ckeys</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;, </span><span class="si">%d</span><span class="s"> varying key(s)&#39;</span>  <span class="o">%</span> <span class="n">len_vkeys</span> <span class="k">if</span> <span class="n">len_vkeys</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="s">&#39;# == </span><span class="si">%d</span><span class="s"> items</span><span class="si">%s%s</span><span class="s"> ==</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">info_triple</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">annotation</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">show_lexsort</span><span class="p">:</span> <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cycle</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">(...)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">infix_operator</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">level</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">triple</span> <span class="o">=</span> <span class="p">(</span><span class="n">pretty</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">pos_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="n">infix_operator</span><span class="p">,</span> <span class="n">pretty</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">pos_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">triple</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">(&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">arg_list</span><span class="p">:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>  <span class="p">(</span><span class="n">br</span><span class="o">+</span><span class="n">indent</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pretty</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span><span class="p">[</span><span class="n">br</span><span class="o">+</span><span class="p">(</span><span class="n">tab</span><span class="o">*</span><span class="p">(</span><span class="n">level</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">]</span> <span class="c"># Remove trailing comma</span>
+
+        <span class="k">if</span> <span class="n">show_lexsort</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;).lexsort(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lexorder</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pprint</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">onlychanged</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pprint</span><span class="p">()</span>
+
+
+</div>
+<div class="viewcode-block" id="Arguments"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments">[docs]</a><span class="k">class</span> <span class="nc">Arguments</span><span class="p">(</span><span class="n">PrettyPrinted</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The abstract, base class that defines the core interface and</span>
+<span class="sd">    methods for all members of the Arguments family of classes,</span>
+<span class="sd">    including either the simple, static members of Args below, or the</span>
+<span class="sd">    sophisticated parameter exploration algorithms subclassing from</span>
+<span class="sd">    DynamicArgs defined in dynamic.py.</span>
+
+<span class="sd">    The Args subclass may be used directly and forms the root of one</span>
+<span class="sd">    family of classes that have statically defined or precomputed</span>
+<span class="sd">    argument sets (defined below). The second subfamily are the</span>
+<span class="sd">    DynamicArgs, designed to allow more sophisticated, online</span>
+<span class="sd">    parameter space exploration techniques such as hill climbing,</span>
+<span class="sd">    bisection search, genetic algorithms and so on.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fp_precision</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The floating point precision to use for floating point</span>
+<span class="s">         values.  Unlike other basic Python types, floats need care</span>
+<span class="s">         with their representation as you only want to display up to</span>
+<span class="s">         the precision actually specified. A floating point precision</span>
+<span class="s">         of 0 casts number to integers before representing them.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pprint_args</span> <span class="o">=</span> <span class="p">([],[],</span><span class="bp">None</span><span class="p">,{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([],[</span><span class="s">&#39;fp_precision&#39;</span><span class="p">,</span> <span class="s">&#39;dynamic&#39;</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Arguments</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="c"># Some types cannot be sorted easily (e.g. numpy arrays)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unsortable_keys</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constant_keys</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Arguments.spec_formatter"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments.spec_formatter">[docs]</a>    <span class="k">def</span> <span class="nf">spec_formatter</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+        <span class="s">&quot; Formats the elements of an argument set appropriately&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Arguments.constant_keys"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments.constant_keys">[docs]</a>    <span class="k">def</span> <span class="nf">constant_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of parameter names whose values are constant</span>
+<span class="sd">        as the argument specifier is iterated.  Note that the union of</span>
+<span class="sd">        constant and varying_keys should partition the entire set of</span>
+<span class="sd">        keys in the case where there are no unsortable keys.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Arguments.constant_items"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments.constant_items">[docs]</a>    <span class="k">def</span> <span class="nf">constant_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the set of constant items as a list of tuples. This</span>
+<span class="sd">        allows easy conversion to dictionary format. Note, the items</span>
+<span class="sd">        should be supplied in the same key ordering as for</span>
+<span class="sd">        constant_keys for consistency.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Arguments.varying_keys"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments.varying_keys">[docs]</a>    <span class="k">def</span> <span class="nf">varying_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of parameters whose values vary as the</span>
+<span class="sd">        argument specifier is iterated.  Whenever it is possible, keys</span>
+<span class="sd">        should be sorted from those slowest to faster varying and</span>
+<span class="sd">        sorted alphanumerically within groups that vary at the same</span>
+<span class="sd">        rate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="k">def</span> <span class="nf">round_floats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specs</span><span class="p">,</span> <span class="n">fp_precision</span><span class="p">):</span>
+        <span class="n">_round_float</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">,</span> <span class="n">fp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">np_ftypes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+        <span class="n">_round</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">,</span> <span class="n">fp</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">if</span> <span class="n">fp_precision</span><span class="o">==</span><span class="mi">0</span>  <span class="k">else</span> <span class="n">_round_float</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">_round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">fp_precision</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">float_types</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Arguments.next"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called to get a list of specifications: dictionaries with</span>
+<span class="sd">        parameter name keys and string values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">StopIteration</span>
+</div>
+<div class="viewcode-block" id="Arguments.copy"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience method to avoid using the specifier without</span>
+<span class="sd">        exhausting it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_collect_by_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">specs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dictionary like object with the lists of values</span>
+<span class="sd">        collapsed by their respective key. Useful to find varying vs</span>
+<span class="sd">        constant keys and to find how fast keys vary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Collect (key, value) tuples as list of lists, flatten with chain</span>
+        <span class="n">allkeys</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
+            <span class="p">[[(</span><span class="n">k</span><span class="p">,</span> <span class="n">run</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">run</span><span class="p">]</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">])</span>
+        <span class="n">collection</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">allkeys</span><span class="p">:</span> <span class="n">collection</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">collection</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates two argument specifiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">other</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">Concatenate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the Cartesian product of two argument specifiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">CartesianProduct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">other</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">other</span><span class="p">:</span> <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_cartesian_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_specs</span><span class="p">,</span> <span class="n">second_specs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the Cartesian product of the specifications. Result will</span>
+<span class="sd">        contain N specifications where N = len(first_specs) *</span>
+<span class="sd">        len(second_specs) and keys are merged.</span>
+<span class="sd">        Example: [{&#39;a&#39;:1},{&#39;b&#39;:2}] * [{&#39;c&#39;:3},{&#39;d&#39;:4}] =</span>
+<span class="sd">        [{&#39;a&#39;:1,&#39;c&#39;:3},{&#39;a&#39;:1,&#39;d&#39;:4},{&#39;b&#39;:2,&#39;c&#39;:3},{&#39;b&#39;:2,&#39;d&#39;:4}]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="p">[</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+                          <span class="nb">list</span><span class="p">(</span><span class="n">s1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">s2</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                          <span class="nb">list</span><span class="p">(</span><span class="n">s1</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">s2</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                      <span class="p">))</span>
+                 <span class="k">for</span> <span class="n">s1</span> <span class="ow">in</span> <span class="n">first_specs</span> <span class="k">for</span> <span class="n">s2</span> <span class="ow">in</span> <span class="n">second_specs</span> <span class="p">]</span>
+
+<div class="viewcode-block" id="Arguments.summary"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Arguments.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A succinct summary of the argument specifier. Unlike the repr,</span>
+<span class="sd">        a summary does not have to be complete but must supply the</span>
+<span class="sd">        most relevant information about the object to the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Items: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">varying_keys</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Varying Keys: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">varying_keys</span><span class="p">)</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_items</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_items</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Constant Items: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">items</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="Args"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Args">[docs]</a><span class="k">class</span> <span class="nc">Args</span><span class="p">(</span><span class="n">Arguments</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An Arguments class that supports statically specified or</span>
+<span class="sd">    precomputed argument sets. It may be used directly to specify</span>
+<span class="sd">    argument values but also forms the base class for a family of more</span>
+<span class="sd">    specific static Argument classes. Each subclass is less flexible</span>
+<span class="sd">    and general but allows arguments to be easily and succinctly</span>
+<span class="sd">    specified. For instance, the Range subclass allows parameter</span>
+<span class="sd">    ranges to be easily declared.</span>
+
+<span class="sd">    The constructor of Args accepts argument definitions in two</span>
+<span class="sd">    different formats. The keyword format allows constant arguments to</span>
+<span class="sd">    be specified directly and easily. For instance:</span>
+
+<span class="sd">    &gt;&gt;&gt; Args(a=2, b=3)</span>
+
+<span class="sd">    The alternative input format takes an explicit list of the</span>
+<span class="sd">    argument specifications:</span>
+
+<span class="sd">    &gt;&gt;&gt; Args([{&#39;a&#39;:3, &#39;b&#39;:5}]) # Equivalent behaviour to above</span>
+
+<span class="sd">    This latter format is completely flexible and general, allowing</span>
+<span class="sd">    any arbitrary list of arguments to be specified as desired. This</span>
+<span class="sd">    is not generally recommended however as the structure of a</span>
+<span class="sd">    parameter space is often expressed more clearly by composing</span>
+<span class="sd">    together simpler, more succinct Args objects with the</span>
+<span class="sd">    CartesianProduct (*) or Concatenation (+) operators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">specs</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">          The static list of specifications (ie. dictionaries) to be</span>
+<span class="s">          returned by the specifier. Float values are rounded</span>
+<span class="s">          according to fp_precision.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fp_precision</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fp_precision</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">fp_precision</span> <span class="o">=</span> <span class="n">Arguments</span><span class="o">.</span><span class="n">fp_precision</span>
+        <span class="n">raw_specs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">explicit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_specs</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">fp_precision</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Args</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fp_precision</span><span class="o">=</span><span class="n">fp_precision</span><span class="p">,</span> <span class="n">specs</span><span class="o">=</span><span class="n">raw_specs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lexorder</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">explicit</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;specs&#39;</span><span class="p">],[])</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># Present in kwarg format</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([],</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                             <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constant_items</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_build_specs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">fp_precision</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the specs, the remaining kwargs and whether or not the</span>
+<span class="sd">        constructor was called with kwarg or explicit specs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">specs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">overrides</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span>
+                                             <span class="n">allow_extra_keywords</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">extra_kwargs</span> <span class="o">=</span> <span class="n">overrides</span><span class="o">.</span><span class="n">extra_keywords</span><span class="p">()</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                           <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extra_kwargs</span><span class="p">])</span>
+            <span class="n">rounded_specs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round_floats</span><span class="p">([</span><span class="n">extra_kwargs</span><span class="p">],</span>
+                                                   <span class="n">fp_precision</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">extra_kwargs</span><span class="o">==</span><span class="p">{}:</span> <span class="k">return</span> <span class="p">[],</span> <span class="n">kwargs</span><span class="p">,</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>                <span class="k">return</span> <span class="n">rounded_specs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round_floats</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">fp_precision</span><span class="p">)),</span> <span class="n">kwargs</span><span class="p">,</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exhausted</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exhausted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exhausted</span><span class="o">=</span><span class="bp">True</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">specs</span>
+
+    <span class="k">def</span> <span class="nf">_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">idfun</span><span class="o">=</span><span class="nb">repr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: repr() must be implemented properly on all objects. This</span>
+<span class="sd">        is implicitly assumed by Lancet when Python objects need to be</span>
+<span class="sd">        formatted to string representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">seen</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">idfun</span><span class="p">(</span><span class="n">e</span><span class="p">),</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">sequence</span>
+                <span class="k">if</span> <span class="n">idfun</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Args.show"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Args.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience method to inspect the available argument values in</span>
+<span class="sd">        human-readable format. The ordering of keys is determined by</span>
+<span class="sd">        how quickly they vary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_keys</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_keys</span>
+        <span class="n">spec_lines</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ordering</span>
+                                 <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">s</span><span class="p">])</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">specs</span><span class="p">]</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%d</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spec_lines</span><span class="p">)]))</span>
+
+</div>
+<div class="viewcode-block" id="Args.lexsort"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Args.lexsort">[docs]</a>    <span class="k">def</span> <span class="nf">lexsort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The lexical sort order is specified by a list of string</span>
+<span class="sd">        arguments. Each string is a key name prefixed by &#39;+&#39; or &#39;-&#39;</span>
+<span class="sd">        for ascending and descending sort respectively. If the key is</span>
+<span class="sd">        not found in the operand&#39;s set of varying keys, it is ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Please specify the keys for sorting, use&quot;</span>
+                            <span class="s">&quot;&#39;+&#39; prefix for ascending,&quot;</span>
+                            <span class="s">&quot;&#39;-&#39; for descending.)&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">order</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Key(s) specified not in the set of varying keys.&quot;</span><span class="p">)</span>
+
+        <span class="n">sorted_args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">specs_param</span> <span class="o">=</span> <span class="n">sorted_args</span><span class="o">.</span><span class="n">params</span><span class="p">(</span><span class="s">&#39;specs&#39;</span><span class="p">)</span>
+        <span class="n">specs_param</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">sorted_args</span><span class="o">.</span><span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lexsorted_specs</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="n">specs_param</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">sorted_args</span><span class="o">.</span><span class="n">_lexorder</span> <span class="o">=</span> <span class="n">order</span>
+        <span class="k">return</span> <span class="n">sorted_args</span>
+</div>
+    <span class="k">def</span> <span class="nf">_lexsorted_specs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A lexsort is specified using normal key string prefixed by &#39;+&#39;</span>
+<span class="sd">        (for ascending) or &#39;-&#39; for (for descending).</span>
+
+<span class="sd">        Note that in Python 2, if a key is missing, None is returned</span>
+<span class="sd">        (smallest Python value). In Python 3, an Exception will be</span>
+<span class="sd">        raised regarding comparison of heterogenous types.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">specs</span><span class="p">[:]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="s">&#39;-&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">order</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Please specify the keys for sorting, use&quot;</span>
+                            <span class="s">&quot;&#39;+&#39; prefix for ascending,&quot;</span>
+                            <span class="s">&quot;&#39;-&#39; for descending.)&quot;</span><span class="p">)</span>
+
+        <span class="n">sort_cycles</span> <span class="o">=</span> <span class="p">[(</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;+&#39;</span> <span class="k">else</span> <span class="bp">False</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+                       <span class="k">if</span> <span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ascending</span><span class="p">)</span> <span class="ow">in</span> <span class="n">sort_cycles</span><span class="p">:</span>
+            <span class="n">specs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                           <span class="n">reverse</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">ascending</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">specs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">constant_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_by_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span> <span class="k">if</span>
+                <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unique</span><span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">constant_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_by_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">collection</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">varying_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_by_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span>
+        <span class="n">constant_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">)</span>
+        <span class="n">unordered_varying</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">collection</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">constant_set</span><span class="p">)</span>
+        <span class="c"># Finding out how fast keys are varying</span>
+        <span class="n">grouplens</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">len</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+                           <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">k</span><span class="p">])]),</span><span class="n">k</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">collection</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unsortable_keys</span><span class="p">)]</span>
+        <span class="n">varying_counts</span> <span class="o">=</span> <span class="p">[(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grouplens</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">unordered_varying</span><span class="p">)]</span>
+        <span class="c"># Grouping keys with common frequency alphanumerically (desired behaviour).</span>
+        <span class="n">ddict</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="ow">in</span> <span class="n">varying_counts</span><span class="p">:</span> <span class="n">ddict</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">alphagroups</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ddict</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ddict</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">alphagroups</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unsortable_keys</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span> <span class="k">if</span> <span class="n">DataFrame</span> <span class="k">else</span> <span class="s">&quot;Pandas not available&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Concatenate"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Concatenate">[docs]</a><span class="k">class</span> <span class="nc">Concatenate</span><span class="p">(</span><span class="n">Args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Concatenate is the sequential composition of two specifiers. The</span>
+<span class="sd">    specifier created by the compositon (firsts + second) generates</span>
+<span class="sd">    the arguments in first followed by the arguments in second.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="n">Args</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The first specifier in the concatenation.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">second</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="n">Args</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The second specifier in the concatenation.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+
+        <span class="n">max_precision</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">fp_precision</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">fp_precision</span><span class="p">)</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">specs</span> <span class="o">+</span> <span class="n">second</span><span class="o">.</span><span class="n">specs</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Concatenate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">fp_precision</span><span class="o">=</span><span class="n">max_precision</span><span class="p">,</span>
+                                                <span class="n">first</span><span class="o">=</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="n">second</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;first&#39;</span><span class="p">,</span> <span class="s">&#39;second&#39;</span><span class="p">],[],</span> <span class="n">infix_operator</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CartesianProduct"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.CartesianProduct">[docs]</a><span class="k">class</span> <span class="nc">CartesianProduct</span><span class="p">(</span><span class="n">Args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CartesianProduct is the Cartesian product of two specifiers. The</span>
+<span class="sd">    specifier created by the compositon (firsts * second) generates</span>
+<span class="sd">    the cartesian produce of the arguments in first followed by the</span>
+<span class="sd">    arguments in second. Note that len(first * second) =</span>
+<span class="sd">    len(first)*len(second)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="n">Args</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The first specifier in the Cartesian product.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">second</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="n">Args</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The second specifier in the Cartesian product.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+
+        <span class="n">max_precision</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">fp_precision</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">fp_precision</span><span class="p">)</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cartesian_product</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">specs</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span>
+
+        <span class="n">overlap</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">varying_keys</span> <span class="o">+</span> <span class="n">first</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">)</span>
+                   <span class="o">&amp;</span>  <span class="nb">set</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">varying_keys</span> <span class="o">+</span> <span class="n">second</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">overlap</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(),</span> <span class="p">(</span><span class="s">&#39;Sets of keys cannot overlap&#39;</span>
+                                  <span class="s">&#39;between argument specifiers&#39;</span>
+                                  <span class="s">&#39;in cartesian product.&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CartesianProduct</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">fp_precision</span><span class="o">=</span><span class="n">max_precision</span><span class="p">,</span>
+                                               <span class="n">first</span><span class="o">=</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="n">second</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;first&#39;</span><span class="p">,</span> <span class="s">&#39;second&#39;</span><span class="p">],[],</span> <span class="n">infix_operator</span><span class="o">=</span><span class="s">&#39;*&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Range"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Range">[docs]</a><span class="k">class</span> <span class="nc">Range</span><span class="p">(</span><span class="n">Args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Range generates an argument from a numerically interpolated range</span>
+<span class="sd">    which is linear by default. An optional function can be specified</span>
+<span class="sd">    to sample a numeric range with regular intervals.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The key assigned to the values computed over the numeric range.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">start_value</span> <span class="o">=</span>  <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The starting numeric value of the range.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">end_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The ending numeric value of the range (inclusive).&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The number of steps to interpolate over. Default is 2</span>
+<span class="s">         which returns the start and end values without interpolation.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="c"># Can&#39;t this be a lambda?</span>
+    <span class="n">mapfn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">identityfn</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The function to be mapped across the linear range. The</span>
+<span class="s">         identity function is used by by default&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">start_value</span><span class="p">,</span> <span class="n">end_value</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mapfn</span><span class="o">=</span><span class="n">identityfn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start_value</span><span class="p">,</span> <span class="n">end_value</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="p">[{</span><span class="n">key</span><span class="p">:</span><span class="n">mapfn</span><span class="p">(</span><span class="n">val</span><span class="p">)}</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span> <span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Range</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="n">start_value</span><span class="p">,</span>
+                                         <span class="n">end_value</span><span class="o">=</span><span class="n">end_value</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
+                                         <span class="n">mapfn</span><span class="o">=</span><span class="n">mapfn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="s">&#39;start_value&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;end_value&#39;</span><span class="p">,</span> <span class="s">&#39;steps&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="Range.linspace"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Range.linspace">[docs]</a>    <span class="k">def</span> <span class="nf">linspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Simple replacement for numpy linspace&quot;&quot;&quot;</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+        <span class="n">nm1</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">nm1inv</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">nm1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nm1inv</span> <span class="o">*</span> <span class="p">(</span><span class="n">start</span><span class="o">*</span><span class="p">(</span><span class="n">nm1</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">stop</span><span class="o">*</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">L</span>
+</div></div>
+<div class="viewcode-block" id="List"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.List">[docs]</a><span class="k">class</span> <span class="nc">List</span><span class="p">(</span><span class="n">Args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An argument specifier that takes its values from a given list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The list values that are to be returned by the specifier&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The key assigned to the elements of the supplied list.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="p">[{</span><span class="n">key</span><span class="p">:</span><span class="n">val</span><span class="p">}</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">List</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">],</span> <span class="p">[])</span>
+
+</div>
+<div class="viewcode-block" id="Log"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Log">[docs]</a><span class="k">class</span> <span class="nc">Log</span><span class="p">(</span><span class="n">Args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specifier that loads arguments from a log file in task id (tid)</span>
+<span class="sd">    order.  This wrapper class allows a concise representation of file</span>
+<span class="sd">    logs with the option of adding the task id to the loaded</span>
+<span class="sd">    specifications.</span>
+
+<span class="sd">    For full control over the arguments, you can use this class to</span>
+<span class="sd">    create a fully specified Args object as follows:</span>
+
+<span class="sd">    Args(Log.extract_log(&lt;log_file&gt;).values()),</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">log_path</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+         <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The relative or absolute path to the log file. If a</span>
+<span class="s">              relative path is given, the absolute path is computed</span>
+<span class="s">              relative to os.getcwd().&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">tid_key</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;tid&#39;</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+         <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;If not None, the key given to the tid values included</span>
+<span class="s">               in the loaded specifications. If None, the tid number</span>
+<span class="s">               is ignored.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Log.extract_log"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Log.extract_log">[docs]</a>    <span class="k">def</span> <span class="nf">extract_log</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="n">dict_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parses the log file generated by a launcher and returns</span>
+<span class="sd">        dictionary with tid keys and specification values.</span>
+
+<span class="sd">        Ordering can be maintained by setting dict_type to the</span>
+<span class="sd">        appropriate constructor (i.e. OrderedDict). Keys are converted</span>
+<span class="sd">        from unicode to strings for kwarg use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log_path</span> <span class="o">=</span> <span class="p">(</span><span class="n">log_path</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">log_path</span><span class="p">))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">splits</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">log</span><span class="p">)</span>
+            <span class="n">uzipped</span> <span class="o">=</span> <span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">:])))</span> <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">)</span>
+            <span class="n">szipped</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="nb">dict</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="n">uzipped</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dict_type</span><span class="p">(</span><span class="n">szipped</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Log.write_log"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.Log.write_log">[docs]</a>    <span class="k">def</span> <span class="nf">write_log</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">allow_append</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes the supplied specifications to the log path. The data</span>
+<span class="sd">        may be supplied as either as a an Args or as a list of</span>
+<span class="sd">        dictionaries.</span>
+
+<span class="sd">        By default, specifications will be appropriately appended to</span>
+<span class="sd">        an existing log file. This can be disabled by setting</span>
+<span class="sd">        allow_append to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">append</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span>
+        <span class="n">islist</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">append</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_append</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Appending has been disabled&#39;</span>
+                            <span class="s">&#39; and file </span><span class="si">%s</span><span class="s"> exists&#39;</span> <span class="o">%</span> <span class="n">log_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">islist</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Args</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Can only write Args objects or dictionary&#39;</span>
+                            <span class="s">&#39; lists to log file.&#39;</span><span class="p">)</span>
+
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">data</span> <span class="k">if</span> <span class="n">islist</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">specs</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span><span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;List elements must be dictionaries.&#39;</span><span class="p">)</span>
+
+        <span class="n">log_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s">&#39;r+&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">append</span> <span class="k">else</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">log_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span> <span class="k">if</span> <span class="n">append</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">ascending_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="n">log_str</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%d</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">el</span><span class="p">))</span>
+                             <span class="k">for</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ascending_indices</span><span class="p">,</span><span class="n">specs</span><span class="p">)])</span>
+        <span class="n">log_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">+</span><span class="n">log_str</span> <span class="k">if</span> <span class="n">append</span> <span class="k">else</span> <span class="n">log_str</span><span class="p">)</span>
+        <span class="n">log_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_path</span><span class="p">,</span> <span class="n">tid_key</span><span class="o">=</span><span class="s">&#39;tid&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">log_items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Log</span><span class="o">.</span><span class="n">extract_log</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">tid_key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">log_specs</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="ow">in</span> <span class="n">log_items</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log_specs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span><span class="o">+</span><span class="p">[(</span><span class="n">tid_key</span><span class="p">,</span><span class="n">idx</span><span class="p">)])</span>
+                         <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="ow">in</span> <span class="n">log_items</span><span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Log</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">log_specs</span><span class="p">,</span>
+                                  <span class="n">log_path</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span>
+                                  <span class="n">tid_key</span><span class="o">=</span><span class="n">tid_key</span><span class="p">,</span>
+                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;log_path&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;tid_key&#39;</span><span class="p">])</span>
+
+
+</div>
+<div class="viewcode-block" id="FilePattern"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.FilePattern">[docs]</a><span class="k">class</span> <span class="nc">FilePattern</span><span class="p">(</span><span class="n">Args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A FilePattern specifier allows files to be matched and information</span>
+<span class="sd">    encoded in filenames to be extracted via an extended form of</span>
+<span class="sd">    globbing. This object may be used to specify filename arguments to</span>
+<span class="sd">    CommandTemplates when launching jobs but it also very useful for</span>
+<span class="sd">    collating files for analysis.</span>
+
+<span class="sd">    For instance, you can find the absolute filenames of all npz files</span>
+<span class="sd">    in a &#39;data&#39; subdirectory (relative to the root) that start with</span>
+<span class="sd">    &#39;timeseries&#39; using the pattern &#39;data/timeseries*.npz&#39;.</span>
+
+<span class="sd">    In addition to globbing supported by the glob module, patterns can</span>
+<span class="sd">    extract metadata encoded in filenames using a subset of the Python</span>
+<span class="sd">    format specification syntax. To illustrate, you can use</span>
+<span class="sd">    &#39;data/timeseries-{date}.npz&#39; to record the date strings associated</span>
+<span class="sd">    with matched files. Note that a particular named fields can only</span>
+<span class="sd">    be used in a particular pattern once.</span>
+
+<span class="sd">    By default metadata is extracted as strings but format types are</span>
+<span class="sd">    supported in the usual manner</span>
+<span class="sd">    eg. &#39;data/timeseries-{day:d}-{month:d}.npz&#39; will extract the day</span>
+<span class="sd">    and month from the filename as integer values. Only field names</span>
+<span class="sd">    and types are recognised with other format specification syntax</span>
+<span class="sd">    ignored. Type codes supported: &#39;d&#39;, &#39;b&#39;, &#39;o&#39;, &#39;x&#39;, &#39;e&#39;,&#39;E&#39;,&#39;f&#39;,</span>
+<span class="sd">    &#39;F&#39;,&#39;g&#39;, &#39;G&#39;, &#39;n&#39; (if ommited, result is a string by default).</span>
+
+<span class="sd">    Note that ordering is determined via ascending alphanumeric sort</span>
+<span class="sd">    and that actual filenames should not include any globbing</span>
+<span class="sd">    characters, namely: &#39;?&#39;,&#39;*&#39;,&#39;[&#39; and &#39;]&#39; (general good practice for</span>
+<span class="sd">    filenames anyway).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The key name given to the matched file path strings.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The pattern files are to be searched against.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The root directory from which patterns are to be loaded.</span>
+<span class="s">       The root is set relative to os.getcwd().&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="FilePattern.directory"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.FilePattern.directory">[docs]</a>    <span class="k">def</span> <span class="nf">directory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load all the files in a given directory selecting only files</span>
+<span class="sd">        with the given extension if specified. The given kwargs are</span>
+<span class="sd">        passed through to the normal constructor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">root</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">extension</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">extension</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span> <span class="o">+</span> <span class="n">suffix</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span><span class="s">&#39;*&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">format_parse</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">el</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">format_parse</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Directory cannot contain format field specifications&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">root</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_expansion</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FilePattern</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="n">pattern</span><span class="p">,</span>
+                                          <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="s">&#39;pattern&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;root&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="FilePattern.fields"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.FilePattern.fields">[docs]</a>    <span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the fields specified in the pattern using Python&#39;s</span>
+<span class="sd">        formatting mini-language.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parse</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">parse</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">_load_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the files that match the given pattern.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path_pattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+        <span class="n">expanded_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_pattern</span><span class="p">(</span><span class="n">path_pattern</span><span class="p">)</span>
+
+        <span class="n">specs</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span> <span class="ow">in</span> <span class="n">expanded_paths</span><span class="p">:</span>
+            <span class="n">filelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">path</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+                <span class="n">specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span><span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filepath</span><span class="p">)}))</span>
+
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_expand_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        From the pattern decomposition, finds the absolute paths</span>
+<span class="sd">        matching the pattern.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">globpattern</span><span class="p">,</span> <span class="n">regexp</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">types</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decompose_pattern</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="n">filelist</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">globpattern</span><span class="p">)</span>
+        <span class="n">expansion</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fields</span> <span class="o">==</span> <span class="p">[]:</span>
+                <span class="n">expansion</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">fname</span><span class="p">,</span> <span class="p">{}))</span>
+                <span class="k">continue</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regexp</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="n">match_items</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">)(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">match_items</span><span class="p">)</span>
+            <span class="n">expansion</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">fname</span><span class="p">,</span> <span class="n">tags</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">expansion</span>
+
+    <span class="k">def</span> <span class="nf">_decompose_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a path pattern with format declaration, generates a</span>
+<span class="sd">        four-tuple (glob_pattern, regexp pattern, fields, type map)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="s">&#39;~lancet~sep~&#39;</span>
+        <span class="n">float_codes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;e&#39;</span><span class="p">,</span><span class="s">&#39;E&#39;</span><span class="p">,</span><span class="s">&#39;f&#39;</span><span class="p">,</span> <span class="s">&#39;F&#39;</span><span class="p">,</span><span class="s">&#39;g&#39;</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="s">&#39;n&#39;</span><span class="p">]</span>
+        <span class="n">typecodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">float_codes</span><span class="p">]</span>
+                         <span class="o">+</span> <span class="p">[(</span><span class="s">&#39;b&#39;</span><span class="p">,</span><span class="nb">bin</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">,</span><span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;o&#39;</span><span class="p">,</span><span class="nb">oct</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="nb">hex</span><span class="p">)])</span>
+        <span class="n">parse</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span>
+        <span class="n">text</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">parse</span><span class="p">)</span>
+
+        <span class="c"># Finding the field types from format string</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">]:</span> <span class="k">continue</span>
+            <span class="n">constructor</span> <span class="o">=</span>  <span class="n">typecodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">constructor</span><span class="p">:</span> <span class="n">types</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">field</span><span class="p">,</span> <span class="n">constructor</span><span class="p">)]</span>
+
+        <span class="n">stars</span> <span class="o">=</span>  <span class="p">[</span><span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span> <span class="k">else</span> <span class="s">&#39;*&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        <span class="n">globpat</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">+</span><span class="n">star</span> <span class="k">for</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="n">star</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="n">stars</span><span class="p">))</span>
+
+        <span class="n">refields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span> <span class="k">else</span> <span class="n">sep</span><span class="o">+</span><span class="p">(</span><span class="s">&#39;(?P&lt;</span><span class="si">%s</span><span class="s">&gt;.*?)&#39;</span><span class="o">%</span> <span class="n">f</span><span class="p">)</span><span class="o">+</span><span class="n">sep</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">+</span><span class="n">group</span> <span class="k">for</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="n">group</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">refields</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span> <span class="n">parts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">regexp_pattern</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">*&#39;</span><span class="p">,</span><span class="s">&#39;.*&#39;</span><span class="p">)</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span> <span class="k">if</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">globpat</span><span class="p">,</span> <span class="n">regexp_pattern</span> <span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>
+
+
+<span class="c"># Importing from filetypes requires PrettyPrinted to be defined first</span></div>
+<span class="kn">from</span> <span class="nn">filetypes</span> <span class="kn">import</span> <span class="n">FileType</span>
+
+<div class="viewcode-block" id="FileInfo"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.FileInfo">[docs]</a><span class="k">class</span> <span class="nc">FileInfo</span><span class="p">(</span><span class="n">Args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads metadata (and optionally data) from a set of filenames. For</span>
+<span class="sd">    instance, you can load metadata associated with a series of image</span>
+<span class="sd">    files given by a FilePattern. Unlike other explicit instances of</span>
+<span class="sd">    Args, this object extends the values of an existing Args object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">class_</span> <span class="o">=</span> <span class="n">Args</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        The argument specifier that supplies the file paths.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">filetype</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span> <span class="n">FileType</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        A FileType object to be applied to each file path.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">       The key used to find the file paths for inspection.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">load_contents</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">       Whether the main contents of the files are to be loaded along</span>
+<span class="s">       with the associated metadata. Note that this can be slow when</span>
+<span class="s">       handling large numbers of files - it may be better to select</span>
+<span class="s">       only the required data with a pandas DataFrame and use the</span>
+<span class="s">       load_dframe method instead.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">ignore</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">       Metadata keys that are to be explicitly ignored. &#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">filetype</span><span class="p">,</span>
+                 <span class="n">load_contents</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">ignore</span> <span class="o">=</span> <span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">specs</span><span class="p">,</span> <span class="n">data_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">filetype</span><span class="p">,</span>
+                                      <span class="n">load_contents</span><span class="p">,</span> <span class="n">ignore</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileInfo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span>
+                                       <span class="n">source</span> <span class="o">=</span> <span class="n">source</span><span class="p">,</span>
+                                       <span class="n">filetype</span> <span class="o">=</span> <span class="n">filetype</span><span class="p">,</span>
+                                       <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">,</span>
+                                       <span class="n">load_contents</span> <span class="o">=</span> <span class="n">load_contents</span><span class="p">,</span>
+                                       <span class="n">ignore</span><span class="o">=</span><span class="n">ignore</span><span class="p">,</span>
+                                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># Do not attempt to sort data fields.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unsortable_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;source&#39;</span><span class="p">,</span> <span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="s">&#39;filetype&#39;</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&#39;load_contents&#39;</span><span class="p">,</span> <span class="s">&#39;ignore&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="FileInfo.load"><a class="viewcode-back" href="../../Reference_Manual/lancet.core-module.html#lancet.core.FileInfo.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dframe</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the file contents into the supplied dataframe using the</span>
+<span class="sd">        specified key and filetype. This allows a specific selection</span>
+<span class="sd">        to be made using pandas over the metadata before loading the</span>
+<span class="sd">        file contents (which may be slow).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">DataFrame</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Pandas not available&quot;</span>
+        <span class="n">filename_series</span> <span class="o">=</span> <span class="n">dframe</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="n">filename_series</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">loaded_data</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">):</span>
+            <span class="n">key_exists</span> <span class="o">=</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dframe</span><span class="o">.</span><span class="n">columns</span>
+            <span class="k">if</span> <span class="n">key_exists</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Appending &#39;_data&#39; suffix to data key </span><span class="si">%r</span><span class="s"> to avoid&quot;</span>
+                             <span class="s">&quot;overwriting existing metadata with the same name.&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="s">&#39;_data&#39;</span> <span class="k">if</span> <span class="n">key_exists</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+            <span class="n">dframe</span><span class="p">[</span><span class="n">key</span><span class="o">+</span><span class="n">suffix</span><span class="p">]</span> <span class="o">=</span> <span class="n">loaded_data</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">dframe</span>
+</div>
+    <span class="k">def</span> <span class="nf">_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">filetype</span><span class="p">,</span> <span class="n">load_contents</span><span class="p">,</span> <span class="n">ignore</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the union of the source.specs and the metadata</span>
+<span class="sd">        dictionary loaded by the filetype object. Optionally, the the</span>
+<span class="sd">        file contents are also loaded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">mdata</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
+        <span class="n">mdata_clashes</span><span class="p">,</span> <span class="n">datakey_clashes</span>  <span class="o">=</span> <span class="nb">set</span><span class="p">(),</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">specs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spec</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Key </span><span class="si">%r</span><span class="s"> not available in &#39;source&#39;.&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+
+            <span class="n">mdata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">filetype</span><span class="o">.</span><span class="n">metadata</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                         <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">filetype</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">if</span> <span class="n">load_contents</span> <span class="k">else</span> <span class="p">{}</span>
+            <span class="n">data_keys</span> <span class="o">=</span> <span class="n">data_keys</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">mdata_spec</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="o">**</span><span class="n">mdata</span><span class="p">)</span>
+            <span class="n">specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">mdata_spec</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">))</span>
+            <span class="n">mdata_clashes</span> <span class="o">=</span> <span class="n">mdata_clashes</span> <span class="o">|</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">mdata</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="n">datakey_clashes</span> <span class="o">=</span> <span class="n">datakey_clashes</span> <span class="o">|</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">mdata_spec</span><span class="p">))</span>
+
+        <span class="c"># Metadata clashes can be avoided by using the ignore list.</span>
+        <span class="k">if</span> <span class="n">mdata_clashes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Loaded metadata keys overriding source keys.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">datakey_clashes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Loaded data keys overriding source and/or metadata keys&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">specs</span><span class="p">,</span> <span class="n">data_keys</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/lancet/core.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../lancet.html" >lancet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

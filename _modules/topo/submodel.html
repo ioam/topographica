@@ -1,0 +1,696 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.submodel &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.submodel</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A set of tools which allow specifying a model consisting of sheets</span>
+<span class="sd">organized in levels, and projections connecting these sheets. The</span>
+<span class="sd">sheets have an attribute matchconditions allowing to specify which</span>
+<span class="sd">other (incoming) sheets a sheet should connect to.</span>
+
+<span class="sd">Instances of the LabelDecorator decorator are offered for setting</span>
+<span class="sd">parameters/matchconditions for a sheet within a level, as well as</span>
+<span class="sd">parameters for projections.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">lancet</span>
+<span class="kn">import</span> <span class="nn">numbergen</span>
+<span class="kn">from</span> <span class="nn">holoviews.core.tree</span> <span class="kn">import</span> <span class="n">AttrTree</span>
+<span class="kn">import</span> <span class="nn">topo.sheet</span><span class="o">,</span> <span class="nn">topo.projection</span>
+<span class="kn">from</span> <span class="nn">specifications</span> <span class="kn">import</span> <span class="n">SheetSpec</span><span class="p">,</span> <span class="n">ProjectionSpec</span><span class="p">,</span> <span class="n">ModelSpec</span><span class="p">,</span> <span class="n">ArraySpec</span> <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">topo.misc.commandline</span> <span class="kn">import</span> <span class="n">global_params</span>
+
+
+
+<div class="viewcode-block" id="select"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.select">[docs]</a><span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="o">*</span><span class="n">decorators</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A meta-decorator that applies one-of-N possible decorators based</span>
+<span class="sd">    on the index. The index may be a boolean value for selecting</span>
+<span class="sd">    between two options.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">decorators</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapped</span>
+
+
+</div>
+<div class="viewcode-block" id="order_projections"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.order_projections">[docs]</a><span class="k">def</span> <span class="nf">order_projections</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">connection_order</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function for reproducing random streams when</span>
+<span class="sd">    time_dependent=False (where the order of projection instantiation</span>
+<span class="sd">    matters). This function should only be used for legacy reasons and</span>
+<span class="sd">    should not be used with new models.</span>
+
+<span class="sd">    The first argument is an instance of Model (with projections</span>
+<span class="sd">    configured) and the second is the projection ordering, specified</span>
+<span class="sd">    by the (decorated) method names generating those projections.</span>
+
+<span class="sd">    This function allows sorting on a single source sheet property. To</span>
+<span class="sd">    specify such an ordering, use a tuple where the first element is</span>
+<span class="sd">    the relevant method name and the second element is a source sheet</span>
+<span class="sd">    property dictionary to match. For instance, specifying the</span>
+<span class="sd">    connection_order list as:</span>
+
+<span class="sd">    [(&#39;V1_afferent_projections&#39;, {&#39;polarity&#39;:&#39;On&#39;}),</span>
+<span class="sd">    (&#39;V1_afferent_projections&#39;,  {&#39;polarity&#39;:&#39;Off&#39;})]</span>
+
+<span class="sd">    will order the &#39;On&#39; projections generated by the</span>
+<span class="sd">    V1_afferent_projections method before the &#39;Off&#39; projections.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">connection_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">connection_order</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">projections</span><span class="p">:</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">connection_list</span><span class="p">)</span>
+                   <span class="k">if</span> <span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">spec</span><span class="o">.</span><span class="n">matchname</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Could not order projection </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">spec</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">spec</span><span class="o">.</span><span class="n">sort_precedence</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">continue</span>
+
+        <span class="n">property_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">pdict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">pdict</span><span class="p">))</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pkeys</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="k">for</span> <span class="n">pkeys</span> <span class="ow">in</span> <span class="n">property_keys</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Please specify only a single property to sort on&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">pkey</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">property_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pkey</span> <span class="ow">in</span> <span class="n">property_keys</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Please specify only a single property to sort on&quot;</span><span class="p">)</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="n">property_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">spec_property_value</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span> <span class="k">for</span> <span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">pdict</span><span class="p">))</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="n">pdict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">spec_property_value</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">match</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Could not order projection </span><span class="si">%r</span><span class="s"> by property </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+        <span class="n">spec</span><span class="o">.</span><span class="n">sort_precedence</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="MatchConditions"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.MatchConditions">[docs]</a><span class="k">class</span> <span class="nc">MatchConditions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator class for matchconditions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">method_name</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">_matchcondition_level</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">_target_method_name</span> <span class="o">=</span> <span class="n">method_name</span>
+            <span class="k">return</span> <span class="n">f</span>
+        <span class="k">return</span> <span class="n">decorator</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;MatchConditions()&quot;</span>
+
+</div>
+<div class="viewcode-block" id="ComponentDecorator"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.ComponentDecorator">[docs]</a><span class="k">class</span> <span class="nc">ComponentDecorator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator class that can be instantiated with a component type to</span>
+<span class="sd">    create a decorator used to associate methods with the</span>
+<span class="sd">    corresponding component.</span>
+
+<span class="sd">    This class works by setting a &#39;_component_type&#39; attribute on the</span>
+<span class="sd">    decorated method. Methods that have been annotated in this way may</span>
+<span class="sd">    be tracked in classes decorated with the ComponentRegistry class</span>
+<span class="sd">    decorator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">object_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">object_type</span>
+
+        <span class="c"># Enable IPython tab completion in the settings method</span>
+        <span class="n">kwarg_string</span> <span class="o">=</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
+                                 <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="n">object_type</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">__func__</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span>  <span class="s">&#39;params(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">kwarg_string</span>
+
+
+<div class="viewcode-block" id="ComponentDecorator.params"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.ComponentDecorator.params">[docs]</a>    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A convenient way of generating parameter dictionaries with</span>
+<span class="sd">        tab-completion in IPython.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">kwargs</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">_component_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+        <span class="k">return</span> <span class="n">f</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;ComponentDecorator(</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="ComponentRegistry"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.ComponentRegistry">[docs]</a><span class="k">class</span> <span class="nc">ComponentRegistry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An instance of this class is to be used as class decorator. Any</span>
+<span class="sd">    decorated class using ClassDecorators on their methods will be</span>
+<span class="sd">    registered with their corresponding component types.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method_registry</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_registry</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matchconditions</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="ComponentRegistry.compute_conditions"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.ComponentRegistry.compute_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">compute_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Collect the matchcondition dictionary for a particular level</span>
+<span class="sd">        given a certain Model instance and sheet properties. If no</span>
+<span class="sd">        matchconditions are available, an empty dictionary is</span>
+<span class="sd">        returned.</span>
+
+<span class="sd">        Respects the appropriate method resolution order (mro) of the</span>
+<span class="sd">        given model instance.  &quot;&quot;&quot;</span>
+        <span class="n">mro</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">mro</span><span class="p">()]</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">[(</span><span class="n">target</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">lvl</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchconditions</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">cls</span> <span class="ow">in</span> <span class="n">mro</span><span class="p">)</span> <span class="ow">and</span> <span class="n">lvl</span> <span class="o">==</span> <span class="n">level</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">target</span><span class="p">,</span> <span class="n">fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">properties</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="ow">in</span> <span class="n">filtered</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ComponentRegistry.lookup"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.ComponentRegistry.lookup">[docs]</a>    <span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a class, a method name and a mode, return either the</span>
+<span class="sd">        component type (if mode=&#39;type) or the appropriate method (if</span>
+<span class="sd">        mode=&#39;method&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mro</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">()]</span>
+        <span class="n">registry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method_registry</span> <span class="k">if</span> <span class="n">mode</span><span class="o">==</span><span class="s">&#39;method&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_registry</span>
+
+        <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">mro</span><span class="p">:</span>
+            <span class="n">entries</span> <span class="o">=</span> <span class="n">registry</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">entries</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;Could not find method named </span><span class="si">%r</span><span class="s">.&quot;</span>
+                       <span class="s">&quot; Please ensure classes using component decorators&quot;</span>
+                       <span class="s">&quot; are decorated with the Model.definition&quot;</span>
+                       <span class="s">&quot; class decorator.&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="n">component_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s">&quot;_component_type&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">component_type</span><span class="p">:</span>
+                <span class="n">method_name</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">__name__</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">method_registry</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">method_name</span><span class="p">:</span><span class="n">method</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">type_registry</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">method_name</span><span class="p">:</span><span class="n">component_type</span><span class="p">})</span>
+
+            <span class="n">match_level</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s">&#39;_matchcondition_level&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+            <span class="n">target_method_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s">&#39;_target_method_name&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match_level</span> <span class="ow">and</span> <span class="n">target_method_name</span><span class="p">:</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">match_level</span><span class="p">,</span> <span class="n">target_method_name</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">matchconditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span>
+
+
+<span class="c"># A singleton to be used by model class using decorators</span></div>
+<span class="n">definition</span> <span class="o">=</span> <span class="n">ComponentRegistry</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The available setup options are:</span>
+
+<span class="sd">        :&#39;training_patterns&#39;: fills the training_patterns AttrTree</span>
+<span class="sd">        with pattern generator instances. The path is the name of the</span>
+<span class="sd">        input sheet. Usually calls PatternCoordinator to do this.</span>
+<span class="sd">        :&#39;sheets_setup&#39;: determines the number of sheets, their types</span>
+<span class="sd">        and names sets sheet parameters according to the registered</span>
+<span class="sd">        methods in level sets sheet matchconditions according to the</span>
+<span class="sd">        registered methods in matchconditions</span>
+<span class="sd">        :&#39;projections&#39;: determines which connections should be present</span>
+<span class="sd">        between the sheets according to the matchconditions of</span>
+<span class="sd">        SheetSpec objects, using connect to specify the</span>
+<span class="sd">        connection type and sets their parameters according to the</span>
+<span class="sd">        registered methods in connect</span>
+
+
+<span class="sd">    The available instantiate options are:</span>
+
+<span class="sd">        :&#39;sheets&#39;: instantiates all sheets and registers them in</span>
+<span class="sd">        topo.sim</span>
+<span class="sd">        :&#39;projections&#39;: instantiates all projections and registers</span>
+<span class="sd">        them in topo.sim</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">random_seed</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Overrides the default global seed on param.random_seed when not None.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># A convenient handle on the definition class decorator</span>
+    <span class="n">definition</span> <span class="o">=</span> <span class="n">definition</span>
+
+    <span class="n">matchconditions</span> <span class="o">=</span> <span class="n">MatchConditions</span><span class="p">()</span>
+    <span class="n">sheet_decorators</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">projection_decorators</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register_decorator</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">object_type</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">object_type</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">decorator</span> <span class="o">=</span> <span class="n">ComponentDecorator</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">object_type</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>  <span class="n">decorator</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">object_type</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">Sheet</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">sheet_decorators</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">decorator</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">object_type</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">Projection</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">projection_decorators</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">decorator</span><span class="p">)</span>
+
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Model.modified_parameters"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.modified_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">modified_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;Dictionary of modified model parameters&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">(</span><span class="n">onlychanged</span><span class="o">=</span><span class="bp">True</span><span class="p">)}</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">register</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">time_dependent</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">numbergen</span><span class="o">.</span><span class="n">TimeAware</span><span class="o">.</span><span class="n">time_dependent</span> <span class="o">=</span> <span class="n">time_dependent</span>
+        <span class="k">if</span> <span class="n">register</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_register_global_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">specification</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c"># Training patterns need to be accessed by GeneratorSheets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;training_patterns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AttrTree</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_register_global_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register the parameters of this object as global parameters</span>
+<span class="sd">        available for users to set from the command line.  Values</span>
+<span class="sd">        supplied as global parameters will override those of the given</span>
+<span class="sd">        dictionary of params.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">global_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span><span class="n">obj</span><span class="p">})</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">global_params</span><span class="o">.</span><span class="n">params</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">default</span><span class="o">=</span><span class="n">val</span>
+
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_params</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">())</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+
+    <span class="c">#==============================================#</span>
+    <span class="c"># Public methods to be implemented by modelers #</span>
+    <span class="c">#==============================================#</span>
+
+<div class="viewcode-block" id="Model.property_setup"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.property_setup">[docs]</a>    <span class="k">def</span> <span class="nf">property_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to precompute any useful properties from the class</span>
+<span class="sd">        parameters. For instance, if there is a ``num_lags``</span>
+<span class="sd">        parameter, this method could compute the actual projection</span>
+<span class="sd">        delays and store it as properties[&#39;lags&#39;]. The return value is</span>
+<span class="sd">        the updated &#39;properties&#39; dictionary.</span>
+
+<span class="sd">        In addition, this method can be used to configure class</span>
+<span class="sd">        attributes of the model components.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">properties</span>
+
+</div>
+<div class="viewcode-block" id="Model.training_pattern_setup"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.training_pattern_setup">[docs]</a>    <span class="k">def</span> <span class="nf">training_pattern_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dictionary of PatternGenerators to be added to</span>
+<span class="sd">        self.training_patterns, with the target sheet name keys and</span>
+<span class="sd">        pattern generator values.</span>
+
+<span class="sd">        The overrides keywords can be used by a subclass to</span>
+<span class="sd">        parameterize the training patterns e.g. override the default</span>
+<span class="sd">        parameters of a PatternCoordinator object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="Model.sheet_setup"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.sheet_setup">[docs]</a>    <span class="k">def</span> <span class="nf">sheet_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dictionary of properties or equivalent Lancet.Args</span>
+<span class="sd">        object. Each outer key must be the level name and the values</span>
+<span class="sd">        are lists of property dictionaries for the sheets at that</span>
+<span class="sd">        level (or equivalent Lancet Args object). For instance, two</span>
+<span class="sd">        LGN sheets at the &#39;LGN&#39; level could be defined by either:</span>
+
+<span class="sd">        {&#39;LGN&#39;:[{&#39;polarity&#39;:&#39;ON&#39;}, {&#39;polarity&#39;:&#39;OFF&#39;}]}</span>
+<span class="sd">        OR</span>
+<span class="sd">        {&#39;LGN&#39;:lancet.List(&#39;polarity&#39;, [&#39;ON&#39;, &#39;OFF&#39;])}</span>
+
+<span class="sd">        The specified properties are used to initialize the sheets</span>
+<span class="sd">        AttrTree with SheetSpec objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="Model.analysis_setup"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.analysis_setup">[docs]</a>    <span class="k">def</span> <span class="nf">analysis_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up appropriate defaults for analysis functions in</span>
+<span class="sd">        topo.analysis.featureresponses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+    <span class="c">#====================================================#</span>
+    <span class="c"># Remaining methods should not need to be overridden #</span>
+    <span class="c">#====================================================#</span>
+</div>
+<div class="viewcode-block" id="Model.setup"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">setup_options</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method can be used to setup certain parts of the</span>
+<span class="sd">        submodel.  If setup_options=True, all setup methods are</span>
+<span class="sd">        called.  setup_options can also be a list, whereas all list</span>
+<span class="sd">        items of available_setup_options are accepted.</span>
+
+<span class="sd">        Available setup options are:</span>
+<span class="sd">        &#39;training_patterns&#39;,&#39;sheets&#39;,&#39;projections&#39; and &#39;analysis&#39;.</span>
+
+<span class="sd">        This method returns a ModelSpec object which is also set as</span>
+<span class="sd">        the value of the &#39;specification&#39; attribute.</span>
+
+<span class="sd">        Please consult the docstring of the Model class for more</span>
+<span class="sd">        information about each setup option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">available_setup_options</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;attributes&#39;</span><span class="p">,</span>
+                                   <span class="s">&#39;training_patterns&#39;</span><span class="p">,</span>
+                                   <span class="s">&#39;sheets&#39;</span><span class="p">,</span>
+                                   <span class="s">&#39;projections&#39;</span><span class="p">,</span>
+                                   <span class="s">&#39;analysis&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">random_seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span>
+
+        <span class="k">if</span> <span class="n">setup_options</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+            <span class="n">setup_options</span> <span class="o">=</span> <span class="n">available_setup_options</span>
+
+        <span class="k">if</span> <span class="s">&#39;attributes&#39;</span> <span class="ow">in</span> <span class="n">setup_options</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_setup</span><span class="p">({})</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ModelSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;training_patterns&#39;</span> <span class="ow">in</span> <span class="n">setup_options</span><span class="p">:</span>
+            <span class="n">training_patterns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_pattern_setup</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">training_pattern</span> <span class="ow">in</span> <span class="n">training_patterns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">training_patterns</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">training_pattern</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;training_patterns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">training_patterns</span>
+        <span class="k">if</span> <span class="s">&#39;sheets&#39;</span> <span class="ow">in</span> <span class="n">setup_options</span><span class="p">:</span>
+            <span class="n">sheet_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_setup</span><span class="p">()</span>
+
+            <span class="n">enumeration</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sheet_properties</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">ordering</span><span class="p">,</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">property_list</span><span class="p">))</span> <span class="ow">in</span> <span class="n">enumeration</span><span class="p">:</span>
+                <span class="n">sheet_type</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;type&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">property_list</span><span class="p">,</span> <span class="n">lancet</span><span class="o">.</span><span class="n">Identity</span><span class="p">):</span>
+                    <span class="n">property_list</span> <span class="o">=</span> <span class="p">[{}]</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">property_list</span><span class="p">,</span> <span class="n">lancet</span><span class="o">.</span><span class="n">Args</span><span class="p">):</span>
+                    <span class="n">property_list</span> <span class="o">=</span> <span class="n">property_list</span><span class="o">.</span><span class="n">specs</span>
+                <span class="c"># If an empty list or Args()</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">property_list</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">for</span> <span class="n">properties</span> <span class="ow">in</span> <span class="n">property_list</span><span class="p">:</span>
+                    <span class="n">spec_properties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">)</span>
+                    <span class="n">sheet_spec</span> <span class="o">=</span> <span class="n">SheetSpec</span><span class="p">(</span><span class="n">sheet_type</span><span class="p">,</span> <span class="n">spec_properties</span><span class="p">)</span>
+                    <span class="n">sheet_spec</span><span class="o">.</span><span class="n">sort_precedence</span> <span class="o">=</span> <span class="n">ordering</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sheet_spec</span><span class="p">),</span> <span class="n">sheet_spec</span><span class="p">)</span>
+
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_sheet_spec_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;projections&#39;</span> <span class="ow">in</span> <span class="n">setup_options</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_projection_specs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;analysis&#39;</span> <span class="ow">in</span> <span class="n">setup_options</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysis_setup</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">specification</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">return</span> <span class="n">model</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_update_sheet_spec_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sheet_spec</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">param_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">sheet_spec</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="s">&#39;method&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">param_method</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Parameters for sheet level </span><span class="si">%r</span><span class="s"> not specified&quot;</span> <span class="o">%</span> <span class="n">sheet_spec</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
+
+            <span class="n">updated_params</span> <span class="o">=</span> <span class="n">param_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheet_spec</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+            <span class="n">sheet_spec</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">updated_params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span>
+
+
+    <span class="k">def</span> <span class="nf">_matchcondition_holds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matchconditions</span><span class="p">,</span> <span class="n">src_sheet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a dictionary of properties to match and a target sheet</span>
+<span class="sd">        spec, return True if the matchcondition holds else False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">matches</span><span class="o">=</span><span class="bp">True</span>
+        <span class="k">if</span> <span class="n">matchconditions</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">incoming_key</span><span class="p">,</span> <span class="n">incoming_value</span> <span class="ow">in</span> <span class="n">matchconditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">incoming_key</span> <span class="ow">in</span> <span class="n">src_sheet</span><span class="o">.</span><span class="n">properties</span> <span class="ow">and</span> \
+                    <span class="nb">str</span><span class="p">(</span><span class="n">src_sheet</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">incoming_key</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">incoming_value</span><span class="p">))</span> \
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">incoming_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">src_sheet</span><span class="o">.</span><span class="n">properties</span> <span class="ow">and</span> <span class="n">incoming_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="n">matches</span><span class="o">=</span><span class="bp">False</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">matches</span>
+
+    <span class="k">def</span> <span class="nf">_compute_projection_specs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loop through all possible combinations of SheetSpec objects in</span>
+<span class="sd">        self.sheets If the src_sheet fulfills all criteria specified</span>
+<span class="sd">        in dest_sheet.matchconditions, create a new ProjectionSpec</span>
+<span class="sd">        object and add this item to self.projections.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sheetspec_product</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+                                              <span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">src_sheet</span><span class="p">,</span> <span class="n">dest_sheet</span> <span class="ow">in</span> <span class="n">sheetspec_product</span><span class="p">:</span>
+
+            <span class="n">conditions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">compute_conditions</span><span class="p">(</span><span class="n">dest_sheet</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+                                                            <span class="n">dest_sheet</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">matchname</span><span class="p">,</span> <span class="n">matchconditions</span> <span class="ow">in</span> <span class="n">conditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matchcondition_holds</span><span class="p">(</span><span class="n">matchconditions</span><span class="p">,</span> <span class="n">src_sheet</span><span class="p">):</span>
+
+                    <span class="n">paramfn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">matchname</span><span class="p">,</span> <span class="s">&#39;method&#39;</span><span class="p">)</span>
+                    <span class="n">projtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">matchname</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">)</span>
+
+                    <span class="n">proj</span> <span class="o">=</span> <span class="n">ProjectionSpec</span><span class="p">(</span><span class="n">projtype</span><span class="p">,</span> <span class="n">src_sheet</span><span class="p">,</span> <span class="n">dest_sheet</span><span class="p">)</span>
+
+                    <span class="n">paramsets</span> <span class="o">=</span> <span class="n">paramfn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_sheet</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span> <span class="n">dest_sheet</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+                    <span class="n">paramsets</span> <span class="o">=</span> <span class="p">[</span><span class="n">paramsets</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paramsets</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">paramsets</span>
+
+                    <span class="k">for</span> <span class="n">paramset</span> <span class="ow">in</span> <span class="n">paramsets</span><span class="p">:</span>
+                        <span class="n">proj</span> <span class="o">=</span> <span class="n">ProjectionSpec</span><span class="p">(</span><span class="n">projtype</span><span class="p">,</span> <span class="n">src_sheet</span><span class="p">,</span> <span class="n">dest_sheet</span><span class="p">)</span>
+                        <span class="n">proj</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">paramset</span><span class="p">)</span>
+                        <span class="c"># Only used when time_dependent=False</span>
+                        <span class="c"># (which is to be deprecated)</span>
+                        <span class="n">proj</span><span class="o">.</span><span class="n">matchname</span> <span class="o">=</span> <span class="n">matchname</span>
+
+                        <span class="n">path</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dest_sheet</span><span class="p">),</span> <span class="n">paramset</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                        <span class="n">model</span><span class="o">.</span><span class="n">projections</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">proj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">setup_options</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">instantiate_options</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A convenient way to setup a model object, instantiate it and</span>
+<span class="sd">        return it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">setup_options</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">instantiate_options</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span>
+
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="s">&quot;Convenient property access.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Models must define properties via the property_setup method&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Model.keys"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;The list of available property keys.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Model.items"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.Model.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;The property items.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+
+
+<span class="c"># Register the sheets and projections available in Topographica</span></div></div>
+<div class="viewcode-block" id="register_submodel_decorators"><a class="viewcode-back" href="../../Reference_Manual/topo.submodel.html#topo.submodel.register_submodel_decorators">[docs]</a><span class="k">def</span> <span class="nf">register_submodel_decorators</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span><span class="n">superclass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Register a Model decorator for each of the non-abstract classes provided.</span>
+<span class="sd">    Only registers those that are subclasses of the given superclass, if specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">param</span><span class="o">.</span><span class="n">logging_level</span><span class="p">(</span><span class="s">&#39;CRITICAL&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> 
+                <span class="p">(</span><span class="n">superclass</span><span class="o">==</span><span class="bp">None</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">superclass</span><span class="p">))</span> <span class="ow">and</span>
+                <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s">&quot;_</span><span class="si">%s</span><span class="s">__abstract&quot;</span> <span class="o">%</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">))):</span>
+               <span class="n">Model</span><span class="o">.</span><span class="n">register_decorator</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</div>
+<span class="n">register_submodel_decorators</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">concrete_descendents</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">register_submodel_decorators</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">concrete_descendents</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">Projection</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/submodel.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

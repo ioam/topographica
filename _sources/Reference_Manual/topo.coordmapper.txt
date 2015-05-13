@@ -1,0 +1,14 @@
+topo.coordmapper Package
+========================
+
+:mod:`coordmapper` Package
+--------------------------
+
+.. inheritance-diagram:: topo.coordmapper
+
+
+.. automodule:: topo.coordmapper
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

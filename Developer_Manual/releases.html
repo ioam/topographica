@@ -1,0 +1,277 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Making Releases &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="making-releases">
+<h1>Making Releases<a class="headerlink" href="#making-releases" title="Permalink to this headline">¶</a></h1>
+<p>The latest version of an IOAM project is always available by Git, but
+we also make more stable versions available periodically. To make such
+a release, the steps we have followed in the past are listed below.
+Here &lt;package&gt; should be replaced with the GitHub project name of the
+package being released, e.g. param or imagen.</p>
+<ol class="arabic">
+<li><p class="first">Ensure that no one besides yourself has any modified files
+checked out in Git; if they do, make sure all of it gets checked
+in or does not need to be included in the release, and ensure
+that none of it will be checked in until the release is complete.</p>
+</li>
+<li><p class="first">Increment the release number in <tt class="docutils literal"><span class="pre">&lt;project&gt;.__init__.__version__</span></tt>,
+setup.py, and the release notes in doc/index.rst. Note that
+some ioam projects (e.g. param) contain more than one package
+(param and numbergen in param&#8217;s case).</p>
+</li>
+<li><p class="first">Update the documentation files, especially README.rst,
+doc/News/index_text.rst, doc/Home/news_text.rst and
+doc/Downloads/index_text.rst (check the download links will be
+correct). The rest should be read through, making sure that the
+auto-generated pages are working properly, that the citations in
+the User Manual work, and that pages written by hand match the
+current version of the code. In particular,
+doc/Reference_Manual/index_text.rst needs to match the current
+version of the reference manual, and remember to check the
+inheritance graphs.</p>
+</li>
+<li><p class="first">Update the tutorials to match changes to the GUI or graphing
+support, if necessary. For the old non-notebook tutorials, a
+simple way to get updated versions of each image is to:</p>
+<ol class="arabic simple">
+<li>Change to the doc/Tutorials/images/ directory</li>
+<li>Launch <tt class="docutils literal"><span class="pre">xv</span></tt> on all of the images (<tt class="docutils literal"><span class="pre">xv</span> <span class="pre">*</span> <span class="pre">&amp;</span></tt>)</li>
+<li>Select the image you want to update, using xv&#8217;s right-click
+menu</li>
+<li>Select Grab from xv&#8217;s right-click menu</li>
+<li>Select Save from xv&#8217;s right-click menu</li>
+</ol>
+<p>The advantage of this method is that you never need to type in
+filenames, make sure they match the .html or .rst file, and so
+on.</p>
+<p>Be sure to work through the tutorial once it is updated, to make
+sure all of the instructions still make sense for the new
+release.  The newer notebook tutorials should be tested
+automatically, but be sure to check buildbot to make sure.</p>
+</li>
+<li><p class="first">Update Changelog.txt, if any, by making a copy of ChangeLog.txt, doing
+&#8220;make Changelog.txt&#8221;, and pasting the new items at the top of the
+copy (so that any fixes to the old items are preserved). Also
+summarize major changes in it for the release notes in News/.
+(if present) or in README.rst.</p>
+</li>
+<li><p class="first">Update the issues trackers and the remaining work lists in
+Future_Work/index_text.rst and Future_Work/current_text.rst
+(if present) to reflect completed tasks and changes in priority.</p>
+</li>
+<li><p class="first">Check any modified files into Git.</p>
+</li>
+<li><p class="first">Are all the buildbot and other continuous tests still passing? You
+might need to trigger new builds to check all platforms are ok.</p>
+</li>
+<li><p class="first">Save all open files from within any editor, and sure that they
+have all been committed to git and pushed to github.</p>
+</li>
+<li><p class="first">Tag the repository:</p>
+<div class="highlight-python"><div class="highlight"><pre>git tag -a v1.2.1 -m &#39;Release version 1.2.1&#39;
+</pre></div>
+</div>
+<p>If you have to repeat this step, the next time you
+will need <tt class="docutils literal"><span class="pre">-f</span> <span class="pre">-a</span></tt>, not just <tt class="docutils literal"><span class="pre">-a</span></tt>.</p>
+</li>
+<li><p class="first">In python, do <tt class="docutils literal"><span class="pre">import</span> <span class="pre">&lt;project&gt;</span> <span class="pre">;</span> <span class="pre">project.__version__.verify()</span></tt> to test
+that the version information has been declared properly.</p>
+</li>
+<li><p class="first">Push your tag to github:</p>
+<div class="highlight-python"><div class="highlight"><pre>git push origin v1.2.1
+</pre></div>
+</div>
+<p>Note that if you are repeating the tagging, you may need to push
+using <tt class="docutils literal"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">-f</span> <span class="pre">origin</span> <span class="pre">v1.2.1</span></tt>.</p>
+</li>
+<li><p class="first">Test creating a distribution and inspect the results:</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">sdist</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">cd</span> <span class="pre">dist;</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">&lt;package&gt;</span></tt></li>
+<li>Use <tt class="docutils literal"><span class="pre">ls</span> <span class="pre">-lFRA</span></tt> or <tt class="docutils literal"><span class="pre">find</span> <span class="pre">.</span></tt> to ensure that no stray files were
+included and nothing is missing.</li>
+<li>Double-check the generated documentation to ensure that it is
+complete and was generated properly.</li>
+<li>Try out the source on various platforms, e.g. using virtual
+machines, ensuring that there are no errors. Also perform a
+self-test on the various platforms (<tt class="docutils literal"><span class="pre">nosetests</span></tt> or
+<tt class="docutils literal"><span class="pre">./topographica</span> <span class="pre">-t</span> <span class="pre">quick</span> <span class="pre">-t</span> <span class="pre">exhaustive</span></tt>).</li>
+</ol>
+</li>
+<li><p class="first">Make a PyPI release by running:</p>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py register sdist upload
+</pre></div>
+</div>
+</li>
+<li><p class="first">Download the new package from <a class="reference external" href="https://pypi.python.org/pypi">https://pypi.python.org/pypi</a>?name=&lt;package&gt;,
+again testing the issues listed in the previous step, but now
+installing via virtualenv using <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span></tt>, <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span>
+<span class="pre">--upgrade</span></tt>, etc.</p>
+</li>
+<li><p class="first">If you find problems, go back to step 7 and start over.</p>
+</li>
+<li><p class="first">Publish Windows exe files on PyPi (from a Windows machine with git
+installed):</p>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py bdist_wininst --plat-name=win32 --user-access-control=auto upload
+python setup.py bdist_wininst --plat-name=win-amd64 --user-access-control=auto upload
+</pre></div>
+</div>
+</li>
+<li><p class="first">Check that the exe runs and installs correctly on Windows.</p>
+</li>
+<li><p class="first">When the package is ready, notify the other developers that they
+may once again push new code to the Git repository.</p>
+</li>
+<li><p class="first">Force build for the public web site for this project, and check
+the results (should eventually be updated automatically anyway).</p>
+</li>
+<li><p class="first">Send an announcement to topographica-announce at lists.sf.net and
+<a class="reference external" href="mailto:neuroinfo&#37;&#52;&#48;incf&#46;org">neuroinfo<span>&#64;</span>incf<span>&#46;</span>org</a>, if appropriate.</p>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">Making Releases</a></li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Developer_Manual/releases.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

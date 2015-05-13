@@ -1,0 +1,8 @@
+<map id="inheritance156ba0059b" name="inheritance156ba0059b">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,79,264,105"/>
+<area shape="rect" id="node3" href="#topo.submodel.specifications.Specification" title="params(name=String)" alt="" coords="312,79,605,105"/>
+<area shape="rect" id="node2" href="#topo.submodel.specifications.ArraySpec" title="params(name=String)" alt="" coords="667,5,946,30"/>
+<area shape="rect" id="node4" href="#topo.submodel.specifications.ModelSpec" title="params(name=String)" alt="" coords="665,54,948,79"/>
+<area shape="rect" id="node5" href="#topo.submodel.specifications.ProjectionSpec" title="params(name=String)" alt="" coords="653,103,960,129"/>
+<area shape="rect" id="node6" href="#topo.submodel.specifications.SheetSpec" title="params(name=String)" alt="" coords="665,153,948,178"/>
+</map>

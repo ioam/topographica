@@ -1,0 +1,467 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet.launch &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lancet-launch">
+<h1>lancet.launch<a class="headerlink" href="#lancet-launch" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance8744d36cfd.svg" usemap="#inheritance8744d36cfd" class="inheritance"/></div><map id="inheritance8744d36cfd" name="inheritance8744d36cfd">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="lancet.launch.pyc-module.html">lancet.launch.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-lancet.launch">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-lancet.launch" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lancet.launch.Command">
+<em class="property">class </em><tt class="descclassname">lancet.launch.</tt><tt class="descname">Command</tt><big>(</big><em>executable=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#Command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.Command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="lancet.core-module.html#lancet.core.PrettyPrinted" title="lancet.core.PrettyPrinted"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.PrettyPrinted</span></tt></a>, <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A command is a way of converting the dictionaries returned by
+argument specifiers into a particular command. When called with an
+argument specifier, a command template returns a list of strings
+corresponding to a subprocess Popen argument list.</p>
+<p>__call__(self, spec, tid=None, info={}):</p>
+<p>All Commands must be callable. The tid argument is the task id and
+info is a dictionary of run-time information supplied by the
+launcher. See the _setup_launch method of Launcher to see details
+about the launch information supplied.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">executable</span></tt> (<em>allow_None=False, constant=True, default=python, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The executable that is to be run by this Command. Unless the
+        executable is a standard command expected on the system path,
+        this should be an absolute path. By default this invokes
+        python or the python environment used to invoke the Command
+        (Topographica for instance).</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">do_format</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Set to True to receive input arguments as formatted strings,
+        False for the raw unformatted objects.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.launch.Command.finalize">
+<tt class="descname">finalize</tt><big>(</big><em>info</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#Command.finalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.Command.finalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional method that allows a Command to save state before
+launch. The info argument is supplied by the Launcher.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.launch.Command.summary">
+<tt class="descname">summary</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#Command.summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.Command.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>A succinct summary of the Command configuration.  Unlike the
+repr, a summary does not have to be complete but must supply
+key information relevant to the user. Must begin by stating
+the executable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.launch.Command.verify">
+<tt class="descname">verify</tt><big>(</big><em>args</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#Command.verify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.Command.verify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional, final check that ensures valid arguments have been
+passed before launch. Allows the constant and varying_keys to
+be be checked and can inspect the specs attribute if an
+instance of Args. If invalid, raise an Exception with the
+appropriate error message, otherwise return None.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.launch.Launcher">
+<em class="property">class </em><tt class="descclassname">lancet.launch.</tt><tt class="descname">Launcher</tt><big>(</big><em>batch_name</em>, <em>args</em>, <em>command</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#Launcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.Launcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="lancet.core-module.html#lancet.core.PrettyPrinted" title="lancet.core.PrettyPrinted"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.PrettyPrinted</span></tt></a>, <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A Launcher is constructed using a name, an argument specifier and
+a command template. It can then launch the corresponding tasks
+appropriately when invoked.</p>
+<p>This default Launcher uses subprocess to launch tasks. It is
+intended to illustrate the basic design and should be used as a
+base class for more complex Launchers. In particular all Launchers
+should retain the same behaviour of writing stdout/stderr to the
+streams directory, writing a log file and recording launch
+information.</p>
+<dl class="docutils">
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">reduction_fn</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A callable that will be invoked when the Launcher has completed
+      all tasks. For example, this could inform the user of completion
+      (eg. send an e-mail) among other possibilities.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">timestamp</span></tt> (<em>constant=False, default=(0, 0, 0, 0, 0, 0, 0, 0, 0), instantiate=False, length=9, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional override of timestamp (default timestamp set on launch
+      call) in Python struct_time 9-tuple format.  Useful when you
+      need to have a known root_directory path (see root_directory
+      documentation) before launch. For example, you should store
+      state related to analysis (eg. pickles) in the same location as
+      everything else.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">args</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The specifier used to generate the varying parameters for the tasks.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">output_directory</span></tt> (<em>allow_None=False, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The output directory - the directory that will contain all
+         the root directories for the individual launches.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">tag</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A very short, identifiable human-readable string that
+       meaningfully describes the batch to be executed. Should not
+       include spaces as it may be used in filenames.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">command</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The command template used to generate the commands for the current tasks.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">subdir</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A list of subdirectory names that allows custom organization
+      within the output directory before the root directory.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">batch_name</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A unique identifier for the current batch</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">max_concurrency</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=2, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Concurrency limit to impose on the launch. As the current class
+       uses subprocess locally, multiple processes are possible at
+       once. Set to None for no limit (eg. for clusters)</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Metadata information to add to the info file.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">timestamp_format</span></tt> (<em>allow_None=True, constant=False, default=%Y-%m-%d_%H%M, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The timestamp format for the root directories in python datetime
+      format. If None, the timestamp is omitted from root directory
+      name.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">description</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short description of the purpose of the current set of tasks.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.launch.Launcher.get_root_directory">
+<tt class="descname">get_root_directory</tt><big>(</big><em>timestamp=None</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#Launcher.get_root_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.Launcher.get_root_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper method that supplies the root directory name given a
+timestamp.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.launch.Launcher.summary">
+<tt class="descname">summary</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#Launcher.summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.Launcher.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>A succinct summary of the Launcher configuration.  Unlike the
+repr, a summary does not have to be complete but must supply
+key information relevant to the user.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.launch.QLauncher">
+<em class="property">class </em><tt class="descclassname">lancet.launch.</tt><tt class="descname">QLauncher</tt><big>(</big><em>batch_name</em>, <em>args</em>, <em>command</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#QLauncher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.QLauncher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.launch.Launcher" title="lancet.launch.Launcher"><tt class="xref py py-class docutils literal"><span class="pre">lancet.launch.Launcher</span></tt></a></p>
+<p>Launcher that operates with Grid Engine using default arguments
+chosen to be suitable for a typical cluster (tested on
+the Edinburgh University Eddie cluster).</p>
+<p>One of the main features of this class is that it is non-blocking
+- it alway exits shortly after invoking qsub. This means that the
+script is not left running or waiting for long periods of time.</p>
+<p>By convention the standard output and error streams go to the
+corresponding folders in the &#8216;streams&#8217; subfolder of the root
+directory - any -o or -e qsub options will be overridden. The job
+name (the -N flag) is specified automatically and any user value
+will be ignored.</p>
+<dl class="docutils">
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">reduction_fn</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A callable that will be invoked when the Launcher has completed
+      all tasks. For example, this could inform the user of completion
+      (eg. send an e-mail) among other possibilities.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">timestamp</span></tt> (<em>constant=False, default=(0, 0, 0, 0, 0, 0, 0, 0, 0), instantiate=False, length=9, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional override of timestamp (default timestamp set on launch
+      call) in Python struct_time 9-tuple format.  Useful when you
+      need to have a known root_directory path (see root_directory
+      documentation) before launch. For example, you should store
+      state related to analysis (eg. pickles) in the same location as
+      everything else.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">args</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The specifier used to generate the varying parameters for the tasks.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">qsub_switches</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;-V&#8217;, &#8216;-cwd&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Specifies the qsub switches (flags without arguments) as a list
+       of strings. By default the -V switch is used to exports all
+       environment variables in the host environment to the batch job.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">output_directory</span></tt> (<em>allow_None=False, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The output directory - the directory that will contain all
+         the root directories for the individual launches.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">qsub_flag_options</span></tt> (<em>allow_None=False, constant=False, default={&#8216;-b&#8217;: &#8216;y&#8217;}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Specifies qsub flags and their corresponding options as a
+       dictionary. Valid values may be strings or lists of string.  If
+       a plain Python dictionary is used, the keys arealphanumerically
+       sorted, otherwise the dictionary is assumed to be an
+       OrderedDict (Python 2.7+ or param.external.OrderedDict) and the
+       key ordering will be preserved.
+
+       By default the -b (binary) flag is set to &#8216;y&#8217; to allow binaries
+       to be directly invoked. Note that the &#8216;-&#8216; is added to the key
+       if missing (to make into a valid flag) so you can specify using
+       keywords in the dict constructor: ie. using
+       qsub_flag_options=dict(key1=value1, key2=value2, ....)</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">tag</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A very short, identifiable human-readable string that
+       meaningfully describes the batch to be executed. Should not
+       include spaces as it may be used in filenames.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">command</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The command template used to generate the commands for the current tasks.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">subdir</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A list of subdirectory names that allows custom organization
+      within the output directory before the root directory.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">batch_name</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A unique identifier for the current batch</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">max_concurrency</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=2, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Concurrency limit to impose on the launch. As the current class
+       uses subprocess locally, multiple processes are possible at
+       once. Set to None for no limit (eg. for clusters)</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Metadata information to add to the info file.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">timestamp_format</span></tt> (<em>allow_None=True, constant=False, default=%Y-%m-%d_%H%M, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The timestamp format for the root directories in python datetime
+      format. If None, the timestamp is omitted from root directory
+      name.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">description</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short description of the purpose of the current set of tasks.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.launch.QLauncher.collate_and_launch">
+<tt class="descname">collate_and_launch</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#QLauncher.collate_and_launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.QLauncher.collate_and_launch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that collates the previous jobs and launches the next
+block of concurrent jobs when using DynamicArgs. This method
+is invoked on initial launch and then subsequently via a
+commandline call (to Python via qsub) to collate the
+previously run jobs and launch the next block of jobs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.launch.QLauncher.qdel_batch">
+<tt class="descname">qdel_batch</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#QLauncher.qdel_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.QLauncher.qdel_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs qdel command to remove all remaining queued jobs using
+the &lt;batch_name&gt;* pattern . Necessary when StopIteration is
+raised with scheduled jobs left on the queue.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.launch.ShellCommand">
+<em class="property">class </em><tt class="descclassname">lancet.launch.</tt><tt class="descname">ShellCommand</tt><big>(</big><em>executable</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#ShellCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.ShellCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.launch.Command" title="lancet.launch.Command"><tt class="xref py py-class docutils literal"><span class="pre">lancet.launch.Command</span></tt></a></p>
+<p>A generic Command that can be used to invoke shell commands on
+most operating systems where Python can be run. By default,
+follows the GNU coding convention for commandline arguments.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">executable</span></tt> (<em>allow_None=False, constant=True, default=python, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The executable that is to be run by this Command. Unless the
+        executable is a standard command expected on the system path,
+        this should be an absolute path. By default this invokes
+        python or the python environment used to invoke the Command
+        (Topographica for instance).</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">expansions</span></tt> (<em>allow_None=False, constant=True, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows extension of the specification that supports functions
+        that expand to valid argument values.  If a function is used,
+        it must have the signature (spec, info, tid). A typical usage
+        for a function value is to build a valid output filename given
+        the contrext.
+
+        Three such subclasses are provided:
+        &#8216;RootDirectory&#8217;, &#8216;LongFilename&#8217; and &#8216;Expand&#8217;.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">do_format</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Set to True to receive input arguments as formatted strings,
+        False for the raw unformatted objects.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">posargs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The list of positional argument keys. Positional arguments are
+       always supplied at the end of a command in the order given.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">long_prefix</span></tt> (<em>allow_None=False, constant=True, default=&#8211;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Although the double dash is a GNU coding convention, some
+       applications use single dashes for long options.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">short_prefix</span></tt> (<em>allow_None=False, constant=True, default=-, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Although the single dash is a GNU coding convention, the
+       argument prefix may depend on the applications and/or platform.</dd>
+</dl>
+<dl class="class">
+<dt id="lancet.launch.ShellCommand.Expand">
+<em class="property">class </em><tt class="descname">Expand</tt><big>(</big><em>template</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#ShellCommand.Expand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.ShellCommand.Expand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Takes a new-style format string template and expands it out
+using the keys in the spec, info and tid.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.launch.ShellCommand.LongFilename">
+<em class="property">class </em><tt class="descclassname">ShellCommand.</tt><tt class="descname">LongFilename</tt><big>(</big><em>extension</em>, <em>excluding=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#ShellCommand.LongFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.ShellCommand.LongFilename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Generates a long filename based on the input arguments in the
+root directory with the given extension. Ignores constant
+items.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.launch.ShellCommand.RootDirectory">
+<em class="property">class </em><tt class="descclassname">ShellCommand.</tt><tt class="descname">RootDirectory</tt><a class="reference internal" href="../_modules/lancet/launch.html#ShellCommand.RootDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.ShellCommand.RootDirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Supplies the root_directory to a command.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.launch.review_and_launch">
+<em class="property">class </em><tt class="descclassname">lancet.launch.</tt><tt class="descname">review_and_launch</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#review_and_launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.review_and_launch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="lancet.core-module.html#lancet.core.PrettyPrinted" title="lancet.core.PrettyPrinted"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.PrettyPrinted</span></tt></a>, <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A helper decorator that always checks for consistency and can
+prompt the user for a full review of the launch configuration.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">launch_args</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>An optional argument specifier to
+        parameterise lancet, allowing multi-launch scripts.  For
+        instance, this may be useful for collecting statistics over
+        runs that are not deterministic or are affected by a random
+        input seed.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">launch_fn</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The function that is to be decorated.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">review</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not to perform a detailed review of the launch.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">output_directory</span></tt> (<em>allow_None=False, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The output directory - the directory that will contain all
+         the root directories for the individual launches.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.launch.review_and_launch.cross_check_launchers">
+<tt class="descname">cross_check_launchers</tt><big>(</big><em>launchers</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#review_and_launch.cross_check_launchers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.review_and_launch.cross_check_launchers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs consistency checks across all the launchers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.launch.review_and_launch.input_options">
+<tt class="descname">input_options</tt><big>(</big><em>options</em>, <em>prompt='Select option'</em>, <em>default=None</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#review_and_launch.input_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.review_and_launch.input_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to prompt the user for input on the commandline.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.launch.review_and_launch.review_args">
+<tt class="descname">review_args</tt><big>(</big><em>obj</em>, <em>show_repr=False</em>, <em>heading='Arguments'</em><big>)</big><a class="reference internal" href="../_modules/lancet/launch.html#review_and_launch.review_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.launch.review_and_launch.review_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reviews the given argument specification. Can review the
+meta-arguments (launch_args) or the arguments themselves.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">lancet.launch</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-lancet.launch">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/lancet.launch-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.hardware.robotics &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.hardware.robotics</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes for using robotic or other hardware using Topographica.</span>
+
+<span class="sd">This module contains several classes for constructing robotics</span>
+<span class="sd">interfaces to Topographica simulations.  It includes modules that read</span>
+<span class="sd">input from or send output to robot devices, and a (quasi) real-time</span>
+<span class="sd">simulation object that attempts to maintain a correspondence between</span>
+<span class="sd">simulation time and real time.</span>
+
+<span class="sd">This module requires the PlayerStage robot interface system (from</span>
+<span class="sd">playerstage.sourceforge.net), and the playerrobot module for</span>
+<span class="sd">high-level communications with Player robots.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">Image</span>
+<span class="kn">import</span> <span class="nn">ImageOps</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span><span class="n">cos</span><span class="p">,</span><span class="n">sin</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">EventProcessor</span>
+<span class="kn">from</span> <span class="nn">imagen.image</span> <span class="kn">import</span> <span class="n">GenericImage</span>
+
+<span class="kn">from</span> <span class="nn">playerrobot</span> <span class="kn">import</span> <span class="n">CameraDevice</span><span class="p">,</span> <span class="n">PTZDevice</span>
+
+
+<div class="viewcode-block" id="CameraImage"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.robotics.CameraImage">[docs]</a><span class="k">class</span> <span class="nc">CameraImage</span><span class="p">(</span><span class="n">GenericImage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An image pattern generator that gets its image from a Player</span>
+<span class="sd">    camera device.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">camera</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">CameraDevice</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       An instance of playerrobot.CameraDevice to be used</span>
+<span class="s">       to generate images.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CameraImage</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decode_image</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">_decode_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fmt</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">bpp</span><span class="p">,</span><span class="n">fdiv</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fmt</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s">&#39;L&#39;</span><span class="p">,(</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s">&#39;raw&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># JPALERT: if not grayscale, then assume color.  This</span>
+            <span class="c"># should be expanded for other modes.</span>
+            <span class="n">rgb_im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s">&#39;RGB&#39;</span><span class="p">,(</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">))</span>
+            <span class="n">rgb_im</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s">&#39;raw&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">ImageOps</span><span class="o">.</span><span class="n">grayscale</span><span class="p">(</span><span class="n">rgb_im</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="CameraImageQueued"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.robotics.CameraImageQueued">[docs]</a><span class="k">class</span> <span class="nc">CameraImageQueued</span><span class="p">(</span><span class="n">CameraImage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A version of CameraImage that gets the image from the camera&#39;s image queue,</span>
+<span class="sd">    rather than directly from the camera object.  Using queues is</span>
+<span class="sd">    necessary when running the playerrobot in a separate process</span>
+<span class="sd">    without shared memory.  When getting an image, this pattern</span>
+<span class="sd">    generator will fetch every image in the image queue and use the</span>
+<span class="sd">    most recent as the current pattern.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_get_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">):</span>
+
+        <span class="n">im_spec</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># if we don&#39;t have an image then block until we get one</span>
+            <span class="n">im_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">image_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">image_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+
+        <span class="c"># Make sure we clear the image queue and get the most recent image.</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">image_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="n">im_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">image_queue</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">image_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">im_spec</span><span class="p">:</span>
+            <span class="c"># If we got a new image from the queue, then</span>
+            <span class="c"># construct a PIL image from it.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decode_image</span><span class="p">(</span><span class="o">*</span><span class="n">im_spec</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="PTZ"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.robotics.PTZ">[docs]</a><span class="k">class</span> <span class="nc">PTZ</span><span class="p">(</span><span class="n">EventProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pan/Tilt/Zoom control.</span>
+
+<span class="sd">    This event processor takes input events on its &#39;Saccade&#39; input</span>
+<span class="sd">    port in the form of (amplitude,direction) saccade commands (as</span>
+<span class="sd">    produced by the topo.sheet.saccade.SaccadeController class) and</span>
+<span class="sd">    appropriately servoes the attached PTZ object.  There is not</span>
+<span class="sd">    currently any dynamic zoom control, though the static zoom level</span>
+<span class="sd">    can be set as a parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ptz</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">PTZDevice</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       An instance of playerrobot.PTZDevice to be controlled.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">zoom</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Desired FOV width in degrees.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Desired max pan/tilt speed in deg/sec.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">invert_amplitude</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Invert the sense of the amplitude signal, in order to get the</span>
+<span class="s">       appropriate ipsi-/contralateral sense of saccades.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">dest_ports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Saccade&quot;</span><span class="p">]</span>
+    <span class="n">src_ports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;State&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">conn</span><span class="o">.</span><span class="n">dest_port</span> <span class="o">==</span> <span class="s">&quot;Saccade&quot;</span><span class="p">:</span>
+            <span class="c"># the data should be (amplitude,direction)</span>
+            <span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Executing shift, amplitude=</span><span class="si">%.2f</span><span class="s">, direction=</span><span class="si">%.2f</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invert_amplitude</span><span class="p">:</span>
+            <span class="n">amplitude</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c"># if the amplitude is negative, invert the direction, so up is still up.</span>
+        <span class="k">if</span> <span class="n">amplitude</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">direction</span> <span class="o">*</span> <span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+
+        <span class="n">pan</span><span class="p">,</span><span class="n">tilt</span><span class="p">,</span><span class="n">zoom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ptz</span><span class="o">.</span><span class="n">state_deg</span>
+        <span class="n">pan</span> <span class="o">+=</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="n">tilt</span> <span class="o">+=</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptz</span><span class="o">.</span><span class="n">set_ws_deg</span><span class="p">(</span><span class="n">pan</span><span class="p">,</span><span class="n">tilt</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="p">)</span>
+        <span class="c">## self.ptz.cmd_queue.put_nowait((&#39;set_ws_deg&#39;,</span>
+        <span class="c">##                                (pan,tilt,self.zoom,self.speed,self.speed)))</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/hardware/robotics.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

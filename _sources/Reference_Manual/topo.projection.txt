@@ -1,0 +1,25 @@
+topo.projection Package
+=======================
+
+:mod:`projection` Package
+-------------------------
+
+.. inheritance-diagram:: topo.projection
+
+
+.. automodule:: topo.projection
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`optimized` Module
+-----------------------
+
+.. inheritance-diagram:: topo.projection.optimized
+
+
+.. automodule:: topo.projection.optimized
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.slissom &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.sheet" href="../sheet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" accesskey="U">topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sheet.slissom</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The SLISSOM class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.command.pylabplot</span> <span class="kn">import</span> <span class="n">vectorplot</span><span class="p">,</span> <span class="n">matrixplot</span>
+
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">SettlingCFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">PiecewiseLinear</span>
+
+
+
+
+<span class="n">activity_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+
+<div class="viewcode-block" id="SLISSOM"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.html#topo.sheet.slissom.SLISSOM">[docs]</a><span class="k">class</span> <span class="nc">SLISSOM</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Sheet class implementing the SLISSOM algorithm</span>
+<span class="sd">    (Choe and Miikkulainen, Neurocomputing 21:139-157, 1998).</span>
+
+<span class="sd">    A SLISSOM sheet is a SettlingCFSheet sheet extended to include spiking</span>
+<span class="sd">    neurons using dynamic synapses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># configurable parameters</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Baseline threshold&quot;</span><span class="p">)</span>
+
+    <span class="n">threshold_decay_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Dynamic threshold decay rate&quot;</span><span class="p">)</span>
+
+    <span class="n">absolute_refractory</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Absolute refractory period&quot;</span><span class="p">)</span>
+
+    <span class="n">dynamic_threshold_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Initial value for dynamic threshold when spike occurs&quot;</span><span class="p">)</span>
+
+    <span class="n">spike_amplitude</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Amplitude of spike at the moment of spiking&quot;</span><span class="p">)</span>
+
+    <span class="n">reset_on_new_iteration</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Reset activity and projection activity when new iteration starts&quot;</span><span class="p">)</span>
+
+    <span class="n">noise_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Noise added to the on-going activity&quot;</span><span class="p">)</span>
+
+    <span class="n">output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">PiecewiseLinear</span><span class="p">(</span><span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">upper_bound</span><span class="o">=</span><span class="mf">0.65</span><span class="p">)])</span>
+
+    <span class="c"># logging facility for debugging</span>
+    <span class="n">trace_coords</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;List of coord(s) of membrane potential(s) to track over time&quot;</span><span class="p">)</span>
+
+    <span class="n">trace_n</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Number of steps to track neuron&#39;s membrane potential&quot;</span><span class="p">)</span>
+
+    <span class="c"># matrices and vectors for internal use</span>
+    <span class="n">dynamic_threshold</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">spike</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">spike_history</span><span class="o">=</span> <span class="bp">None</span>
+    <span class="n">membrane_potential</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">membrane_potential_trace</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">trace_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        SLISSOM-specific init, where dynamic threshold stuff</span>
+<span class="sd">        gets initialized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SLISSOM</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_threshold</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">activity_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spike_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">activity_type</span><span class="p">)</span>
+
+        <span class="n">num_traces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential_trace</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_traces</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_n</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">activity_type</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SLISSOM.activate"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.html#topo.sheet.slissom.SLISSOM.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For now, this is the same as the parent&#39;s activate(), plus</span>
+<span class="sd">        fixed+dynamic thresholding. Overloading was necessary to</span>
+<span class="sd">        avoid self.send_output() being invoked before thresholding.</span>
+<span class="sd">        This function also updates and maintains internal values such as</span>
+<span class="sd">        membrane_potential, spike, etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="mf">0.0</span>
+
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">+=</span> <span class="n">proj</span><span class="o">.</span><span class="n">activity</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+                <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+        <span class="c"># Add noise, based on the noise_rate.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_rate</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_rate</span><span class="p">)</span> \
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_rate</span>
+
+        <span class="c"># Thresholding: baseline + dynamic threshold + absolute refractory</span>
+        <span class="c"># period</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+
+                <span class="n">thresh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_threshold</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+
+                <span class="c"># Calculate membrane potential</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">-</span> <span class="n">thresh</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">thresh</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_history</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_amplitude</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_threshold</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_threshold_init</span>
+                    <span class="c"># set absolute refractory period for &quot;next&quot; timestep</span>
+                    <span class="c"># (hence the &quot;-1&quot;)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spike_history</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_refractory</span><span class="o">-</span><span class="mf">1.0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_threshold</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_threshold</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_decay_rate</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spike_history</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">1.0</span>
+
+                <span class="c"># Append spike to the membrane potential</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_trace</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SLISSOM.input_event"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.html#topo.sheet.slissom.SLISSOM.input_event">[docs]</a>    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        SLISSOM-specific input_event handeling:</span>
+<span class="sd">        On a new afferent input, DO NOT clear the activity matrix unless</span>
+<span class="sd">        reset_on_new_iteration is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_on_new_iteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+                <span class="n">proj</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="mf">0.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">input_event</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SLISSOM.plot_trace"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.html#topo.sheet.slissom.SLISSOM.plot_trace">[docs]</a>    <span class="k">def</span> <span class="nf">plot_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot membrane potential trace of the unit designated by the</span>
+<span class="sd">        trace_coords list. This plot has trace_n data points.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">trace_offset</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential_trace</span><span class="p">:</span>
+            <span class="n">vectorplot</span><span class="p">(</span><span class="n">trace</span><span class="o">+</span><span class="n">trace_offset</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="s">&quot;b-&quot;</span><span class="p">)</span>
+            <span class="n">vectorplot</span><span class="p">(</span><span class="n">trace</span><span class="o">+</span><span class="n">trace_offset</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="s">&quot;rx&quot;</span><span class="p">)</span>
+            <span class="n">trace_offset</span> <span class="o">+=</span> <span class="mi">3</span>
+</div>
+<div class="viewcode-block" id="SLISSOM.vectorplot_trace"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.html#topo.sheet.slissom.SLISSOM.vectorplot_trace">[docs]</a>    <span class="k">def</span> <span class="nf">vectorplot_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot membrane potential trace of the unit designated by the</span>
+<span class="sd">        trace_coords list. This plot has trace_n data points.</span>
+<span class="sd">        This method simply calls plot_trace().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SLISSOM.matrixplot_trace"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.html#topo.sheet.slissom.SLISSOM.matrixplot_trace">[docs]</a>    <span class="k">def</span> <span class="nf">matrixplot_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Matrixplot membrane potential trace of the unit designated by the</span>
+<span class="sd">        trace_coords list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">matrixplot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential_trace</span><span class="p">,</span><span class="n">aspect</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_update_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update membrane potential trace for sheet coordinate (x,y).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trace_id</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace_coords</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">trace_r</span><span class="p">,</span> <span class="n">trace_c</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet2matrix</span><span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential_trace</span><span class="p">[</span><span class="n">trace_id</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_count</span><span class="p">]</span><span class="o">=</span>\
+                 <span class="bp">self</span><span class="o">.</span><span class="n">membrane_potential</span><span class="p">[</span><span class="n">trace_r</span><span class="p">,</span><span class="n">trace_c</span><span class="p">]</span>
+            <span class="n">trace_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace_count</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_count</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_n</span>
+
+</div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;SLISSOM&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/sheet/slissom.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" >topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

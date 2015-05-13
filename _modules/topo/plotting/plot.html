@@ -1,0 +1,830 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.plotting.plot &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.plotting.plot</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plot class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">holoviews.core</span> <span class="kn">import</span> <span class="n">NdMapping</span><span class="p">,</span> <span class="n">SheetCoordinateSystem</span><span class="p">,</span> <span class="n">Slice</span>
+<span class="kn">from</span> <span class="nn">bitmap</span> <span class="kn">import</span> <span class="n">HSVBitmap</span><span class="p">,</span> <span class="n">RGBBitmap</span><span class="p">,</span> <span class="n">Bitmap</span><span class="p">,</span> <span class="n">DrawBitmap</span>
+
+
+
+<span class="c">### JCALERT!</span>
+<span class="c">### - Re-write the test file, taking the new changes into account.</span>
+<span class="c">### - I have to change the order: situate, plot_bb and (normalize)</span>
+<span class="c">### - There should be a way to associate the density explicitly</span>
+<span class="c">###   with the sheet_views, because it must match all SheetViews</span>
+<span class="c">###   in that dictionary.  Maybe as a tuple?</span>
+<span class="c">### - Fix the plot name handling along with the view_info sheetview attribute</span>
+<span class="c">### - Get rid of release_sheetviews.</span>
+
+
+<div class="viewcode-block" id="Plot"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.Plot">[docs]</a><span class="k">class</span> <span class="nc">Plot</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Simple Plot object constructed from a specified PIL image.</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+
+     <span class="n">staleness_warning</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Time length allowed between bitmaps making up a single plot before warning.</span>
+
+<span class="s">       If the difference between the Image with the earliest</span>
+<span class="s">       timestamp and the one with the latest timestamp is larger</span>
+<span class="s">       than this parameter&#39;s value, produce a warning.</span>
+<span class="s">       &quot;&quot;&quot;</span><span class="p">)</span>
+
+     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">image</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+          <span class="nb">super</span><span class="p">(</span><span class="n">Plot</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span> <span class="o">=</span> <span class="n">Bitmap</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span> <span class="c"># Possibly scaled copy (at first identical)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="o">=</span><span class="mf">1.0</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">plot_src_name</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">precedence</span> <span class="o">=</span> <span class="mf">0.0</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">row_precedence</span> <span class="o">=</span> <span class="mf">0.5</span>
+          <span class="c"># If False, this plot should be left in its native size</span>
+          <span class="c"># pixel-for-pixel, (e.g. for a color key or similar static</span>
+          <span class="c"># image), rather than being resized as necessary.</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="o">=</span><span class="bp">False</span>
+
+          <span class="c"># Time at which the bitmaps were created</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+
+<div class="viewcode-block" id="Plot.rescale"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.Plot.rescale">[docs]</a>     <span class="k">def</span> <span class="nf">rescale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scale_factor</span><span class="p">):</span>
+          <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          Change the size of this image by the specified numerical factor.</span>
+
+<span class="sd">          The original image is kept as-is in _orig_bitmap; the scaled</span>
+<span class="sd">          image is stored in bitmap.  The scale_factor argument is</span>
+<span class="sd">          taken as relative to the current scaling of the bitmap.  For</span>
+<span class="sd">          instance, calling scale(1.5) followed by scale(2.0) will</span>
+<span class="sd">          yield a final scale of 3.0, not 2.0.</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+
+          <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="p">)</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Plot.set_scale"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.Plot.set_scale">[docs]</a>     <span class="k">def</span> <span class="nf">set_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scale_factor</span><span class="p">):</span>
+          <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          Specify the numerical value of the scaling factor for this image.</span>
+
+<span class="sd">          The original image is kept as-is in _orig_bitmap; the scaled</span>
+<span class="sd">          image is stored in bitmap.  The scale_factor argument is</span>
+<span class="sd">          taken as relative to the original size of the bitmap.  For</span>
+<span class="sd">          instance, calling scale(1.5) followed by scale(2.0) will</span>
+<span class="sd">          yield a final scale of 2.0, not 3.0.</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span> <span class="o">=</span> <span class="n">scale_factor</span>
+
+          <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="p">)</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Plot.label"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.Plot.label">[docs]</a>     <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+          <span class="sd">&quot;&quot;&quot;Return a label for this plot.&quot;&quot;&quot;</span>
+          <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_src_name</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+
+</div></div>
+<span class="k">def</span> <span class="nf">_sane_plot_data</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">):</span>
+     <span class="c"># CEBALERT: was sf.net tracker item 1860837</span>
+     <span class="c"># (Avoid plotting only hue+confidence for a weights plot.)</span>
+     <span class="n">s_chan</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Strength&#39;</span><span class="p">)</span>
+     <span class="k">if</span> <span class="n">s_chan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">s_chan</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">s_chan</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Weights&#39;</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">channels</span><span class="p">[</span><span class="s">&#39;Strength&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">sheet_views</span>
+     <span class="k">else</span><span class="p">:</span>
+          <span class="k">return</span> <span class="bp">True</span>
+
+<span class="c"># JABALERT: How can we handle joint normalization, where a set of</span>
+<span class="c"># plots (e.g. a CFProjectionPlotGroup, or the jointly normalized</span>
+<span class="c"># subset of a ConnectionFields plot) is all scaled by the same amount,</span>
+<span class="c"># so that relative strengths can be determined?  Maybe we can have</span>
+<span class="c"># make_template_plot and the various TemplatePlot types accept a</span>
+<span class="c"># parameter &#39;range_only&#39; that makes them simply calculate a pair</span>
+<span class="c"># (min,max) with the values to use for scaling, and then the caller</span>
+<span class="c"># (e.g. CFProjectionPlotGroup._create_plots) would run through</span>
+<span class="c"># everything twice, first to get the ranges, and then the next time it</span>
+<span class="c"># would supply an explicit range for scaling (overriding the default</span>
+<span class="c"># single-plot normalization)?  See the commented-out code for</span>
+<span class="c"># value_range below for a start. I *think* that would work, but maybe</span>
+<span class="c"># there is some simpler way?</span>
+<div class="viewcode-block" id="make_template_plot"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.make_template_plot">[docs]</a><span class="k">def</span> <span class="nf">make_template_plot</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                       <span class="n">plot_bounding_box</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">normalize</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span>
+                       <span class="n">name</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Factory function for constructing a Plot object whose type is not yet known.</span>
+
+<span class="sd">     Typically, a TemplatePlot will be constructed through this call, because</span>
+<span class="sd">     it selects the appropriate type automatically, rather than calling</span>
+<span class="sd">     one of the Plot subclasses automatically.  See TemplatePlot.__init__ for</span>
+<span class="sd">     a description of the arguments.</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+     <span class="k">if</span> <span class="n">_sane_plot_data</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">):</span>
+          <span class="n">plot_types</span><span class="o">=</span><span class="p">[</span><span class="n">SHCPlot</span><span class="p">,</span><span class="n">RGBPlot</span><span class="p">,</span><span class="n">PalettePlot</span><span class="p">,</span><span class="n">MultiOrPlot</span><span class="p">]</span>
+          <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">plot_types</span><span class="p">:</span>
+               <span class="n">plot</span> <span class="o">=</span> <span class="n">pt</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span>
+                         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+               <span class="k">if</span> <span class="n">plot</span><span class="o">.</span><span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">range_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># range_ is None means we&#39;re calculating the range</span>
+                    <span class="k">return</span> <span class="n">plot</span>
+
+     <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;make_template_plot&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&#39;No </span><span class="si">%s</span><span class="s"> plot constructed for this Sheet&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+     <span class="k">return</span> <span class="bp">None</span>
+
+
+</div>
+<div class="viewcode-block" id="TemplatePlot"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.TemplatePlot">[docs]</a><span class="k">class</span> <span class="nc">TemplatePlot</span><span class="p">(</span><span class="n">Plot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A bitmap-based plot as specified by a plot template (or plot channels).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Not sure why, but this has to be a Parameter to avoid spurious complaints</span>
+    <span class="n">warn_time</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">precedence</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Time last warned about stale plots&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                 <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span>
+                 <span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build a plot out of a set of SheetViews as determined by a plot_template.</span>
+
+<span class="sd">        channels is a plot_template, i.e. a dictionary with keys</span>
+<span class="sd">        (i.e. &#39;Strength&#39;,&#39;Hue&#39;,&#39;Confidence&#39; ...).  Each key typically</span>
+<span class="sd">        has a string value naming specifies a Image in</span>
+<span class="sd">        sheet_views, though specific channels may contain other</span>
+<span class="sd">        types of information as required by specific Plot subclasses.</span>
+<span class="sd">        channels that are not used by a particular Plot subclass will</span>
+<span class="sd">        silently be ignored.</span>
+
+<span class="sd">        sheet_views is a dictionary of SheetViews, generally (but</span>
+<span class="sd">        not necessarily) belonging to a Sheet object.</span>
+
+<span class="sd">        density is the density of the Sheet whose sheet_views was</span>
+<span class="sd">        passed.</span>
+
+<span class="sd">        plot_bounding_box is the outer bounding_box of the plot to</span>
+<span class="sd">        apply if specified.  If not, the bounds of</span>
+<span class="sd">        the smallest Image are used.</span>
+
+<span class="sd">        normalize specifies how the Plot should be normalized: any</span>
+<span class="sd">        value of normalize other than &#39;None&#39; will result in normalization</span>
+<span class="sd">        according to the value of the range argument:</span>
+
+<span class="sd">          range=(A,B) - scale plot so that A is 0 and B is 1</span>
+
+<span class="sd">          range=False - scale plot so that min(plot) is 0 and</span>
+<span class="sd">                        max(plot) is 1 (i.e. fill the maximim</span>
+<span class="sd">                        dynamic range)</span>
+
+<span class="sd">          range=None  - calculate value_range only</span>
+
+
+<span class="sd">        name (which is inherited from Parameterized) specifies the name</span>
+<span class="sd">        to use for this plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemplatePlot</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="c"># for a template plot, resize is True by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="o">=</span><span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sheet_views</span><span class="p">)</span>
+        <span class="c"># bounds of the situated plotting area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span> <span class="o">=</span> <span class="n">plot_bounding_box</span>
+
+
+        <span class="c">### JCALERT ! The problem of displaying the right plot name is still reviewed</span>
+        <span class="c">### at the moment we have the plot_src_name and name attribute that are used for the label.</span>
+        <span class="c">### generally the name is set to the plot_template name, except for connection</span>
+        <span class="c"># set the name of the sheet that provides the SheetViews</span>
+        <span class="c"># combined with the self.name parameter when creating the plot (which is generally</span>
+        <span class="c"># the name of the plot_template), it provides the necessary information for displaying plot label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_src_name</span><span class="p">()</span>
+
+
+        <span class="c"># # Eventually: support other type of plots (e.g vector fields...) using</span>
+        <span class="c"># # something like:</span>
+        <span class="c"># def annotated_bitmap(self):</span>
+        <span class="c"># enable other construction....</span>
+
+    <span class="k">def</span> <span class="nf">_get_sv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">sheet_view_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sheet_view_key</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">sv</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">NdMapping</span><span class="p">):</span>
+                <span class="n">sv</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">last</span>
+
+        <span class="k">return</span> <span class="n">sv</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the matrix view associated with a given key, if any.</span>
+
+<span class="sd">        If the key is found in self.channels and the corresponding</span>
+<span class="sd">        sheetview is found in self.view_dict, the view&#39;s matrix is</span>
+<span class="sd">        returned; otherwise None is returned (with no error).</span>
+<span class="sd">        If the sheet_view derives from a cyclic distribution, and it</span>
+<span class="sd">        will be used as Hue, the matrix is normalized in range 0..1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sv</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sv</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="s">&#39;Hue&#39;</span> <span class="ow">and</span> <span class="n">sv</span><span class="o">.</span><span class="n">value_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cyclic</span><span class="p">:</span>
+                <span class="n">cyclic_range</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">value_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sv</span><span class="o">.</span><span class="n">value_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">matrix</span> <span class="o">/=</span> <span class="n">cyclic_range</span>
+
+            <span class="c"># Calculate timestamp for this plot</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">timestamp</span>
+            <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&gt;=</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">timestamp</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">staleness_warning</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">TemplatePlot</span><span class="o">.</span><span class="n">warn_time</span> <span class="o">!=</span> <span class="nb">min</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Combining SheetViews from different times (</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">) for plot </span><span class="si">%s</span><span class="s">; see staleness_warning&quot;</span> <span class="o">%</span>
+                                     <span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                        <span class="n">TemplatePlot</span><span class="o">.</span><span class="n">warn_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">matrix</span>
+
+
+    <span class="k">def</span> <span class="nf">_set_plot_src_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the Plot plot_src_name. Called when Plot is created&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+            <span class="n">sheet_view_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sheet_view_key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">sv</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">sv</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_src_name</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">src_name</span>
+                 <span class="bp">self</span><span class="o">.</span><span class="n">precedence</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">precedence</span>
+                 <span class="bp">self</span><span class="o">.</span><span class="n">row_precedence</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">row_precedence</span>
+                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sv</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span><span class="s">&#39;proj_src_name&#39;</span><span class="p">):</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">proj_src_name</span><span class="o">=</span><span class="n">sv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">proj_src_name</span>
+
+
+    <span class="c">### JCALERT: This could be inserted in the code of get_matrix</span>
+    <span class="k">def</span> <span class="nf">_get_shape_and_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sub-function used by plot: get the matrix shape and the bounding box</span>
+<span class="sd">        of the SheetViews that constitute the TemplatePlot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">channel</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">channel</span><span class="p">,{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">sv</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">NdMapping</span><span class="p">):</span> <span class="n">sv</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">last</span>
+            <span class="k">if</span> <span class="n">sv</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">bounds</span>
+
+        <span class="k">return</span> <span class="n">shape</span><span class="p">,</span> <span class="n">box</span>
+
+
+    <span class="c"># CEBALERT: needs simplification! (To begin work on joint</span>
+    <span class="c"># normalization, I didn&#39;t want to interfere with the existing</span>
+    <span class="c"># normalization calculations.)  Also need to update this</span>
+    <span class="c"># docstring.</span>
+    <span class="c">#</span>
+    <span class="c"># range=None  - calculate value_range; don&#39;t scale a</span>
+    <span class="c"># range=(A,B) - scale a so that A is 0 and B is 1</span>
+    <span class="c"># range=False - scale a so that min(array) is 0 and max(array) is 1</span>
+    <span class="k">def</span> <span class="nf">_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">range_</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize an array s to be in the range 0 to 1.0.</span>
+<span class="sd">        For an array of identical elements, returns an array of ones</span>
+<span class="sd">        if the elements are greater than zero, and zeros if the</span>
+<span class="sd">        elements are less than or equal to zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">range_</span><span class="p">:</span> <span class="c"># i.e. not False, not None (expecting a tuple)</span>
+             <span class="n">range_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">range_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+             <span class="n">range_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">range_</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+             <span class="k">if</span> <span class="n">range_min</span><span class="o">==</span><span class="n">range_max</span><span class="p">:</span>
+                  <span class="k">if</span> <span class="n">range_min</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                       <span class="n">resu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                  <span class="k">else</span><span class="p">:</span>
+                       <span class="n">resu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+             <span class="k">else</span><span class="p">:</span>
+                  <span class="n">a_offset</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="n">range_min</span>
+                  <span class="n">resu</span> <span class="o">=</span> <span class="n">a_offset</span><span class="o">/</span><span class="p">(</span><span class="n">range_max</span><span class="o">-</span><span class="n">range_min</span><span class="p">)</span>
+
+             <span class="k">return</span> <span class="n">resu</span>
+        <span class="k">else</span><span class="p">:</span>
+             <span class="k">if</span> <span class="n">range_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                  <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;value_range&#39;</span><span class="p">):</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">a</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+                  <span class="k">else</span><span class="p">:</span>
+                       <span class="c"># If normalizing multiple matrices, take the largest values</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">a</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span>
+                                         <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">a</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
+                  <span class="k">return</span> <span class="bp">None</span> <span class="c"># (indicate that array was not scaled)</span>
+             <span class="k">else</span><span class="p">:</span> <span class="c"># i.e. range_ is False</span>
+                  <span class="n">a_offset</span> <span class="o">=</span> <span class="n">a</span><span class="o">-</span><span class="n">a</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                  <span class="n">max_a_offset</span> <span class="o">=</span> <span class="n">a_offset</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+                  <span class="k">if</span> <span class="n">max_a_offset</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                       <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">a_offset</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">max_a_offset</span><span class="p">))</span>
+                  <span class="k">else</span><span class="p">:</span>
+                       <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+                            <span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+                       <span class="k">else</span><span class="p">:</span>
+                            <span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+                  <span class="k">return</span> <span class="n">a</span>
+
+
+    <span class="c">### JC: maybe density can become an attribute of the TemplatePlot?</span>
+    <span class="k">def</span> <span class="nf">_re_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">mat</span><span class="p">,</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">):</span>
+
+        <span class="c"># CEBHACKALERT: for Julien...</span>
+        <span class="c"># If plot_bounding_box is that of a Sheet, it will already have been</span>
+        <span class="c"># setup so that the density in the x direction and the density in the</span>
+        <span class="c"># y direction are equal.</span>
+        <span class="c"># If plot_bounding_box comes from elsewhere (i.e. you create it from</span>
+        <span class="c"># arbitrary bounds), it might need to be adjusted to ensure the density</span>
+        <span class="c"># in both directions is the same (see Sheet.__init__()). I don&#39;t know where</span>
+        <span class="c"># you want to do that; presumably the code should be common to Sheet and</span>
+        <span class="c"># where it&#39;s used in the plotting?</span>
+        <span class="c">#</span>
+        <span class="c"># It&#39;s possible we can move some of the functionality</span>
+        <span class="c"># into SheetCoordinateSystem.</span>
+        <span class="k">if</span> <span class="n">plot_bounding_box</span><span class="o">.</span><span class="n">containsbb_exclusive</span><span class="p">(</span><span class="n">box</span><span class="p">):</span>
+             <span class="n">ct</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">density</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+             <span class="n">new_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ct</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+             <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">ct</span><span class="p">)</span>
+             <span class="n">new_mat</span><span class="p">[</span><span class="n">r1</span><span class="p">:</span><span class="n">r2</span><span class="p">,</span><span class="n">c1</span><span class="p">:</span><span class="n">c2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat</span>
+        <span class="k">else</span><span class="p">:</span>
+             <span class="n">scs</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+             <span class="n">s</span><span class="o">=</span><span class="n">Slice</span><span class="p">(</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">scs</span><span class="p">)</span>
+             <span class="n">s</span><span class="o">.</span><span class="n">crop_to_sheet</span><span class="p">(</span><span class="n">scs</span><span class="p">)</span>
+             <span class="n">new_mat</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">submatrix</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_mat</span>
+
+
+
+
+</div>
+<div class="viewcode-block" id="SHCPlot"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.SHCPlot">[docs]</a><span class="k">class</span> <span class="nc">SHCPlot</span><span class="p">(</span><span class="n">TemplatePlot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bitmap plot based on Strength, Hue, and Confidence matrices.</span>
+
+<span class="sd">    Constructs an HSV (hue, saturation, and value) plot by choosing</span>
+<span class="sd">    the appropriate matrix for each channel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                 <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span>
+                 <span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SHCPlot</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                                   <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c"># catching the empty plot exception</span>
+        <span class="n">s_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="s">&#39;Strength&#39;</span><span class="p">)</span>
+        <span class="n">h_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="s">&#39;Hue&#39;</span><span class="p">)</span>
+        <span class="n">c_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="s">&#39;Confidence&#39;</span><span class="p">)</span>
+
+        <span class="c"># If it is an empty plot: self.bitmap=None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">s_mat</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">c_mat</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">h_mat</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Empty plot.&#39;</span><span class="p">)</span>
+
+        <span class="c"># Otherwise, we construct self.bitmap according to what is specified by the channels.</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">shape</span><span class="p">,</span><span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_shape_and_box</span><span class="p">()</span>
+
+            <span class="n">hue</span><span class="p">,</span><span class="n">sat</span><span class="p">,</span><span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_hsv_matrices</span><span class="p">((</span><span class="n">s_mat</span><span class="p">,</span><span class="n">h_mat</span><span class="p">,</span><span class="n">c_mat</span><span class="p">),</span><span class="n">shape</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="n">range_</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">range_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                 <span class="k">return</span> <span class="c">##############################</span>
+
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span> <span class="o">=</span> <span class="n">box</span>
+
+            <span class="n">hue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re_bound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">hue</span><span class="p">,</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+            <span class="n">sat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re_bound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">sat</span><span class="p">,</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re_bound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">val</span><span class="p">,</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span> <span class="o">=</span> <span class="n">HSVBitmap</span><span class="p">(</span><span class="n">hue</span><span class="p">,</span><span class="n">sat</span><span class="p">,</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span>
+
+
+    <span class="k">def</span> <span class="nf">__make_hsv_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">hsc_matrices</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sub-function of plot() that return the h,s,v matrices corresponding</span>
+<span class="sd">        to the current matrices in sliced_matrices_dict. The shape of the matrices</span>
+<span class="sd">        in the dict is passed, as well as the normalize boolean parameter.</span>
+<span class="sd">        The result specified a bitmap in hsv coordinate.</span>
+
+<span class="sd">        Applies normalizing and cropping if required.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">zero</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">one</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+        <span class="n">s</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">hsc_matrices</span>
+        <span class="c"># Determine appropriate defaults for each matrix</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">s</span><span class="o">=</span><span class="n">one</span> <span class="c"># Treat as full strength by default</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="n">one</span> <span class="c"># Treat as full confidence by default</span>
+        <span class="k">if</span> <span class="n">h</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>       <span class="c"># No color, gray-scale plot.</span>
+            <span class="n">h</span><span class="o">=</span><span class="n">zero</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">zero</span>
+
+        <span class="c"># If normalizing, offset the matrix so that the minimum</span>
+        <span class="c"># value is 0.0 and then scale to make the maximum 1.0</span>
+        <span class="k">if</span> <span class="n">normalize</span><span class="o">!=</span><span class="s">&#39;None&#39;</span><span class="p">:</span>
+             <span class="n">s</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+             <span class="c"># CEBALERT: I meant False, right?</span>
+             <span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+        <span class="c"># This translation from SHC to HSV is valid only for black backgrounds;</span>
+        <span class="c"># it will need to be extended also to support white backgrounds.</span>
+        <span class="n">hue</span><span class="p">,</span><span class="n">sat</span><span class="p">,</span><span class="n">val</span><span class="o">=</span><span class="n">h</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">s</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">hue</span><span class="p">,</span><span class="n">sat</span><span class="p">,</span><span class="n">val</span><span class="p">)</span>
+
+
+
+
+</div>
+<div class="viewcode-block" id="RGBPlot"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.RGBPlot">[docs]</a><span class="k">class</span> <span class="nc">RGBPlot</span><span class="p">(</span><span class="n">TemplatePlot</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Bitmap plot based on Red, Green, and Blue matrices.</span>
+
+<span class="sd">  Construct an RGB (red, green, and blue) plot from the Red, Green,</span>
+<span class="sd">  and Blue channels.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+               <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span>
+               <span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+       <span class="nb">super</span><span class="p">(</span><span class="n">RGBPlot</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                                   <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+
+       <span class="c"># catching the empty plot exception</span>
+       <span class="n">r_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="s">&#39;Red&#39;</span><span class="p">)</span>
+       <span class="n">g_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="s">&#39;Green&#39;</span><span class="p">)</span>
+       <span class="n">b_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="s">&#39;Blue&#39;</span><span class="p">)</span>
+
+       <span class="c"># If it is an empty plot: self.bitmap=None</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">r_mat</span><span class="o">==</span><span class="bp">None</span> <span class="ow">and</span> <span class="n">g_mat</span><span class="o">==</span><span class="bp">None</span> <span class="ow">and</span> <span class="n">b_mat</span><span class="o">==</span><span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Empty plot.&#39;</span><span class="p">)</span>
+            <span class="c"># Otherwise, we construct self.bitmap according to what is specified by the channels.</span>
+       <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">shape</span><span class="p">,</span><span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_shape_and_box</span><span class="p">()</span>
+
+            <span class="n">red</span><span class="p">,</span><span class="n">green</span><span class="p">,</span><span class="n">blue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_rgb_matrices</span><span class="p">((</span><span class="n">r_mat</span><span class="p">,</span><span class="n">g_mat</span><span class="p">,</span><span class="n">b_mat</span><span class="p">),</span><span class="n">shape</span><span class="p">,</span>
+                                                      <span class="n">normalize</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">range_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                 <span class="k">return</span> <span class="c">############################</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span> <span class="o">=</span> <span class="n">box</span>
+
+            <span class="n">red</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re_bound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">red</span><span class="p">,</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+            <span class="n">green</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re_bound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">green</span><span class="p">,</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+            <span class="n">blue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re_bound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">blue</span><span class="p">,</span><span class="n">box</span><span class="p">,</span><span class="n">density</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span> <span class="o">=</span> <span class="n">RGBBitmap</span><span class="p">(</span><span class="n">red</span><span class="p">,</span><span class="n">green</span><span class="p">,</span><span class="n">blue</span><span class="p">)</span>
+
+       <span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span>
+
+  <span class="k">def</span> <span class="nf">__make_rgb_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rgb_matrices</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sub-function of plot() that return the h,s,v matrices</span>
+<span class="sd">        corresponding to the current matrices in</span>
+<span class="sd">        sliced_matrices_dict. The shape of the matrices in the dict is</span>
+<span class="sd">        passed, as well as the normalize boolean parameter.  The</span>
+<span class="sd">        result specified a bitmap in hsv coordinate.</span>
+
+<span class="sd">        Applies normalizing and cropping if required.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">zero</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+        <span class="n">r</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">rgb_matrices</span>
+        <span class="c"># Determine appropriate defaults for each matrix</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">r</span><span class="o">=</span><span class="n">zero</span>
+        <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">g</span><span class="o">=</span><span class="n">zero</span>
+        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">b</span><span class="o">=</span><span class="n">zero</span>
+
+        <span class="c"># CEBALERT: have I checked this works?</span>
+        <span class="k">if</span> <span class="n">normalize</span><span class="o">!=</span><span class="s">&#39;None&#39;</span><span class="p">:</span>
+             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+             <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+             <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+
+
+
+</div>
+<div class="viewcode-block" id="PalettePlot"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.PalettePlot">[docs]</a><span class="k">class</span> <span class="nc">PalettePlot</span><span class="p">(</span><span class="n">TemplatePlot</span><span class="p">):</span>
+     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Bitmap plot based on a Strength matrix, with optional colorization.</span>
+
+<span class="sd">     Not yet implemented.</span>
+
+<span class="sd">     When implemented, construct an RGB plot from a Strength channel,</span>
+<span class="sd">     optionally colorized using a specified Palette.</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+
+     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                  <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+          <span class="nb">super</span><span class="p">(</span><span class="n">PalettePlot</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                                           <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+          <span class="c">### JABHACKALERT: To implement the class: If Strength is present,</span>
+          <span class="c">### ask for Palette if it&#39;s there, and make a PaletteBitmap.</span>
+
+
+
+
+
+</div>
+<div class="viewcode-block" id="MultiOrPlot"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plot.MultiOrPlot">[docs]</a><span class="k">class</span> <span class="nc">MultiOrPlot</span><span class="p">(</span><span class="n">TemplatePlot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bitmap plot with oriented lines draws for every units, representing</span>
+<span class="sd">    the most preferred orientations.</span>
+<span class="sd">    Constructs a matrix of drawing directives displaying oriented lines</span>
+<span class="sd">    in each unit, colored according to the order or preference, and selectivity</span>
+<span class="sd">    This plot expects channels named &quot;OrX&quot; &quot;SelX&quot;, with &quot;X&quot; the number</span>
+<span class="sd">    ranking the preferred orientations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">unit_size</span>       <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;box size of a single unit&quot;</span><span class="p">)</span>
+    <span class="n">min_brightness</span>  <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;min brightness of lines&quot;</span><span class="p">)</span>
+    <span class="n">max_brightness</span>  <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;max brightness of lines&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                 <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span>
+                 <span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiOrPlot</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="p">,</span>
+                                   <span class="n">plot_bounding_box</span><span class="p">,</span><span class="n">normalize</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="n">n</span>       <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">channels</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">density</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unit_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">density</span> <span class="p">)</span>
+
+        <span class="c"># there should be an even number of channels</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Empty plot.&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_size</span> <span class="o">%</span> <span class="mi">2</span> <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unit_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_size</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">n</span>       <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">m</span>       <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+            <span class="n">o</span>           <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span> <span class="s">&quot;Or</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">s</span>           <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span> <span class="s">&quot;Sel</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="n">o</span><span class="o">==</span><span class="bp">None</span> <span class="ow">or</span> <span class="n">s</span><span class="o">==</span><span class="bp">None</span> <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Empty plot.&#39;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">o</span><span class="p">,</span> <span class="n">s</span> <span class="p">)</span> <span class="p">)</span>
+
+        <span class="n">shape</span><span class="p">,</span><span class="n">box</span>         <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_shape_and_box</span><span class="p">()</span>
+        <span class="n">dm</span>                <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_lines_from_or_matrix</span><span class="p">(</span> <span class="n">m</span><span class="p">,</span> <span class="n">shape</span> <span class="p">)</span>
+        <span class="n">box_size</span>          <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span>       <span class="o">=</span> <span class="n">DrawBitmap</span><span class="p">(</span> <span class="n">dm</span><span class="p">,</span> <span class="n">box_size</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orig_bitmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bitmap</span>
+
+
+    <span class="k">def</span> <span class="nf">__vertices_from_or</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">o</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        help function for generating coordinates of line vertices</span>
+<span class="sd">        from normalized orientation value.</span>
+<span class="sd">        Return a list with two tuples, the coordinates of the segment with the</span>
+<span class="sd">        given orientation, in the normalized range [ 0...1 ].</span>
+<span class="sd">	Orientation is expected in range [ 0..pi ]. Space</span>
+<span class="sd">        representation is in ordinary image convention: first coordinate is X,</span>
+<span class="sd">        from left to right, second coordinate Y, from top to bottom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">s</span>       <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span> <span class="n">o</span> <span class="p">)</span>
+        <span class="n">c</span>       <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span> <span class="n">o</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="p">(</span> <span class="mf">0.5</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">s</span> <span class="p">),</span> <span class="p">(</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">c</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">-</span> <span class="n">s</span> <span class="p">)</span> <span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">__make_line_directive</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">os_list</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        help function for composing the list of line directives</span>
+<span class="sd">        for a single unit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">d_hue</span>   <span class="o">=</span> <span class="mi">360</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span> <span class="n">os_list</span> <span class="p">)</span>
+        <span class="n">hue</span>     <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">p</span>       <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">n</span>       <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_brightness</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_brightness</span>
+        <span class="k">for</span> <span class="n">o</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="n">os_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">:</span>
+                <span class="n">f</span>       <span class="o">=</span> <span class="s">&quot;hsl(</span><span class="si">%d</span><span class="s">,100</span><span class="si">%%</span><span class="s">,</span><span class="si">%2d%%</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">hue</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_brightness</span><span class="p">,</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">s</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">{</span> <span class="s">&quot;line&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="n">o</span><span class="p">,</span> <span class="p">{</span> <span class="s">&quot;fill&quot;</span><span class="p">:</span> <span class="n">f</span> <span class="p">}</span> <span class="p">]</span> <span class="p">}</span> <span class="p">)</span>
+            <span class="n">hue</span>         <span class="o">=</span> <span class="n">hue</span> <span class="o">+</span> <span class="n">d_hue</span>
+
+        <span class="k">return</span> <span class="n">p</span>
+
+
+    <span class="k">def</span> <span class="nf">__make_lines_from_or_matrix</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">matrices</span><span class="p">,</span> <span class="n">shape</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return a matrix of line drawing directives for each unit, derived from</span>
+<span class="sd">        the given list of tuples ( o, s ), where o is the orientation view and s</span>
+<span class="sd">        is the selectivity. The list is ordered by the orientation preference.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vertices_from_or</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vertices_from_or</span><span class="p">,</span> <span class="n">otypes</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">object_</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">mat_list</span>                <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">o</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">matrices</span><span class="p">:</span>
+            <span class="n">a</span>   <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">d</span>   <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+            <span class="n">ad</span>  <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">d</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">ad</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span> <span class="p">)</span> <span class="ow">and</span> <span class="n">ad</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">mat_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">vertices_from_or</span><span class="p">(</span> <span class="n">o</span> <span class="p">),</span> <span class="p">(</span> <span class="n">s</span> <span class="o">-</span> <span class="n">d</span> <span class="p">)</span> <span class="o">/</span> <span class="n">ad</span> <span class="p">)</span> <span class="p">)</span>
+
+        <span class="n">lines</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span> <span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">object_</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="n">shape</span><span class="p">[</span> <span class="mi">0</span> <span class="p">]</span> <span class="p">):</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="n">shape</span><span class="p">[</span> <span class="mi">1</span> <span class="p">]</span> <span class="p">):</span>
+                <span class="n">os_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">o</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">mat_list</span><span class="p">:</span>
+                    <span class="n">os_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">o</span><span class="p">[</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">],</span> <span class="n">s</span><span class="p">[</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">]</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="n">lines</span><span class="p">[</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">]</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_line_directive</span><span class="p">(</span> <span class="n">os_list</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lines</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/plotting/plot.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

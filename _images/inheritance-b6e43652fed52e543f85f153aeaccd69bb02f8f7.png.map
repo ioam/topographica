@@ -1,0 +1,21 @@
+<map id="inheritancebe3ab90ace" name="inheritancebe3ab90ace">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,243,232,265"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="Abstract base class for functions mapping from a 2D coordinate into another one." alt="" coords="274,243,550,265"/>
+<area shape="rect" id="node3" href="#topo.coordmapper.AffineTransform" title="Remaps the input with an affine transform." alt="" coords="617,47,830,70"/>
+<area shape="rect" id="node4" href="#topo.coordmapper.Cartesian2Polar" title="Maps from Cartesian (x,y) to polar (radius,angle)." alt="" coords="616,91,831,113"/>
+<area shape="rect" id="node5" href="#topo.coordmapper.ConstantMapper" title="Map all values to the same constant, pre&#45;specified coordinates." alt="" coords="613,134,834,156"/>
+<area shape="rect" id="node6" href="#topo.coordmapper.Grid" title="Divides the 2D area into a grid, where all points within each grid" alt="" coords="649,177,798,200"/>
+<area shape="rect" id="node7" href="#topo.coordmapper.Jitter" title="Additively modifies calculated x,y coordinates, e.g. with random noise." alt="" coords="647,221,800,243"/>
+<area shape="rect" id="node9" href="#topo.coordmapper.SingleDimensionMapper" title="Coordinate Mapper that uses an origin&#45;centered 1&#45;D mapping function." alt="" coords="592,264,855,286"/>
+<area shape="rect" id="node10" href="#topo.coordmapper.NormalJitter" title="Additively modifies calculated x,y coordinates with Gaussian random noise." alt="" coords="627,307,820,330"/>
+<area shape="rect" id="node11" href="#topo.coordmapper.OttesSCMapper" title="Abstract class for superior colliculus mappings." alt="" coords="616,351,831,373"/>
+<area shape="rect" id="node14" href="#topo.coordmapper.Pipeline" title="Applies a sequence of coordmappers, left to right." alt="" coords="639,394,808,416"/>
+<area shape="rect" id="node15" href="#topo.coordmapper.Polar2Cartesian" title="Map from polar (radius,angle) to Cartesian (x,y) coordinates." alt="" coords="616,437,831,460"/>
+<area shape="rect" id="node17" href="#topo.coordmapper.Rotate2d" title="Rotate the input around the origin by an angle in radians." alt="" coords="934,4,1110,26"/>
+<area shape="rect" id="node18" href="#topo.coordmapper.Scale2d" title="Scale the input along the x and y axes by sx and sy, respectively." alt="" coords="937,47,1108,70"/>
+<area shape="rect" id="node19" href="#topo.coordmapper.Translate2d" title="Translate the input by xoff,yoff." alt="" coords="927,91,1117,113"/>
+<area shape="rect" id="node8" href="#topo.coordmapper.MagnifyingMapper" title="Exponential (magnifying) mapping function." alt="" coords="908,243,1136,265"/>
+<area shape="rect" id="node16" href="#topo.coordmapper.ReducingMapper" title="Provides a mapping that reduces the center of the activity." alt="" coords="913,286,1132,308"/>
+<area shape="rect" id="node12" href="#topo.coordmapper.OttesSCMotorMapper" title="Efferent superior colliculus mapping." alt="" coords="898,330,1146,352"/>
+<area shape="rect" id="node13" href="#topo.coordmapper.OttesSCSenseMapper" title="Afferent superior colliculus mapping." alt="" coords="897,373,1147,395"/>
+</map>

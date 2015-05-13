@@ -1,0 +1,11 @@
+<map id="inheritancefc7b96e2bc" name="inheritancefc7b96e2bc">
+<area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="160,2,365,15"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="390,15,476,28"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="3,28,135,41"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="196,28,329,41"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFSheet" title="A ProjectionSheet providing access to the ConnectionFields in its CFProjections." alt="" coords="657,15,739,28"/>
+<area shape="rect" id="node7" href="#topo.sheet.JointNormalizingCFSheet" title="A type of CFSheet extended to support joint sum&#45;based normalization." alt="" coords="764,15,893,28"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.ProjectionSheet" title="A Sheet whose activity is computed using Projections from other sheets." alt="" coords="500,15,633,28"/>
+<area shape="rect" id="node8" href="#topo.sheet.SettlingCFSheet" title="A JointNormalizingCFSheet implementing the idea of settling." alt="" coords="918,15,1019,28"/>
+<area shape="rect" id="node9" href="#topo.sheet.slissom.SLISSOM" title="A Sheet class implementing the SLISSOM algorithm" alt="" coords="1044,15,1149,28"/>
+</map>

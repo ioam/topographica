@@ -1,0 +1,13 @@
+<map id="inheritance52f2812edd" name="inheritance52f2812edd">
+<area shape="rect" id="node1" title="Internal class." alt="" coords="122,118,205,133"/>
+<area shape="rect" id="node4" title="Internal class." alt="" coords="304,61,368,75"/>
+<area shape="rect" id="node2" title="Internal class." alt="" coords="3,118,59,133"/>
+<area shape="rect" id="node3" title="Frame widget which may contain other widgets and can have a 3D border." alt="" coords="482,61,545,75"/>
+<area shape="rect" id="node5" title="Geometry manager Grid." alt="" coords="136,32,191,47"/>
+<area shape="rect" id="node6" title="Geometry manager Pack." alt="" coords="135,61,192,75"/>
+<area shape="rect" id="node7" title="Geometry manager Place." alt="" coords="133,89,193,104"/>
+<area shape="rect" id="node8" title="Base class for named objects that support Parameters and message" alt="" coords="88,3,239,18"/>
+<area shape="rect" id="node10" title="A Parameterized subclass that maintains Tkinter.Variable shadows" alt="" coords="272,32,400,47"/>
+<area shape="rect" id="node11" href="topo.plotting.html#topo.plotting.plotgroup.PlotGroup" title="Container that has one or more Plots and also knows how to arrange" alt="" coords="267,3,405,18"/>
+<area shape="rect" id="node9" title="Provide widgets for Parameters of itself and up to one additional" alt="" coords="459,32,568,47"/>
+</map>

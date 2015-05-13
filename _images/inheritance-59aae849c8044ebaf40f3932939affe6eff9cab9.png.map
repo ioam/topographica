@@ -1,0 +1,15 @@
+<map id="inheritance10172fd8d9" name="inheritance10172fd8d9">
+<area shape="rect" id="node1" title="Internal class." alt="" coords="62,60,104,68"/>
+<area shape="rect" id="node4" title="Internal class." alt="" coords="152,31,184,38"/>
+<area shape="rect" id="node2" title="Internal class." alt="" coords="2,60,30,68"/>
+<area shape="rect" id="node3" title="Frame widget which may contain other widgets and can have a 3D border." alt="" coords="226,29,258,36"/>
+<area shape="rect" id="node5" title="Geometry manager Grid." alt="" coords="69,16,97,24"/>
+<area shape="rect" id="node6" title="Geometry manager Pack." alt="" coords="68,31,97,38"/>
+<area shape="rect" id="node7" title="Geometry manager Place." alt="" coords="68,45,98,53"/>
+<area shape="rect" id="node8" title="Base class for named objects that support Parameters and message" alt="" coords="44,1,121,9"/>
+<area shape="rect" id="node10" title="A Parameterized subclass that maintains Tkinter.Variable shadows" alt="" coords="135,3,200,11"/>
+<area shape="rect" id="node9" title="Provide widgets for Parameters of itself and up to one additional" alt="" coords="215,10,270,18"/>
+<area shape="rect" id="node13" href="#topo.tkgui.projectionpanel.CFProjectionPanel" title="Panel for displaying CFProjections." alt="" coords="1059,20,1150,27"/>
+<area shape="rect" id="node17" href="#topo.tkgui.projectionpanel.PlotMatrixPanel" title="PlotGroupPanel for visualizing an array of bitmaps, such as for" alt="" coords="839,20,925,27"/>
+<area shape="rect" id="node18" href="#topo.tkgui.projectionpanel.ProjectionSheetPanel" title="Abstract base class for panels relating to ProjectionSheets." alt="" coords="720,20,817,27"/>
+</map>

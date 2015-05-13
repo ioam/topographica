@@ -1,0 +1,8 @@
+<map id="inheritance2af7241929" name="inheritance2af7241929">
+<area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="214,3,491,21"/>
+<area shape="rect" id="node5" href="#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="524,21,639,38"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="4,37,181,54"/>
+<area shape="rect" id="node6" href="#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="264,37,441,54"/>
+<area shape="rect" id="node3" href="#topo.base.generatorsheet.ChannelGeneratorSheet" title="A GeneratorSheet that handles input patterns with multiple" alt="" coords="909,21,1148,38"/>
+<area shape="rect" id="node4" href="#topo.base.generatorsheet.GeneratorSheet" title="Sheet for generating a series of 2D patterns." alt="" coords="672,21,875,38"/>
+</map>

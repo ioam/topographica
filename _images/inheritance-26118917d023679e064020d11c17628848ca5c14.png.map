@@ -1,0 +1,7 @@
+<map id="inheritance87315e6b61" name="inheritance87315e6b61">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,54,264,79"/>
+<area shape="rect" id="node3" href="#topo.base.simulation.EventProcessor" title="params(name=String)" alt="" coords="312,54,571,79"/>
+<area shape="rect" id="node2" href="#topo.base.ep.PulseGenerator" title="params(amplitude=Number, period=Number, phase=Number, name=String)" alt="" coords="619,5,829,30"/>
+<area shape="rect" id="node4" href="#topo.base.ep.SumUnit" title="params(name=String)" alt="" coords="641,54,807,79"/>
+<area shape="rect" id="node5" href="#topo.base.ep.ThresholdUnit" title="params(amplitude=Number, initial_accum=Number, threshold=Number, name=String)" alt="" coords="625,103,823,129"/>
+</map>

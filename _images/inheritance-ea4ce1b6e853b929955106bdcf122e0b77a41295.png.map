@@ -1,0 +1,6 @@
+<map id="inheritance9cc735fe36" name="inheritance9cc735fe36">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,30,264,55"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPResponseFn" title="params(name=String)" alt="" coords="313,30,517,55"/>
+<area shape="rect" id="node3" href="#topo.responsefn.projfn.CFPRF_ActivityBased" title="params(b=Number, l=Number, m=Number, r=Number, single_cf_fn=ClassSelector, u=Number, name=String)" alt="" coords="581,5,883,30"/>
+<area shape="rect" id="node4" href="#topo.responsefn.projfn.CFPRF_EuclideanDistance" title="params(name=String)" alt="" coords="565,54,899,79"/>
+</map>

@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.ipython &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.ipython</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Topographica IPython extension for notebook support. Automatically</span>
+<span class="sd">loaded when importing the topo module but may also be explicitly</span>
+<span class="sd">loaded using:</span>
+
+<span class="sd">%load_ext topo.misc.ipython</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">difflib</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">IPython</span> <span class="c"># pyflakes:ignore (Required import)</span>
+    <span class="kn">from</span> <span class="nn">IPython.core.magic</span> <span class="kn">import</span> <span class="n">Magics</span><span class="p">,</span> <span class="n">magics_class</span><span class="p">,</span> <span class="n">line_magic</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">SkipTest</span>
+    <span class="k">raise</span> <span class="n">SkipTest</span><span class="p">(</span><span class="s">&quot;IPython extension requires IPython &gt;= 0.12&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="prompt"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.ipython.prompt">[docs]</a><span class="k">def</span> <span class="nf">prompt</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to repeatedly prompt the user with a list of</span>
+<span class="sd">    options. If no input is given, the default value is returned. If</span>
+<span class="sd">    wither the skip flag is True or the prompt is in a batch mode</span>
+<span class="sd">    environment (e.g. for automated testing), the default value is</span>
+<span class="sd">    immediately returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">))</span>
+    <span class="n">show_options</span> <span class="o">=</span> <span class="n">options</span><span class="p">[:]</span>
+    <span class="k">assert</span> <span class="n">default</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">options</span><span class="p">,</span> <span class="s">&quot;Default value must be in options list.&quot;</span>
+    <span class="k">if</span> <span class="n">skip</span> <span class="ow">or</span> <span class="p">(</span><span class="s">&#39;SKIP_IPYTHON_PROMPTS&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="n">default_index</span> <span class="o">=</span> <span class="n">show_options</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="n">show_options</span><span class="p">[</span><span class="n">default_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">show_options</span><span class="p">[</span><span class="n">default_index</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">choices</span> <span class="o">=</span><span class="s">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">show_options</span><span class="p">)</span>
+    <span class="n">prompt_msg</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">): &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">choices</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="n">prompt_msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">response</span> <span class="o">==</span><span class="s">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">response</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;Response &#39;</span><span class="si">%s</span><span class="s">&#39; not in available options (</span><span class="si">%s</span><span class="s">). Please try again: &quot;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">choices</span><span class="p">))</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="export_notebook"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.ipython.export_notebook">[docs]</a><span class="k">def</span> <span class="nf">export_notebook</span><span class="p">(</span><span class="n">notebook</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s">&#39;.ty&#39;</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s">&#39;_export_&#39;</span><span class="p">,</span>
+                    <span class="n">diff</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">stale_time</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a v3-format .ipynb notebook file (from IPython 0.13 or</span>
+<span class="sd">    later), allows the contents of labelled code cells to be exported</span>
+<span class="sd">    to a plaintext file.  The typical use case is for generating a</span>
+<span class="sd">    runnable plain Python source file from selected cells of an</span>
+<span class="sd">    IPython notebook.</span>
+
+<span class="sd">    Code is selected for export by placing the given identifier on the first</span>
+<span class="sd">    line of the chosen code cells. By default, only the labelled cells are</span>
+<span class="sd">    exported. This behavior may be inverted to exclude labelled cells by</span>
+<span class="sd">    setting the invert flag.</span>
+
+<span class="sd">    notebook    The filename of the notebook (.ipynb).</span>
+<span class="sd">    output_path Optional output file path. Otherwise, uses the notebook basename.</span>
+<span class="sd">    ext         The file extension of the output.</span>
+<span class="sd">    identifier  The identifier used to label cells.</span>
+<span class="sd">    diff        Whether to print a diff when overwriting content.</span>
+<span class="sd">    invert      When set, only the non-labelled cells are exported.</span>
+<span class="sd">    stale_time  Number of seconds that may elapse since the last notebook</span>
+<span class="sd">                save before a staleness warning is issued. Useful when</span>
+<span class="sd">                exporting from an active IPython notebook.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Deprecation Warning: Please use the </span><span class="si">%d</span><span class="s">efine_exporter magic instead&quot;</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">notebook</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ext</span>
+
+    <span class="c"># Assumes the v3 version of the ipynb format.</span>
+    <span class="kn">import</span> <span class="nn">IPython.nbformat.current</span>
+    <span class="n">nbnode</span> <span class="o">=</span> <span class="n">IPython</span><span class="o">.</span><span class="n">nbformat</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">notebook</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">),</span> <span class="s">&#39;ipynb&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">nbnode</span><span class="p">[</span><span class="s">&#39;worksheets&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;cells&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="p">[</span><span class="s">&#39;cell_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;code&#39;</span><span class="p">:</span>
+            <span class="n">celllines</span> <span class="o">=</span> <span class="n">cell</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="n">labelled</span> <span class="o">=</span> <span class="p">(</span><span class="n">celllines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="n">identifier</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">labelled</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">invert</span><span class="p">:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">celllines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+            <span class="k">if</span> <span class="n">invert</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">labelled</span><span class="p">:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">celllines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+    <span class="k">if</span> <span class="n">stale_time</span><span class="p">:</span>
+        <span class="n">modified_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">notebook</span><span class="p">)</span>
+        <span class="k">if</span>  <span class="n">modified_time</span> <span class="o">&gt;</span> <span class="n">stale_time</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Notebook last saved </span><span class="si">%.1f</span><span class="s"> seconds ago.&quot;</span> <span class="o">%</span> <span class="n">modified_time</span>
+
+    <span class="n">new_contents</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="n">overwrite</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">old_contents</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">new_contents</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">diff</span> <span class="ow">and</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">deltas</span> <span class="o">=</span><span class="n">difflib</span><span class="o">.</span><span class="n">unified_diff</span><span class="p">(</span><span class="n">old_contents</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(),</span> <span class="n">new_contents</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(),</span> <span class="n">lineterm</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">deltas</span><span class="p">))</span>
+
+</div>
+<span class="nd">@magics_class</span>
+<div class="viewcode-block" id="ExportMagic"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.ipython.ExportMagic">[docs]</a><span class="k">class</span> <span class="nc">ExportMagic</span><span class="p">(</span><span class="n">Magics</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Line magic that defines a cell magic to export the cell contents</span>
+<span class="sd">    to a specific file. For instance, running</span>
+
+<span class="sd">    %define_exporter OUT ./output.txt</span>
+
+<span class="sd">    will define an %%OUT cell magic that writes to the file</span>
+<span class="sd">    output.txt. This cell magic takes a optional arguments &#39;clear&#39; and</span>
+<span class="sd">    &#39;run&#39;. If &#39;clear&#39; should be specified for the first cell to be</span>
+<span class="sd">    exported. If &#39;run&#39; is specified, the cell is executed in the</span>
+<span class="sd">    active notebook as well as exported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@line_magic</span>
+    <span class="k">def</span> <span class="nf">define_exporter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Please supply the export magic name and target filename&quot;</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">split</span>
+
+        <span class="k">def</span> <span class="nf">exporter</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;w&#39;</span> <span class="k">if</span> <span class="s">&#39;clear&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">else</span> <span class="s">&#39;a&#39;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cell</span><span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s">&#39;run&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">run_cell</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">register_magic_function</span><span class="p">(</span><span class="n">exporter</span><span class="p">,</span> <span class="n">magic_kind</span><span class="o">=</span><span class="s">&#39;cell&#39;</span><span class="p">,</span>
+                                           <span class="n">magic_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="s">&#39;complete_command&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;clear&#39;</span><span class="p">],</span>
+                            <span class="n">str_key</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">{name}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+
+
+<span class="c">#===============#</span>
+<span class="c"># Display hooks #</span>
+<span class="c">#===============#</span>
+</div>
+<span class="kn">from</span> <span class="nn">holoviews.ipython</span> <span class="kn">import</span> <span class="n">load_ipython_extension</span> <span class="k">as</span> <span class="n">load_imagen_extension</span>
+
+<span class="kn">from</span> <span class="nn">holoviews.ipython.widgets</span> <span class="kn">import</span> <span class="n">RunProgress</span>
+<span class="n">RunProgress</span><span class="o">.</span><span class="n">run_hook</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span>
+
+<span class="n">_loaded</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">def</span> <span class="nf">load_ipython_extension</span><span class="p">(</span><span class="n">ip</span><span class="p">):</span>
+    <span class="n">load_imagen_extension</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+
+    <span class="k">global</span> <span class="n">_loaded</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_loaded</span><span class="p">:</span>
+        <span class="n">_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">register_magics</span><span class="p">(</span><span class="n">ExportMagic</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">lancet</span> <span class="kn">import</span> <span class="n">load_ipython_extension</span> <span class="k">as</span> <span class="n">load_lancet_extension</span>
+            <span class="n">load_lancet_extension</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">runscript</span>
+        <span class="n">runscript</span><span class="o">.</span><span class="n">ns</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">user_ns</span>
+        <span class="n">runscript</span><span class="o">.</span><span class="n">push</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">push</span>
+
+        <span class="kn">from</span> <span class="nn">topo.misc.commandline</span> <span class="kn">import</span> <span class="n">exec_startup_files</span>
+        <span class="n">exec_startup_files</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/misc/ipython.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

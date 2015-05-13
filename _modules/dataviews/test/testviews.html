@@ -1,0 +1,324 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.test.testviews &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="dataviews" href="../../dataviews.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../dataviews.html" accesskey="U">dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataviews.test.testviews</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">dataviews.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">dataviews.views</span> <span class="kn">import</span> <span class="n">View</span><span class="p">,</span> <span class="n">Annotation</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">GridLayout</span>
+
+
+<span class="k">class</span> <span class="nc">ViewTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">View</span><span class="p">(</span><span class="s">&#39;An example of arbitrary data&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_constant_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;label&#39;</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span><span class="s">&#39;An example of arbitrary data&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&#39;another label&#39;</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Label should be a constant parameter.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span> <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">test_add_operator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">view1</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span><span class="s">&#39;data1&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;view1&#39;</span><span class="p">)</span>
+        <span class="n">view2</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span><span class="s">&#39;data2&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;view2&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">view1</span> <span class="o">+</span> <span class="n">view2</span><span class="p">),</span> <span class="n">GridLayout</span><span class="p">)</span>
+
+
+
+<span class="k">class</span> <span class="nc">AnnotationTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constructor</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">boxes</span><span class="o">=</span><span class="p">[</span><span class="n">BoundingBox</span><span class="p">(),</span> <span class="p">((</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))],</span>
+                                <span class="n">vlines</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">hlines</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">],</span>
+                                <span class="n">arrows</span> <span class="o">=</span> <span class="p">[((</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.2</span><span class="p">),{</span><span class="s">&#39;text&#39;</span><span class="p">:</span><span class="s">&#39;arrow&#39;</span><span class="p">,</span><span class="s">&#39;points&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">})])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span>  <span class="nb">set</span><span class="p">([</span>
+                    <span class="p">(</span><span class="s">&#39;line&#39;</span><span class="p">,</span> <span class="p">((</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+                              <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)),</span> <span class="bp">None</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s">&#39;line&#39;</span><span class="p">,</span> <span class="p">((</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span>
+                              <span class="p">(</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">)),</span> <span class="bp">None</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s">&#39;vline&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;vline&#39;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s">&#39;hline&#39;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;hline&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s">&#39;arrow&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span> <span class="mi">20</span><span class="p">,</span> <span class="s">&#39;-&gt;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)])</span>
+
+    <span class="k">def</span> <span class="nf">test_annotation_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">annotation</span> <span class="o">=</span> <span class="n">Annotation</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">annotation</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">test_annotation_add_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">annotation</span> <span class="o">=</span> <span class="n">Annotation</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor</span><span class="p">)</span>
+        <span class="n">annotation</span><span class="o">.</span><span class="n">box</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.75</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">|</span> <span class="nb">set</span><span class="p">([(</span><span class="s">&#39;line&#39;</span><span class="p">,</span> <span class="p">((</span><span class="mf">0.75</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">),</span>
+                                          <span class="p">(</span><span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">),</span>
+                                          <span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">)),</span> <span class="bp">None</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">annotation</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_annotation_add_vline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">annotation</span> <span class="o">=</span> <span class="n">Annotation</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor</span><span class="p">)</span>
+        <span class="n">annotation</span><span class="o">.</span><span class="n">vline</span><span class="p">(</span><span class="mf">0.99</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">annotation</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">|</span> <span class="nb">set</span><span class="p">([(</span><span class="s">&#39;vline&#39;</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="bp">None</span><span class="p">)]))</span>
+
+
+    <span class="k">def</span> <span class="nf">test_annotation_add_hline_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">annotation</span> <span class="o">=</span> <span class="n">Annotation</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor</span><span class="p">)</span>
+        <span class="n">annotation</span><span class="o">.</span><span class="n">hline</span><span class="p">(</span><span class="o">-</span><span class="mf">0.8</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;Time&#39;</span><span class="p">:(</span><span class="mi">10</span><span class="p">,</span><span class="mi">20</span><span class="p">)})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">annotation</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">|</span> <span class="nb">set</span><span class="p">([(</span><span class="s">&#39;hline&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">,</span> <span class="p">((</span><span class="s">&#39;Time&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)),))]))</span>
+
+
+
+<div class="viewcode-block" id="CompositeTest"><a class="viewcode-back" href="../../../Reference_Manual/dataviews.test.testviews-module.html#dataviews.test.testviews.CompositeTest">[docs]</a><span class="k">class</span> <span class="nc">CompositeTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="s">&quot;For testing of basic composite view types&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data1</span> <span class="o">=</span><span class="s">&#39;An example of arbitrary data&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data2</span> <span class="o">=</span> <span class="s">&#39;Another example...&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data3</span> <span class="o">=</span> <span class="s">&#39;A third example.&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">view1</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;view1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view2</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;view2&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view3</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;view3&#39;</span><span class="p">)</span>
+
+</div>
+<span class="k">class</span> <span class="nc">LayoutTest</span><span class="p">(</span><span class="n">CompositeTest</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_layout_single</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Layout</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">test_layout_double</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view1</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_layout_triple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_layout_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view1</span>
+        <span class="k">for</span> <span class="n">el</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data1</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_layout_add_operator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">layout1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span>
+        <span class="n">layout2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">layout1</span> <span class="o">+</span> <span class="n">layout2</span><span class="p">),</span> <span class="n">GridLayout</span><span class="p">)</span>
+
+
+
+<span class="k">class</span> <span class="nc">OverlayTest</span><span class="p">(</span><span class="n">CompositeTest</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_overlay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Overlay</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">test_overlay_mul</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;The View class should not support __mul__.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span> <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">test_overlay_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">views</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">]</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">Overlay</span><span class="p">(</span><span class="n">views</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">el</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">overlay</span><span class="p">,</span> <span class="n">views</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_overlay_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">views</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">]</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">Overlay</span><span class="p">(</span><span class="n">views</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">overlay</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">views</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">test_overlay_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new_layers</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">]</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">Overlay</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">])</span>
+        <span class="n">overlay</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">new_layers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">overlay</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_layers</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">test_overlay_add</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">Overlay</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">])</span>
+        <span class="n">overlay</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">test_overlay_integer_indexing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">Overlay</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">overlay</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">overlay</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">overlay</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">overlay</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Index should be out of range.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span> <span class="k">pass</span>
+
+
+    <span class="k">def</span> <span class="nf">test_overlay_str_indexing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">Overlay</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">overlay</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="o">.</span><span class="n">label</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">overlay</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="o">.</span><span class="n">label</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">overlay</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="o">.</span><span class="n">label</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">overlay</span><span class="p">[</span><span class="s">&#39;Invalid key&#39;</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Index should be an invalid key.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span> <span class="k">pass</span>
+
+
+
+<span class="k">class</span> <span class="nc">GridLayoutTest</span><span class="p">(</span><span class="n">CompositeTest</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_gridlayout_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">GridLayout</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_gridlayout_cols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GridLayout</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">view1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view2</span><span class="p">])</span>
+
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">nose</span>
+    <span class="n">nose</span><span class="o">.</span><span class="n">runmodule</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&quot;--logging-level&quot;</span><span class="p">,</span> <span class="s">&quot;ERROR&quot;</span><span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/dataviews/test/testviews.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../dataviews.html" >dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

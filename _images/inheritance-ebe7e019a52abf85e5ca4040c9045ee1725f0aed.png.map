@@ -1,0 +1,14 @@
+<map id="inheritance595dfe9011" name="inheritance595dfe9011">
+<area shape="rect" id="node1" title="params(input_ranges=ClassSelector, group=String, name=String)" alt="" coords="780,101,978,118"/>
+<area shape="rect" id="node13" title="params(input_ranges=ClassSelector, group=String, name=String)" alt="" coords="1018,101,1141,118"/>
+<area shape="rect" id="node2" title="params(group=String, name=String)" alt="" coords="547,101,711,118"/>
+<area shape="rect" id="node3" title="params(name=String)" alt="" coords="272,101,479,118"/>
+<area shape="rect" id="node4" title="Class used for comparing two HoloViews objects, including complex" alt="" coords="276,68,475,85"/>
+<area shape="rect" id="node6" title="Class to integrate the Comparison class with unittest.TestCase." alt="" coords="511,53,747,69"/>
+<area shape="rect" id="node5" title="This class is designed to allow equality testing to work" alt="" coords="4,68,240,85"/>
+<area shape="rect" id="node9" title="This class extends ComparisonTestCase to handle IPython specific" alt="" coords="811,53,947,69"/>
+<area shape="rect" id="node7" title="A class whose instances are single test cases." alt="" coords="320,36,431,53"/>
+<area shape="rect" id="node8" title="A Reference allows access to an object to be deferred until it is" alt="" coords="34,3,210,20"/>
+<area shape="rect" id="node11" title="A SimRef instance is installed on Collector to allow Topographica" alt="" coords="324,3,427,20"/>
+<area shape="rect" id="node10" title="params(name=String)" alt="" coords="36,101,208,118"/>
+</map>

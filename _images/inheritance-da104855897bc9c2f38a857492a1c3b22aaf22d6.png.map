@@ -1,0 +1,11 @@
+<map id="inheritance2832b575c1" name="inheritance2832b575c1">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="3,62,159,77"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="188,62,376,77"/>
+<area shape="rect" id="node3" href="#topo.analysis.command.ProjectionSheetMeasurementCommand" title="params(outputs=List, name=String)" alt="" coords="406,32,669,47"/>
+<area shape="rect" id="node5" href="#topo.analysis.command.measure_cog" title="params(measurement_storage_hook=Callable, proj_name=String, stride=Integer, name=String)" alt="" coords="457,62,618,77"/>
+<area shape="rect" id="node6" href="#topo.analysis.command.measure_projection" title="params(cols=Number, projection=ObjectSelector, rows=Number, name=String)" alt="" coords="445,91,630,107"/>
+<area shape="rect" id="node4" href="#topo.analysis.command.UnitMeasurementCommand" title="params(coords=List, projection=ObjectSelector, outputs=List, name=String)" alt="" coords="699,17,917,33"/>
+<area shape="rect" id="node9" href="#topo.analysis.command.update_projectionactivity" title="params(outputs=List, name=String)" alt="" coords="706,47,910,62"/>
+<area shape="rect" id="node7" href="#topo.analysis.command.update_connectionfields" title="params(coords=List, projection=ObjectSelector, outputs=List, name=String)" alt="" coords="946,3,1148,18"/>
+<area shape="rect" id="node8" href="#topo.analysis.command.update_projection" title="params(coords=List, projection=ObjectSelector, outputs=List, name=String)" alt="" coords="959,33,1136,48"/>
+</map>

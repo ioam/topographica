@@ -1,0 +1,6 @@
+<map id="inheritance1b0934e756" name="inheritance1b0934e756">
+<area shape="rect" id="node1" title="Generic 2D image generator with support for multiple channels." alt="" coords="737,3,887,22"/>
+<area shape="rect" id="node2" title="Abstract base class for patterns supporting multiple channels natively." alt="" coords="480,3,701,22"/>
+<area shape="rect" id="node3" title="A class hierarchy for callable objects that can generate 2D patterns." alt="" coords="227,3,445,22"/>
+<area shape="rect" id="node4" title="Base class for named objects that support Parameters and message" alt="" coords="4,3,192,22"/>
+</map>

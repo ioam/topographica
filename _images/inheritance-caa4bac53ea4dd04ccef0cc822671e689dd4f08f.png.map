@@ -1,0 +1,9 @@
+<map id="inheritance49aa83dbeb" name="inheritance49aa83dbeb">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,79,264,105"/>
+<area shape="rect" id="node5" href="#topo.plotting.plot.Plot" title="Simple Plot object constructed from a specified PIL image." alt="" coords="313,79,471,105"/>
+<area shape="rect" id="node2" href="#topo.plotting.plot.MultiOrPlot" title="Bitmap plot with oriented lines draws for every units, representing" alt="" coords="787,5,991,30"/>
+<area shape="rect" id="node3" href="#topo.plotting.plot.TemplatePlot" title="A bitmap&#45;based plot as specified by a plot template (or plot channels)." alt="" coords="521,79,738,105"/>
+<area shape="rect" id="node4" href="#topo.plotting.plot.PalettePlot" title="Bitmap plot based on a Strength matrix, with optional colorization." alt="" coords="788,54,991,79"/>
+<area shape="rect" id="node6" href="#topo.plotting.plot.RGBPlot" title="Bitmap plot based on Red, Green, and Blue matrices." alt="" coords="796,103,983,129"/>
+<area shape="rect" id="node7" href="#topo.plotting.plot.SHCPlot" title="Bitmap plot based on Strength, Hue, and Confidence matrices." alt="" coords="796,153,983,178"/>
+</map>

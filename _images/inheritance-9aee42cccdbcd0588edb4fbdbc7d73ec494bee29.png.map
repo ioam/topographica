@@ -1,0 +1,7 @@
+<map id="inheritance79c31056cf" name="inheritance79c31056cf">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="7,153,265,178"/>
+<area shape="rect" id="node5" href="#topo.submodel.Model" title="params(random_seed=Integer, name=String)" alt="" coords="315,153,475,178"/>
+<area shape="rect" id="node2" href="#topo.submodel.ComponentDecorator" title="Decorator class that can be instantiated with a component type to" alt="" coords="5,103,267,129"/>
+<area shape="rect" id="node3" href="#topo.submodel.ComponentRegistry" title="An instance of this class is to be used as class decorator. Any" alt="" coords="13,54,259,79"/>
+<area shape="rect" id="node4" href="#topo.submodel.MatchConditions" title="Decorator class for matchconditions." alt="" coords="22,5,250,30"/>
+</map>

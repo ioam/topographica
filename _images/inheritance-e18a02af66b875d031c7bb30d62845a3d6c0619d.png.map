@@ -1,0 +1,6 @@
+<map id="inheritance775de93f23" name="inheritance775de93f23">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,30,264,55"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPOutputFn" title="Type for an object that applies some operation (typically something" alt="" coords="312,30,499,55"/>
+<area shape="rect" id="node3" href="#topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1" title="Non&#45;optimized version of CFPOF_DivisiveNormalizeL1_opt." alt="" coords="561,5,925,30"/>
+<area shape="rect" id="node4" href="#topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt" title="Performs divisive normalization of the weights of all cfs." alt="" coords="547,54,939,79"/>
+</map>

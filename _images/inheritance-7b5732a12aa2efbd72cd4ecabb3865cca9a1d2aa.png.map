@@ -1,0 +1,6 @@
+<map id="inheritance9cc735fe36" name="inheritance9cc735fe36">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,30,264,55"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPResponseFn" title="Map an input activity matrix into an output matrix using the CFs" alt="" coords="313,30,517,55"/>
+<area shape="rect" id="node3" href="#topo.responsefn.projfn.CFPRF_ActivityBased" title="Calculate the activity of each unit nonlinearly based on the input activity." alt="" coords="581,5,883,30"/>
+<area shape="rect" id="node4" href="#topo.responsefn.projfn.CFPRF_EuclideanDistance" title="Euclidean&#45;distance&#45;&#45;based response function." alt="" coords="565,54,899,79"/>
+</map>

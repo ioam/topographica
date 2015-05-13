@@ -1,0 +1,91 @@
+topo.tkgui Package
+==================
+
+:mod:`tkgui` Package
+--------------------
+
+.. inheritance-diagram:: topo.tkgui
+
+
+.. automodule:: topo.tkgui
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`editor` Module
+--------------------
+
+.. inheritance-diagram:: topo.tkgui.editor
+
+
+.. automodule:: topo.tkgui.editor
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`featurecurvepanel` Module
+-------------------------------
+
+.. inheritance-diagram:: topo.tkgui.featurecurvepanel
+
+
+.. automodule:: topo.tkgui.featurecurvepanel
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`plotgrouppanel` Module
+----------------------------
+
+.. inheritance-diagram:: topo.tkgui.plotgrouppanel
+
+
+.. automodule:: topo.tkgui.plotgrouppanel
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`projectionpanel` Module
+-----------------------------
+
+.. inheritance-diagram:: topo.tkgui.projectionpanel
+
+
+.. automodule:: topo.tkgui.projectionpanel
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`templateplotgrouppanel` Module
+------------------------------------
+
+.. inheritance-diagram:: topo.tkgui.templateplotgrouppanel
+
+
+.. automodule:: topo.tkgui.templateplotgrouppanel
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`testpattern` Module
+-------------------------
+
+.. inheritance-diagram:: topo.tkgui.testpattern
+
+
+.. automodule:: topo.tkgui.testpattern
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`topoconsole` Module
+-------------------------
+
+.. inheritance-diagram:: topo.tkgui.topoconsole
+
+
+.. automodule:: topo.tkgui.topoconsole
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

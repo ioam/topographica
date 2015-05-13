@@ -1,0 +1,494 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.unitsupport &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.unitsupport</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Unit Support: Classes and methods to allow Unum and Quantities unit</span>
+<span class="sd">packages to interact with Topographica.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">bothmethod</span>
+
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">numbergen</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">SkipTest</span>
+
+<span class="n">got_unum</span> <span class="o">=</span> <span class="bp">False</span><span class="p">;</span> <span class="n">got_pq</span><span class="o">=</span><span class="bp">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quantities</span> <span class="kn">as</span> <span class="nn">pq</span>
+    <span class="n">got_pq</span><span class="o">=</span><span class="bp">True</span>
+<span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">unum</span>
+    <span class="kn">import</span> <span class="nn">unum.units</span>
+    <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">UNIT_FORMAT</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span>
+    <span class="n">got_unum</span><span class="o">=</span><span class="bp">True</span>
+<span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+
+<span class="k">if</span> <span class="bp">True</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">got_unum</span><span class="p">,</span> <span class="n">got_pq</span><span class="p">]:</span> <span class="k">raise</span> <span class="n">SkipTest</span><span class="p">(</span><span class="s">&#39;Could not find Quantities or Unum.&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="strip_pq_hook"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.unitsupport.strip_pq_hook">[docs]</a><span class="k">class</span> <span class="nc">strip_pq_hook</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hook to convert units provided by the quantities package to the base</span>
+<span class="sd">        unit as defined in the QuantityConversions class and return a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span><span class="s">&#39;units&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">val</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;unit_conversions&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">unit_conversions</span><span class="o">.</span><span class="n">convert_to_base</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;src&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">src</span><span class="p">,</span><span class="s">&#39;unit_conversions&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">unit_conversions</span><span class="o">.</span><span class="n">convert_to_base</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="strip_unum_hook"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.unitsupport.strip_unum_hook">[docs]</a><span class="k">class</span> <span class="nc">strip_unum_hook</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hook to convert unum unit objects to the specified base unit and</span>
+<span class="sd">        return as a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;Unum&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">val</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;unit_conversions&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">unit_conversions</span><span class="o">.</span><span class="n">convert_to_base</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;src&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">src</span><span class="p">,</span><span class="s">&#39;unit_conversions&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">unit_conversions</span><span class="o">.</span><span class="n">convert_to_base</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="Conversions"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.unitsupport.Conversions">[docs]</a><span class="k">class</span> <span class="nc">Conversions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The UnumConversion class holds unit conversions and definitions,</span>
+<span class="sd">    setting and resetting the unum unit table allowing sheet specific</span>
+<span class="sd">    conversions to be performed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">package</span> <span class="o">=</span> <span class="s">&#39;Quantities&#39;</span>
+
+    <span class="n">initialized</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">units</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize this object first by storing the unit</span>
+<span class="sd">        specification, backing up the current unit table, creating the</span>
+<span class="sd">        specified unum unit objects and then restoring the backed up</span>
+<span class="sd">        unit table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;_unit_objects&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unit_objects</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;_unit_specs&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unit_specs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="s">&#39;unit_conversions&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">Sheet</span><span class="o">.</span><span class="n">params</span><span class="p">():</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">Sheet</span><span class="o">.</span><span class="n">_add_parameter</span><span class="p">(</span><span class="s">&quot;unit_conversions&quot;</span><span class="p">,</span><span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="bp">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s">&#39;unit_conversions&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pattern</span><span class="o">.</span><span class="n">PatternGenerator</span><span class="o">.</span><span class="n">params</span><span class="p">():</span>
+            <span class="n">pattern</span><span class="o">.</span><span class="n">PatternGenerator</span><span class="o">.</span><span class="n">_add_parameter</span><span class="p">(</span><span class="s">&quot;unit_conversions&quot;</span><span class="p">,</span><span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="bp">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s">&#39;unit_conversions&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">numbergen</span><span class="o">.</span><span class="n">NumberGenerator</span><span class="o">.</span><span class="n">params</span><span class="p">():</span>
+            <span class="n">numbergen</span><span class="o">.</span><span class="n">NumberGenerator</span><span class="o">.</span><span class="n">_add_parameter</span><span class="p">(</span><span class="s">&quot;unit_conversions&quot;</span><span class="p">,</span><span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="bp">None</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="nd">@bothmethod</span>
+<div class="viewcode-block" id="Conversions.declare_unit"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.unitsupport.Conversions.declare_unit">[docs]</a>    <span class="k">def</span> <span class="nf">declare_unit</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">unit_key</span><span class="p">,</span><span class="n">conversion</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">base</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and return unit using specified package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s">&#39;Quantities&#39;</span><span class="p">:</span>
+            <span class="n">unit_obj</span> <span class="o">=</span> <span class="n">pq</span><span class="o">.</span><span class="n">UnitQuantity</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">definition</span><span class="o">=</span><span class="n">conversion</span><span class="p">,</span><span class="n">symbol</span><span class="o">=</span><span class="n">unit_key</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">base</span><span class="p">:</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="p">[(</span><span class="n">unit_obj</span><span class="p">,</span><span class="n">unit_key</span><span class="p">,</span><span class="n">conversion</span><span class="p">,</span><span class="n">name</span><span class="p">)]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">_set_base_units_pq</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="p">[(</span><span class="n">unit_obj</span><span class="p">,</span><span class="n">conversion</span><span class="p">)]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">initialize_units</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">unit_obj</span>
+
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s">&#39;Unum&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">conversion</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">conversion</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">obj</span><span class="o">.</span><span class="n">del_unit</span><span class="p">(</span><span class="n">unit_key</span><span class="p">)</span>
+            <span class="n">unit_obj</span> <span class="o">=</span> <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">unit_key</span><span class="p">,</span><span class="n">conversion</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">base</span><span class="p">:</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="p">[(</span><span class="n">unit_obj</span><span class="p">,</span><span class="n">unit_key</span><span class="p">,</span><span class="n">conversion</span><span class="p">,</span><span class="n">name</span><span class="p">)]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">_set_base_units_unum</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="p">[(</span><span class="n">unit_obj</span><span class="p">,</span><span class="n">conversion</span><span class="p">)]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">initialize_units</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">unit_obj</span>
+
+</div>
+    <span class="nd">@bothmethod</span>
+<div class="viewcode-block" id="Conversions.get_unit"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.unitsupport.Conversions.get_unit">[docs]</a>    <span class="k">def</span> <span class="nf">get_unit</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">unit_key</span><span class="p">,</span><span class="n">local</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">global_</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Looks up and returns unit_key in local then global unit</span>
+<span class="sd">        dictionary, if not in either returns None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">local</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">initialized</span><span class="p">:</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_get_local_unit</span><span class="p">(</span><span class="n">unit_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">global_</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">unit</span><span class="p">:</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_get_global_unit</span><span class="p">(</span><span class="n">unit_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unit</span>
+
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Conversions.set_package"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.unitsupport.Conversions.set_package">[docs]</a>    <span class="k">def</span> <span class="nf">set_package</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the public methods in accordance with the selected package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">package</span>
+
+        <span class="n">public_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;convert_to_base&#39;</span><span class="p">,</span><span class="s">&#39;initialize&#39;</span><span class="p">,</span><span class="s">&#39;initialize_units&#39;</span><span class="p">,</span><span class="s">&#39;set_local_units&#39;</span><span class="p">]</span>
+        <span class="n">unum_methods</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">_convert_to_base_unum</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">_initialize_unum</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">_initialize_units_unum</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">_set_local_units_unum</span><span class="p">]</span>
+        <span class="n">pq_methods</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">_convert_to_base_pq</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">_initialize_pq</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">_initialize_units_pq</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">_set_local_units_pq</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s">&#39;Unum&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">got_unum</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;Unum package not installed, call Conversions.set_package(</span><span class="se">\&#39;</span><span class="s">Quantities</span><span class="se">\&#39;</span><span class="s">) or install Unum.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s">&#39;Quantities&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">got_pq</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;Quantities package not installed, call Conversions.set_package = (</span><span class="se">\&#39;</span><span class="s">Unum</span><span class="se">\&#39;</span><span class="s">) or install Quantities.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span><span class="s">&#39;Unum&#39;</span><span class="p">:</span> <span class="n">selected</span> <span class="o">=</span> <span class="n">unum_methods</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">selected</span> <span class="o">=</span> <span class="n">pq_methods</span>
+        <span class="p">[</span><span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">pub</span><span class="p">,</span><span class="n">sel</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">sel</span><span class="p">,</span><span class="n">pub</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">selected</span><span class="p">,</span> <span class="n">public_methods</span><span class="p">)]</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_convert_to_base_pq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set local unit definitions and detect unit type then convert</span>
+<span class="sd">        the value and return as a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_local_units_pq</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">unit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="n">unit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">):</span> <span class="k">print</span> <span class="s">&#39;Cannot convert {0} to base unit.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">magnitude</span>
+
+
+    <span class="k">def</span> <span class="nf">_convert_to_base_unum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert value to base unit using local unit</span>
+<span class="sd">        definitions and return a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ut_bak</span> <span class="o">=</span> <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">getUnitTable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_local_units_unum</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">checkNoUnit</span><span class="p">()</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">unum</span><span class="o">.</span><span class="n">ShouldBeUnitlessError</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">unit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">val</span><span class="o">.</span><span class="n">asUnit</span><span class="p">(</span><span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">break</span>
+                <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">):</span> <span class="k">print</span> <span class="s">&#39;Cannot convert {0} to base unit.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">asUnit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ut_bak</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">val</span>
+
+
+    <span class="nd">@bothmethod</span>
+    <span class="k">def</span> <span class="nf">_del_unit</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">unit_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete specified unit definition from global unum unit table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unit_table</span> <span class="o">=</span> <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">getUnitTable</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">unit_key</span> <span class="ow">in</span> <span class="n">unit_table</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">del</span> <span class="n">unit_table</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span>
+        <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">unit_table</span><span class="p">)</span>
+
+
+    <span class="nd">@bothmethod</span>
+    <span class="k">def</span> <span class="nf">_get_local_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">unit_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns local unit object or if nonexistent None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">unit_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_objects</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+
+    <span class="nd">@bothmethod</span>
+    <span class="k">def</span> <span class="nf">_get_global_unit</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">unit_key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s">&#39;Unum&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">unum</span><span class="o">.</span><span class="n">units</span><span class="p">,</span><span class="n">unit_key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s">&#39;Quantities&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="n">pq</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">unit_registry</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
+
+
+    <span class="k">def</span> <span class="nf">_initialize_pq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize param and Topographica to deal with Quantities unit</span>
+<span class="sd">        package by installing appropriate set hook on parameters and</span>
+<span class="sd">        initializing specified units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="o">.</span><span class="n">set_hook</span> <span class="o">=</span> <span class="n">strip_pq_hook</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">boundingregion</span><span class="o">.</span><span class="n">BoundingRegionParameter</span><span class="o">.</span><span class="n">set_hook</span> <span class="o">=</span> <span class="n">strip_pq_hook</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_units</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_initialize_unum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize param and Topographica to deal with Unum unit</span>
+<span class="sd">        package by installing appropriate set hook on parameters and</span>
+<span class="sd">        initializing specified units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="o">.</span><span class="n">set_hook</span> <span class="o">=</span> <span class="n">strip_unum_hook</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">boundingregion</span><span class="o">.</span><span class="n">BoundingRegionParameter</span><span class="o">.</span><span class="n">set_hook</span> <span class="o">=</span> <span class="n">strip_unum_hook</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_units</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
+
+
+    <span class="nd">@bothmethod</span>
+    <span class="k">def</span> <span class="nf">_initialize_units_pq</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize specified units using Quantities unit package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;_unit_objects&#39;</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_objects</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;_unit_specs&#39;</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_specs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+            <span class="n">unit_key</span> <span class="o">=</span> <span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_objects</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_specs</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">unit</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+    <span class="nd">@bothmethod</span>
+    <span class="k">def</span> <span class="nf">_initialize_units_unum</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize specified units using Unum unit package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;_unit_objects&#39;</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_objects</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;_unit_specs&#39;</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_specs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+            <span class="n">unit_key</span> <span class="o">=</span> <span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strUnit</span><span class="p">()</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_objects</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_unit_specs</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">unit</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getUnitTable</span><span class="p">()[</span><span class="n">unit_key</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+
+
+    <span class="nd">@bothmethod</span>
+    <span class="k">def</span> <span class="nf">_set_base_units_pq</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set base unit, which is used to interface with Topographicas</span>
+<span class="sd">        coordinate system, using Quantities unit package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;_base_units&#39;</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_base_units</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_base_units</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+
+    <span class="nd">@bothmethod</span>
+    <span class="k">def</span> <span class="nf">_set_base_units_unum</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set base units, which are used to interface with Topographicas</span>
+<span class="sd">        coordinate system, using Unum unit package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="s">&#39;_base_units&#39;</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_base_units</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_base_units</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">unit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+
+    <span class="k">def</span> <span class="nf">_set_local_units_pq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the local unit definitions according to stored unit definitions and using</span>
+<span class="sd">        the Quantities unit package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_specs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unit_objects</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span><span class="o">.</span><span class="n">_conv_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit_specs</span><span class="p">[</span><span class="n">unit</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_specs</span><span class="p">[</span><span class="n">unit</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">simplified</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">unit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_conv_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">unit</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">unit</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">simplified</span>
+
+
+    <span class="k">def</span> <span class="nf">_set_local_units_unum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the local unit definitions according to stored unit definitions and using</span>
+<span class="sd">        the Quantities unit package.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">unit_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_specs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">del_unit</span><span class="p">(</span><span class="n">unit_key</span><span class="p">)</span>
+            <span class="n">unit_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_specs</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unit_objects</span><span class="p">[</span><span class="n">unit_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">unit_key</span><span class="p">,</span><span class="n">unit_spec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">unit_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_units</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">del_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">unum</span><span class="o">.</span><span class="n">Unum</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">unit</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">unit</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/misc/unitsupport.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

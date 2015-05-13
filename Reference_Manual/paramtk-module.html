@@ -1,0 +1,911 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>paramtk &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="paramtk">
+<h1>paramtk<a class="headerlink" href="#paramtk" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance95afd34832.svg" usemap="#inheritance95afd34832" class="inheritance"/></div><map id="inheritance95afd34832" name="inheritance95afd34832">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="paramtk.__init__.pyc-module.html">paramtk.__init__.pyc</a></li>
+<li><a class="reference external" href="paramtk.odict.pyc-module.html">paramtk.odict.pyc</a></li>
+<li><a class="reference external" href="paramtk.tilewrapper.pyc-module.html">paramtk.tilewrapper.pyc</a></li>
+<li><a class="reference external" href="paramtk.odict-module.html">paramtk.odict</a></li>
+<li><a class="reference external" href="paramtk.tilewrapper-module.html">paramtk.tilewrapper</a></li>
+<li><a class="reference external" href="paramtk.tcl.README-module.html">paramtk.tcl.README</a></li>
+<li><a class="reference external" href="paramtk.tcl.scrodget-2.1.pkgIndex.tcl-module.html">paramtk.tcl.scrodget-2.1.pkgIndex.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.scrodget-2.1.scrodget.tcl-module.html">paramtk.tcl.scrodget-2.1.scrodget.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.tooltip-1.4.tooltip.tcl-module.html">paramtk.tcl.tooltip-1.4.tooltip.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.tooltip-1.4.pkgIndex.tcl-module.html">paramtk.tcl.tooltip-1.4.pkgIndex.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.tooltip-1.4.tipstack.tcl-module.html">paramtk.tcl.tooltip-1.4.tipstack.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.pkgIndex.tcl-module.html">paramtk.tcl.snit-2.2.1.pkgIndex.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.validate.tcl-module.html">paramtk.tcl.snit-2.2.1.validate.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.snit_tcl83_utils.tcl-module.html">paramtk.tcl.snit-2.2.1.snit_tcl83_utils.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.main1.tcl-module.html">paramtk.tcl.snit-2.2.1.main1.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.snit2.tcl-module.html">paramtk.tcl.snit-2.2.1.snit2.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.snit.tcl-module.html">paramtk.tcl.snit-2.2.1.snit.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.main1_83.tcl-module.html">paramtk.tcl.snit-2.2.1.main1_83.tcl</a></li>
+<li><a class="reference external" href="paramtk.tcl.snit-2.2.1.main2.tcl-module.html">paramtk.tcl.snit-2.2.1.main2.tcl</a></li>
+</ul>
+</div>
+<div class="section" id="module-paramtk">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-paramtk" title="Permalink to this headline">¶</a></h2>
+<p>Classes linking Parameters to Tkinter.</p>
+<p>TkParameterized allows flexible graphical representation and
+manipulation of the parameters of a Parameterized instance or class.</p>
+<p>ParametersFrame and ParametersFrameWithApply extend TkParameterized,
+displaying all the Parameters together in a list. Both allow these
+Parameters to be edited; ParametersFrame applies changes immediately
+as they are made, whereas ParametersFrameWithApply makes no changes
+until a confirmation is given (by pressing the &#8216;Apply&#8217; button).</p>
+<p>Using these classes to display parameters has several benefits,
+including that, automatically:</p>
+<ul class="simple">
+<li>changes to the Parameters in the GUI are reflected in the objects
+themselves without any additional code;</li>
+<li>each Parameter is represented by an appropriate widget (e.g. slider
+for a Number);</li>
+<li>type and range checking is handled (by virtue of using parameters);</li>
+<li>doc strings are displayed as pop-up help for each parameter;</li>
+<li>parameter names are formatted nicely for display;</li>
+<li>changes to parameter values in the GUI can be associated with
+function calls.</li>
+</ul>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Display the parameters of an object inside an existing window</li>
+</ol>
+<p>You want to display all parameters of a parameterized instance
+inside an existing container (e.g. a window or a frame):</p>
+<blockquote>
+<div><p># existing Parameterized instance g
+from topo import pattern
+g = pattern.Gaussian()</p>
+<p># existing window t
+import Tkinter
+t = Tkinter.Toplevel()</p>
+<p># display all the parameters of g in t
+from topo.param.tk import ParametersFrame
+ParametersFrame(t,g)
+#should be ParametersFrame(t,g).pack(); see ALERT in ParametersFrame</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li>Display the parameters of an object in a standalone window</li>
+</ol>
+<p>You want a new window displaying only the parameters of your object:</p>
+<blockquote>
+<div><p># existing Parameterized instance g
+from topo import pattern
+g = pattern.Gaussian()</p>
+<p># display all the parameters of g in a new window
+from topo.param.tk import edit_parameters
+edit_parameters(g)</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li>Flexible GUI layout using TkParameterized</li>
+</ol>
+<p>You want to display only some of the parameters of one or more
+Parameterized instances:</p>
+<blockquote>
+<div><p>## Existing, non-GUI code
+from topo import param</p>
+<dl class="docutils">
+<dt>class Object1(param.Parameterized):</dt>
+<dd>duration = param.Number(2.0,bounds=(0,None),doc=&#8217;Duration of measurement&#8217;)
+displacement = param.Number(0.0,bounds=(-1,1),doc=&#8217;Displacement from point A&#8217;)</dd>
+<dt>class Object2(param.Parameterized):</dt>
+<dd>active_today = param.Boolean(True,doc=&#8217;Whether or not to count today&#8217;)
+operator_name = param.String(&#8216;A. Person&#8217;,doc=&#8217;Operator today&#8217;)</dd>
+</dl>
+<p>o1 = Object1()
+o2 = Object2()</p>
+<p>## Existing window
+import Tkinter
+t = Tkinter.Toplevel()</p>
+<p>## Flexible GUI representation: display o1.duration, o1.displacement,
+## and o2.active_today inside t, ignoring o2.operator_name
+from topo.param.tk import TkParameterized</p>
+<p>t1 = TkParameterized(t,o1)
+t2 = TkParameterized(t,o2)</p>
+<p>t1.pack_param(&#8216;duration&#8217;,side=&#8217;left&#8217;)
+t1.pack_param(&#8216;displacement&#8217;,side=&#8217;bottom&#8217;)
+t2.pack_param(&#8216;active_today&#8217;,side=&#8217;right&#8217;)</p>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li>?</li>
+</ol>
+<p>TkParameterized is itself a subclass of Parameterized, so a
+TkParameterized class can have its own parameters (in addition to
+representing those of an external parameterized instance or class).</p>
+<blockquote>
+<div><p>## Existing class
+from topo import params</p>
+<dl class="docutils">
+<dt>class X(param.Parameterized):</dt>
+<dd>one = param.Boolean(True)
+two = param.Boolean(True)</dd>
+</dl>
+<p>## Panel to represent an instance of X
+from Tkinter import Frame
+from topo.param.tk import TkParameterized</p>
+<p>class XPanel(TkParameterized,Frame):</p>
+<blockquote>
+<div><p>dock = param.Boolean(False,doc=&#8217;Whether to attach this Panel&#8217;)</p>
+<dl class="docutils">
+<dt>def __init__(self,master,x):</dt>
+<dd>self.pack_param(&#8216;dock&#8217;,side=&#8217;top&#8217;,on_set=self.handle_dock)
+self.pack_param(&#8216;one&#8217;,side=&#8217;left&#8217;)
+self.pack_param(&#8216;two&#8217;,side=&#8217;right&#8217;)</dd>
+<dt>def handle_dock(self):</dt>
+<dd><dl class="first last docutils">
+<dt>if self.dock:</dt>
+<dd># dock the window</dd>
+<dt>else:</dt>
+<dd># undock the window</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p>## Running the code
+t = Tkinter.Toplevel()
+x = X()
+XPanel(t,x)</p>
+</div></blockquote>
+<dl class="class">
+<dt id="paramtk.AppWindow">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">AppWindow</tt><big>(</big><em>parent</em>, <em>status=False</em>, <em>**config</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#AppWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.AppWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">paramtk.ScrolledWindow</span></tt></p>
+<p>A ScrolledWindow with extra features intended to be common to all
+windows of an application.</p>
+<p>Currently this only includes a window icon, but we intend to
+add a right-click menu and possibly more.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="paramtk.Button">
+<tt class="descclassname">paramtk.</tt><tt class="descname">Button</tt><a class="reference internal" href="../_modules/paramtk.html#Button"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Button" title="Permalink to this definition">¶</a></dt>
+<dd><p>A GUI-specific parameter to display a button.</p>
+<p>Can be associated with an image by specifying an image_path
+(i.e. location of an image suitable for PIL, e.g. a PNG, TIFF, or
+JPEG image) and optionally a size (width,height) tuple.</p>
+<p>Note that the button size can also be set when there is no image,
+but instead of being presumed to be in pixels, it is presumed to
+be in text units (a Tkinter feature: see
+e.g. <a class="reference external" href="http://effbot.org/tkinterbook/button.htm">http://effbot.org/tkinterbook/button.htm</a>). Therefore, to
+place two identically sized buttons next to each other, with one
+displaying text and the other an image, you first have to convert
+one of the sizes to the other&#8217;s units.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.DoNothingTranslator">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">DoNothingTranslator</tt><big>(</big><em>param</em>, <em>initial_value=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#DoNothingTranslator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.DoNothingTranslator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#paramtk.Translator" title="paramtk.Translator"><tt class="xref py py-class docutils literal"><span class="pre">paramtk.Translator</span></tt></a></p>
+<p>Performs no translation. For use with Parameter types such as
+Boolean and String, where the representation
+of the object in the GUI is the object itself.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.Eval_ReprTranslator">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">Eval_ReprTranslator</tt><big>(</big><em>param</em>, <em>initial_value=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Eval_ReprTranslator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Eval_ReprTranslator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#paramtk.Translator" title="paramtk.Translator"><tt class="xref py py-class docutils literal"><span class="pre">paramtk.Translator</span></tt></a></p>
+<p>Translates a string to an object by eval()ing the string in
+__main__.__dict__ (i.e. as if the string were typed at the
+commandline), and translates an object to a string by
+repr(object).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.FocusTakingButton">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">FocusTakingButton</tt><big>(</big><em>master=None</em>, <em>cnf={}</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#FocusTakingButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.FocusTakingButton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Button</span></tt></p>
+<p>A Tkinter Button that takes the focus when the mouse &lt;Enter&gt;s.</p>
+<p>(Tkinter.Button doesn&#8217;t get focus even when it&#8217;s clicked,
+and only &lt;Enter&gt; and &lt;Leave&gt; events work for buttons.)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.Menu">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">Menu</tt><big>(</big><em>master=None</em>, <em>cnf={}</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Menu</span></tt></p>
+<p>Tkinter Menu, but with a way to access entries by name.</p>
+<p>Entries can be accessed via the label supplied when the entry is
+add()ed or insert()ed. For an entry whose label could change, you
+can supply &#8216;indexname&#8217;, which can then be used to access the entry
+no matter what the label might have become.</p>
+<dl class="method">
+<dt id="paramtk.Menu.add">
+<tt class="descname">add</tt><big>(</big><em>itemType</em>, <em>cnf={}</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>See Tkinter.Menu.add(), but &#8216;indexname&#8217; can also be supplied.</p>
+<p>If supplied, indexname must be unique. If label is supplied without
+indexname, then label must be unique.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.Menu.delete">
+<tt class="descname">delete</tt><big>(</big><em>index1</em>, <em>index2=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>If index2 is not specified, deletes the menu item at index1
+(an indexname or tk integer index).</p>
+<p>If index2 is specified, deletes menu items in
+range(index1,index2+1).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.Menu.entryconfig">
+<tt class="descname">entryconfig</tt><big>(</big><em>index</em>, <em>cnf=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#paramtk.Menu.entryconfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure a menu item at INDEX.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.Menu.entryconfigure">
+<tt class="descname">entryconfigure</tt><big>(</big><em>index</em>, <em>cnf=None</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu.entryconfigure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu.entryconfigure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure a menu item at INDEX.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.Menu.get_indexname">
+<tt class="descname">get_indexname</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu.get_indexname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu.get_indexname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the indexname, whether given an indexname or index
+(where index could be an int or Tkinter position e.g. &#8216;end&#8217;).</p>
+<p>The returned value will be None if index refers to an unnamed
+entry.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.Menu.get_tkinter_index">
+<tt class="descname">get_tkinter_index</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu.get_tkinter_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu.get_tkinter_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Tkinter index, whether given an indexname or index
+(where index could be an int or Tkinter position e.g. &#8216;end&#8217;).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.Menu.insert">
+<tt class="descname">insert</tt><big>(</big><em>index</em>, <em>itemType</em>, <em>cnf={}</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>See Tkinter.Menu.insert(), but index can also be specified as text.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.Menu.invoke">
+<tt class="descname">invoke</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Menu.invoke"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Menu.invoke" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invoke a menu item identified by INDEX and execute
+the associated command.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.ParametersFrame">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">ParametersFrame</tt><big>(</big><em>master</em>, <em>parameterized_object=None</em>, <em>on_set=None</em>, <em>on_modify=None</em>, <em>msg_handler=None</em>, <em>on_close=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ParametersFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ParametersFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#paramtk.TkParameterized" title="paramtk.TkParameterized"><tt class="xref py py-class docutils literal"><span class="pre">paramtk.TkParameterized</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Frame</span></tt></p>
+<p>Displays and allows instantaneous editing of the Parameters
+of a supplied Parameterized.</p>
+<p>Changes made to Parameter representations on the GUI are
+immediately applied to the underlying object.</p>
+<p><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_labels</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">display_threshold</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-10, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Parameters with precedence below this value are not displayed.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Refresh</span></tt> (<em>constant=False, default=None, image_path=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=None</em>)</dt>
+<dd>Return values to those currently set on the object (or, if editing a class, to those currently set on the class).</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Defaults</span></tt> (<em>constant=False, default=None, image_path=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=None</em>)</dt>
+<dd>Return values to class defaults.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Close</span></tt> (<em>constant=False, default=None, image_path=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=None</em>)</dt>
+<dd>Close the window. (If applicable, asks if unsaved changes should be saved).</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">pretty_parameters</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Whether to format parameter names, or display the
+        variable names instead.
+
+        Example use:
+          TkParameterized.pretty_parameters=False
+
+        (This causes all Parameters throughout the GUI to be displayed
+        with variable names.)</dd>
+</dl>
+<dl class="method">
+<dt id="paramtk.ParametersFrame.hidden_param">
+<tt class="descname">hidden_param</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ParametersFrame.hidden_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ParametersFrame.hidden_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if a parameter&#8217;s precedence is below the display threshold.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.ParametersFrameWithApply">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">ParametersFrameWithApply</tt><big>(</big><em>master</em>, <em>parameterized_object=None</em>, <em>on_set=None</em>, <em>on_modify=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ParametersFrameWithApply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ParametersFrameWithApply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#paramtk.ParametersFrame" title="paramtk.ParametersFrame"><tt class="xref py py-class docutils literal"><span class="pre">paramtk.ParametersFrame</span></tt></a></p>
+<p>Displays and allows editing of the Parameters of a supplied
+Parameterized.</p>
+<p>Changes made to Parameter representations in the GUI are not
+applied to the underlying object until Apply is pressed.</p>
+<p><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_labels</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">display_threshold</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-10, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Parameters with precedence below this value are not displayed.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Refresh</span></tt> (<em>constant=False, default=None, image_path=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=None</em>)</dt>
+<dd>Return values to those currently set on the object (or, if editing a class, to those currently set on the class).</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Defaults</span></tt> (<em>constant=False, default=None, image_path=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=None</em>)</dt>
+<dd>Return values to class defaults.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Apply</span></tt> (<em>constant=False, default=None, image_path=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=None</em>)</dt>
+<dd>Set object&#8217;s Parameters to displayed values.
+
+                          When editing a class, sets the class defaults
+                          (i.e. acts on the class object).</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Close</span></tt> (<em>constant=False, default=None, image_path=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=None</em>)</dt>
+<dd>Close the window. (If applicable, asks if unsaved changes should be saved).</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">pretty_parameters</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Whether to format parameter names, or display the
+        variable names instead.
+
+        Example use:
+          TkParameterized.pretty_parameters=False
+
+        (This causes all Parameters throughout the GUI to be displayed
+        with variable names.)</dd>
+</dl>
+<dl class="method">
+<dt id="paramtk.ParametersFrameWithApply.has_unapplied_change">
+<tt class="descname">has_unapplied_change</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ParametersFrameWithApply.has_unapplied_change"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ParametersFrameWithApply.has_unapplied_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if any one of the packed parameters&#8217; displayed values is different from
+that on the object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.ProgressWindow">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">ProgressWindow</tt><big>(</big><em>parent</em>, <em>sim=None</em>, <em>timer=None</em>, <em>progress_var=None</em>, <em>title=None</em>, <em>status=None</em>, <em>unpack_master_when_done=True</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ProgressWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ProgressWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">paramtk.ProgressController</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Frame</span></tt></p>
+<p>Graphically displays progress information for a SomeTimer object.</p>
+<p>** Currently expects a 0-100 (percent) value <a href="#id1"><span class="problematic" id="id2">**</span></a><a href="#id3"><span class="problematic" id="id4">*</span></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.ScrolledFrame">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">ScrolledFrame</tt><big>(</big><em>parent</em>, <em>**config</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ScrolledFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ScrolledFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Frame</span></tt></p>
+<p>XXXX</p>
+<p>Content to be scrolled should go in the &#8216;content&#8217; frame.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.TaggedSlider">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">TaggedSlider</tt><big>(</big><em>master</em>, <em>variable</em>, <em>bounds=(0</em>, <em>1)</em>, <em>inclusive_bounds=(True</em>, <em>True)</em>, <em>slider_length=100</em>, <em>tag_width=10</em>, <em>tag_extra_config={}</em>, <em>slider_extra_config={}</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TaggedSlider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TaggedSlider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Frame</span></tt></p>
+<p>Widget for manipulating a numeric value using either a slider or a
+text-entry box, keeping the two values in sync.</p>
+<p>Generates a number of Events:</p>
+<p>&lt;&lt;TagFocusOut&gt;&gt;  - tag loses focus
+&lt;&lt;TagReturn&gt;&gt;    - Return pressed in tag
+&lt;&lt;SliderSet&gt;&gt;    - slider is clicked/dragged</p>
+<dl class="method">
+<dt id="paramtk.TaggedSlider.config">
+<tt class="descname">config</tt><big>(</big><em>**options</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TaggedSlider.config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TaggedSlider.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>TaggedSlider is a compound widget. In most cases, config
+options should be passed to one of the component widgets
+(i.e. the tag or the slider). For some options, however,
+we need to handle them being set on the widget as a whole;
+further, some of these should be applied to both component
+widgets, but some should just be applied to one.</p>
+<p>Options handled:
+* state (applied to both)
+* background, foreground (applied to tag only)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TaggedSlider.get">
+<tt class="descname">get</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TaggedSlider.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TaggedSlider.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls the tag&#8217;s get() method.</p>
+<p>Helps to match behavior of other Tkinter Widgets.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TaggedSlider.set_bounds">
+<tt class="descname">set_bounds</tt><big>(</big><em>lower</em>, <em>upper</em>, <em>inclusive_bounds=None</em><big>)</big><a class="headerlink" href="#paramtk.TaggedSlider.set_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set new lower and upper bounds for the slider.</p>
+<p>If specified, inclusive_bounds should be a sequence of length
+2 specifying True or False for the lower and upper bounds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TaggedSlider.set_slider_bounds">
+<tt class="descname">set_slider_bounds</tt><big>(</big><em>lower</em>, <em>upper</em>, <em>inclusive_bounds=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TaggedSlider.set_slider_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TaggedSlider.set_slider_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set new lower and upper bounds for the slider.</p>
+<p>If specified, inclusive_bounds should be a sequence of length
+2 specifying True or False for the lower and upper bounds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TaggedSlider.tag_set">
+<tt class="descname">tag_set</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TaggedSlider.tag_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TaggedSlider.tag_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>After entering a value into the tag, this method should be
+called to set the slider correctly.</p>
+<p>(Called automatically for tag&#8217;s &lt;Return&gt; and &lt;FocusOut&gt;
+events.)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.TkParameterized">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">TkParameterized</tt><big>(</big><em>master</em>, <em>extraPO=None</em>, <em>self_first=True</em>, <em>msg_handler=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterized"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#paramtk.TkParameterizedBase" title="paramtk.TkParameterizedBase"><tt class="xref py py-class docutils literal"><span class="pre">paramtk.TkParameterizedBase</span></tt></a></p>
+<p>Provide widgets for Parameters of itself and up to one additional
+Parameterized instance or class.</p>
+<p>A subclass that defines a Parameter p can display it appropriately
+for manipulation by the user simply by calling
+pack_param(&#8216;p&#8217;). The GUI display and the actual Parameter value
+are automatically synchronized (though see technical notes in
+TkParameterizedBase&#8217;s documentation for more details).</p>
+<p>In general, pack_param() adds a Tkinter.Frame containing a label
+and a widget:</p>
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;                     The Parameter&#8217;s
+|                   |                     &#8216;representation&#8217;
+| [label]  [widget] <a href="#id5"><span class="problematic" id="id6">|</span></a>&lt;&#8212;-frame
+|                   |
+&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+<p>In the same way, an instance of this class can be used to display
+the Parameters of an existing object. By passing in extraPO=x,
+where x is an existing Parameterized instance or class, a
+Parameter q of x can also be displayed in the GUI by calling
+pack_param(&#8216;q&#8217;).</p>
+<p>For representation in the GUI, Parameter values might need to be
+converted between their real values and strings used for display
+(e.g. for a ClassSelector, the options are really class objects,
+but the user is presented with a list of strings to choose
+from). Such translation is handled and documented in the
+TkParameterizedBase; the default behaviors can be overridden if
+required.</p>
+<p>(Note that this class simply adds widget drawing to
+TkParameterizedBase. More detail about the shadowing of
+Parameters is available in the documentation for
+TkParameterizedBase.)</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">pretty_parameters</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Whether to format parameter names, or display the
+        variable names instead.
+
+        Example use:
+          TkParameterized.pretty_parameters=False
+
+        (This causes all Parameters throughout the GUI to be displayed
+        with variable names.)</dd>
+</dl>
+<dl class="method">
+<dt id="paramtk.TkParameterized.gui_get_param">
+<tt class="descname">gui_get_param</tt><big>(</big><em>param_name</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterized.gui_get_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterized.gui_get_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulate getting the parameter in the GUI.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterized.gui_set_param">
+<tt class="descname">gui_set_param</tt><big>(</big><em>param_name</em>, <em>val</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterized.gui_set_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterized.gui_set_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulate setting the parameter in the GUI.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterized.hide_param">
+<tt class="descname">hide_param</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterized.hide_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterized.hide_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide the representation of Parameter &#8216;name&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterized.pack_param">
+<tt class="descname">pack_param</tt><big>(</big><em>name</em>, <em>parent=None</em>, <em>widget_options={}</em>, <em>on_set=None</em>, <em>on_modify=None</em>, <em>**pack_options</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterized.pack_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterized.pack_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a widget for the Parameter name, configured according
+to widget_options, and pack()ed according to the pack_options.</p>
+<p>Pop-up help is automatically set from the Parameter&#8217;s doc.</p>
+<p>The widget and label (if appropriate) are enlosed in a Frame
+so they can be manipulated as a single unit (see the class
+docstring). The representation
+(frame,widget,label,pack_options) is returned (as well as
+being stored in the representations dictionary).</p>
+<ul class="simple">
+<li>parent is an existing widget that is to be the parent</li>
+</ul>
+<p>(master) of the widget created for this paramter. If no parent
+is specified, defaults to the originally supplied master
+(i.e. that set during __init__).</p>
+<ul class="simple">
+<li>on_set is an optional function to call whenever the</li>
+</ul>
+<p>Parameter&#8217;s corresponding Tkinter Variable&#8217;s trace_variable
+indicates that it has been set (this does not necessarily mean
+that the widget&#8217;s value has changed). When the widget is created,
+the on_set method will be called (because the creation of the
+widget triggers a set in Tkinter).</p>
+<ul class="simple">
+<li>on_modify is an optional function to call whenever the</li>
+</ul>
+<p>corresponding Tkinter Variable is actually changed.</p>
+<p>widget_options specified here override anything that might have been
+set elsewhere (e.g. Button&#8217;s size can be overridden here
+if required).</p>
+<p>Examples of use:
+pack_param(name)
+pack_param(name,side=&#8217;left&#8217;)
+pack_param(name,parent=frame3,on_set=some_func)
+pack_param(name,widget_options={&#8216;width&#8217;:50},side=&#8217;top&#8217;,expand=&#8217;yes&#8217;,fill=&#8217;y&#8217;)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterized.unhide_param">
+<tt class="descname">unhide_param</tt><big>(</big><em>name</em>, <em>new_pack_options={}</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterized.unhide_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterized.unhide_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Un-hide the representation of Parameter &#8216;name&#8217;.</p>
+<p>Any new pack options supplied overwrite the originally
+supplied ones, but the parent of the widget remains the same.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterized.unpack_param">
+<tt class="descname">unpack_param</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterized.unpack_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterized.unpack_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroy the representation of Parameter &#8216;name&#8217;.</p>
+<p>(unpack and then pack a param if you want to put it in a different
+frame; otherwise simply use hide and unhide)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.TkParameterizedBase">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">TkParameterizedBase</tt><big>(</big><em>extraPO=None</em>, <em>self_first=True</em>, <em>live_update=True</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterizedBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterizedBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A Parameterized subclass that maintains Tkinter.Variable shadows
+(proxies) of its Parameters. The Tkinter Variable shadows are kept
+in sync with the Parameter values, and vice versa.</p>
+<p>Optionally performs the same for an <em>additional</em> shadowed
+Parameterized (extraPO). The Parameters of the extra
+shadowed PO are available via this object (via both the usual
+&#8216;dot&#8217; attribute access and dedicated parameter accessors
+declared in this class).</p>
+<p>The Tkinter.Variable shadows for this Parameterized and any
+extra shadowed one are available under their corresponding
+parameter names in the _tkvars dictionary.</p>
+<p>(See note 1 for complications arising from name clashes.)</p>
+<p>Parameters being represented by TkParameterizedBase also
+have a &#8216;translators&#8217; dictionary, allowing mapping between string
+representations of the objects and the objects themselves (for use
+with e.g. a Tkinter.OptionMenu). More information about the
+translators is available from specific translator-related methods
+in this class.</p>
+<ol class="arabic">
+<li><p class="first">(a) There is an order of precedance for parameter lookup:
+this PO &gt; shadowed PO.</p>
+<p>Therefore, if you create a Parameter for this PO
+with the same name as one of the shadowed PO&#8217;s Parameters, only
+the Parameter on this PO will be shadowed.</p>
+<p>Example: &#8216;name&#8217; is a common attribute. As a
+Parameterized, this object has a &#8216;name&#8217; Parameter. Any
+shadowed PO will also have a &#8216;name&#8217; Parameter. By default,
+this object&#8217;s name will be shadowed at the expense of the name
+of the extra shadowed PO.</p>
+<p>The precedence order can be reversed by setting the attribute
+&#8216;self_first&#8217; on this object to False.</p>
+<p>(b) Along the same lines, an additional complication can arise
+relating specifically to &#8216;dot&#8217; attribute lookup.  For
+instance, a sublass of TkParameterized might also
+inherit from Tkinter.Frame. Frame has many of its own
+attributes, including - for example - &#8216;size&#8217;. If we shadow a
+Parameterized that has a &#8216;size&#8217; Parameter, the
+Parameterized&#8217;s size Parameter will not be available as
+.size because (&#8216;dot&#8217;) attribute lookup begins on the local
+object and is not overridden by &#8216;self_first&#8217;. Using the
+parameter accessors .get_parameter_object(&#8216;size&#8217;) or
+.get_parameter_value(&#8216;size&#8217;) (and the equivalent set versions)
+avoids this problem.</p>
+</li>
+<li><p class="first">If a shadowed PO&#8217;s Parameter value is modified elsewhere, the
+Tkinter Variable shadow is NOT updated until that Parameter value
+or shadow value is requested from this object. Thus requesting the
+value will always return an up-to-date result, but any GUI display
+of the Variable might display a stale value (until a GUI refresh
+takes place).</p>
+</li>
+</ol>
+<dl class="method">
+<dt id="paramtk.TkParameterizedBase.change_PO">
+<tt class="descname">change_PO</tt><big>(</big><em>extraPO</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterizedBase.change_PO"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterizedBase.change_PO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shadow the Parameters of extraPO.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterizedBase.get_parameter_object">
+<tt class="descname">get_parameter_object</tt><big>(</big><em>name</em>, <em>parameterized_object=None</em>, <em>with_source=False</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterizedBase.get_parameter_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterizedBase.get_parameter_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameter <em>object</em> (not value) specified by name,
+from the source_POs in this object (or the
+specified parameterized_object).</p>
+<p>If with_source=True, returns also the source parameterizedobject.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterizedBase.get_parameter_value">
+<tt class="descname">get_parameter_value</tt><big>(</big><em>name</em>, <em>parameterized_object=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterizedBase.get_parameter_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterizedBase.get_parameter_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of the parameter specified by name.</p>
+<p>If a parameterized_object is specified, looks for the parameter there.
+Otherwise, looks in the source_POs of this object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterizedBase.get_source_po">
+<tt class="descname">get_source_po</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterizedBase.get_source_po"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterizedBase.get_source_po" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Parameterized which contains the parameter &#8216;name&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.TkParameterizedBase.set_parameter_value">
+<tt class="descname">set_parameter_value</tt><big>(</big><em>name</em>, <em>val</em>, <em>parameterized_object=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#TkParameterizedBase.set_parameter_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.TkParameterizedBase.set_parameter_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of the parameter specified by name to val.</p>
+<p>Updates the corresponding tkvar.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.ToolTip">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">ToolTip</tt><big>(</big><em>wdgt</em>, <em>msg=None</em>, <em>msgFunc=None</em>, <em>delay=1</em>, <em>follow=True</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ToolTip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ToolTip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Toplevel</span></tt></p>
+<p>Provides a ToolTip widget for Tkinter.
+To apply a ToolTip to any Tkinter widget, simply pass the widget to the
+ToolTip constructor</p>
+<dl class="method">
+<dt id="paramtk.ToolTip.hide">
+<tt class="descname">hide</tt><big>(</big><em>event=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ToolTip.hide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ToolTip.hide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hides the ToolTip.  Usually this is caused by leaving the widget</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>event: The event that called this function</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.ToolTip.move">
+<tt class="descname">move</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ToolTip.move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ToolTip.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes motion within the widget.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>event: The event that called this function</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.ToolTip.show">
+<tt class="descname">show</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ToolTip.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ToolTip.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays the ToolTip if the time delay has been long enough</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="paramtk.ToolTip.spawn">
+<tt class="descname">spawn</tt><big>(</big><em>event=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#ToolTip.spawn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.ToolTip.spawn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn the ToolTip.  This simply makes the ToolTip eligible for display.
+Usually this is caused by entering the widget</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>event: The event that called this funciton</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="paramtk.Translator">
+<em class="property">class </em><tt class="descclassname">paramtk.</tt><tt class="descname">Translator</tt><big>(</big><em>param</em>, <em>initial_value=None</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#Translator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.Translator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract class that</p>
+<p>Translators handle translation between objects and their
+string representations in the GUI.</p>
+<blockquote>
+<div>last_string2object_failed is a flag that can be set to indicate that
+the last string-to-object translation failed.
+(TkParameterized checks this attribute for indicating errors to
+the user.)</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.askyesno">
+<tt class="descclassname">paramtk.</tt><tt class="descname">askyesno</tt><big>(</big><em>title=None</em>, <em>message=None</em>, <em>**options</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#askyesno"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.askyesno" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ask a question; return true if the answer is yes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.edit_parameters">
+<tt class="descclassname">paramtk.</tt><tt class="descname">edit_parameters</tt><big>(</big><em>parameterized</em>, <em>with_apply=True</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#edit_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.edit_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edit the Parameters of a supplied parameterized instance or class.</p>
+<p>Specify with_apply=False for a ParametersFrame (which immediately
+updates the object - no need to press the Apply button).</p>
+<p>Extra params are passed to the ParametersFrame constructor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.initialize">
+<tt class="descclassname">paramtk.</tt><tt class="descname">initialize</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/paramtk.html#initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add extension Tcl/Tk code to the Tk instance at
+Tkinter._default_root (creating the Tk instance first if
+necessary).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.inverse">
+<tt class="descclassname">paramtk.</tt><tt class="descname">inverse</tt><big>(</big><em>dict_</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#inverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the inverse of dictionary <a href="#id7"><span class="problematic" id="id8">dict_</span></a>.</p>
+<p>(I.e. return a dictionary with keys that are the values of <a href="#id9"><span class="problematic" id="id10">dict_</span></a>,
+and values that are the corresponding keys from <a href="#id11"><span class="problematic" id="id12">dict_</span></a>.)</p>
+<p>The values of <a href="#id13"><span class="problematic" id="id14">dict_</span></a> must be unique.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.is_button">
+<tt class="descclassname">paramtk.</tt><tt class="descname">is_button</tt><big>(</big><em>widget</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#is_button"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.is_button" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple detection of Button-like widgets that are not Checkbuttons
+(i.e. widgets that do not require a separate label).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.keys_sorted_by_value">
+<tt class="descclassname">paramtk.</tt><tt class="descname">keys_sorted_by_value</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#keys_sorted_by_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.keys_sorted_by_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the keys of dictionary d sorted by value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.keys_sorted_by_value_unique">
+<tt class="descclassname">paramtk.</tt><tt class="descname">keys_sorted_by_value_unique</tt><big>(</big><em>d</em>, <em>**sort_kwargs</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#keys_sorted_by_value_unique"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.keys_sorted_by_value_unique" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the keys of d, sorted by value.</p>
+<p>The values of d must be unique (see inverse)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.keys_sorted_by_value_unique_None_safe">
+<tt class="descclassname">paramtk.</tt><tt class="descname">keys_sorted_by_value_unique_None_safe</tt><big>(</big><em>d</em>, <em>**sort_kwargs</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#keys_sorted_by_value_unique_None_safe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.keys_sorted_by_value_unique_None_safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>None is handled separately: if present, it always comes out at the
+end of the list. Allows callers to use any sort function without
+worrying that None will not match the other objects (e.g. for
+using an attribute present on all the other objects, such as
+precedence of sheets).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="paramtk.lookup_by_class">
+<tt class="descclassname">paramtk.</tt><tt class="descname">lookup_by_class</tt><big>(</big><em>dict_</em>, <em>class_</em><big>)</big><a class="reference internal" href="../_modules/paramtk.html#lookup_by_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#paramtk.lookup_by_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look for <a href="#id15"><span class="problematic" id="id16">class_</span></a> or its superclasses in the keys of <a href="#id17"><span class="problematic" id="id18">dict_</span></a>; on
+finding a match, return the value (return None if no match found).</p>
+<p>Searches from the most immediate class to the most distant
+(i.e. from <a href="#id19"><span class="problematic" id="id20">class_</span></a> to the final superclass of <a href="#id21"><span class="problematic" id="id22">class_</span></a>).</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">paramtk</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-paramtk">Module</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/paramtk-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

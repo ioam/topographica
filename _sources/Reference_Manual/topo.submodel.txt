@@ -1,0 +1,69 @@
+topo.submodel Package
+=====================
+
+:mod:`submodel` Package
+-----------------------
+
+.. inheritance-diagram:: topo.submodel
+
+
+.. automodule:: topo.submodel
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`color` Module
+-------------------
+
+.. inheritance-diagram:: topo.submodel.color
+
+
+.. automodule:: topo.submodel.color
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`earlyvision` Module
+-------------------------
+
+.. inheritance-diagram:: topo.submodel.earlyvision
+
+
+.. automodule:: topo.submodel.earlyvision
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`gcal` Module
+------------------
+
+.. inheritance-diagram:: topo.submodel.gcal
+
+
+.. automodule:: topo.submodel.gcal
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`scal` Module
+------------------
+
+.. inheritance-diagram:: topo.submodel.scal
+
+
+.. automodule:: topo.submodel.scal
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`specifications` Module
+----------------------------
+
+.. inheritance-diagram:: topo.submodel.specifications
+
+
+.. automodule:: topo.submodel.specifications
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

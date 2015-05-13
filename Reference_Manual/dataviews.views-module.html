@@ -1,0 +1,291 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.views &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataviews-views">
+<h1>dataviews.views<a class="headerlink" href="#dataviews-views" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance15f48b3978.svg" usemap="#inheritance15f48b3978" class="inheritance"/></div><map id="inheritance15f48b3978" name="inheritance15f48b3978">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="dataviews.views.pyc-module.html">dataviews.views.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-dataviews.views">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-dataviews.views" title="Permalink to this headline">¶</a></h2>
+<p>Views objects used to hold data and provide indexing into different coordinate
+systems.</p>
+<dl class="class">
+<dt id="dataviews.views.NdMapping">
+<em class="property">class </em><tt class="descclassname">dataviews.views.</tt><tt class="descname">NdMapping</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.views.NdMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.ndmapping-module.html#dataviews.ndmapping.NdIndexableMapping" title="dataviews.ndmapping.NdIndexableMapping"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.ndmapping.NdIndexableMapping</span></tt></a></p>
+<p>NdMapping supports the same indexing semantics as NdIndexableMapping but
+also supports filtering of items using slicing ranges.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=True, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Default&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.views.View">
+<em class="property">class </em><tt class="descclassname">dataviews.views.</tt><tt class="descname">View</tt><big>(</big><em>data</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#View"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A view is a data structure for holding data, which may be plotted
+using matplotlib. Views have an associated title, style name and
+metadata information.  All Views may be composed together into a
+GridLayout using the addition operator.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+</dl>
+<dl class="attribute">
+<dt id="dataviews.views.View.style">
+<tt class="descname">style</tt><a class="reference internal" href="../_modules/dataviews/views.html#View.style"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.View.style" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the style that may be used to control display of
+this view. If a style name is not set and but a label is
+assigned, then the closest existing style name is returned.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.views.Annotation">
+<em class="property">class </em><tt class="descclassname">dataviews.views.</tt><tt class="descname">Annotation</tt><big>(</big><em>boxes=</em><span class="optional">[</span><span class="optional">]</span>, <em>vlines=</em><span class="optional">[</span><span class="optional">]</span>, <em>hlines=</em><span class="optional">[</span><span class="optional">]</span>, <em>arrows=</em><span class="optional">[</span><span class="optional">]</span>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Annotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.views.View" title="dataviews.views.View"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.View</span></tt></a></p>
+<p>An annotation is a type of View that is displayed on the top of an
+overlay. Annotations elements do not depend on the details of the
+data displayed and are generally for the convenience of the user
+(e.g. to draw attention to specific areas of the figure using
+arrows, boxes or labels).</p>
+<p>All annotations have an optional interval argument that indicates
+which stack elements they apply to. For instance, this allows
+annotations for a specific time interval when overlaid over a
+SheetStack or DataStack with a &#8216;time&#8217; dimension. The interval
+argument is a dictionary of dimension keys and tuples containing
+(start, end) values. A value of None, indicates an unspecified
+constraint.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+</dl>
+<dl class="method">
+<dt id="dataviews.views.Annotation.arrow">
+<tt class="descname">arrow</tt><big>(</big><em>xy</em>, <em>text=''</em>, <em>direction='&lt;'</em>, <em>points=40</em>, <em>arrowstyle='-&gt;'</em>, <em>interval=None</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Annotation.arrow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Annotation.arrow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an arrow along one of the cardinal directions with option
+text. The direction indicates the direction the arrow is
+pointing and the points argument defines the length of the
+arrow in points. Different arrow head styles are supported via
+the arrowstyle argument.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.views.Annotation.box">
+<tt class="descname">box</tt><big>(</big><em>box</em>, <em>interval=None</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Annotation.box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Annotation.box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a box with corners specified in the positions specified
+by ((left, bottom), (right, top)). Alternatively, a
+BoundingBox may be supplied.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.views.Annotation.hline">
+<tt class="descname">hline</tt><big>(</big><em>y</em>, <em>interval=None</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Annotation.hline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Annotation.hline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an axis hline (horizontal line) at the given y value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.views.Annotation.line">
+<tt class="descname">line</tt><big>(</big><em>coords</em>, <em>interval=None</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Annotation.line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Annotation.line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an arbitrary polyline that goes through the listed
+coordinates.  Coordinates are specified using a list of (x,y)
+tuples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.views.Annotation.vline">
+<tt class="descname">vline</tt><big>(</big><em>x</em>, <em>interval=None</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Annotation.vline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Annotation.vline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an axis vline (vertical line) at the given x value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.views.Overlay">
+<em class="property">class </em><tt class="descclassname">dataviews.views.</tt><tt class="descname">Overlay</tt><big>(</big><em>overlays</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Overlay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Overlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.views.View" title="dataviews.views.View"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.View</span></tt></a></p>
+<p>An Overlay allows a group of Layers to be overlaid together. Layers can
+be indexed out of an overlay and an overlay is an iterable that iterates
+over the contained layers.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.
+
+      Overlays should not have their label set directly by the user as
+      the label is only for defining custom channel operations.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+</dl>
+<dl class="method">
+<dt id="dataviews.views.Overlay.add">
+<tt class="descname">add</tt><big>(</big><em>layer</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Overlay.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Overlay.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlay a single layer on top of the existing overlay.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.views.Overlay.set">
+<tt class="descname">set</tt><big>(</big><em>layers</em><big>)</big><a class="reference internal" href="../_modules/dataviews/views.html#Overlay.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.views.Overlay.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a collection of layers to be overlaid with each other.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">dataviews.views</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-dataviews.views">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/dataviews.views-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

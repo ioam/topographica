@@ -1,0 +1,14 @@
+<map id="inheritancee08cba1177" name="inheritancee08cba1177">
+<area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="158,27,362,40"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="387,40,472,53"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="3,52,134,65"/>
+<area shape="rect" id="node7" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="195,52,326,65"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFSheet" title="A ProjectionSheet providing access to the ConnectionFields in its CFProjections." alt="" coords="697,15,778,28"/>
+<area shape="rect" id="node9" href="#topo.sheet.JointNormalizingCFSheet" title="A type of CFSheet extended to support joint sum&#45;based normalization." alt="" coords="829,15,957,28"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.ProjectionSheet" title="A Sheet whose activity is computed using Projections from other sheets." alt="" coords="506,15,637,28"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.generatorsheet.GeneratorSheet" title="Sheet for generating a series of 2D patterns." alt="" coords="496,40,646,53"/>
+<area shape="rect" id="node11" href="#topo.sheet.SequenceGeneratorSheet" title="Sheet that generates a timed sequence of patterns." alt="" coords="671,40,804,53"/>
+<area shape="rect" id="node8" href="#topo.sheet.ActivityCopy" title="Copies incoming Activity patterns to its activity matrix and output port." alt="" coords="527,65,615,78"/>
+<area shape="rect" id="node10" href="#topo.sheet.JointNormalizingCFSheet_Continuous" title="CFSheet that runs continuously, with no &#39;resting&#39; periods between pattern presentations." alt="" coords="982,2,1149,15"/>
+<area shape="rect" id="node12" href="#topo.sheet.SettlingCFSheet" title="A JointNormalizingCFSheet implementing the idea of settling." alt="" coords="1015,27,1116,40"/>
+</map>

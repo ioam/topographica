@@ -1,0 +1,16 @@
+<map id="inheritance7784a43624" name="inheritance7784a43624">
+<area shape="rect" id="node1" title="Abstract baseclass implementing common methods for objects with" alt="" coords="201,93,367,108"/>
+<area shape="rect" id="node3" title="An NdIndexableMapping is a type of mapping (like a dictionary or array)" alt="" coords="408,93,608,108"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="3,63,160,78"/>
+<area shape="rect" id="node7" title="A command is a way of converting the dictionaries returned by" alt="" coords="230,33,339,48"/>
+<area shape="rect" id="node8" title="Acts like a Python function, but with arguments that are Parameters." alt="" coords="190,123,379,138"/>
+<area shape="rect" id="node10" href="#topo.misc.lancext.BatchCollector" title="BatchCollector is a wrapper class used to execute a Collector in a" alt="" coords="214,3,355,18"/>
+<area shape="rect" id="node14" href="#topo.misc.lancext.topo_metadata" title="Topographica specific helper function that expands on Lancet&#39;s" alt="" coords="212,63,357,78"/>
+<area shape="rect" id="node4" title="NdMapping supports the same indexing semantics as NdIndexableMapping but" alt="" coords="637,93,799,108"/>
+<area shape="rect" id="node5" title="Collator is an NdMapping holding AttrTree objects and" alt="" coords="828,93,982,108"/>
+<area shape="rect" id="node9" href="#topo.misc.lancext.BatchCollator" title="BatchCollator provides a convenient interface to load the output" alt="" coords="1011,93,1148,108"/>
+<area shape="rect" id="node6" title="A mixin class for generating pretty&#45;printed representations." alt="" coords="27,18,137,34"/>
+<area shape="rect" id="node12" href="#topo.misc.lancext.TopoCommand" title="TopoCommand is designed to to format Lancet Args objects into" alt="" coords="437,33,579,48"/>
+<area shape="rect" id="node13" href="#topo.misc.lancext.param_formatter" title="This class is closely related to the param_formatter class in" alt="" coords="432,123,584,138"/>
+<area shape="rect" id="node11" href="#topo.misc.lancext.RunBatchCommand" title="Runs a custom analysis function specified by a Collector using" alt="" coords="637,33,799,48"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="inheritance50e9782c42" name="inheritance50e9782c42">
+<area shape="rect" id="node1" title="params(init_keys=List, norm_value=Parameter, name=String)" alt="" coords="306,126,507,151"/>
+<area shape="rect" id="node3" href="#topo.transferfn.TransferFnWithState" title="params(plastic=Boolean, init_keys=List, norm_value=Parameter, name=String)" alt="" coords="559,53,802,78"/>
+<area shape="rect" id="node5" href="#topo.transferfn.misc.HalfRectify" title="params(gain=Number, noise_magnitude=Number, randomized_init=Boolean, t_init=Number, init_keys=List, norm_value=Parameter, name=String)" alt="" coords="572,101,789,126"/>
+<area shape="rect" id="node7" href="#topo.transferfn.misc.KernelMax" title="params(crop_radius_multiplier=Number, density=Number, kernel_radius=Number, neighborhood_kernel_generator=ClassSelector, init_keys=List, norm_value=Parameter, name=String)" alt="" coords="573,150,788,174"/>
+<area shape="rect" id="node8" href="#topo.transferfn.misc.PatternCombine" title="params(generator=ClassSelector, operator=Parameter, init_keys=List, norm_value=Parameter, name=String)" alt="" coords="554,198,807,223"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="5,126,259,151"/>
+<area shape="rect" id="node4" href="#topo.transferfn.misc.AttributeTrackingTF" title="params(attrib_names=List, coordframe=Parameter, object=Parameter, step=Number, units=List, plastic=Boolean, init_keys=List, norm_value=Parameter, name=String)" alt="" coords="865,5,1136,29"/>
+<area shape="rect" id="node6" href="#topo.transferfn.misc.HomeostaticResponse" title="params(learning_rate=Number, linear_slope=Number, noise_magnitude=Number, period=Number, randomized_init=Boolean, seed=Integer, smoothing=Number, t_init=Number, target_activity=Number, plastic=Boolean, init_keys=List, norm_value=Parameter, name=String)" alt="" coords="854,53,1147,78"/>
+<area shape="rect" id="node9" href="#topo.transferfn.misc.TemporalScatter" title="params(distribution=ClassSelector, span=Number, timestep=Number, plastic=Boolean, init_keys=List, norm_value=Parameter, name=String)" alt="" coords="873,101,1128,126"/>
+</map>

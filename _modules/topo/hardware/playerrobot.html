@@ -1,0 +1,573 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.hardware.playerrobot &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.hardware.playerrobot</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">High-level interface to the Player client libraries.</span>
+
+<span class="sd">The Player client libraries allow Python code to communicate with</span>
+<span class="sd">hardware devices such as robots, cameras, and range sensors.</span>
+
+<span class="sd">This is a temporary home for this file until it finds a permanent home</span>
+<span class="sd">(maybe in the PlayerStage project or in PLASTK?)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span><span class="nn">array</span>
+
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">RLock</span><span class="p">,</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">eq</span><span class="p">,</span><span class="n">ne</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
+<span class="c"># Since this module ships with Topographica only as a sample and is not</span>
+<span class="c"># intended to be run, the following SkipTest statement was included to allow</span>
+<span class="c"># nose to handle this module (when looking for doctests) without raising an</span>
+<span class="c"># import error. If the file is moved elsewhere -- or run on its own, </span>
+<span class="c"># assuming the PlayerStage package has been installed -- the below code should</span>
+<span class="c"># be reworked to either import the package directly, or handle the import error</span>
+<span class="c"># differently. For more information on how nose works, see topo/tests/README.</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">playerc</span>
+    <span class="n">SKIP</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">SKIP</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c"># JPALERT: Because of the global interpreter lock in Python, using</span>
+<span class="c"># Python threads (via the &#39;thread&#39; or &#39;threading&#39; modules does not</span>
+<span class="c"># necessarily provide low-latency polling of the player process.  In</span>
+<span class="c"># particular, long-running native functions (e.g. C/C++ foreign</span>
+<span class="c"># functions) will not be pre-empted, so the polling loop won&#39;t</span>
+<span class="c"># get a timeslice until they complete.  A better solution, especially</span>
+<span class="c"># on multicore machines, is true preemptive multiprocessing.  The</span>
+<span class="c"># &#39;processing&#39; module should provide that, but it doesn&#39;t yet work</span>
+<span class="c"># properly on MacOS, and I haven&#39;t tested it yet on linux.  God knows</span>
+<span class="c"># what will happen on Windows.</span>
+
+<div class="viewcode-block" id="use_processing"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.use_processing">[docs]</a><span class="k">def</span> <span class="nf">use_processing</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configure the module to use the processing library for asynchronous</span>
+<span class="sd">    process support. Use of the processing library requires the use of</span>
+<span class="sd">    queues for communication with robot devices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">processing</span>
+    <span class="k">global</span> <span class="n">RLock</span><span class="p">,</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Queue</span>
+    <span class="n">RLock</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">RLock</span>  <span class="c"># pyflakes:ignore (optional alternative)</span>
+    <span class="n">Thread</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">Process</span>  <span class="c"># pyflakes:ignore (optional alternative)</span>
+    <span class="n">Queue</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">Queue</span>  <span class="c"># pyflakes:ignore (optional alternative)</span>
+</div>
+<div class="viewcode-block" id="use_threading"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.use_threading">[docs]</a><span class="k">def</span> <span class="nf">use_threading</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configure the module to use the threading library for asynchronous</span>
+<span class="sd">    process support. (the default)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">threading</span>
+    <span class="k">global</span> <span class="n">RLock</span><span class="p">,</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Queue</span>
+    <span class="n">RLock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span>  <span class="c"># pyflakes:ignore (optional alternative)</span>
+    <span class="n">Thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span>  <span class="c"># pyflakes:ignore (optional alternative)</span>
+    <span class="n">Queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Queue</span>  <span class="c"># pyflakes:ignore (optional alternative)</span>
+
+<span class="c"># JPALERT This is a HACK for the CVS version of Player, this value</span>
+<span class="c"># should be defined in the playerc module:</span></div>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">SKIP</span><span class="p">:</span>
+    <span class="n">playerc</span><span class="o">.</span><span class="n">PLAYERC_OPEN_MODE</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<span class="k">class</span> <span class="nc">PlayerException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="player_fn"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.player_fn">[docs]</a><span class="k">def</span> <span class="nf">player_fn</span><span class="p">(</span><span class="n">error_op</span><span class="o">=</span><span class="n">ne</span><span class="p">,</span><span class="n">error_val</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Player function decorator.  Adds error checking.</span>
+
+<span class="sd">    Takes an operator and a value, and compares the result</span>
+<span class="sd">    of the function call with the value using the operator.</span>
+<span class="sd">    If the result is true, a PlayerException is raised.  The</span>
+<span class="sd">    default error condition is error_op = ne, error_value = 0,</span>
+<span class="sd">    which raises an exception if fn(*args) != 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">new_fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">error_op</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">),</span><span class="n">error_val</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span><span class="n">playerc</span><span class="o">.</span><span class="n">playerc_error_str</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">new_fn</span>
+    <span class="k">return</span> <span class="n">wrap</span>
+
+</div>
+<div class="viewcode-block" id="synchronized"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.synchronized">[docs]</a><span class="k">def</span> <span class="nf">synchronized</span><span class="p">(</span><span class="n">lock</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple synchronization decorator.</span>
+
+<span class="sd">    Takes an existing lock and synchronizes a function or</span>
+<span class="sd">    method on that lock.  Code taken from the Python Wiki</span>
+<span class="sd">    PythonDecoratorLibrary:</span>
+
+<span class="sd">    http://wiki.python.org/moin/PythonDecoratorLibrary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">newFunction</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+            <span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">newFunction</span>
+    <span class="k">return</span> <span class="n">wrap</span>
+
+</div>
+<div class="viewcode-block" id="synched_method"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.synched_method">[docs]</a><span class="k">def</span> <span class="nf">synched_method</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Synchronized method decorator.</span>
+
+<span class="sd">    Like synchronized() decorator, except synched_method assumes</span>
+<span class="sd">    that the first argument of the function is an instance containing</span>
+<span class="sd">    a Lock object, and this lock is used for synchronization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">newFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">newFunction</span>
+
+
+</div>
+<div class="viewcode-block" id="PlayerObject"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.PlayerObject">[docs]</a><span class="k">class</span> <span class="nc">PlayerObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A generic threadsafe wrapper for client and proxy objects</span>
+<span class="sd">    from the playerc library.</span>
+
+<span class="sd">    PlayerObject wrappers are constructed automatically by PlayerRobot</span>
+<span class="sd">    objects.  Each PlayerObject instance wraps a playerc device proxy</span>
+<span class="sd">    or client object, and publishes a thread-safe version of each of</span>
+<span class="sd">    proxy&#39;s methods, that is synchronized with the PlayerRobot</span>
+<span class="sd">    instance&#39;s run-loop thread, and that catches playerc error</span>
+<span class="sd">    conditions and raises them as PlayerExceptions.  The original</span>
+<span class="sd">    playerc proxy object is available via the attribute .proxy.</span>
+<span class="sd">    Specialized subclasses of PlayerObject can have additional</span>
+<span class="sd">    interfaces for getting device state or setting commands specific</span>
+<span class="sd">    to that device.</span>
+
+<span class="sd">    Developer note: the PlayerObject base class __init__ method</span>
+<span class="sd">    automatically wraps each method on the proxy that (a) doesn&#39;t</span>
+<span class="sd">    begin with &#39;__&#39; and (b) is not already in dir(self).  This way,</span>
+<span class="sd">    subclasses can override the wrapping process by defining their own</span>
+<span class="sd">    wrappers *before* the base class __init__ method is called.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proxy</span><span class="p">,</span><span class="n">lock</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">lock</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">proxy</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">proxy</span><span class="p">):</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;__&#39;</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">synchronized</span><span class="p">(</span><span class="n">lock</span><span class="p">)(</span><span class="n">player_fn</span><span class="p">()(</span><span class="n">attr</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">process_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="n">name</span><span class="p">,</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Doing command:&quot;</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">args</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cmd_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="PlayerClient"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.PlayerClient">[docs]</a><span class="k">class</span> <span class="nc">PlayerClient</span><span class="p">(</span><span class="n">PlayerObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Player object wrapper for playerc.client objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proxy</span><span class="p">,</span><span class="n">lock</span><span class="p">):</span>
+
+        <span class="c"># Override the wrapper on playerc.client.read, because</span>
+        <span class="c"># it returns None for errors, instead of returning 0 for</span>
+        <span class="c"># &quot;no error.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">synchronized</span><span class="p">(</span><span class="n">lock</span><span class="p">)(</span><span class="n">player_fn</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="bp">None</span><span class="p">)(</span><span class="n">proxy</span><span class="o">.</span><span class="n">read</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PlayerClient</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span><span class="n">lock</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">process_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="PlayerDevice"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.PlayerDevice">[docs]</a><span class="k">class</span> <span class="nc">PlayerDevice</span><span class="p">(</span><span class="n">PlayerObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic Player device object.</span>
+
+<span class="sd">    Overrides the default proxy .subscribe method so that the mode defaults</span>
+<span class="sd">    to PLAYERC_OPEN_MODE.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@synched_method</span>
+    <span class="nd">@player_fn</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">playerc</span><span class="o">.</span><span class="n">PLAYERC_OPEN_MODE</span> <span class="k">if</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">mode</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="PTZDevice"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.PTZDevice">[docs]</a><span class="k">class</span> <span class="nc">PTZDevice</span><span class="p">(</span><span class="n">PlayerDevice</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Player Pan/Tilt/Zoom (PTZ) device.</span>
+
+<span class="sd">    Adds the following to the original proxy interface:</span>
+
+<span class="sd">    state = The tuple (pan,tilt,zoom) indicating the current state of</span>
+<span class="sd">    the PTZ device.</span>
+
+<span class="sd">    state_deg = Same as state, but returns values in  degrees instead</span>
+<span class="sd">    of radians</span>
+
+<span class="sd">    set_deg() and set_ws_deg() methods.  Same as .set() and .set_ws(),</span>
+<span class="sd">    using degrees instead of radians.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">pan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">tilt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">zoom</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_state</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_state_deg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">pan</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">tilt</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">zoom</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span>
+    <span class="n">state_deg</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_state_deg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_deg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pan</span><span class="p">,</span><span class="n">tilt</span><span class="p">,</span><span class="n">zoom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">pan</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="n">tilt</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="n">zoom</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_ws_deg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pan</span><span class="p">,</span><span class="n">tilt</span><span class="p">,</span><span class="n">zoom</span><span class="p">,</span><span class="n">pan_speed</span><span class="p">,</span><span class="n">tilt_speed</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_ws</span><span class="p">(</span><span class="n">pan</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="n">tilt</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="n">zoom</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span><span class="n">pan_speed</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span><span class="n">tilt_speed</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="CameraDevice"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.CameraDevice">[docs]</a><span class="k">class</span> <span class="nc">CameraDevice</span><span class="p">(</span><span class="n">PlayerDevice</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Player camera device.</span>
+
+<span class="sd">    The synchronized method get_image grabs an uncompressed snapshot,</span>
+<span class="sd">    along with the additional formatting information needed to make an</span>
+<span class="sd">    image.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proxy</span><span class="p">,</span><span class="n">lock</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decompress</span> <span class="o">=</span> <span class="n">synchronized</span><span class="p">(</span><span class="n">lock</span><span class="p">)(</span><span class="n">player_fn</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span><span class="bp">None</span><span class="p">)(</span><span class="n">proxy</span><span class="o">.</span><span class="n">decompress</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CameraDevice</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span><span class="n">lock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">process_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span>
+        <span class="c"># check to make sure it&#39;s really an image</span>
+        <span class="k">if</span> <span class="n">im</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">image_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CameraDevice</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">process_queues</span><span class="p">()</span>
+
+
+<span class="c">#    @synched_method</span>
+<div class="viewcode-block" id="CameraDevice.get_image"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.CameraDevice.get_image">[docs]</a>    <span class="k">def</span> <span class="nf">get_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the tuple:</span>
+<span class="sd">          (format,width,height,bpp,fdiv,data)</span>
+<span class="sd">        Where data is a copy of the uncompressed image data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">compression</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decompress</span><span class="p">()</span>
+        <span class="n">im_array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s">&#39;B&#39;</span><span class="p">)</span>
+        <span class="n">im_array</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">image</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">image_count</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>  \
+               <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">bpp</span><span class="p">,</span>    \
+               <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">fdiv</span><span class="p">,</span>   \
+               <span class="n">im_array</span>
+</div>
+    <span class="n">image</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_image</span><span class="p">)</span>
+
+
+
+<span class="c">##################</span>
+<span class="c"># DEVICE TABLE</span>
+<span class="c">#</span>
+<span class="c"># This table contains the mapping from device type names</span>
+<span class="c"># to specialized device object types.  Types not indexed in this table</span>
+<span class="c"># should default to type PlayerDevice.</span>
+</div>
+<span class="n">device_table</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;ptz&#39;</span>     <span class="p">:</span><span class="n">PTZDevice</span><span class="p">,</span>
+                <span class="s">&#39;camera&#39;</span>  <span class="p">:</span><span class="n">CameraDevice</span><span class="p">,</span>
+                <span class="p">}</span>
+
+
+
+<div class="viewcode-block" id="PlayerRobot"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.PlayerRobot">[docs]</a><span class="k">class</span> <span class="nc">PlayerRobot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Player Robot interface.</span>
+
+<span class="sd">    A PlayerRobot instance encapsulates an interface to a Player</span>
+<span class="sd">    robot. It creates and manages a playerc.client object and a set of</span>
+<span class="sd">    device proxies wrapped in PlayerDevice objects.  In addition, it</span>
+<span class="sd">    maintains a run-loop in a separate thread that calls the client&#39;s</span>
+<span class="sd">    .read() method at regular intervals.  The devices are published</span>
+<span class="sd">    through standard interfaces on the PlayerRobot instance, and their</span>
+<span class="sd">    methods and properties are synchronized with the run thread</span>
+<span class="sd">    through a mutex.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">      # set up a robot object with position, laser, and camera objects</span>
+<span class="sd">      robot = PlayerRobot(host=&#39;myrobot.mydomain.edu&#39;,port=6665,</span>
+<span class="sd">                          devices = [(&#39;position2d&#39;,0),</span>
+<span class="sd">                                     (&#39;laser&#39;,0),</span>
+<span class="sd">                                     (&#39;camera&#39;,1)])</span>
+
+<span class="sd">      # start the run thread, devices will be subscribed</span>
+<span class="sd">      # automatically.</span>
+<span class="sd">      robot.start()</span>
+
+<span class="sd">      # start the robot turning at 30 deg/sec</span>
+<span class="sd">      robot.position2d[0].set_cmd_vel(0, 0, 30*pi/180)</span>
+
+<span class="sd">      # wait for a while</span>
+<span class="sd">      time.sleep(5.0)</span>
+
+<span class="sd">      # all stop</span>
+<span class="sd">      robot.position2d[0].set_cmd_vel(0,0,0)</span>
+
+<span class="sd">      # shut down the robot&#39;s thread, unsubscribing all devices and</span>
+<span class="sd">      # disconnecting the client</span>
+<span class="sd">      robot.stop()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">host</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="mi">6665</span><span class="p">,</span><span class="n">speed</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                 <span class="n">devices</span><span class="o">=</span><span class="p">[]):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">RLock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed</span> <span class="o">=</span> <span class="n">speed</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">PlayerClient</span><span class="p">(</span><span class="n">playerc</span><span class="o">.</span><span class="n">playerc_client</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="n">host</span><span class="p">,</span><span class="n">port</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queues_running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">devname</span><span class="p">,</span><span class="n">devnum</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_device</span><span class="p">(</span><span class="n">devname</span><span class="p">,</span><span class="n">devnum</span><span class="o">=</span><span class="n">devnum</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_loop</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;PlayerRobot Run Loop&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">run_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscribe_all</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queues_running</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">process_queues</span><span class="p">()</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unsubscribe_all</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PlayerRobot.run_queues"><a class="viewcode-back" href="../../../Reference_Manual/topo.hardware.html#topo.hardware.playerrobot.PlayerRobot.run_queues">[docs]</a>    <span class="k">def</span> <span class="nf">run_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">run_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When using queues for communication with devices, this method</span>
+<span class="sd">        toggles queue processing.  It is often useful to turn off</span>
+<span class="sd">        queue processing, e.g. when a client does not plan on using queued</span>
+<span class="sd">        data for a while.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queues_running</span> <span class="o">=</span> <span class="n">run_state</span>
+</div>
+    <span class="k">def</span> <span class="nf">process_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">process_queues</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">subscribe_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span><span class="p">:</span>
+            <span class="n">dev</span><span class="o">.</span><span class="n">subscribe</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">unsubscribe_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span><span class="p">:</span>
+            <span class="n">dev</span><span class="o">.</span><span class="n">unsubscribe</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">devname</span><span class="p">,</span><span class="n">devnum</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">devname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">devname</span><span class="p">,{})</span>
+
+        <span class="n">proxy_constr</span> <span class="o">=</span>  <span class="nb">getattr</span><span class="p">(</span><span class="n">playerc</span><span class="p">,</span><span class="s">&#39;playerc_&#39;</span><span class="o">+</span><span class="n">devname</span><span class="p">)</span>
+        <span class="n">devtype</span> <span class="o">=</span> <span class="n">device_table</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">devname</span><span class="p">,</span><span class="n">PlayerDevice</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+            <span class="n">dev</span> <span class="o">=</span> <span class="n">devtype</span><span class="p">(</span><span class="n">proxy_constr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">proxy</span><span class="p">,</span><span class="n">devnum</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">devname</span><span class="p">)[</span><span class="n">devnum</span><span class="p">]</span> <span class="o">=</span> <span class="n">dev</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="n">dev</span><span class="o">.</span><span class="n">subscribe</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/hardware/playerrobot.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

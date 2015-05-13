@@ -1,0 +1,585 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet.core &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lancet-core">
+<h1>lancet.core<a class="headerlink" href="#lancet-core" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancefc96a479df.svg" usemap="#inheritancefc96a479df" class="inheritance"/></div><map id="inheritancefc96a479df" name="inheritancefc96a479df">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="lancet.core.pyc-module.html">lancet.core.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-lancet.core">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-lancet.core" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lancet.core.Args">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">Args</tt><big>(</big><em>specs=None</em>, <em>fp_precision=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Arguments" title="lancet.core.Arguments"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Arguments</span></tt></a></p>
+<p>An Arguments class that supports statically specified or
+precomputed argument sets. It may be used directly to specify
+argument values but also forms the base class for a family of more
+specific static Argument classes. Each subclass is less flexible
+and general but allows arguments to be easily and succinctly
+specified. For instance, the Range subclass allows parameter
+ranges to be easily declared.</p>
+<p>The constructor of Args accepts argument definitions in two
+different formats. The keyword format allows constant arguments to
+be specified directly and easily. For instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Args</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The alternative input format takes an explicit list of the
+argument specifications:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Args</span><span class="p">([{</span><span class="s">&#39;a&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">}])</span> <span class="c"># Equivalent behaviour to above</span>
+</pre></div>
+</div>
+<p>This latter format is completely flexible and general, allowing
+any arbitrary list of arguments to be specified as desired. This
+is not generally recommended however as the structure of a
+parameter space is often expressed more clearly by composing
+together simpler, more succinct Args objects with the
+CartesianProduct (*) or Concatenation (+) operators.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.core.Args.lexsort">
+<tt class="descname">lexsort</tt><big>(</big><em>*order</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Args.lexsort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Args.lexsort" title="Permalink to this definition">¶</a></dt>
+<dd><p>The lexical sort order is specified by a list of string
+arguments. Each string is a key name prefixed by &#8216;+&#8217; or &#8216;-&#8216;
+for ascending and descending sort respectively. If the key is
+not found in the operand&#8217;s set of varying keys, it is ignored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.core.Args.show">
+<tt class="descname">show</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Args.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Args.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to inspect the available argument values in
+human-readable format. The ordering of keys is determined by
+how quickly they vary.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.Arguments">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">Arguments</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.PrettyPrinted" title="lancet.core.PrettyPrinted"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.PrettyPrinted</span></tt></a>, <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>The abstract, base class that defines the core interface and
+methods for all members of the Arguments family of classes,
+including either the simple, static members of Args below, or the
+sophisticated parameter exploration algorithms subclassing from
+DynamicArgs defined in dynamic.py.</p>
+<p>The Args subclass may be used directly and forms the root of one
+family of classes that have statically defined or precomputed
+argument sets (defined below). The second subfamily are the
+DynamicArgs, designed to allow more sophisticated, online
+parameter space exploration techniques such as hill climbing,
+bisection search, genetic algorithms and so on.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+</dl>
+<dl class="attribute">
+<dt id="lancet.core.Arguments.constant_items">
+<tt class="descname">constant_items</tt><a class="reference internal" href="../_modules/lancet/core.html#Arguments.constant_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments.constant_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the set of constant items as a list of tuples. This
+allows easy conversion to dictionary format. Note, the items
+should be supplied in the same key ordering as for
+constant_keys for consistency.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lancet.core.Arguments.constant_keys">
+<tt class="descname">constant_keys</tt><a class="reference internal" href="../_modules/lancet/core.html#Arguments.constant_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments.constant_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of parameter names whose values are constant
+as the argument specifier is iterated.  Note that the union of
+constant and varying_keys should partition the entire set of
+keys in the case where there are no unsortable keys.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.core.Arguments.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Arguments.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to avoid using the specifier without
+exhausting it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.core.Arguments.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Arguments.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called to get a list of specifications: dictionaries with
+parameter name keys and string values.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="lancet.core.Arguments.spec_formatter">
+<em class="property">classmethod </em><tt class="descname">spec_formatter</tt><big>(</big><em>spec</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Arguments.spec_formatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments.spec_formatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats the elements of an argument set appropriately</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.core.Arguments.summary">
+<tt class="descname">summary</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Arguments.summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>A succinct summary of the argument specifier. Unlike the repr,
+a summary does not have to be complete but must supply the
+most relevant information about the object to the user.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lancet.core.Arguments.varying_keys">
+<tt class="descname">varying_keys</tt><a class="reference internal" href="../_modules/lancet/core.html#Arguments.varying_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Arguments.varying_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of parameters whose values vary as the
+argument specifier is iterated.  Whenever it is possible, keys
+should be sorted from those slowest to faster varying and
+sorted alphanumerically within groups that vary at the same
+rate.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.CartesianProduct">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">CartesianProduct</tt><big>(</big><em>first</em>, <em>second</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#CartesianProduct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.CartesianProduct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Args" title="lancet.core.Args"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Args</span></tt></a></p>
+<p>CartesianProduct is the Cartesian product of two specifiers. The
+specifier created by the compositon (firsts * second) generates
+the cartesian produce of the arguments in first followed by the
+arguments in second. Note that len(first * second) =
+len(first)*len(second)</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">second</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The second specifier in the Cartesian product.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">first</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The first specifier in the Cartesian product.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.Concatenate">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">Concatenate</tt><big>(</big><em>first</em>, <em>second</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Concatenate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Concatenate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Args" title="lancet.core.Args"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Args</span></tt></a></p>
+<p>Concatenate is the sequential composition of two specifiers. The
+specifier created by the compositon (firsts + second) generates
+the arguments in first followed by the arguments in second.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">second</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The second specifier in the concatenation.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">first</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The first specifier in the concatenation.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.FileInfo">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">FileInfo</tt><big>(</big><em>source</em>, <em>key</em>, <em>filetype</em>, <em>load_contents=False</em>, <em>ignore=</em><span class="optional">[</span><span class="optional">]</span>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#FileInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.FileInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Args" title="lancet.core.Args"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Args</span></tt></a></p>
+<p>Loads metadata (and optionally data) from a set of filenames. For
+instance, you can load metadata associated with a series of image
+files given by a FilePattern. Unlike other explicit instances of
+Args, this object extends the values of an existing Args object.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">ignore</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Metadata keys that are to be explicitly ignored.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">filetype</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A FileType object to be applied to each file path.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">load_contents</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=True, default=False, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether the main contents of the files are to be loaded along
+       with the associated metadata. Note that this can be slow when
+       handling large numbers of files - it may be better to select
+       only the required data with a pandas DataFrame and use the
+       load_dframe method instead.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">source</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The argument specifier that supplies the file paths.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">key</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The key used to find the file paths for inspection.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.core.FileInfo.load">
+<tt class="descname">load</tt><big>(</big><em>dframe</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#FileInfo.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.FileInfo.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the file contents into the supplied dataframe using the
+specified key and filetype. This allows a specific selection
+to be made using pandas over the metadata before loading the
+file contents (which may be slow).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.FilePattern">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">FilePattern</tt><big>(</big><em>key</em>, <em>pattern</em>, <em>root=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#FilePattern"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.FilePattern" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Args" title="lancet.core.Args"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Args</span></tt></a></p>
+<p>A FilePattern specifier allows files to be matched and information
+encoded in filenames to be extracted via an extended form of
+globbing. This object may be used to specify filename arguments to
+CommandTemplates when launching jobs but it also very useful for
+collating files for analysis.</p>
+<p>For instance, you can find the absolute filenames of all npz files
+in a &#8216;data&#8217; subdirectory (relative to the root) that start with
+&#8216;timeseries&#8217; using the pattern &#8216;data/timeseries*.npz&#8217;.</p>
+<p>In addition to globbing supported by the glob module, patterns can
+extract metadata encoded in filenames using a subset of the Python
+format specification syntax. To illustrate, you can use
+&#8216;data/timeseries-{date}.npz&#8217; to record the date strings associated
+with matched files. Note that a particular named fields can only
+be used in a particular pattern once.</p>
+<p>By default metadata is extracted as strings but format types are
+supported in the usual manner
+eg. &#8216;data/timeseries-{day:d}-{month:d}.npz&#8217; will extract the day
+and month from the filename as integer values. Only field names
+and types are recognised with other format specification syntax
+ignored. Type codes supported: &#8216;d&#8217;, &#8216;b&#8217;, &#8216;o&#8217;, &#8216;x&#8217;, &#8216;e&#8217;,&#8217;E&#8217;,&#8217;f&#8217;,
+&#8216;F&#8217;,&#8217;g&#8217;, &#8216;G&#8217;, &#8216;n&#8217; (if ommited, result is a string by default).</p>
+<p>Note that ordering is determined via ascending alphanumeric sort
+and that actual filenames should not include any globbing
+characters, namely: &#8216;?&#8217;,&#8217;*&#8217;,&#8217;[&#8216; and &#8216;]&#8217; (general good practice for
+filenames anyway).</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">pattern</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The pattern files are to be searched against.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">key</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The key name given to the matched file path strings.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">root</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The root directory from which patterns are to be loaded.
+       The root is set relative to os.getcwd().</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+<dl class="classmethod">
+<dt id="lancet.core.FilePattern.directory">
+<em class="property">classmethod </em><tt class="descname">directory</tt><big>(</big><em>directory</em>, <em>root=None</em>, <em>extension=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#FilePattern.directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.FilePattern.directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load all the files in a given directory selecting only files
+with the given extension if specified. The given kwargs are
+passed through to the normal constructor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.core.FilePattern.fields">
+<tt class="descname">fields</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#FilePattern.fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.FilePattern.fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fields specified in the pattern using Python&#8217;s
+formatting mini-language.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.List">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">List</tt><big>(</big><em>key</em>, <em>values</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#List"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.List" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Args" title="lancet.core.Args"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Args</span></tt></a></p>
+<p>An argument specifier that takes its values from a given list.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">values</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The list values that are to be returned by the specifier</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">key</span></tt> (<em>allow_None=False, constant=True, default=default, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The key assigned to the elements of the supplied list.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.Log">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">Log</tt><big>(</big><em>log_path</em>, <em>tid_key='tid'</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Args" title="lancet.core.Args"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Args</span></tt></a></p>
+<p>Specifier that loads arguments from a log file in task id (tid)
+order.  This wrapper class allows a concise representation of file
+logs with the option of adding the task id to the loaded
+specifications.</p>
+<p>For full control over the arguments, you can use this class to
+create a fully specified Args object as follows:</p>
+<p>Args(Log.extract_log(&lt;log_file&gt;).values()),</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">log_path</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The relative or absolute path to the log file. If a
+              relative path is given, the absolute path is computed
+              relative to os.getcwd().</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">tid_key</span></tt> (<em>allow_None=True, constant=True, default=tid, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If not None, the key given to the tid values included
+               in the loaded specifications. If None, the tid number
+               is ignored.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="lancet.core.Log.extract_log">
+<em class="property">static </em><tt class="descname">extract_log</tt><big>(</big><em>log_path</em>, <em>dict_type=&lt;type 'dict'&gt;</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Log.extract_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Log.extract_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the log file generated by a launcher and returns
+dictionary with tid keys and specification values.</p>
+<p>Ordering can be maintained by setting dict_type to the
+appropriate constructor (i.e. OrderedDict). Keys are converted
+from unicode to strings for kwarg use.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="lancet.core.Log.write_log">
+<em class="property">static </em><tt class="descname">write_log</tt><big>(</big><em>log_path</em>, <em>data</em>, <em>allow_append=True</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Log.write_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Log.write_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the supplied specifications to the log path. The data
+may be supplied as either as a an Args or as a list of
+dictionaries.</p>
+<p>By default, specifications will be appropriately appended to
+an existing log file. This can be disabled by setting
+allow_append to False.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.PrettyPrinted">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">PrettyPrinted</tt><a class="reference internal" href="../_modules/lancet/core.html#PrettyPrinted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.PrettyPrinted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A mixin class for generating pretty-printed representations.</p>
+<dl class="method">
+<dt id="lancet.core.PrettyPrinted.pprint_args">
+<tt class="descname">pprint_args</tt><big>(</big><em>pos_args</em>, <em>keyword_args</em>, <em>infix_operator=None</em>, <em>extra_params={}</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#PrettyPrinted.pprint_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.PrettyPrinted.pprint_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to define the positional arguments and keyword order
+for pretty printing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.core.Range">
+<em class="property">class </em><tt class="descclassname">lancet.core.</tt><tt class="descname">Range</tt><big>(</big><em>key</em>, <em>start_value</em>, <em>end_value</em>, <em>steps=2</em>, <em>mapfn=&lt;function identityfn at 0x2b2c1c5ae410&gt;</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.core.Args" title="lancet.core.Args"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Args</span></tt></a></p>
+<p>Range generates an argument from a numerically interpolated range
+which is linear by default. An optional function can be specified
+to sample a numeric range with regular intervals.</p>
+<dl class="docutils">
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">mapfn</span></tt> (<em>constant=True, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The function to be mapped across the linear range. The
+         identity function is used by by default</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">end_value</span></tt> (<em>allow_None=True, bounds=None, constant=True, default=None, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The ending numeric value of the range (inclusive).</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">steps</span></tt> (<em>allow_None=False, bounds=(2, None), constant=True, default=2, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The number of steps to interpolate over. Default is 2
+         which returns the start and end values without interpolation.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">key</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The key assigned to the values computed over the numeric range.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">start_value</span></tt> (<em>allow_None=True, bounds=None, constant=True, default=None, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The starting numeric value of the range.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">specs</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The static list of specifications (ie. dictionaries) to be
+          returned by the specifier. Float values are rounded
+          according to fp_precision.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.core.Range.linspace">
+<tt class="descname">linspace</tt><big>(</big><em>start</em>, <em>stop</em>, <em>n</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#Range.linspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.Range.linspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple replacement for numpy linspace</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lancet.core.set_fp_precision">
+<tt class="descclassname">lancet.core.</tt><tt class="descname">set_fp_precision</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/lancet/core.html#set_fp_precision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.core.set_fp_precision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to set the floating precision across lancet.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">lancet.core</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-lancet.core">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/lancet.core-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

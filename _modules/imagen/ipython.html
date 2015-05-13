@@ -1,0 +1,332 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.ipython &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="imagen" href="../imagen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" accesskey="U">imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for imagen.ipython</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="k">try</span><span class="p">:</span>    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">animation</span>
+<span class="k">except</span><span class="p">:</span> <span class="n">animation</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="kn">from</span> <span class="nn">IPython.core.pylabtools</span> <span class="kn">import</span> <span class="n">print_figure</span>
+
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+
+<span class="kn">from</span> <span class="nn">patterngenerator</span> <span class="kn">import</span> <span class="n">PatternGenerator</span>
+<span class="kn">from</span> <span class="nn">plots</span> <span class="kn">import</span> <span class="n">Plot</span><span class="p">,</span> <span class="n">GridLayoutPlot</span><span class="p">,</span> <span class="n">viewmap</span><span class="p">,</span> <span class="n">ProjectionGridPlot</span>
+<span class="kn">from</span> <span class="nn">views</span> <span class="kn">import</span> <span class="n">SheetStack</span><span class="p">,</span> <span class="n">SheetLayer</span><span class="p">,</span> <span class="n">GridLayout</span><span class="p">,</span> <span class="n">ProjectionGrid</span>
+
+
+<span class="n">GIF_TAG</span> <span class="o">=</span> <span class="s">&quot;&lt;img src=&#39;data:image/gif;base64,{b64}&#39;/&gt;&quot;</span>
+
+<span class="n">VIDEO_TAG</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;video controls&gt;</span>
+<span class="s"> &lt;source src=&quot;data:video/{mime_type};base64,{b64}&quot; type=&quot;video/{mime_type}&quot;&gt;</span>
+<span class="s"> Your browser does not support the video tag.</span>
+<span class="s">&lt;/video&gt;&quot;&quot;&quot;</span>
+
+<span class="c"># &#39;format name&#39;:(animation writer, mime_type,  anim_kwargs, extra_args, tag)</span>
+<span class="n">ANIMATION_OPTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;webm&#39;</span><span class="p">:(</span><span class="s">&#39;ffmpeg&#39;</span><span class="p">,</span> <span class="s">&#39;webm&#39;</span><span class="p">,</span>  <span class="p">{},</span>
+            <span class="p">[</span><span class="s">&#39;-vcodec&#39;</span><span class="p">,</span> <span class="s">&#39;libvpx&#39;</span><span class="p">,</span> <span class="s">&#39;-b&#39;</span><span class="p">,</span> <span class="s">&#39;1000k&#39;</span><span class="p">],</span>
+            <span class="n">VIDEO_TAG</span><span class="p">),</span>
+    <span class="s">&#39;h264&#39;</span><span class="p">:(</span><span class="s">&#39;ffmpeg&#39;</span><span class="p">,</span> <span class="s">&#39;mp4&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;codec&#39;</span><span class="p">:</span><span class="s">&#39;libx264&#39;</span><span class="p">},</span>
+            <span class="p">[</span><span class="s">&#39;-pix_fmt&#39;</span><span class="p">,</span> <span class="s">&#39;yuv420p&#39;</span><span class="p">],</span>
+            <span class="n">VIDEO_TAG</span><span class="p">),</span>
+    <span class="s">&#39;gif&#39;</span><span class="p">:(</span><span class="s">&#39;imagemagick&#39;</span><span class="p">,</span> <span class="s">&#39;gif&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fps&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">},</span> <span class="p">[],</span>
+           <span class="n">GIF_TAG</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">select_format</span><span class="p">(</span><span class="n">format_priority</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">format_priority</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anim</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(),</span>
+                                           <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="o">*</span><span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">fmt</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">fmt</span>
+        <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">format_priority</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">opts</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">additional_opts</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="n">default_options</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;size&#39;</span><span class="p">]</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">default_options</span> <span class="o">+</span> <span class="n">additional_opts</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">anim_opts</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">additional_opts</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="n">default_options</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;fps&#39;</span><span class="p">]</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">default_options</span> <span class="o">+</span> <span class="n">additional_opts</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">mime_type</span><span class="p">,</span> <span class="n">anim_kwargs</span><span class="p">,</span> <span class="n">extra_args</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">extra_args</span> <span class="o">!=</span> <span class="p">[]:</span>
+        <span class="n">anim_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">anim_kwargs</span><span class="p">,</span> <span class="n">extra_args</span><span class="o">=</span><span class="n">extra_args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="s">&#39;_encoded_video&#39;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">mime_type</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">writer</span><span class="p">,</span> <span class="o">**</span><span class="n">anim_kwargs</span><span class="p">)</span>
+            <span class="n">video</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">anim</span><span class="o">.</span><span class="n">_encoded_video</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;base64&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tag</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b64</span><span class="o">=</span><span class="n">anim</span><span class="o">.</span><span class="n">_encoded_video</span><span class="p">,</span>
+                      <span class="n">mime_type</span><span class="o">=</span><span class="n">mime_type</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">HTML_video</span><span class="p">(</span><span class="n">plot</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+    <span class="n">anim_kwargs</span> <span class="o">=</span>  <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">view</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;fps&#39;</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">view</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+    <span class="n">video_format</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;video_format&#39;</span><span class="p">,</span> <span class="n">VIDEO_FORMAT</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">video_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ANIMATION_OPTS</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unrecognized video format: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">video_format</span><span class="p">)</span>
+    <span class="n">anim</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">anim</span><span class="p">(</span><span class="o">**</span><span class="n">anim_kwargs</span><span class="p">)</span>
+
+    <span class="n">writers</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">writers</span><span class="o">.</span><span class="n">avail</span>
+    <span class="k">for</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="p">[</span><span class="n">video_format</span><span class="p">]</span> <span class="o">+</span> <span class="n">ANIMATION_OPTS</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">fmt</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">writers</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="o">*</span><span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">fmt</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">return</span> <span class="s">&quot;&lt;b&gt;Could not generate </span><span class="si">%s</span><span class="s"> animation&lt;/b&gt;&quot;</span> <span class="o">%</span> <span class="n">video_format</span>
+
+
+<span class="k">def</span> <span class="nf">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;svg&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">inches</span> <span class="o">=</span> <span class="n">size</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="n">inches</span><span class="p">,</span> <span class="n">inches</span><span class="p">)</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;data:image/png;base64,&#39;</span>
+    <span class="n">b64</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">print_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s">&#39;png&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;base64&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="s">&quot;&lt;img height=&#39;</span><span class="si">%d</span><span class="s">&#39; width=&#39;</span><span class="si">%d</span><span class="s">&#39; src=&#39;</span><span class="si">%s</span><span class="s">&#39; /&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">b64</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="s">&quot;&lt;img src=&#39;</span><span class="si">%s</span><span class="s">&#39; /&gt;&quot;</span> <span class="o">%</span> <span class="n">b64</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">html</span> <span class="k">if</span> <span class="p">(</span><span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="k">else</span> <span class="s">&#39;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/br&gt;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">html</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">figure_fallback</span><span class="p">(</span><span class="n">plotobj</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Cannot import matplotlib.animation&#39;</span> <span class="k">if</span> <span class="n">animation</span> <span class="ow">is</span> <span class="bp">None</span>
+                   <span class="k">else</span> <span class="s">&#39;Failed to generate matplotlib animation&#39;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span>  <span class="n">plotobj</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+
+<span class="c">#===============#</span>
+<span class="c"># Display hooks #</span>
+<span class="c">#===============#</span>
+
+<span class="k">def</span> <span class="nf">animation_display</span><span class="p">(</span><span class="n">anim</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="o">*</span><span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">VIDEO_FORMAT</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">sheetstack_display</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;svg&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">SheetStack</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">stackplot</span> <span class="o">=</span> <span class="n">viewmap</span><span class="p">[</span><span class="n">stack</span><span class="o">.</span><span class="n">type</span><span class="p">](</span><span class="n">stack</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">(</span><span class="n">stack</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span>  <span class="n">stackplot</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>    <span class="k">return</span> <span class="n">HTML_video</span><span class="p">(</span><span class="n">stackplot</span><span class="p">,</span> <span class="n">stack</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span> <span class="k">return</span> <span class="n">figure_fallback</span><span class="p">(</span><span class="n">stackplot</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">layout_display</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;svg&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">GridLayout</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">Plot</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">Plot</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">gridplot</span> <span class="o">=</span> <span class="n">GridLayoutPlot</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">opts</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">grid_size</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span>  <span class="n">gridplot</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>     <span class="k">return</span> <span class="n">HTML_video</span><span class="p">(</span><span class="n">gridplot</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>  <span class="k">return</span> <span class="n">figure_fallback</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">projection_display</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;svg&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">ProjectionGrid</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">size_factor</span> <span class="o">=</span> <span class="mf">0.17</span>
+    <span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">size_factor</span><span class="o">*</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">Plot</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                 <span class="n">size_factor</span><span class="o">*</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">Plot</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">gridplot</span> <span class="o">=</span> <span class="n">ProjectionGridPlot</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">opts</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">grid_size</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span>  <span class="n">gridplot</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>     <span class="k">return</span> <span class="n">HTML_video</span><span class="p">(</span><span class="n">gridplot</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>  <span class="k">return</span> <span class="n">figure_fallback</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">sheetlayer_display</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;svg&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">SheetLayer</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">viewmap</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">__class__</span><span class="p">](</span><span class="n">view</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">(</span><span class="n">view</span><span class="p">))()</span>
+    <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="update_matplotlib_rc"><a class="viewcode-back" href="../../Reference_Manual/imagen.ipython-module.html#imagen.ipython.update_matplotlib_rc">[docs]</a><span class="k">def</span> <span class="nf">update_matplotlib_rc</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Default changes to the matplotlib rc used by IPython Notebook.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">matplotlib</span>
+    <span class="n">rc</span><span class="o">=</span> <span class="p">{</span><span class="s">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">6.0</span><span class="p">,</span><span class="mf">4.0</span><span class="p">),</span>
+         <span class="s">&#39;figure.facecolor&#39;</span><span class="p">:</span> <span class="s">&#39;white&#39;</span><span class="p">,</span>
+         <span class="s">&#39;figure.edgecolor&#39;</span><span class="p">:</span> <span class="s">&#39;white&#39;</span><span class="p">,</span>
+         <span class="s">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+         <span class="s">&#39;savefig.dpi&#39;</span><span class="p">:</span> <span class="mi">72</span><span class="p">,</span>
+         <span class="s">&#39;figure.subplot.bottom&#39;</span> <span class="p">:</span> <span class="o">.</span><span class="mi">125</span>
+         <span class="p">}</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rc</span><span class="p">)</span>
+
+</div>
+<span class="n">message</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;Welcome to the Imagen IPython extension! (http://ioam.github.io/imagen/)&quot;&quot;&quot;</span>
+
+<span class="n">_loaded</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">VIDEO_FORMAT</span> <span class="o">=</span> <span class="n">select_format</span><span class="p">([</span><span class="s">&#39;webm&#39;</span><span class="p">,</span><span class="s">&#39;h264&#39;</span><span class="p">,</span><span class="s">&#39;gif&#39;</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">load_ipython_extension</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="n">message</span>
+
+    <span class="k">global</span> <span class="n">_loaded</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_loaded</span><span class="p">:</span>
+        <span class="n">_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">PatternGenerator</span><span class="o">.</span><span class="n">xdensity</span> <span class="o">=</span> <span class="mi">256</span>
+        <span class="n">PatternGenerator</span><span class="o">.</span><span class="n">ydensity</span> <span class="o">=</span> <span class="mi">256</span>
+        <span class="n">html_formatter</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">display_formatter</span><span class="o">.</span><span class="n">formatters</span><span class="p">[</span><span class="s">&#39;text/html&#39;</span><span class="p">]</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type_by_name</span><span class="p">(</span><span class="s">&#39;matplotlib.animation&#39;</span><span class="p">,</span> <span class="s">&#39;FuncAnimation&#39;</span><span class="p">,</span> <span class="n">animation_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">SheetLayer</span><span class="p">,</span> <span class="n">sheetlayer_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">SheetStack</span><span class="p">,</span> <span class="n">sheetstack_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">GridLayout</span><span class="p">,</span> <span class="n">layout_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">ProjectionGrid</span><span class="p">,</span> <span class="n">projection_display</span><span class="p">)</span>
+
+        <span class="n">update_matplotlib_rc</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/imagen/ipython.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" >imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Jan 25, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

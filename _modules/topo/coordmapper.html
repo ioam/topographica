@@ -1,0 +1,661 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.coordmapper &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.coordmapper</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A family of function objects for transforming one set of coordinates into</span>
+<span class="sd">another.</span>
+
+<span class="sd">Coordinate mapper functions are useful for defining magnifications and</span>
+<span class="sd">other kinds of transformations on sheet coordinates, e.g. for defining</span>
+<span class="sd">retinal magnification using a CFProjection.  A CoordinateMapperFn</span>
+<span class="sd">(e.g. MagnifyingMapper), is applied to an (x,y) pair and returns a new</span>
+<span class="sd">(x,y) pair.  To apply a mapping to a CF projection, set the</span>
+<span class="sd">CFProjection&#39;s coord_mapper parameter to an instance of the desired</span>
+<span class="sd">CoordinateMapperFn.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">atan</span><span class="p">,</span><span class="n">pi</span><span class="p">,</span><span class="n">atan2</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span><span class="n">log</span><span class="p">,</span><span class="n">sqrt</span><span class="p">,</span><span class="n">sin</span><span class="p">,</span><span class="n">cos</span><span class="p">,</span><span class="n">ones</span><span class="p">,</span><span class="n">dot</span>
+<span class="kn">from</span> <span class="nn">numpy.matlib</span> <span class="kn">import</span> <span class="n">matrix</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">CoordinateMapperFn</span>
+<span class="kn">from</span> <span class="nn">topo.misc.util</span> <span class="kn">import</span> <span class="n">signabs</span>
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">numbergen</span>
+
+
+
+
+<div class="viewcode-block" id="ConstantMapper"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.ConstantMapper">[docs]</a><span class="k">class</span> <span class="nc">ConstantMapper</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Map all values to the same constant, pre-specified coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_cons</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Constant x value returned by the mapping.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">y_cons</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Constant y value returned by the mapping.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="c"># Ignores all (x,y), always returning (x_cons,y_cons)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_cons</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_cons</span>
+
+</div>
+<div class="viewcode-block" id="Pipeline"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Pipeline">[docs]</a><span class="k">class</span> <span class="nc">Pipeline</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies a sequence of coordmappers, left to right.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mappers</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;The sequence of mappers to apply.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">reduce</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">args</span><span class="p">,</span><span class="n">f</span><span class="p">:</span> <span class="nb">apply</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">args</span><span class="p">),</span>
+                       <span class="p">[(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappers</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Jitter"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Jitter">[docs]</a><span class="k">class</span> <span class="nc">Jitter</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Additively modifies calculated x,y coordinates, e.g. with random noise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Amount of jitter.&quot;</span><span class="p">)</span>
+
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(),</span><span class="n">doc</span><span class="o">=</span>
+        <span class="s">&quot;Number generator to use, typically a random distribution.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen</span><span class="p">()</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen</span><span class="p">()</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+
+</div>
+<div class="viewcode-block" id="NormalJitter"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.NormalJitter">[docs]</a><span class="k">class</span> <span class="nc">NormalJitter</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Additively modifies calculated x,y coordinates with Gaussian random noise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">NormalRandom</span><span class="p">(),</span><span class="n">doc</span><span class="o">=</span>
+         <span class="s">&quot;Number generator to use, typically a Gaussian distribution.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">gen</span><span class="p">(),</span><span class="n">y</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">gen</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Grid"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Grid">[docs]</a><span class="k">class</span> <span class="nc">Grid</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Divides the 2D area into a grid, where all points within each grid</span>
+<span class="sd">    element map to the same location.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">xdensity</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of columns per 1.0 input sheet distance horizontally.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">ydensity</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of rows per 1.0 input sheet distance vertically.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">xd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xdensity</span>
+        <span class="n">yd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ydensity</span>
+
+        <span class="n">xquant</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">xd</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">xd</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mf">0.5</span><span class="p">))</span><span class="o">-</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">xd</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="n">yquant</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">yd</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">yd</span><span class="o">*</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="mf">0.5</span><span class="p">))</span><span class="o">-</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">yd</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="k">return</span>  <span class="n">xquant</span><span class="p">,</span><span class="n">yquant</span>
+
+</div>
+<div class="viewcode-block" id="Polar2Cartesian"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Polar2Cartesian">[docs]</a><span class="k">class</span> <span class="nc">Polar2Cartesian</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Map from polar (radius,angle) to Cartesian (x,y) coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">degrees</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Indicates whether the input angle is in degrees or radians.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+
+            <span class="k">return</span> <span class="n">r</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">r</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Cartesian2Polar"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Cartesian2Polar">[docs]</a><span class="k">class</span> <span class="nc">Cartesian2Polar</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maps from Cartesian (x,y) to polar (radius,angle).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">degrees</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Indicates whether the output angle is in degrees or radians.&quot;</span><span class="p">)</span>
+
+    <span class="n">negative_radii</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;If true, coordinates with negative x values will be</span>
+<span class="s">        given negative radii, and angles between -90 and 90</span>
+<span class="s">        degrees. (useful for mapping to saccade amplitude/direction space)&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">negative_radii</span><span class="p">:</span>
+            <span class="n">xsgn</span><span class="p">,</span><span class="n">xabs</span> <span class="o">=</span> <span class="n">signabs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="n">xsgn</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">xabs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees</span><span class="p">:</span>
+            <span class="n">angle</span> <span class="o">*=</span> <span class="mi">180</span><span class="o">/</span><span class="n">pi</span>
+
+        <span class="k">return</span> <span class="n">radius</span><span class="p">,</span><span class="n">angle</span>
+
+
+
+</div>
+<div class="viewcode-block" id="AffineTransform"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.AffineTransform">[docs]</a><span class="k">class</span> <span class="nc">AffineTransform</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remaps the input with an affine transform.</span>
+
+<span class="sd">    This mapper allows the specification of an arbitrary combination</span>
+<span class="sd">    of translation, rotation and scaling via a transform</span>
+<span class="sd">    matrix. Single translations, etc, can be specified more simply</span>
+<span class="sd">    with the subclasses Translate2d, Rotate2d, and Scale2d.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The affine transformation matrix.  The functions</span>
+<span class="s">       Translate2dMat, Rotate2dMat, and Scale2dMat generate affine</span>
+<span class="s">       transform matrices that can be multiplied together to create</span>
+<span class="s">       combination transforms.  E.g. the matrix::</span>
+
+<span class="s">         Translate2dMat(3,0)*Rotate2d(pi/2)</span>
+
+<span class="s">       will shift points to the right by 3 units and rotate them around</span>
+<span class="s">       the origin by 90 degrees.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AffineTransform</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="c"># This buffer prevents having to allocate memory for each point.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_op_buf</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">],</span>
+                               <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+                               <span class="p">[</span><span class="mf">1.0</span><span class="p">]])</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+
+        <span class="c">## JPHACKALERT: If the coordmapper interface took a matrix of</span>
+        <span class="c">## x/y column vectors, instead of x and y separately, affine</span>
+        <span class="c">## transforms could be applied to all the points in a single</span>
+        <span class="c">## matrix operation.  This would probably require revision of</span>
+        <span class="c">## some of the other coordmapper functions, but it might allow</span>
+        <span class="c">## some optimization in, e.g., CFProjection intialization by</span>
+        <span class="c">## allowing all the CF positions to be computed at once.</span>
+
+        <span class="c">## JPALERT: This is the easy way, but it allocates a matrix</span>
+        <span class="c">## for the result.  It might be faster to unroll the</span>
+        <span class="c">## computation.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_op_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_op_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_op_buf</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+</div>
+<span class="k">def</span> <span class="nf">Translate2dMat</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span><span class="n">yoff</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an affine transformation matrix that translates points by</span>
+<span class="sd">    the offset (xoff,yoff).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xoff</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yoff</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>   <span class="mi">1</span> <span class="p">]])</span>
+
+
+<span class="k">def</span> <span class="nf">Rotate2dMat</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an affine transformation matrix that rotates the points</span>
+<span class="sd">    around the origin by t radians.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">),</span>  <span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span>  <span class="mi">0</span>   <span class="p">,</span>    <span class="mi">0</span>   <span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+
+<span class="k">def</span> <span class="nf">Scale2dMat</span><span class="p">(</span><span class="n">sx</span><span class="p">,</span><span class="n">sy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an affine translation matrix that scales the points</span>
+<span class="sd">    toward/away from the origin by a factor of sx on x-axis and sy on</span>
+<span class="sd">    the y-axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">sx</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+
+<div class="viewcode-block" id="Translate2d"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Translate2d">[docs]</a><span class="k">class</span> <span class="nc">Translate2d</span><span class="p">(</span><span class="n">AffineTransform</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Translate the input by xoff,yoff.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xoff</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">yoff</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Translate2d</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="n">Translate2dMat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xoff</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">yoff</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Rotate2d"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Rotate2d">[docs]</a><span class="k">class</span> <span class="nc">Rotate2d</span><span class="p">(</span><span class="n">AffineTransform</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotate the input around the origin by an angle in radians.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Rotate2d</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="n">Rotate2dMat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Scale2d"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.Scale2d">[docs]</a><span class="k">class</span> <span class="nc">Scale2d</span><span class="p">(</span><span class="n">AffineTransform</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scale the input along the x and y axes by sx and sy, respectively.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sx</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">sy</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Scale2d</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="n">Scale2dMat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sy</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SingleDimensionMapper"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.SingleDimensionMapper">[docs]</a><span class="k">class</span> <span class="nc">SingleDimensionMapper</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coordinate Mapper that uses an origin-centered 1-D mapping function.</span>
+
+<span class="sd">    An abstract mapping function for coordinate mappers that remap</span>
+<span class="sd">    based on the radius, x, or y individually. Subclasses should override</span>
+<span class="sd">    _map_fn(self,z).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">in_range</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The maximum range of the mapping input.&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">out_range</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The maximum range of the output.&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">remap_dimension</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;radius&#39;</span><span class="p">,</span>
+        <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;radius&#39;</span><span class="p">,</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">,</span><span class="s">&#39;xy&#39;</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The dimension to remap. (&#39;xy&#39; remaps x and y independently.)&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remap_dimension</span> <span class="o">==</span> <span class="s">&#39;radius&#39;</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">new_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_fn</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="n">xout</span> <span class="o">=</span> <span class="n">new_r</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="n">yout</span> <span class="o">=</span> <span class="n">new_r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;x&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">remap_dimension</span><span class="p">:</span>
+                <span class="n">xout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_fn</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xout</span> <span class="o">=</span> <span class="n">x</span>
+
+            <span class="k">if</span> <span class="s">&#39;y&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">remap_dimension</span><span class="p">:</span>
+                <span class="n">yout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_fn</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">yout</span> <span class="o">=</span> <span class="n">y</span>
+
+        <span class="k">return</span> <span class="n">xout</span><span class="p">,</span><span class="n">yout</span>
+
+    <span class="k">def</span> <span class="nf">_map_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="MagnifyingMapper"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.MagnifyingMapper">[docs]</a><span class="k">class</span> <span class="nc">MagnifyingMapper</span><span class="p">(</span><span class="n">SingleDimensionMapper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exponential (magnifying) mapping function.</span>
+
+<span class="sd">    Provides a mapping that magnifies the center of the activity image.</span>
+<span class="sd">    Parameter k indicates amount of magnification, where 0 means no</span>
+<span class="sd">    magnification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_map_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">z</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sgn</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="n">signabs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">sgn</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_range</span> <span class="o">*</span> <span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">in_range</span><span class="o">*</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ReducingMapper"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.ReducingMapper">[docs]</a><span class="k">class</span> <span class="nc">ReducingMapper</span><span class="p">(</span><span class="n">SingleDimensionMapper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides a mapping that reduces the center of the activity.</span>
+
+<span class="sd">    Roughly the inverse of MagnifyingMapper.  k indicates amount of reduction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_map_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+        <span class="n">sgn</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="n">signabs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sgn</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_range</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">z</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">in_range</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="OttesSCMapper"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.OttesSCMapper">[docs]</a><span class="k">class</span> <span class="nc">OttesSCMapper</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract class for superior colliculus mappings.</span>
+
+<span class="sd">    Subclasses of this class implement afferent and efferent mappings</span>
+<span class="sd">    from Ottes et al. (1986) Vision Research 26:857-873.</span>
+
+<span class="sd">    Default constant values are from Table 1, ibid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">5.3</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Shape parameter A, in degrees&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">Bu</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Rostral-caudal scale parameter, in mm&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">Bv</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Orthogonal (medial-lateral?) scale paraemter in mm/deg&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">mm_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Scale factor to convert constants Bu and Bv from mm to sheet</span>
+<span class="s">       units.  Expressed in mm/unit. &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">amplitude_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Scale factor for saccade command amplitude, expressed in</span>
+<span class="s">        degrees per unit of sheet.  Indicates how large a</span>
+<span class="s">        saccade is represented by the x-component of the command</span>
+<span class="s">        input.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">direction_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Scale factor for saccade command direction, expressed in</span>
+<span class="s">        degrees per unit of sheet.  Indicates what direction of saccade</span>
+<span class="s">        is represented by the y-component of the command input.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="OttesSCMotorMapper"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.OttesSCMotorMapper">[docs]</a><span class="k">class</span> <span class="nc">OttesSCMotorMapper</span><span class="p">(</span><span class="n">OttesSCMapper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Efferent superior colliculus mapping.</span>
+
+<span class="sd">    Provides the output/motor mapping from SC as defined by Ottes et al.</span>
+<span class="sd">    (see superclass docs for reference)</span>
+
+<span class="sd">    The mapping allows the creation of a single sheet representing</span>
+<span class="sd">    both colliculi, one in the x-positive hemisheet and the other in</span>
+<span class="sd">    the x-negative hemisheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span>
+        <span class="n">Bu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Bu</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_scale</span>
+        <span class="n">Bv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Bv</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_scale</span>
+
+        <span class="n">R</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">amplitude_scale</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction_scale</span>
+
+        <span class="n">Rsign</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">signabs</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+
+        <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="o">=</span> <span class="n">ottes_mapping</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">Bu</span><span class="p">,</span><span class="n">Bv</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Rsign</span><span class="o">*</span><span class="n">u</span><span class="p">,</span><span class="n">v</span>
+
+
+</div>
+<div class="viewcode-block" id="OttesSCSenseMapper"><a class="viewcode-back" href="../../Reference_Manual/topo.coordmapper.html#topo.coordmapper.OttesSCSenseMapper">[docs]</a><span class="k">class</span> <span class="nc">OttesSCSenseMapper</span><span class="p">(</span><span class="n">OttesSCMapper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Afferent superior colliculus mapping.</span>
+
+<span class="sd">    Provides the input/retinal mapping to SC as defined by Ottes et al.</span>
+<span class="sd">    (see superclass docs for reference)</span>
+
+<span class="sd">    The mapping allows the creation of a single sheet representing</span>
+<span class="sd">    both colliculi, one in the x-positive hemisheet and the other in</span>
+<span class="sd">    the x-negative hemisheet.</span>
+
+<span class="sd">    [NOTE: see warning in docs for ottes_inverse_mapping().]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+
+        <span class="n">A</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span>
+        <span class="n">Bu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Bu</span>
+        <span class="n">Bv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Bv</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_scale</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_scale</span>
+
+        <span class="n">usgn</span><span class="p">,</span><span class="n">u</span> <span class="o">=</span> <span class="n">signabs</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="n">R</span><span class="p">,</span><span class="n">phi</span> <span class="o">=</span> <span class="n">ottes_inverse_mapping</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">Bu</span><span class="p">,</span><span class="n">Bv</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">usgn</span><span class="o">*</span><span class="n">R</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">amplitude_scale</span><span class="p">,</span>
+                <span class="n">phi</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">direction_scale</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">ottes_mapping</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">Bu</span><span class="p">,</span><span class="n">Bv</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The efferent mapping function from Ottes et al. (1986)</span>
+<span class="sd">    Vision Research 26:857-873.</span>
+
+<span class="sd">    Takes saccade with amplitude R (in degrees) and direction</span>
+<span class="sd">    phi (in degrees), and returns a location u,v on the colliculus</span>
+<span class="sd">    in mm, where the u axis is rostral/caudal, and the v axis is</span>
+<span class="sd">    medial/lateral.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">phi</span> <span class="o">*=</span> <span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">Bu</span> <span class="o">*</span> <span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">A</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)))</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">Bv</span> <span class="o">*</span> <span class="n">atan</span><span class="p">((</span><span class="n">R</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">R</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span><span class="o">+</span><span class="n">A</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span>
+
+
+<span class="k">def</span> <span class="nf">ottes_inverse_mapping</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">Bu</span><span class="p">,</span><span class="n">Bv</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Approximate inverse of ottes_mapping(), using the inverse function</span>
+<span class="sd">    provided in the appendix of Ottes et al. (1986) Vision Research 26:857-873</span>
+
+<span class="sd">    Takes takes a location u,v on the colliculus in mm and maps</span>
+<span class="sd">    to a retinal eccentricity R and direction phi, in degrees.</span>
+<span class="sd">    Inverse is approximate, with increasing error as positions near the</span>
+<span class="sd">    edges of the collicular sheet. (I.e. with high absolute v value).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rads</span> <span class="o">=</span> <span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+    <span class="n">R</span>   <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">u</span><span class="o">/</span><span class="n">Bu</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="n">u</span><span class="o">/</span><span class="n">Bu</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">rads</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">Bv</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c">#phi = atan( (exp(u/Bu)*sin(rads*v/Bv)) / (exp(u/Bu)*cos(rads*v/Bv) -1) )</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span> <span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">u</span><span class="o">/</span><span class="n">Bu</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">rads</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">Bv</span><span class="p">)),</span> <span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">u</span><span class="o">/</span><span class="n">Bu</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">rads</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">Bv</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">pi</span>
+
+    <span class="c"># JPALERT: Don&#39;t know why we have to multiply by 180/pi twice, but the answers</span>
+    <span class="c"># are way off without it.  Is the bug in my code, or in the original formula?</span>
+    <span class="k">return</span> <span class="n">R</span><span class="p">,</span><span class="n">phi</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span>
+
+
+<span class="c"># JPALERT: Temporary testing function.  Will disappear eventually.</span>
+<span class="k">def</span> <span class="nf">test_ottes_inverse</span><span class="p">():</span>
+
+    <span class="n">A</span><span class="p">,</span><span class="n">Bu</span><span class="p">,</span><span class="n">Bv</span> <span class="o">=</span> <span class="mf">5.3</span><span class="p">,</span><span class="mf">1.8</span><span class="p">,</span><span class="mf">1.8</span>
+
+    <span class="k">print</span> <span class="s">&#39;</span><span class="si">%10s</span><span class="s"> </span><span class="si">%10s</span><span class="s"> | </span><span class="si">%10s</span><span class="s"> </span><span class="si">%10s</span><span class="s"> | </span><span class="si">%10s</span><span class="s"> </span><span class="si">%10s</span><span class="s"> | </span><span class="si">%s</span><span class="s">&#39;</span> \
+          <span class="o">%</span> <span class="p">(</span><span class="s">&#39;R in&#39;</span><span class="p">,</span><span class="s">&#39;phi in&#39;</span><span class="p">,</span><span class="s">&#39;R out&#39;</span><span class="p">,</span><span class="s">&#39;phi out&#39;</span><span class="p">,</span><span class="s">&#39;R err&#39;</span><span class="p">,</span><span class="s">&#39;phi err&#39;</span><span class="p">,</span><span class="s">&#39;phi ratio&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="mi">10</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">phi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">60</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="mi">10</span><span class="p">):</span>
+            <span class="k">if</span>  <span class="n">phi</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="o">=</span> <span class="n">ottes_mapping</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">Bu</span><span class="p">,</span><span class="n">Bv</span><span class="p">)</span>
+                <span class="n">r2</span><span class="p">,</span><span class="n">phi2</span> <span class="o">=</span> <span class="n">ottes_inverse_mapping</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">Bu</span><span class="p">,</span><span class="n">Bv</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">&#39;</span><span class="si">%10.2f</span><span class="s"> </span><span class="si">%10.2f</span><span class="s"> | </span><span class="si">%10.2f</span><span class="s"> </span><span class="si">%10.2f</span><span class="s"> | </span><span class="si">%10.2f</span><span class="s"> </span><span class="si">%10.2f</span><span class="s"> | </span><span class="si">%.2f</span><span class="s">&#39;</span> \
+                      <span class="o">%</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">phi2</span><span class="p">,</span><span class="n">r2</span><span class="o">-</span><span class="n">r</span><span class="p">,</span><span class="n">phi2</span><span class="o">-</span><span class="n">phi</span><span class="p">,</span><span class="n">phi</span><span class="o">/</span><span class="n">phi2</span><span class="p">)</span>
+
+
+<span class="n">_public</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">_k</span> <span class="k">for</span> <span class="n">_k</span><span class="p">,</span><span class="n">_v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> \
+                    <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="n">CoordinateMapperFn</span><span class="p">)]))</span>
+
+<span class="c"># Automatically discover all .py files in this directory.</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">fnmatch</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="n">_public</span> <span class="o">+</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.py&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s">&#39;[!._]*.py&#39;</span><span class="p">)]</span>
+<span class="k">del</span> <span class="n">f</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">fnmatch</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/coordmapper.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

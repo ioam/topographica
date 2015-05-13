@@ -1,0 +1,374 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.sheetcoords &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="imagen-sheetcoords">
+<h1>imagen.sheetcoords<a class="headerlink" href="#imagen-sheetcoords" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance66b1f728c9.svg" usemap="#inheritance66b1f728c9" class="inheritance"/></div><map id="inheritance66b1f728c9" name="inheritance66b1f728c9">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="imagen.sheetcoords.pyc-module.html">imagen.sheetcoords.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-imagen.sheetcoords">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-imagen.sheetcoords" title="Permalink to this headline">¶</a></h2>
+<p>Provides SheetCoordinateSystem, allowing conversion between the two
+coordinate systems used in ImaGen.</p>
+<p>&#8216;Sheet coordinates&#8217; allow simulation parameters to be specified in
+units that are density-independent, whereas &#8216;matrix coordinates&#8217;
+provide a means of realizing the continuous sheets.</p>
+<p>Hence we can have a pair of &#8216;sheet coordinates&#8217; (x,y); floating-point
+Cartesian coordinates indicating an arbitrary point on the sheet&#8217;s plane.
+We can also have a pair of &#8216;matrix coordinates&#8217; (r,c), which are used
+to address an underlying matrix. These matrix coordinates are also
+floating-point numbers to allow precise conversion between the two
+schemes. Where it is necessary to address a specific element of the
+matrix (as is often the case in calculations), we also have the usual
+matrix index coordinates (r_idx, c_idx). We refer to these as
+matrixidx coordinates. SheetCoordinateSystem provies methods for converting
+between sheet and matrix coordinates, as well as sheet and matrixidx
+coordinates.</p>
+<p>Everyone should use these facilities for conversions between the two
+coordinate systems to guarantee consistency.</p>
+<div class="section" id="example-of-how-the-matrix-stores-the-representation-of-the-sheet">
+<h3>Example of how the matrix stores the representation of the Sheet<a class="headerlink" href="#example-of-how-the-matrix-stores-the-representation-of-the-sheet" title="Permalink to this headline">¶</a></h3>
+<p>For the purposes of this example, assume the goal is a Sheet with
+density=3 that has a 1 at (-1/2,-1/2), a 5 at (0.0,0.0), and a 9 at
+(1/2,1/2).  More precisely, for this Sheet,</p>
+<p>the continuous area from -1/2,-1/2 to -1/6,-1/6 has value 1,
+the continuous area from -1/6,-1/6 to  1/6,1/6  has value 5, and
+the continuous area from  1/6,1/6  to  1/2,1/2  has value 9.</p>
+<p>With the rest of the elements filled in, the Sheet would look like:</p>
+<div class="highlight-python"><pre> (-1/2,1/2) -+-----+-----+-----+- (1/2,1/2)
+             |     |     |     |
+             |  7  |  8  |  9  |
+             |     |     |     |
+ (-1/2,1/6) -+-----+-----+-----+- (1/2,1/6)
+             |     |     |     |
+             |  4  |  5  |  6  |
+             |     |     |     |
+(-1/2,-1/6) -+-----+-----+-----+- (1/2,-1/6)
+             |     |     |     |
+             |  1  |  2  |  3  |
+             |     |     |     |
+(-1/2,-1/2) -+-----+-----+-----+- (1/2,-1/2)</pre>
+</div>
+<p>where element 5 is centered on 0.0,0.0.  A matrix that would match
+these Sheet coordinates is:</p>
+<div class="highlight-python"><pre>[[7 8 9]
+ [4 5 6]
+ [1 2 3]]</pre>
+</div>
+<p>If we have such a matrix, we can access it in one of two ways: Sheet
+or matrix/matrixidx coordinates.  In matrixidx coordinates, the matrix is indexed
+by rows and columns, and it is possible to ask for the element at
+location [0,2] (which returns 9 as in any normal row-major matrix).
+But the values can additionally be accessed in Sheet coordinates,
+where the matrix is indexed by a point in the Cartesian plane.  In
+Sheet coordinates, it is possible to ask for the element at location
+(0.3,0.02), which returns floating-point matrix coordinates that can
+be cropped to give the nearest matrix element, namely the one with
+value 6.</p>
+<p>Of course, it would be an error to try to pass matrix coordinates like
+[0,2] to the sheet2matrix calls; the result would be a value far
+outside of the actual matrix.</p>
+<dl class="class">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem">
+<em class="property">class </em><tt class="descclassname">imagen.sheetcoords.</tt><tt class="descname">SheetCoordinateSystem</tt><big>(</big><em>bounds</em>, <em>xdensity</em>, <em>ydensity=None</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#SheetCoordinateSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Provides methods to allow conversion between sheet and matrix
+coordinates.</p>
+<dl class="method">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.closest_cell_center">
+<tt class="descname">closest_cell_center</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#SheetCoordinateSystem.closest_cell_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.closest_cell_center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given arbitary sheet coordinates, return the sheet coordinates
+of the center of the closest unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.matrix2sheet">
+<tt class="descname">matrix2sheet</tt><big>(</big><em>float_row</em>, <em>float_col</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#SheetCoordinateSystem.matrix2sheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.matrix2sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a floating-point location (float_row,float_col) in matrix
+coordinates to its corresponding location (x,y) in sheet
+coordinates.</p>
+<p>Valid for scalar or array float_row and float_col.</p>
+<p>Inverse of sheet2matrix().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.matrixidx2sheet">
+<tt class="descname">matrixidx2sheet</tt><big>(</big><em>row</em>, <em>col</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#SheetCoordinateSystem.matrixidx2sheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.matrixidx2sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return (x,y) where x and y are the floating point coordinates of
+the <em>center</em> of the given matrix cell (row,col). If the matrix cell
+represents a 0.2 by 0.2 region, then the center location returned
+would be 0.1,0.1.</p>
+<p>NOTE: This is NOT the strict mathematical inverse of
+sheet2matrixidx(), because sheet2matrixidx() discards all but the integer
+portion of the continuous matrix coordinate.</p>
+<p>Valid only for scalar or array row and col.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.sheet2matrix">
+<tt class="descname">sheet2matrix</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#SheetCoordinateSystem.sheet2matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.sheet2matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a point (x,y) in Sheet coordinates to continuous matrix
+coordinates.</p>
+<p>Returns (float_row,float_col), where float_row corresponds to y,
+and float_col to x.</p>
+<p>Valid for scalar or array x and y.</p>
+<p>Note about Bounds
+For a Sheet with BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
+and density=3, x=-0.5 corresponds to float_col=0.0 and x=0.5
+corresponds to float_col=3.0.  float_col=3.0 is not inside the
+matrix representing this Sheet, which has the three columns
+(0,1,2). That is, x=-0.5 is inside the BoundingBox but x=0.5
+is outside. Similarly, y=0.5 is inside (at row 0) but y=-0.5
+is outside (at row 3) (it&#8217;s the other way round for y because
+the matrix row index increases as y decreases).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.sheet2matrixidx">
+<tt class="descname">sheet2matrixidx</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#SheetCoordinateSystem.sheet2matrixidx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.sheet2matrixidx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a point (x,y) in sheet coordinates to the integer row and
+column index of the matrix cell in which that point falls, given a
+bounds and density.  Returns (row,column).</p>
+<p>Note that if coordinates along the right or bottom boundary are
+passed into this function, the returned matrix coordinate of the
+boundary will be just outside the matrix, because the right and
+bottom boundaries are exclusive.</p>
+<p>Valid for scalar or array x and y.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.sheetcoordinates_of_matrixidx">
+<tt class="descname">sheetcoordinates_of_matrixidx</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#SheetCoordinateSystem.sheetcoordinates_of_matrixidx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.sheetcoordinates_of_matrixidx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return x,y where x is a vector of sheet coordinates
+representing the x-center of each matrix cell, and y
+represents the corresponding y-center of the cell.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.xdensity">
+<tt class="descname">xdensity</tt><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.xdensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The spacing between elements in an underlying
+matrix representation, in the x direction.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imagen.sheetcoords.SheetCoordinateSystem.ydensity">
+<tt class="descname">ydensity</tt><a class="headerlink" href="#imagen.sheetcoords.SheetCoordinateSystem.ydensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The spacing between elements in an underlying
+matrix representation, in the y direction.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="imagen.sheetcoords.Slice">
+<em class="property">class </em><tt class="descclassname">imagen.sheetcoords.</tt><tt class="descname">Slice</tt><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></p>
+<p>Represents a slice of a SheetCoordinateSystem; i.e., an array
+specifying the row and column start and end points for a submatrix
+of the SheetCoordinateSystem.</p>
+<p>The slice is created from the supplied bounds by calculating the
+slice that corresponds most closely to the specified bounds.
+Therefore, the slice does not necessarily correspond exactly to
+the specified bounds. The bounds that do exactly correspond to the
+slice are available via the &#8216;bounds&#8217; attribute.</p>
+<p>Note that the slice does not respect the bounds of the
+SheetCoordinateSystem, and that actions such as translate() also
+do not respect the bounds. To ensure that the slice is within the
+SheetCoordinateSystem&#8217;s bounds, use crop_to_sheet().</p>
+<dl class="method">
+<dt id="imagen.sheetcoords.Slice.crop_to_sheet">
+<tt class="descname">crop_to_sheet</tt><big>(</big><em>sheet_coord_system</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice.crop_to_sheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice.crop_to_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crop the slice to the SheetCoordinateSystem&#8217;s bounds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.Slice.positionedcrop">
+<tt class="descname">positionedcrop</tt><big>(</big><em>x</em>, <em>y</em>, <em>sheet_coord_system</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice.positionedcrop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice.positionedcrop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset the bounds_template to this cf&#8217;s location and store the
+result in the &#8216;bounds&#8217; attribute.</p>
+<p>Also stores the input_sheet_slice for access by C.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.Slice.positionlesscrop">
+<tt class="descname">positionlesscrop</tt><big>(</big><em>x</em>, <em>y</em>, <em>sheet_coord_system</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice.positionlesscrop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice.positionlesscrop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the correct slice for a weights/mask matrix at this
+ConnectionField&#8217;s location on the sheet (i.e. for getting
+the correct submatrix of the weights or mask in case the
+unit is near the edge of the sheet).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.Slice.set">
+<tt class="descname">set</tt><big>(</big><em>slice_specification</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set this slice from some iterable that specifies (r1,r2,c1,c2).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.Slice.shape_on_sheet">
+<tt class="descname">shape_on_sheet</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice.shape_on_sheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice.shape_on_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the shape of the array that this Slice would give on its sheet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.Slice.submatrix">
+<tt class="descname">submatrix</tt><big>(</big><em>matrix</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice.submatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice.submatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the submatrix of the given matrix specified by this
+slice.</p>
+<p>Equivalent to computing the intersection between the
+SheetCoordinateSystem&#8217;s bounds and the bounds, and
+returning the corresponding submatrix of the given matrix.</p>
+<p>The submatrix is just a view into the sheet_matrix; it is not
+an independent copy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.sheetcoords.Slice.translate">
+<tt class="descname">translate</tt><big>(</big><em>r</em>, <em>c</em><big>)</big><a class="reference internal" href="../_modules/imagen/sheetcoords.html#Slice.translate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.sheetcoords.Slice.translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate the slice by the specified number of rows
+and columns.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">imagen.sheetcoords</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-imagen.sheetcoords">Module</a><ul>
+<li><a class="reference internal" href="#example-of-how-the-matrix-stores-the-representation-of-the-sheet">Example of how the matrix stores the representation of the Sheet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/imagen.sheetcoords-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Jan 25, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

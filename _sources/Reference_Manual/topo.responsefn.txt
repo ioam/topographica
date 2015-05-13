@@ -1,0 +1,36 @@
+topo.responsefn Package
+=======================
+
+:mod:`responsefn` Package
+-------------------------
+
+.. inheritance-diagram:: topo.responsefn
+
+
+.. automodule:: topo.responsefn
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`optimized` Module
+-----------------------
+
+.. inheritance-diagram:: topo.responsefn.optimized
+
+
+.. automodule:: topo.responsefn.optimized
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`projfn` Module
+--------------------
+
+.. inheritance-diagram:: topo.responsefn.projfn
+
+
+.. automodule:: topo.responsefn.projfn
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

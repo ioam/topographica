@@ -1,0 +1,13 @@
+<map id="inheritance03c0df95af" name="inheritance03c0df95af">
+<area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="143,2,328,14"/>
+<area shape="rect" id="node7" href="topo.base.html#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="375,14,452,25"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="2,36,121,48"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.projection.SheetMask" title="An abstract class that defines a mask over a ProjectionSheet object." alt="" coords="183,47,288,59"/>
+<area shape="rect" id="node8" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="176,25,295,36"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFSheet" title="A ProjectionSheet providing access to the ConnectionFields in its CFProjections." alt="" coords="667,14,740,25"/>
+<area shape="rect" id="node9" href="#topo.sheet.JointNormalizingCFSheet" title="A type of CFSheet extended to support joint sum&#45;based normalization." alt="" coords="762,14,878,25"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.ProjectionSheet" title="A Sheet whose activity is computed using Projections from other sheets." alt="" coords="513,14,632,25"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.projection.NeighborhoodMask" title="A SheetMask where the mask includes a neighborhood around active neurons." alt="" coords="350,47,478,59"/>
+<area shape="rect" id="node10" href="#topo.sheet.SettlingCFSheet" title="A JointNormalizingCFSheet implementing the idea of settling." alt="" coords="900,14,991,25"/>
+<area shape="rect" id="node12" title="Faster but potentially unsafe optimized version of SettlingCFSheet." alt="" coords="1014,14,1149,25"/>
+</map>

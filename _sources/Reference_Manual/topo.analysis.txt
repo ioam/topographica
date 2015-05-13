@@ -1,0 +1,36 @@
+topo.analysis Package
+=====================
+
+:mod:`analysis` Package
+-----------------------
+
+.. inheritance-diagram:: topo.analysis
+
+
+.. automodule:: topo.analysis
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`command` Module
+---------------------
+
+.. inheritance-diagram:: topo.analysis.command
+
+
+.. automodule:: topo.analysis.command
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`featureresponses` Module
+------------------------------
+
+.. inheritance-diagram:: topo.analysis.featureresponses
+
+
+.. automodule:: topo.analysis.featureresponses
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

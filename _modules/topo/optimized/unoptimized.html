@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.optimized.unoptimized &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.optimized.unoptimized</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Provides unoptimized fallbacks for Cython optimized components.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">ResponseFn</span><span class="p">,</span> <span class="n">CFPOutputFn</span><span class="p">,</span> <span class="n">CFPRF_Plugin</span><span class="p">,</span> <span class="n">CFPLF_Plugin</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">DotProduct</span><span class="p">,</span> <span class="n">LearningFn</span><span class="p">,</span> <span class="n">Hebbian</span><span class="p">,</span> <span class="n">TransferFn</span><span class="p">,</span> <span class="n">IdentityTF</span>
+<span class="kn">from</span> <span class="nn">topo.learningfn</span> <span class="kn">import</span> <span class="n">BCMFixed</span>
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">DivisiveNormalizeL1</span>
+
+<span class="kn">from</span> <span class="nn">topo.learningfn.projfn</span> <span class="kn">import</span> <span class="n">CFPLF_Trace</span> <span class="k">as</span> <span class="n">CFPLF_Trace_cython</span> <span class="c"># pyflakes:ignore (optimized version provided)</span>
+
+
+<div class="viewcode-block" id="CFPRF_DotProduct_cython"><a class="viewcode-back" href="../../../Reference_Manual/topo.optimized.html#topo.optimized.unoptimized.CFPRF_DotProduct_cython">[docs]</a><span class="k">class</span> <span class="nc">CFPRF_DotProduct_cython</span><span class="p">(</span><span class="n">CFPRF_Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper written to allow transparent non-optimized fallback;</span>
+<span class="sd">    equivalent to CFPRF_Plugin(single_cf_fn=DotProduct()).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">ResponseFn</span><span class="p">,</span> <span class="n">DotProduct</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CFPRF_DotProduct_cython</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="CFPLF_Hebbian_cython"><a class="viewcode-back" href="../../../Reference_Manual/topo.optimized.html#topo.optimized.unoptimized.CFPLF_Hebbian_cython">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_Hebbian_cython</span><span class="p">(</span><span class="n">CFPLF_Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Same as CFPLF_Plugin(single_cf_fn=Hebbian()); just for non-optimized fallback.&quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="CFPLF_BCMFixed_cython"><a class="viewcode-back" href="../../../Reference_Manual/topo.optimized.html#topo.optimized.unoptimized.CFPLF_BCMFixed_cython">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_BCMFixed_cython</span><span class="p">(</span><span class="n">CFPLF_Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Same as CFPLF_Plugin(single_cf_fn=BCMFixed()); just for non-optimized fallback.&quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">BCMFixed</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="CFPOF_DivisiveNormalizeL1_cython"><a class="viewcode-back" href="../../../Reference_Manual/topo.optimized.html#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython">[docs]</a><span class="k">class</span> <span class="nc">CFPOF_DivisiveNormalizeL1_cython</span><span class="p">(</span><span class="n">CFPOutputFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Non-optimized version of CFPOF_DivisiveNormalizeL1_cython.</span>
+
+<span class="sd">    Same as CFPOF_Plugin(single_cf_fn=DivisiveNormalizeL1()), except</span>
+<span class="sd">    that it supports joint normalization using the norm_total</span>
+<span class="sd">    property of ConnectionField.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">,</span>
+                                       <span class="n">default</span><span class="o">=</span><span class="n">DivisiveNormalizeL1</span><span class="p">(</span><span class="n">norm_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+                                       <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses the cf.norm_total attribute to allow optimization</span>
+<span class="sd">        by computing the sum separately, and to allow joint</span>
+<span class="sd">        normalization. After use, cf.norm_total is deleted because</span>
+<span class="sd">        the value it would have has been changed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># CEBALERT: fix this here and elsewhere</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IdentityTF</span><span class="p">:</span>
+            <span class="n">norm_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span><span class="o">.</span><span class="n">norm_value</span>
+            <span class="n">current_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">cf</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+                <span class="n">current_sum</span> <span class="o">+=</span> <span class="n">cf</span><span class="o">.</span><span class="n">norm_total</span>
+            <span class="k">if</span> <span class="n">current_sum</span> <span class="o">&gt;</span> <span class="mf">0.0000000000001</span><span class="p">:</span>
+                <span class="n">factor</span> <span class="o">=</span> <span class="n">norm_value</span> <span class="o">/</span> <span class="n">current_sum</span>
+                <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">factor</span>
+            <span class="k">del</span> <span class="n">cf</span><span class="o">.</span><span class="n">norm_total</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/optimized/unoptimized.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+<map id="inheritance0f827376bc" name="inheritance0f827376bc">
+<area shape="rect" id="node1" title="Parameterized command for presenting input patterns" alt="" coords="427,4,662,20"/>
+<area shape="rect" id="node5" href="#topo.analysis.featureresponses.pattern_present" title="Given a set of input patterns, installs them into the specified" alt="" coords="693,4,903,20"/>
+<area shape="rect" id="node2" title="Acts like a Python function, but with arguments that are Parameters." alt="" coords="198,20,396,36"/>
+<area shape="rect" id="node3" title="Base class for named objects that support Parameters and message" alt="" coords="3,20,168,36"/>
+<area shape="rect" id="node6" href="#topo.analysis.featureresponses.pattern_response" title="This command is used to perform measurements, which require a" alt="" coords="933,4,1149,20"/>
+</map>

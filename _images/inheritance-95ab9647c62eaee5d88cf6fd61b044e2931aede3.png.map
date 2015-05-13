@@ -1,0 +1,14 @@
+<map id="inheritance1f1dc666b6" name="inheritance1f1dc666b6">
+<area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="262,4,599,25"/>
+<area shape="rect" id="node11" href="#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="695,4,835,25"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="4,87,221,108"/>
+<area shape="rect" id="node5" href="#topo.base.projection.SheetMask" title="An abstract class that defines a mask over a ProjectionSheet object." alt="" coords="335,87,526,108"/>
+<area shape="rect" id="node9" href="#topo.base.simulation.EPConnection" title="EPConnection stores basic information for a connection between" alt="" coords="327,128,535,149"/>
+<area shape="rect" id="node12" href="#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="322,45,539,67"/>
+<area shape="rect" id="node3" href="#topo.base.projection.AndMask" title="A composite SheetMask that computes its value as the logical AND (i.e. intersection) of its sub&#45;masks." alt="" coords="949,45,1129,67"/>
+<area shape="rect" id="node4" href="#topo.base.projection.CompositeSheetMask" title="A SheetMask that computes its value from other SheetMasks." alt="" coords="640,45,890,67"/>
+<area shape="rect" id="node7" href="#topo.base.projection.OrMask" title="A composite SheetMask that computes its value as the logical OR (i.e. union) of its sub&#45;masks." alt="" coords="953,87,1125,108"/>
+<area shape="rect" id="node6" href="#topo.base.projection.NeighborhoodMask" title="A SheetMask where the mask includes a neighborhood around active neurons." alt="" coords="648,87,882,108"/>
+<area shape="rect" id="node8" href="#topo.base.projection.Projection" title="A projection from a Sheet into a ProjectionSheet." alt="" coords="673,128,857,149"/>
+<area shape="rect" id="node10" href="#topo.base.projection.ProjectionSheet" title="A Sheet whose activity is computed using Projections from other sheets." alt="" coords="931,4,1148,25"/>
+</map>

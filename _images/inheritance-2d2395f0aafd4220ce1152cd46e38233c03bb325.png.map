@@ -1,0 +1,11 @@
+<map id="inheritance5c943e4cbf" name="inheritance5c943e4cbf">
+<area shape="rect" id="node1" title="Abstract baseclass implementing common methods for objects with" alt="" coords="161,28,302,41"/>
+<area shape="rect" id="node5" title="A view is a data structure for holding data, which may be plotted" alt="" coords="327,28,419,41"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="3,41,136,54"/>
+<area shape="rect" id="node10" href="#topo.base.sheetview.SheetView" title="Class provided for backward compatibility with earlier SheetView" alt="" coords="174,53,289,66"/>
+<area shape="rect" id="node3" title="Layer is the baseclass for all 2D View types, with an x&#45; and" alt="" coords="569,28,666,41"/>
+<area shape="rect" id="node7" title="Array2D is a basic 2D atomic View type." alt="" coords="721,28,846,41"/>
+<area shape="rect" id="node4" title="Pane extends the View type with the add and left shift operators" alt="" coords="444,28,543,41"/>
+<area shape="rect" id="node6" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="691,2,876,15"/>
+<area shape="rect" id="node8" title="Matrix is the atomic unit as which 2D data is stored, along with" alt="" coords="901,15,1020,28"/>
+</map>

@@ -1,0 +1,284 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet.dynamic &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lancet-dynamic">
+<h1>lancet.dynamic<a class="headerlink" href="#lancet-dynamic" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance40f68afc84.svg" usemap="#inheritance40f68afc84" class="inheritance"/></div><map id="inheritance40f68afc84" name="inheritance40f68afc84">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="lancet.dynamic.pyc-module.html">lancet.dynamic.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-lancet.dynamic">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-lancet.dynamic" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lancet.dynamic.DynamicArgs">
+<em class="property">class </em><tt class="descclassname">lancet.dynamic.</tt><tt class="descname">DynamicArgs</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/dynamic.html#DynamicArgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.dynamic.DynamicArgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="lancet.core-module.html#lancet.core.Arguments" title="lancet.core.Arguments"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.Arguments</span></tt></a></p>
+<p>DynamicArgs are declarative specifications that specify a
+parameter space via a dynamic algorithmic process instead of using
+precomputed arguments. Unlike the static Args objects, new
+arguments can only be generated in response to some feedback from
+the processes that are executed. This type of dynamic feedback is
+a common feature for many algorithms such as hill climbing
+optimization, genetic algorithms, bisection search and other
+sophisticated optimization and search procedures.</p>
+<p>Like the Args objects, a DynamicArgs object is an iterator. On
+each iteration, one or more argument sets defining a collection of
+independent jobs are returned (these jobs should be possible to
+execute concurrently). Between iterations, the output_extractor
+function is used to extract the necessary information from the
+standard output streams of the previously executed jobs. This
+information is used to update the internal state of the
+DynamicArgs object can then generate more arguments to explore or
+terminate. All DynamicArgs classes need to declare the expected
+return format of the output_extractor function.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">output_extractor</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The function that returns the relevant data from the standard
+       output stream dumped to file in the streams subdirectory. This
+       information must be retyrned in a format suitable for updating
+       the specifier.. By default uses json.loads but pickle.loads
+       could also be a valid option. The callable must take a string
+       and return a Python object suitable for updating the specifier.</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="lancet.dynamic.DynamicArgs.output_extractor">
+<em class="property">static </em><tt class="descname">output_extractor</tt><big>(</big><em>s</em>, <em>encoding=None</em>, <em>cls=None</em>, <em>object_hook=None</em>, <em>parse_float=None</em>, <em>parse_int=None</em>, <em>parse_constant=None</em>, <em>object_pairs_hook=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#lancet.dynamic.DynamicArgs.output_extractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialize <tt class="docutils literal"><span class="pre">s</span></tt> (a <tt class="docutils literal"><span class="pre">str</span></tt> or <tt class="docutils literal"><span class="pre">unicode</span></tt> instance containing a JSON
+document) to a Python object.</p>
+<p>If <tt class="docutils literal"><span class="pre">s</span></tt> is a <tt class="docutils literal"><span class="pre">str</span></tt> instance and is encoded with an ASCII based encoding
+other than utf-8 (e.g. latin-1) then an appropriate <tt class="docutils literal"><span class="pre">encoding</span></tt> name
+must be specified. Encodings that are not ASCII based (such as UCS-2)
+are not allowed and should be decoded to <tt class="docutils literal"><span class="pre">unicode</span></tt> first.</p>
+<p><tt class="docutils literal"><span class="pre">object_hook</span></tt> is an optional function that will be called with the
+result of any object literal decode (a <tt class="docutils literal"><span class="pre">dict</span></tt>). The return value of
+<tt class="docutils literal"><span class="pre">object_hook</span></tt> will be used instead of the <tt class="docutils literal"><span class="pre">dict</span></tt>. This feature
+can be used to implement custom decoders (e.g. JSON-RPC class hinting).</p>
+<p><tt class="docutils literal"><span class="pre">object_pairs_hook</span></tt> is an optional function that will be called with the
+result of any object literal decoded with an ordered list of pairs.  The
+return value of <tt class="docutils literal"><span class="pre">object_pairs_hook</span></tt> will be used instead of the <tt class="docutils literal"><span class="pre">dict</span></tt>.
+This feature can be used to implement custom decoders that rely on the
+order that the key and value pairs are decoded (for example,
+collections.OrderedDict will remember the order of insertion). If
+<tt class="docutils literal"><span class="pre">object_hook</span></tt> is also defined, the <tt class="docutils literal"><span class="pre">object_pairs_hook</span></tt> takes priority.</p>
+<p><tt class="docutils literal"><span class="pre">parse_float</span></tt>, if specified, will be called with the string
+of every JSON float to be decoded. By default this is equivalent to
+float(num_str). This can be used to use another datatype or parser
+for JSON floats (e.g. decimal.Decimal).</p>
+<p><tt class="docutils literal"><span class="pre">parse_int</span></tt>, if specified, will be called with the string
+of every JSON int to be decoded. By default this is equivalent to
+int(num_str). This can be used to use another datatype or parser
+for JSON integers (e.g. float).</p>
+<p><tt class="docutils literal"><span class="pre">parse_constant</span></tt>, if specified, will be called with one of the
+following strings: -Infinity, Infinity, NaN, null, true, false.
+This can be used to raise an exception if invalid JSON numbers
+are encountered.</p>
+<p>To use a custom <tt class="docutils literal"><span class="pre">JSONDecoder</span></tt> subclass, specify it with the <tt class="docutils literal"><span class="pre">cls</span></tt>
+kwarg; otherwise <tt class="docutils literal"><span class="pre">JSONDecoder</span></tt> is used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.dynamic.DynamicArgs.show">
+<tt class="descname">show</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/lancet/dynamic.html#DynamicArgs.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.dynamic.DynamicArgs.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>When dynamic, not all argument values may be available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.dynamic.DynamicArgs.update">
+<tt class="descname">update</tt><big>(</big><em>tids</em>, <em>info</em><big>)</big><a class="reference internal" href="../_modules/lancet/dynamic.html#DynamicArgs.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.dynamic.DynamicArgs.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called to update the state of the iterator.  This methods
+receives the set of task ids from the previous set of tasks
+together with the launch information to allow the output
+values to be parsed using the output_extractor. This data is then
+used to determine the next desired point in the parameter
+space by calling the _update_state method.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.dynamic.SimpleGradientDescent">
+<em class="property">class </em><tt class="descclassname">lancet.dynamic.</tt><tt class="descname">SimpleGradientDescent</tt><big>(</big><em>key</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/dynamic.html#SimpleGradientDescent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.dynamic.SimpleGradientDescent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.dynamic.DynamicArgs" title="lancet.dynamic.DynamicArgs"><tt class="xref py py-class docutils literal"><span class="pre">lancet.dynamic.DynamicArgs</span></tt></a></p>
+<p>Very simple gradient descent optimizer designed to illustrate how
+Dynamic Args may be implemented. This class has been deliberately
+kept simple to clearly illustrate how Dynamic Args may be
+implemented. A more practical example would likely probably make
+use of mature, third party optimization libraries (such as the
+routines offered in scipy.optimize).</p>
+<p>This particular algorithm greedily minimizes an output value via
+greedy gradient descent. The local parameter space is explored by
+examining the change in output value when an increment or
+decrement of &#8216;stepsize&#8217; is made in the parameter space, centered
+around the current position. The initial parameter is initialized
+with the &#8216;start&#8217; value and the optimization process terminates
+when either a local minima/maxima has been found or when
+&#8216;max_steps&#8217; is reached.</p>
+<p>The &#8216;output_extractor&#8217; function is expected to return a single
+scalar number to drive the gradient descent algorithm forwards.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">start</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=0.0, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The starting argument value for the gradient ascent or descent</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">stepsize</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=1.0, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The size of the steps taken in parameter space.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">fp_precision</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=4, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The floating point precision to use for floating point
+         values.  Unlike other basic Python types, floats need care
+         with their representation as you only want to display up to
+         the precision actually specified. A floating point precision
+         of 0 casts number to integers before representing them.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">key</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name of the argument that will be optimized in a greedy fashion.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">max_steps</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=100, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Once max_steps is reached, the optimization terminates.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">output_extractor</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The function that returns the relevant data from the standard
+       output stream dumped to file in the streams subdirectory. This
+       information must be retyrned in a format suitable for updating
+       the specifier.. By default uses json.loads but pickle.loads
+       could also be a valid option. The callable must take a string
+       and return a Python object suitable for updating the specifier.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">lancet.dynamic</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-lancet.dynamic">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/lancet.dynamic-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

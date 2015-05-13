@@ -1,0 +1,442 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui.templateplotgrouppanel &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" accesskey="U">topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tkgui.templateplotgrouppanel</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">class TemplatePlotGroupPanel</span>
+<span class="sd">Panel for displaying preference maps and activity plot groups.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">Tkinter</span> <span class="kn">import</span> <span class="n">DISABLED</span><span class="p">,</span> <span class="n">NORMAL</span>
+<span class="kn">from</span> <span class="nn">tkFileDialog</span> <span class="kn">import</span> <span class="n">asksaveasfilename</span>
+
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">normalize_path</span>
+<span class="kn">import</span> <span class="nn">paramtk</span> <span class="kn">as</span> <span class="nn">tk</span>
+
+<span class="kn">import</span> <span class="nn">topo.command.pylabplot</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.plotgroup</span> <span class="kn">import</span> <span class="n">TemplatePlotGroup</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+
+<span class="kn">from</span> <span class="nn">plotgrouppanel</span> <span class="kn">import</span> <span class="n">SheetPanel</span>
+
+
+<span class="c">### CEBALERT: additional dynamic info/right-click problems:</span>
+<span class="c">#</span>
+<span class="c"># If I open an Activity plot and then measure an orientation map,</span>
+<span class="c"># the plot only shows Activity, but the dynamic info includes the or</span>
+<span class="c"># pref and selectivity.  That makes sense, given that the plot would</span>
+<span class="c"># show that if it were refreshed, but it&#39;s confusing.</span>
+
+
+
+
+<span class="c"># CEBALERT: should  be something in plot or wherever, or maybe I don&#39;t see how to get this</span>
+<span class="c"># info the easy way from it? Not sure I actually wrote this correctly, anyway.</span>
+<div class="viewcode-block" id="available_plot_channels"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.templateplotgrouppanel.available_plot_channels">[docs]</a><span class="k">def</span> <span class="nf">available_plot_channels</span><span class="p">(</span><span class="n">plot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the channels+names of the channels that have views.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">available_channels</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">channel</span> <span class="ow">in</span> <span class="n">plot</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">plot</span><span class="o">.</span><span class="n">view_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="n">available_channels</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="n">channel</span>
+    <span class="k">return</span> <span class="n">available_channels</span>
+
+
+
+
+<span class="c">### CB: I&#39;m working here at the moment.</span>
+</div>
+<div class="viewcode-block" id="TemplatePlotGroupPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.templateplotgrouppanel.TemplatePlotGroupPanel">[docs]</a><span class="k">class</span> <span class="nc">TemplatePlotGroupPanel</span><span class="p">(</span><span class="n">SheetPanel</span><span class="p">):</span>
+
+    <span class="n">plotgroup_type</span> <span class="o">=</span> <span class="n">TemplatePlotGroup</span>
+
+    <span class="c">## CB: update init args now we have no pgts.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemplatePlotGroupPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c"># Display any plots that can be done with existing data, but</span>
+        <span class="c"># don&#39;t regenerate the SheetViews unless requested</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plot_immediately</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refresh_plots</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display_labels</span><span class="p">()</span> <span class="c"># should this be called for any redraw? genuinely needs to be</span>
+            <span class="c"># called here because labels might never have been drawn.</span>
+
+
+        <span class="c">#################### RIGHT-CLICK MENU STUFF ####################</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sheet_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Save image as PNG&quot;</span><span class="p">,</span>
+                                     <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__save_to_png</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sheet_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Save image as EPS&quot;</span><span class="p">,</span>
+                                     <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__save_to_postscript</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Print info&quot;</span><span class="p">,</span>
+                                    <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__print_info</span><span class="p">)</span>
+
+        <span class="c"># JABALERT: Shouldn&#39;t be assuming SHC here; should also work</span>
+        <span class="c"># for RGB (or any other channels).</span>
+        <span class="n">channel_menus</span><span class="o">=</span><span class="p">{}</span>
+        <span class="k">for</span> <span class="n">chan</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;Strength&#39;</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">]:</span>
+            <span class="n">newmenu</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Menu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_canvas_menu</span><span class="p">,</span> <span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_canvas_menu</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="n">newmenu</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">chan</span><span class="o">+</span><span class="s">&#39; channel&#39;</span><span class="p">,</span> <span class="n">indexname</span><span class="o">=</span><span class="n">chan</span><span class="p">)</span>
+
+            <span class="c"># The c=chan construction is required so that each lambda has its own copy of the string</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Print matrix&quot;</span><span class="p">,</span>          <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__print_matrix</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Plot in sheet coords&quot;</span><span class="p">,</span>  <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__plot_sheet_matrix</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Plot in matrix coords&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__plot_matrix</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Plot as 3D wireframe&quot;</span><span class="p">,</span>  <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__plot_matrix3d</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Fourier transform&quot;</span><span class="p">,</span>     <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fft</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Autocorrelation&quot;</span><span class="p">,</span>       <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__autocorrelate</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Histogram&quot;</span><span class="p">,</span>             <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__histogram</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">newmenu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Gradient&quot;</span><span class="p">,</span>              <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="o">=</span><span class="n">chan</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gradient</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">channel_menus</span><span class="p">[</span><span class="n">chan</span><span class="p">]</span><span class="o">=</span><span class="n">newmenu</span>
+
+
+        <span class="c">#self._sheet_menu.add_command(label=&quot;Print matrix values&quot;,</span>
+        <span class="c">#                             command=self.__print_matrix)</span>
+        <span class="c">#################################################################</span>
+
+    <span class="c">### JABALERT: Should remove the assumption that the plot will be</span>
+    <span class="c">### SHC (could e.g.  be RGB).</span>
+    <span class="c">###</span>
+    <span class="c">### Should add the ability to turn off any of the channels</span>
+    <span class="c">### independently (just as the Strength-only button does), and</span>
+    <span class="c">### eventually should allow the user to type in the name of any</span>
+    <span class="c">### Image to change the template as desired to visualize any</span>
+    <span class="c">### quantity.</span>
+    <span class="c">###</span>
+    <span class="c"># CB: something about these methods does not seem to fit the PlotGroup hierarchy.</span>
+    <span class="k">def</span> <span class="nf">_canvas_right_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make whichever of the SHC channels is present in the plot available on the menu.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemplatePlotGroupPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_canvas_right_click</span><span class="p">(</span><span class="n">event_info</span><span class="p">,</span><span class="n">show_menu</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;plot&#39;</span> <span class="ow">in</span> <span class="n">event_info</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="n">event_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+
+            <span class="n">available_channels</span> <span class="o">=</span><span class="n">available_plot_channels</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;Strength&#39;</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">available_channels</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_canvas_menu</span><span class="o">.</span><span class="n">entryconfig</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span>
+                                                  <span class="n">label</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> channel: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+                                                  <span class="p">(</span><span class="n">channel</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel</span><span class="p">])),</span><span class="n">state</span><span class="o">=</span><span class="n">NORMAL</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_canvas_menu</span><span class="o">.</span><span class="n">entryconfig</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span>
+                                                  <span class="n">label</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> channel: None&quot;</span> <span class="o">%</span>
+                                                  <span class="p">(</span><span class="n">channel</span><span class="p">),</span><span class="n">state</span><span class="o">=</span><span class="n">DISABLED</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_canvas_menu</span><span class="o">.</span><span class="n">tk_popup</span><span class="p">(</span><span class="n">event_info</span><span class="p">[</span><span class="s">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x_root</span><span class="p">,</span>
+                                       <span class="n">event_info</span><span class="p">[</span><span class="s">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">y_root</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__save_to_png</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">plot</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">filesaver</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span><span class="n">file_format</span><span class="o">=</span><span class="s">&quot;png&quot;</span><span class="p">)</span>
+        <span class="n">PNG_FILETYPES</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;PNG images&#39;</span><span class="p">,</span><span class="s">&#39;*.png&#39;</span><span class="p">),(</span><span class="s">&#39;All files&#39;</span><span class="p">,</span><span class="s">&#39;*&#39;</span><span class="p">)]</span>
+        <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">asksaveasfilename</span><span class="p">(</span><span class="n">filetypes</span><span class="o">=</span><span class="n">PNG_FILETYPES</span><span class="p">,</span>
+                                          <span class="n">initialdir</span><span class="o">=</span><span class="n">normalize_path</span><span class="p">(),</span>
+                                          <span class="n">initialfile</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">snapshot_name</span><span class="p">:</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">snapshot_name</span><span class="p">)</span>
+
+    <span class="c"># based on routine in editor.py</span>
+    <span class="k">def</span> <span class="nf">__save_to_postscript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">plot</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">widget</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">filesaver</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span><span class="n">file_format</span><span class="o">=</span><span class="s">&quot;eps&quot;</span><span class="p">)</span>
+        <span class="n">POSTSCRIPT_FILETYPES</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;Encapsulated PostScript images&#39;</span><span class="p">,</span><span class="s">&#39;*.eps&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;PostScript images&#39;</span><span class="p">,</span><span class="s">&#39;*.ps&#39;</span><span class="p">),(</span><span class="s">&#39;All files&#39;</span><span class="p">,</span><span class="s">&#39;*&#39;</span><span class="p">)]</span>
+        <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">asksaveasfilename</span><span class="p">(</span><span class="n">filetypes</span><span class="o">=</span><span class="n">POSTSCRIPT_FILETYPES</span><span class="p">,</span>
+                                          <span class="n">initialdir</span><span class="o">=</span><span class="n">normalize_path</span><span class="p">(),</span>
+                                          <span class="n">initialfile</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">snapshot_name</span><span class="p">:</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">postscript</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="n">snapshot_name</span><span class="p">)</span>
+
+    <span class="c"># CB: these methods assume channel has a view (the menu only displays those that do)</span>
+    <span class="k">def</span> <span class="nf">__fft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">fftplot</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&quot;FFT Plot: &quot;</span> <span class="o">+</span> <span class="n">description</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__autocorrelate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">autocorrelationplot</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&quot;Autocorrelation: &quot;</span> <span class="o">+</span> <span class="n">description</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">histogramplot</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="s">&quot;Histogram: &quot;</span><span class="o">+</span> <span class="n">description</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">view_dict</span><span class="p">[</span><span class="n">channel</span><span class="p">][</span><span class="n">plot</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel</span><span class="p">]]</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">gradientplot</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="s">&quot;Gradient: &quot;</span> <span class="o">+</span> <span class="n">description</span><span class="p">,</span>
+                                            <span class="n">cyclic_range</span><span class="o">=</span><span class="n">view</span><span class="o">.</span><span class="n">cyclic_range</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__print_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s">&quot;#&quot;</span> <span class="o">+</span> <span class="n">description</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">m</span>
+
+    <span class="k">def</span> <span class="nf">__plot_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">matrixplot</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__plot_sheet_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">activityplot</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">],</span> <span class="n">m</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__plot_matrix3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+        <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">matrixplot3d</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+
+    <span class="c"># CEBALERT: decide if and how to allow any of these functions to be used for getting as many</span>
+    <span class="c"># channels&#39; info as possible.</span>
+    <span class="c"># e.g. in this one...</span>
+    <span class="k">def</span> <span class="nf">__print_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">channel</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">),(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_click_info</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">, row </span><span class="si">%d</span><span class="s">, col </span><span class="si">%d</span><span class="s"> at time </span><span class="si">%s</span><span class="s">: &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span>
+
+        <span class="n">channels_info</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">channel</span><span class="p">,</span><span class="n">name</span> <span class="ow">in</span> <span class="n">available_plot_channels</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+                <span class="n">channels_info</span><span class="o">+=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%f</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">m</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_matrix</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+            <span class="n">channels_info</span><span class="o">+=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%f</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="n">channels_info</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_dynamic_info_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event_info</span><span class="p">,</span><span class="n">basic_text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Also print whatever other channels are there and have views.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="n">event_info</span><span class="p">[</span><span class="s">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">event_info</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">info_string</span> <span class="o">=</span> <span class="n">basic_text</span>
+
+        <span class="k">for</span> <span class="n">channel</span><span class="p">,</span><span class="n">channel_name</span> <span class="ow">in</span> <span class="n">available_plot_channels</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">info_string</span><span class="o">+=</span><span class="s">&quot; </span><span class="si">%s</span><span class="s">: </span><span class="si">% 1.3f</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">channel_name</span><span class="p">,</span><span class="n">plot</span><span class="o">.</span><span class="n">_get_sv</span><span class="p">(</span><span class="n">channel</span><span class="p">)[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">info_string</span>
+
+</div>
+<div class="viewcode-block" id="SheetPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.templateplotgrouppanel.SheetPanel">[docs]</a><span class="k">class</span> <span class="nc">SheetPanel</span><span class="p">(</span><span class="n">TemplatePlotGroupPanel</span><span class="p">):</span>
+
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">Sheet</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SheetPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;color_channel&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_2</span><span class="p">,</span>
+                        <span class="n">on_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">change_color_channel</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&quot;right&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SheetPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup_plotgroup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populate_color_channel_param</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">change_color_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plot_templates</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">color_channel</span>
+            <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">pt</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;Hue&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="n">pt</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;Confidence&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pt</span><span class="p">[</span><span class="s">&quot;Hue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s">&quot;Preference&quot;</span>
+                <span class="n">pt</span><span class="p">[</span><span class="s">&quot;Confidence&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s">&quot;Selectivity&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_plots</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">populate_color_channel_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;None&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">sheets</span><span class="p">:</span>
+            <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">Maps</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+            <span class="n">channels</span> <span class="o">+=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;Preference&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">paths</span>
+                         <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s">&#39;Preference&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">params</span><span class="p">()[</span><span class="s">&#39;color_channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">color_channel</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/tkgui/templateplotgrouppanel.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" >topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

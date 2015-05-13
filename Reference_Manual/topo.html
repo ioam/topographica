@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.topo Package &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-topo-package">
+<h1>topo.topo Package<a class="headerlink" href="#topo-topo-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="topo-package">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">topo</span></tt> Package<a class="headerlink" href="#topo-package" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-topo.__init__"></span><p>Topographica cortical map simulator package.</p>
+<p>Topographica is designed as a collection of packages from which
+elements can be selected to model specific systems.  For more
+information, see the individual subpackages:</p>
+<div class="highlight-python"><div class="highlight"><pre>base           - Core Topographica functions and classes
+plotting       - Visualization functions and classes
+analysis       - Analysis functions and classes (besides plotting)
+tkgui          - Tk-based graphical user interface (GUI)
+command        - High-level user commands
+misc           - Various useful independent modules
+</pre></div>
+</div>
+<p>The Topographica primitives library consists of a family of classes
+that can be used with the above functions and classes:</p>
+<div class="highlight-python"><div class="highlight"><pre>sheet          - Sheet classes: 2D arrays of processing units
+projection     - Projection classes: connections between Sheets
+pattern        - PatternGenerator classes: 2D input or weight patterns
+transferfn     - Transfer functions, for e.g. normalization or squashing
+responsefn     - Calculate the response of a Projection
+learningfn     - Adjust weights for a Projection
+coordmapper    - CoordinateMapperFn classes: map coords between Sheets
+</pre></div>
+</div>
+<p>Each of the library directories can be extended with new classes of
+the appropriate type, just by adding a new .py file to that directory.
+E.g. new PatternGenerator classes can be added to pattern/, and will
+then show up in the GUI menus as potential input patterns.</p>
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="topo.analysis.html">topo.analysis Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.analysis.html#analysis-package"><tt class="docutils literal"><span class="pre">analysis</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.analysis.html#command-module"><tt class="docutils literal"><span class="pre">command</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.analysis.html#featureresponses-module"><tt class="docutils literal"><span class="pre">featureresponses</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.base.html">topo.base Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#base-package"><tt class="docutils literal"><span class="pre">base</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#arrayutil-module"><tt class="docutils literal"><span class="pre">arrayutil</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#cf-module"><tt class="docutils literal"><span class="pre">cf</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#ep-module"><tt class="docutils literal"><span class="pre">ep</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#functionfamily-module"><tt class="docutils literal"><span class="pre">functionfamily</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#generatorsheet-module"><tt class="docutils literal"><span class="pre">generatorsheet</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#projection-module"><tt class="docutils literal"><span class="pre">projection</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#sheet-module"><tt class="docutils literal"><span class="pre">sheet</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#sheetview-module"><tt class="docutils literal"><span class="pre">sheetview</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.base.html#simulation-module"><tt class="docutils literal"><span class="pre">simulation</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.command.html">topo.command Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.command.html#command-package"><tt class="docutils literal"><span class="pre">command</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.command.html#analysis-module"><tt class="docutils literal"><span class="pre">analysis</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.command.html#pylabplot-module"><tt class="docutils literal"><span class="pre">pylabplot</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.coordmapper.html">topo.coordmapper Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.coordmapper.html#coordmapper-package"><tt class="docutils literal"><span class="pre">coordmapper</span></tt> Package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.gpu.html">topo.gpu Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.gpu.html#projection-module"><tt class="docutils literal"><span class="pre">projection</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.gpu.html#sheet-module"><tt class="docutils literal"><span class="pre">sheet</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.hardware.html">topo.hardware Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.hardware.html#opencvcamera-module"><tt class="docutils literal"><span class="pre">opencvcamera</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.hardware.html#playerrobot-module"><tt class="docutils literal"><span class="pre">playerrobot</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.hardware.html#ptz-module"><tt class="docutils literal"><span class="pre">ptz</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.hardware.html#robotics-module"><tt class="docutils literal"><span class="pre">robotics</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.learningfn.html">topo.learningfn Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.learningfn.html#learningfn-package"><tt class="docutils literal"><span class="pre">learningfn</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.learningfn.html#optimized-module"><tt class="docutils literal"><span class="pre">optimized</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.learningfn.html#projfn-module"><tt class="docutils literal"><span class="pre">projfn</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.learningfn.html#som-module"><tt class="docutils literal"><span class="pre">som</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.misc.html">topo.misc Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#misc-package"><tt class="docutils literal"><span class="pre">misc</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#asizeof-module"><tt class="docutils literal"><span class="pre">asizeof</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#attrdict-module"><tt class="docutils literal"><span class="pre">attrdict</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#color-module"><tt class="docutils literal"><span class="pre">color</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#commandline-module"><tt class="docutils literal"><span class="pre">commandline</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#featurecoordinators-module"><tt class="docutils literal"><span class="pre">featurecoordinators</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#fixedpoint-module"><tt class="docutils literal"><span class="pre">fixedpoint</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#gendocs-module"><tt class="docutils literal"><span class="pre">gendocs</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#genexamples-module"><tt class="docutils literal"><span class="pre">genexamples</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#inlinec-module"><tt class="docutils literal"><span class="pre">inlinec</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#ipython-module"><tt class="docutils literal"><span class="pre">ipython</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#lancext-module"><tt class="docutils literal"><span class="pre">lancext</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#legacy-module"><tt class="docutils literal"><span class="pre">legacy</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#memuse-module"><tt class="docutils literal"><span class="pre">memuse</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#picklemain-module"><tt class="docutils literal"><span class="pre">picklemain</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#pyxhandler-module"><tt class="docutils literal"><span class="pre">pyxhandler</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#snapshots-module"><tt class="docutils literal"><span class="pre">snapshots</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#trace-module"><tt class="docutils literal"><span class="pre">trace</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#unitsupport-module"><tt class="docutils literal"><span class="pre">unitsupport</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.misc.html#util-module"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.optimized.html">topo.optimized Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.optimized.html#optimized-package"><tt class="docutils literal"><span class="pre">optimized</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.optimized.html#compile-module"><tt class="docutils literal"><span class="pre">compile</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.optimized.html#unoptimized-module"><tt class="docutils literal"><span class="pre">unoptimized</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.plotting.html">topo.plotting Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.plotting.html#plotting-package"><tt class="docutils literal"><span class="pre">plotting</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.plotting.html#bitmap-module"><tt class="docutils literal"><span class="pre">bitmap</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.plotting.html#plot-module"><tt class="docutils literal"><span class="pre">plot</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.plotting.html#plotfilesaver-module"><tt class="docutils literal"><span class="pre">plotfilesaver</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.plotting.html#plotgroup-module"><tt class="docutils literal"><span class="pre">plotgroup</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.projection.html">topo.projection Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.projection.html#projection-package"><tt class="docutils literal"><span class="pre">projection</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.projection.html#optimized-module"><tt class="docutils literal"><span class="pre">optimized</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.responsefn.html">topo.responsefn Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.responsefn.html#responsefn-package"><tt class="docutils literal"><span class="pre">responsefn</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.responsefn.html#optimized-module"><tt class="docutils literal"><span class="pre">optimized</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.responsefn.html#projfn-module"><tt class="docutils literal"><span class="pre">projfn</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.sheet.html">topo.sheet Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.sheet.html#sheet-package"><tt class="docutils literal"><span class="pre">sheet</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sheet.html#composer-module"><tt class="docutils literal"><span class="pre">composer</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sheet.html#lissom-module"><tt class="docutils literal"><span class="pre">lissom</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sheet.html#optimized-module"><tt class="docutils literal"><span class="pre">optimized</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sheet.html#ptztracker-module"><tt class="docutils literal"><span class="pre">ptztracker</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sheet.html#saccade-module"><tt class="docutils literal"><span class="pre">saccade</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sheet.html#slissom-module"><tt class="docutils literal"><span class="pre">slissom</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.sparse.html">topo.sparse Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.sparse.html#sparse-package"><tt class="docutils literal"><span class="pre">sparse</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sparse.html#compile-module"><tt class="docutils literal"><span class="pre">compile</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.sparse.html#sparsecf-module"><tt class="docutils literal"><span class="pre">sparsecf</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.submodel.html">topo.submodel Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.submodel.html#submodel-package"><tt class="docutils literal"><span class="pre">submodel</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.submodel.html#color-module"><tt class="docutils literal"><span class="pre">color</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.submodel.html#earlyvision-module"><tt class="docutils literal"><span class="pre">earlyvision</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.submodel.html#gcal-module"><tt class="docutils literal"><span class="pre">gcal</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.submodel.html#scal-module"><tt class="docutils literal"><span class="pre">scal</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.submodel.html#specifications-module"><tt class="docutils literal"><span class="pre">specifications</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.tkgui.html">topo.tkgui Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#tkgui-package"><tt class="docutils literal"><span class="pre">tkgui</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#editor-module"><tt class="docutils literal"><span class="pre">editor</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#featurecurvepanel-module"><tt class="docutils literal"><span class="pre">featurecurvepanel</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#plotgrouppanel-module"><tt class="docutils literal"><span class="pre">plotgrouppanel</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#projectionpanel-module"><tt class="docutils literal"><span class="pre">projectionpanel</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#templateplotgrouppanel-module"><tt class="docutils literal"><span class="pre">templateplotgrouppanel</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#testpattern-module"><tt class="docutils literal"><span class="pre">testpattern</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.tkgui.html#topoconsole-module"><tt class="docutils literal"><span class="pre">topoconsole</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topo.transferfn.html">topo.transferfn Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="topo.transferfn.html#transferfn-package"><tt class="docutils literal"><span class="pre">transferfn</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.transferfn.html#misc-module"><tt class="docutils literal"><span class="pre">misc</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.transferfn.html#optimized-module"><tt class="docutils literal"><span class="pre">optimized</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topo.transferfn.html#projfn-module"><tt class="docutils literal"><span class="pre">projfn</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">topo.topo Package</a><ul>
+<li><a class="reference internal" href="#topo-package"><tt class="docutils literal"><span class="pre">topo</span></tt> Package</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/topo.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

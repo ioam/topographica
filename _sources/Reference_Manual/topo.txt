@@ -1,0 +1,38 @@
+topo.topo Package
+=================
+
+:mod:`topo` Package
+-------------------
+
+.. inheritance-diagram:: topo.__init__
+
+
+.. automodule:: topo.__init__
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    topo.analysis
+    topo.base
+    topo.command
+    topo.coordmapper
+    topo.gpu
+    topo.hardware
+    topo.learningfn
+    topo.misc
+    topo.optimized
+    topo.plotting
+    topo.projection
+    topo.responsefn
+    topo.sheet
+    topo.sparse
+    topo.submodel
+    topo.tests
+    topo.tkgui
+    topo.transferfn
+

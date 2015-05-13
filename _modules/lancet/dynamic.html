@@ -1,0 +1,501 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet.dynamic &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="lancet" href="../lancet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../lancet.html" accesskey="U">lancet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for lancet.dynamic</h1><div class="highlight"><pre>
+<span class="c">#</span>
+<span class="c"># Work in progress. Only SimpleOptimization is currently available.</span>
+<span class="c">#</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">Arguments</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">CartesianProduct</span>
+
+<div class="viewcode-block" id="DynamicArgs"><a class="viewcode-back" href="../../Reference_Manual/lancet.dynamic-module.html#lancet.dynamic.DynamicArgs">[docs]</a><span class="k">class</span> <span class="nc">DynamicArgs</span><span class="p">(</span><span class="n">Arguments</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DynamicArgs are declarative specifications that specify a</span>
+<span class="sd">    parameter space via a dynamic algorithmic process instead of using</span>
+<span class="sd">    precomputed arguments. Unlike the static Args objects, new</span>
+<span class="sd">    arguments can only be generated in response to some feedback from</span>
+<span class="sd">    the processes that are executed. This type of dynamic feedback is</span>
+<span class="sd">    a common feature for many algorithms such as hill climbing</span>
+<span class="sd">    optimization, genetic algorithms, bisection search and other</span>
+<span class="sd">    sophisticated optimization and search procedures.</span>
+
+<span class="sd">    Like the Args objects, a DynamicArgs object is an iterator. On</span>
+<span class="sd">    each iteration, one or more argument sets defining a collection of</span>
+<span class="sd">    independent jobs are returned (these jobs should be possible to</span>
+<span class="sd">    execute concurrently). Between iterations, the output_extractor</span>
+<span class="sd">    function is used to extract the necessary information from the</span>
+<span class="sd">    standard output streams of the previously executed jobs. This</span>
+<span class="sd">    information is used to update the internal state of the</span>
+<span class="sd">    DynamicArgs object can then generate more arguments to explore or</span>
+<span class="sd">    terminate. All DynamicArgs classes need to declare the expected</span>
+<span class="sd">    return format of the output_extractor function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">output_extractor</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       The function that returns the relevant data from the standard</span>
+<span class="s">       output stream dumped to file in the streams subdirectory. This</span>
+<span class="s">       information must be retyrned in a format suitable for updating</span>
+<span class="s">       the specifier.. By default uses json.loads but pickle.loads</span>
+<span class="s">       could also be a valid option. The callable must take a string</span>
+<span class="s">       and return a Python object suitable for updating the specifier.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DynamicArgs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># Returned on next iteration and updated by _updated_state method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># Trace of inputs from output_extractor and returned arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">_update_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines the next desired point in the parameter space using</span>
+<span class="sd">        the parsed data returned from the public update</span>
+<span class="sd">        method. Returns the value that will next emitted on the next</span>
+<span class="sd">        iteration using the list of dictionaries format for</span>
+<span class="sd">        arguments. If the update fails or data is None, StopIteration</span>
+<span class="sd">        should be supplied as the return value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+    <span class="k">def</span> <span class="nf">_initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the the DynamicArgs object to its initial state and used</span>
+<span class="sd">        to reset the object adter the iterator is exhausted. The</span>
+<span class="sd">        return value is the initial argument to be returned by</span>
+<span class="sd">        next().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span> <span class="ow">is</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="n">current_val</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span> <span class="o">=</span> <span class="ne">StopIteration</span>
+        <span class="k">return</span> <span class="n">current_val</span>
+
+
+<div class="viewcode-block" id="DynamicArgs.update"><a class="viewcode-back" href="../../Reference_Manual/lancet.dynamic-module.html#lancet.dynamic.DynamicArgs.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tids</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called to update the state of the iterator.  This methods</span>
+<span class="sd">        receives the set of task ids from the previous set of tasks</span>
+<span class="sd">        together with the launch information to allow the output</span>
+<span class="sd">        values to be parsed using the output_extractor. This data is then</span>
+<span class="sd">        used to determine the next desired point in the parameter</span>
+<span class="sd">        space by calling the _update_state method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outputs_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">],</span> <span class="s">&#39;streams&#39;</span><span class="p">)</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_*_tid_*{tid}.o.{tid}*&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_name&#39;</span><span class="p">]</span>
+        <span class="n">flist</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">outputs_dir</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tids</span><span class="p">:</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">flist</span><span class="p">,</span> <span class="n">pattern</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tid</span><span class="o">=</span><span class="n">tid</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;No unique output file for tid </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">tid</span><span class="p">)</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputs_dir</span><span class="p">,</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="s">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_extractor</span><span class="p">(</span><span class="n">contents</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_state</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Cannot load required output files. Cannot continue.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_val</span> <span class="o">=</span> <span class="ne">StopIteration</span>
+
+</div>
+<div class="viewcode-block" id="DynamicArgs.show"><a class="viewcode-back" href="../../Reference_Manual/lancet.dynamic-module.html#lancet.dynamic.DynamicArgs.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When dynamic, not all argument values may be available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">copied</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">enumerated</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">copied</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">group_ind</span><span class="p">,</span> <span class="n">specs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">enumerated</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enumerated</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="k">print</span><span class="p">(</span><span class="s">&quot;Group </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">group_ind</span><span class="p">)</span>
+            <span class="n">ordering</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_keys</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_keys</span>
+            <span class="c"># Ordered nicely by varying_keys definition.</span>
+            <span class="n">spec_lines</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ordering</span><span class="p">])</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%d</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spec_lines</span><span class="p">)]))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Remaining arguments not available for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_trace_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Summarizes the trace of values used to update the DynamicArgs</span>
+<span class="sd">        and the arguments subsequently returned. May be used to</span>
+<span class="sd">        implement the summary method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="s">&quot;Terminated&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pprint</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;exploring arguments [</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="n">pprint</span> <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Step </span><span class="si">%d</span><span class="s">: Initially </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>      <span class="k">print</span> <span class="s">&quot;Step </span><span class="si">%d</span><span class="s">: </span><span class="si">%s</span><span class="s"> after receiving input(s) </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates two argument specifiers. See Concatenate and</span>
+<span class="sd">        DynamicConcatenate documentation respectively.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">other</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span>
+        <span class="n">dynamic</span> <span class="o">=</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DynamicArgs</span><span class="p">),</span>  <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">DynamicArgs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">dynamic</span> <span class="o">==</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Cannot concatenate two dynamic specifiers.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">True</span> <span class="ow">in</span> <span class="n">dynamic</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">DynamicConcatenate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Concatenate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the cartesian product of two argument specifiers. See</span>
+<span class="sd">        CartesianProduct and DynamicCartesianProduct documentation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">other</span><span class="p">:</span> <span class="k">return</span> <span class="p">[]</span>
+        <span class="n">dynamic</span> <span class="o">=</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DynamicArgs</span><span class="p">),</span>  <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">DynamicArgs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">dynamic</span> <span class="o">==</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Cannot take Cartesian product two dynamic specifiers.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">True</span> <span class="ow">in</span> <span class="n">dynamic</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">DynamicCartesianProduct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CartesianProduct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Many DynamicArgs won&#39;t have a length that can be</span>
+<span class="sd">        precomputed. Most DynamicArgs objects will have an iteration</span>
+<span class="sd">        limit to guarantee eventual termination. If so, the maximum</span>
+<span class="sd">        possible number of arguments that could be generated should be</span>
+<span class="sd">        returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+</div>
+<div class="viewcode-block" id="SimpleGradientDescent"><a class="viewcode-back" href="../../Reference_Manual/lancet.dynamic-module.html#lancet.dynamic.SimpleGradientDescent">[docs]</a><span class="k">class</span> <span class="nc">SimpleGradientDescent</span><span class="p">(</span><span class="n">DynamicArgs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Very simple gradient descent optimizer designed to illustrate how</span>
+<span class="sd">    Dynamic Args may be implemented. This class has been deliberately</span>
+<span class="sd">    kept simple to clearly illustrate how Dynamic Args may be</span>
+<span class="sd">    implemented. A more practical example would likely probably make</span>
+<span class="sd">    use of mature, third party optimization libraries (such as the</span>
+<span class="sd">    routines offered in scipy.optimize).</span>
+
+<span class="sd">    This particular algorithm greedily minimizes an output value via</span>
+<span class="sd">    greedy gradient descent. The local parameter space is explored by</span>
+<span class="sd">    examining the change in output value when an increment or</span>
+<span class="sd">    decrement of &#39;stepsize&#39; is made in the parameter space, centered</span>
+<span class="sd">    around the current position. The initial parameter is initialized</span>
+<span class="sd">    with the &#39;start&#39; value and the optimization process terminates</span>
+<span class="sd">    when either a local minima/maxima has been found or when</span>
+<span class="sd">    &#39;max_steps&#39; is reached.</span>
+
+<span class="sd">    The &#39;output_extractor&#39; function is expected to return a single</span>
+<span class="sd">    scalar number to drive the gradient descent algorithm forwards.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The name of the argument that will be optimized in a greedy fashion.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The starting argument value for the gradient ascent or descent&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">stepsize</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The size of the steps taken in parameter space.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">max_steps</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Once max_steps is reached, the optimization terminates.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleGradientDescent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="s">&#39;start&#39;</span><span class="p">,</span> <span class="s">&#39;stepsize&#39;</span><span class="p">],[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_termination_info</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">_initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steps_complete</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_best_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+        <span class="k">return</span> <span class="p">[{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">+</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">-</span><span class="mi">1</span><span class="p">}]</span>
+
+    <span class="k">def</span> <span class="nf">_update_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes as input a list or tuple of two elements. First the</span>
+<span class="sd">        value returned by incrementing by &#39;stepsize&#39; followed by the</span>
+<span class="sd">        value returned after a &#39;stepsize&#39; decrement.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steps_complete</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steps_complete</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_termination_info</span> <span class="o">=</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="ne">StopIteration</span>
+
+        <span class="n">arg_inc</span><span class="p">,</span> <span class="n">arg_dec</span> <span class="o">=</span> <span class="n">vals</span>
+        <span class="n">best_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">arg_inc</span><span class="p">,</span> <span class="n">arg_dec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">best_val</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_val</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_termination_info</span> <span class="o">=</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">best_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="ne">StopIteration</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arg</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="k">if</span> <span class="p">(</span><span class="n">arg_dec</span> <span class="o">&gt;</span> <span class="n">arg_inc</span><span class="p">)</span> <span class="k">else</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_best_val</span><span class="o">=</span> <span class="n">best_val</span>
+        <span class="k">return</span> <span class="p">[{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_arg</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">},</span>
+                <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_arg</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">}]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">constant_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="k">return</span> <span class="p">[]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">constant_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="p">[]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">varying_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;Varying Keys: </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="k">print</span> <span class="s">&#39;Maximum steps allowed: </span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_summary</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_termination_info</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">success</span><span class="p">,</span> <span class="n">best_val</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_termination_info</span>
+            <span class="n">condition</span> <span class="o">=</span>  <span class="s">&#39;Successfully converged.&#39;</span> <span class="k">if</span> <span class="n">success</span> <span class="k">else</span> <span class="s">&#39;Maximum step limit reached.&#39;</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> Minimum value of </span><span class="si">%r</span><span class="s"> at </span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="n">best_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span> <span class="c"># Each step specifies 2 concurrent jobs</span>
+
+
+
+<span class="c">#=========================#</span>
+<span class="c"># Experimental code (WIP) #</span>
+<span class="c">#=========================#</span>
+
+</div>
+<span class="k">class</span> <span class="nc">DynamicConcatenate</span><span class="p">(</span><span class="n">DynamicArgs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first</span> <span class="o">=</span> <span class="n">first</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">second</span> <span class="o">=</span> <span class="n">second</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Concatenate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">dynamic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exhausted</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_first_sent</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_second_cached</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">second</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_second_cached</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;first&#39;</span><span class="p">,</span> <span class="s">&#39;second&#39;</span><span class="p">],[],</span> <span class="n">infix_operator</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">constant_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">varying_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tids</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exhausted</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tids</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_sent</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tids</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exhausted</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second_cached</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_sent</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_first_sent</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>  <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">DynamicCartesianProduct</span><span class="p">(</span><span class="n">DynamicArgs</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">first</span> <span class="o">=</span> <span class="n">first</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">second</span> <span class="o">=</span> <span class="n">second</span>
+
+        <span class="n">overlap</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)</span> <span class="o">&amp;</span>  <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">overlap</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(),</span> <span class="s">&#39;Sets of keys cannot overlap between argument specifiers in cartesian product.&#39;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CartesianProduct</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">dynamic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_second_cached</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">second</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_second_cached</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pprint_args</span><span class="p">([</span><span class="s">&#39;first&#39;</span><span class="p">,</span> <span class="s">&#39;second&#39;</span><span class="p">],[],</span> <span class="n">infix_operator</span><span class="o">=</span><span class="s">&#39;*&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">constant_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">varying_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tids</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">):</span>  <span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tids</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="p">,</span><span class="n">DynamicArgs</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tids</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">first_spec</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cartesian_product</span><span class="p">(</span><span class="n">first_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second_cached</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">second_spec</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cartesian_product</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_cached</span><span class="p">,</span> <span class="n">second_spec</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/lancet/dynamic.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../lancet.html" >lancet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

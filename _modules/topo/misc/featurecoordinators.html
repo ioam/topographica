@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.featurecoordinators &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.featurecoordinators</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Additional FeatureCoordinators specific to cortical modelling work,</span>
+<span class="sd">supplementing the general-purpose ones in imagen.patterncoordinator.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">ParamOverrides</span>
+
+<span class="kn">from</span> <span class="nn">imagen.patterncoordinator</span> <span class="kn">import</span> <span class="n">FeatureCoordinator</span>
+<span class="kn">from</span> <span class="nn">imagen</span> <span class="kn">import</span> <span class="n">Sweeper</span>
+
+<span class="kn">import</span> <span class="nn">numbergen</span>
+
+<div class="viewcode-block" id="DisparityCoordinator"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.featurecoordinators.DisparityCoordinator">[docs]</a><span class="k">class</span> <span class="nc">DisparityCoordinator</span><span class="p">(</span><span class="n">FeatureCoordinator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coordinates the disparity (difference of pattern locations) of two</span>
+<span class="sd">    pattern generators.  The pattern_label of the generators must</span>
+<span class="sd">    contain &#39;Left&#39; or &#39;Right&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">disparity_bound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">4.0</span><span class="o">*</span><span class="mf">0.041665</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Maximum difference of the pattern locations between the two</span>
+<span class="s">        eyes (on the x axis).&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">pattern_label</span><span class="p">,</span> <span class="n">pattern_number</span><span class="p">,</span> <span class="n">master_seed</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">,</span><span class="n">allow_extra_keywords</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">new_pattern</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">pattern_label</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;Left&#39;</span><span class="p">)):</span>
+            <span class="n">new_pattern</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">get_value_generator</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span><span class="o">-</span>\
+                <span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="n">p</span><span class="o">.</span><span class="n">disparity_bound</span><span class="p">,</span>
+                                        <span class="n">ubound</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">disparity_bound</span><span class="p">,</span>
+                                        <span class="n">seed</span><span class="o">=</span><span class="n">master_seed</span><span class="o">+</span><span class="mi">45</span><span class="o">+</span><span class="n">pattern_number</span><span class="p">,</span>
+                                        <span class="n">name</span><span class="o">=</span><span class="s">&quot;DisparityCoordinator&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pattern_number</span><span class="p">))</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">pattern_label</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;Right&#39;</span><span class="p">)):</span>
+            <span class="n">new_pattern</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">get_value_generator</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span><span class="o">+</span>\
+                <span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="n">p</span><span class="o">.</span><span class="n">disparity_bound</span><span class="p">,</span>
+                                        <span class="n">ubound</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">disparity_bound</span><span class="p">,</span>
+                                        <span class="n">seed</span><span class="o">=</span><span class="n">master_seed</span><span class="o">+</span><span class="mi">45</span><span class="o">+</span><span class="n">pattern_number</span><span class="p">,</span>
+                                        <span class="n">name</span><span class="o">=</span><span class="s">&quot;DisparityCoordinator&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pattern_number</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Skipping region </span><span class="si">%s</span><span class="s">; Disparity is defined &#39;</span>
+                         <span class="s">&#39;only for Left and Right retinas.&#39;</span> <span class="o">%</span> <span class="n">pattern</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_pattern</span>
+
+
+</div>
+<div class="viewcode-block" id="OcularityCoordinator"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.featurecoordinators.OcularityCoordinator">[docs]</a><span class="k">class</span> <span class="nc">OcularityCoordinator</span><span class="p">(</span><span class="n">FeatureCoordinator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coordinates the ocularity (brightness difference) of two pattern</span>
+<span class="sd">    generators.  The pattern_label of the generators must contain</span>
+<span class="sd">    &#39;Left&#39; or &#39;Right&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dim_fraction</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Fraction by which the pattern brightness varies between the two eyes.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">pattern_label</span><span class="p">,</span> <span class="n">pattern_number</span><span class="p">,</span> <span class="n">master_seed</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">,</span><span class="n">allow_extra_keywords</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">new_pattern</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">pattern_label</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;Left&#39;</span><span class="p">)):</span>
+            <span class="n">new_pattern</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">dim_fraction</span><span class="p">)</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">dim_fraction</span> <span class="o">*</span> \
+                                <span class="p">(</span><span class="mf">2.0</span><span class="o">-</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                             <span class="n">ubound</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                                             <span class="n">seed</span><span class="o">=</span><span class="n">master_seed</span><span class="o">+</span><span class="mi">55</span><span class="o">+</span><span class="n">pattern_number</span><span class="p">,</span>
+                                                             <span class="n">name</span><span class="o">=</span><span class="s">&quot;OcularityCoordinator&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pattern_number</span><span class="p">)))</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">pattern_label</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;Right&#39;</span><span class="p">)):</span>
+            <span class="n">new_pattern</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">dim_fraction</span><span class="p">)</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">dim_fraction</span> <span class="o">*</span> \
+                                 <span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                         <span class="n">ubound</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                                         <span class="n">seed</span><span class="o">=</span><span class="n">master_seed</span><span class="o">+</span><span class="mi">55</span><span class="o">+</span><span class="n">pattern_number</span><span class="p">,</span>
+                                                         <span class="n">name</span><span class="o">=</span><span class="s">&quot;OcularityCoordinator&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pattern_number</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Skipping region </span><span class="si">%s</span><span class="s">; Ocularity is defined&#39;</span>
+                         <span class="s">&#39; only for Left and Right retinas.&#39;</span> <span class="o">%</span> <span class="n">pattern</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_pattern</span>
+
+
+</div>
+<div class="viewcode-block" id="SpatialFrequencyCoordinator"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.featurecoordinators.SpatialFrequencyCoordinator">[docs]</a><span class="k">class</span> <span class="nc">SpatialFrequencyCoordinator</span><span class="p">(</span><span class="n">FeatureCoordinator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coordinates the size of pattern generators. This is useful when</span>
+<span class="sd">    multiple spatial frequency channels are used, to cover a wide</span>
+<span class="sd">    range of sizes of pattern generators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sf_spacing</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Determines the factor by which successive SF channels increase</span>
+<span class="s">        in size. Together with sf_max_channel, this is used to compute</span>
+<span class="s">        the upper bound of the size of the supplied pattern</span>
+<span class="s">        generator.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">sf_max_channel</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+                                   <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Highest spatial frequency channel. Together with sf_spacing,</span>
+<span class="s">        this is used to compute the upper bound of the size of the</span>
+<span class="s">        supplied pattern generator.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">pattern_label</span><span class="p">,</span> <span class="n">pattern_number</span><span class="p">,</span> <span class="n">master_seed</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">,</span><span class="n">allow_extra_keywords</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">new_pattern</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="n">new_pattern</span><span class="o">.</span><span class="n">size</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">get_value_generator</span><span class="p">(</span><span class="s">&#39;size&#39;</span><span class="p">)</span><span class="o">*</span>\
+                         <span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                                 <span class="n">ubound</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">sf_max_channel</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                                                 <span class="n">seed</span><span class="o">=</span><span class="n">master_seed</span><span class="o">+</span><span class="mi">77</span><span class="o">+</span><span class="n">pattern_number</span><span class="p">,</span>
+                                                 <span class="n">name</span><span class="o">=</span><span class="s">&quot;SpatialFrequencyCoordinator&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pattern_number</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">new_pattern</span>
+
+</div>
+<div class="viewcode-block" id="MotionCoordinator"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.featurecoordinators.MotionCoordinator">[docs]</a><span class="k">class</span> <span class="nc">MotionCoordinator</span><span class="p">(</span><span class="n">FeatureCoordinator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coordinates the motion of patterns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">reset_period</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Period between generating each new translation episode.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">24.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The speed with which the pattern should move,</span>
+<span class="s">        in sheet coordinates per time_fn unit.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">time_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Dynamic</span><span class="o">.</span><span class="n">time_fn</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function to generate the time used as a base for translation.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">pattern_label</span><span class="p">,</span> <span class="n">pattern_number</span><span class="p">,</span> <span class="n">master_seed</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">,</span><span class="n">allow_extra_keywords</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> must be enabled for motion&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span><span class="o">.</span><span class="n">Dynamic</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">err_msg</span> <span class="o">%</span> <span class="s">&quot;param.Dynamic.time_dependent&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">numbergen</span><span class="o">.</span><span class="n">RandomDistribution</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">err_msg</span> <span class="o">%</span> <span class="s">&quot;numbergen.RandomDistribution.time_dependent&quot;</span><span class="p">)</span>
+
+        <span class="n">moved_pattern</span> <span class="o">=</span> <span class="n">Sweeper</span><span class="p">(</span><span class="n">generator</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pattern</span><span class="p">),</span>
+                                <span class="n">speed</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span>
+                                <span class="n">reset_period</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">reset_period</span><span class="p">,</span>
+                                <span class="n">time_fn</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">time_fn</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">moved_pattern</span>
+
+
+</div>
+<span class="n">feature_coordinators</span><span class="o">=</span><span class="p">[(</span><span class="s">&#39;od&#39;</span><span class="p">,</span><span class="n">OcularityCoordinator</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&#39;dy&#39;</span><span class="p">,</span><span class="n">DisparityCoordinator</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&#39;sf&#39;</span><span class="p">,</span><span class="n">SpatialFrequencyCoordinator</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&#39;dr&#39;</span><span class="p">,</span><span class="n">MotionCoordinator</span><span class="p">)]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/misc/featurecoordinators.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

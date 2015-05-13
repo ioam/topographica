@@ -1,0 +1,420 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.tlancet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-misc-tlancet">
+<h1>topo.misc.tlancet<a class="headerlink" href="#topo-misc-tlancet" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancee28d6ff61e.svg" usemap="#inheritancee28d6ff61e" class="inheritance"/></div><map id="inheritancee28d6ff61e" name="inheritancee28d6ff61e">
+</map>
+<div class="section" id="module-topo.misc.tlancet">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.misc.tlancet" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="topo.misc.tlancet.RunBatchAnalysis">
+<em class="property">class </em><tt class="descclassname">topo.misc.tlancet.</tt><tt class="descname">RunBatchAnalysis</tt><big>(</big><em>script_path</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>This analysis class is a generalization of the normal analysis functions
+use in Topographica&#8217;s run_batch command. It allows you to factor out and
+document steps in your analysis, offers a standard mechanism to collate data
+returned from map functions across multiple simulations and allows you to
+define a metric function for use with dynamic TaskSpecifiers
+(eg. Hillclimbing). Here are the types of operation you can define:</p>
+<p>Functions called for their side-effects. Eg. saving plotgroups, orientation
+maps etc.</p>
+<p>Allows you to collect and process dataacross simulations. The map
+component generates the data per simulation while the reduce function
+collapse this data (eg. plotting a variable acrosssimulations).</p>
+<p>Provides the TaskSpecifier feedback (eg. for automated parameter
+search). There can only be one metric function.</p>
+<p>It works by restoring the analysis object from a pickle file <em>within</em> the
+run_batch context, dynamically importing the user-defined functions from the
+launch script and then executing them as specified.  Dynamic import is
+necessary as pickles do not store code and the referenced user-functions need
+to exist before execution. To create the initial pickle file, you need to
+call the save() method once all map, map-reduce and metric functions are
+defined. Note that this class is a callable (no arguments) as it is designed
+to interface with run_batch like a normal analysis function.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">current_tid</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The task identifier for the current task. This needs to be set in the
+         run_batch context in order to ensure the correct naming convention for
+         pickles generated by the map functions (for later reduction).</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">analysis_arguments</span></tt> (<em>constant=False, default=set([]), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The names of all the arguments required by the analysis functions. Used to
+        make sure that the specifiers supply all the required keys.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">analysis_kwargs</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The keyword arguments to be passed to the analysis functions. The analysis
+         functions can capture any desired variables by setting the appropriate
+         keyword arguments.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.add_map_fn">
+<tt class="descname">add_map_fn</tt><big>(</big><em>map_fn</em>, <em>description</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.add_map_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.add_map_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to supply an additional map function (called for its side-effects
+only) along with appropriate description.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.add_map_reduce_fn">
+<tt class="descname">add_map_reduce_fn</tt><big>(</big><em>map_fn</em>, <em>reduce_fn</em>, <em>description</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.add_map_reduce_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.add_map_reduce_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to specify a map-reduce operation whereby the map_fn returns data
+from a given simulation which the reduce_fn collates across all
+simulations once the batch is complete. An appropriate description also
+needs to be supplied.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.analysis_dir">
+<em class="property">classmethod </em><tt class="descname">analysis_dir</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.analysis_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.analysis_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper method pointing to where the analysis function (map functions
+specifically) is executing. For use in analysis functions written by the
+user. Typically used to output custom files (ie. non-plotgroup) to the appropriate
+directory.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.load">
+<em class="property">classmethod </em><tt class="descname">load</tt><big>(</big><em>root_directory</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classmethod used to load the analysis callable in a Topographica
+run_batch context.  Loads the analysisfn.pickle file from the
+specified root directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.pickle_data">
+<tt class="descname">pickle_data</tt><big>(</big><em>subdir</em>, <em>fname</em>, <em>data</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.pickle_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.pickle_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method to pickle the given data to a file of the given name in
+the given subdirectory on the appropriate path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.reduce">
+<tt class="descname">reduce</tt><big>(</big><em>spec_log</em>, <em>root_directory</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to apply all defined map-reduces. For each map function, locates all
+the pickles in the corresponding subfolder and matches the stored data to the
+tid in the filename. The data, Topographica simulation times and corresponding
+tids are extracted and passed on to the appropriate reduce function.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.reduce_batch">
+<em class="property">classmethod </em><tt class="descname">reduce_batch</tt><big>(</big><em>root_directory</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.reduce_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.reduce_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classmethod used to load the analysis object then apply all reductions.
+Loads the analysisfn.pickle file from the specified root directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>The method to save the initial pickle file once the map, reduce and
+metric functions are defined. Must be called before launch and saves
+the object as analysisfn.pickle file from the specified root
+directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.set_map_reduce_fns">
+<tt class="descname">set_map_reduce_fns</tt><big>(</big><em>map_fns</em>, <em>reduce_fns</em>, <em>descriptions</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.set_map_reduce_fns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.set_map_reduce_fns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.set_metric">
+<tt class="descname">set_metric</tt><big>(</big><em>metric_fn</em>, <em>description</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.set_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.set_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to supply a metric function (eg. for hillclimbing) along with
+appropriate description.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchAnalysis.setup">
+<tt class="descname">setup</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchAnalysis.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchAnalysis.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called at the start of a run_batch simulation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.tlancet.RunBatchCommand">
+<em class="property">class </em><tt class="descclassname">topo.misc.tlancet.</tt><tt class="descname">RunBatchCommand</tt><big>(</big><em>tyfile</em>, <em>analysis='default'</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="lancet.launch-module.html#lancet.launch.CommandTemplate" title="lancet.launch.CommandTemplate"><tt class="xref py py-class docutils literal"><span class="pre">lancet.launch.CommandTemplate</span></tt></a></p>
+<p>RunBatchCommand is designed to to format task specifications into
+Topographica run_batch tasks in a way that should be flexible enough to
+be used generally. Note that Topographica is invoked with the -a flag so
+all of topo.command is imported.</p>
+<p>Though some of the parameters required appear to duplicate those in
+run_batch, they are necessary to ensure some basic consistency in the use
+of run_batch between tasks. This CommandTemplate class constrains -all- the
+options for run_batch with the exception of &#8216;times&#8217; which is free to vary
+as part of the task specification. This is allowed as you may wish to
+change the times at which the analysis function is invoked across
+batches.</p>
+<p>This command is queuable with both the queue and specify methods
+implemented. As necessary, specifications are generated in the
+&#8216;specifications&#8217; subdirectory of the root directory.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">executable</span></tt> (<em>allow_None=False, constant=True, default=python, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The executable that is to be run by this CommandTemplate. Unless the
+        executable is a standard command expected on the system path, this
+        should be an absolute path. By default this invokes python or the python
+        environment used to invoke the CommandTemplate (eg. the topographica
+        script).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">max_name_length</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=200, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Equivalent to the run_batch parameter of same name.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">name_time_format</span></tt> (<em>allow_None=False, constant=False, default=%Y%m%d%H%M, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The timestamp format for directories created by run_batch in python
+         datetime format.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">do_format</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Set to True to receive input arguments as formatted strings, False for
+        the raw unformatted objects.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">analysis</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=True, default=default, instantiate=True, objects=[&#8216;default&#8217;, &#8216;RunBatchAnalysis&#8217;, &#8216;custom&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The type of analysis to use with run_batch. The options are &#8216;default&#8217;
+              which runs the default run_batch analysis function,
+              &#8216;RunBatchAnalysis&#8217; which use the more sophisticated picklable
+              analysis function and custom which requires the analysis callable to be
+              created in the run_batch namespace via a -c option with
+              topo_flag_options</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">topo_flag_options</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Specifies Topographica flags and their corresponding options as a
+          dictionary.  This parameter is suitable for setting -c and -p flags for
+          Topographica (eg. to customize OpenMP settings). This parameter is also
+          important to introduce an analysis callable into the namespace if the
+          analysis function is set to &#8216;custom&#8217;.
+
+          Tuples can be used to indicate groups of options using the same flag:
+          {&#8216;-p&#8217;:&#8217;retina_density=5&#8217;} =&gt; -p retina_density=5
+          {&#8216;-p&#8217;:(&#8216;retina_density=5&#8217;, &#8216;scale=2&#8217;) =&gt; -p retina_density=5 -p scale=2
+          {&#8216;-p&#8217;:&#8217;
+
+          If a plain Python dictionary is used, the keys are alphanumerically sorted,
+          otherwise the dictionary is assumed to be an OrderedDict (Python 2.7+,
+          Python3 or param.external.OrderedDict) and the key ordering will be
+          preserved. Finally note that the &#8216;-&#8216; is added to the key if missing (to
+          make into a valid flag) to allow you to specify keywords in a dict
+          constructor ie. dict(key1=value1, key2=value2,....)</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">vc_info</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Equivalent to the run_batch parameter of same name.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">snapshot</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Equivalent to the run_batch parameter of same name.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">analysis_arguments</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The specifier keys to be consumed as analysis function arguments</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">save_global_params</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Equivalent to the run_batch parameter of same name.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">param_formatter</span></tt> (<em>constant=False, default=param_formatter(), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If None, defaults to normal run_batch formatting.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">topo_switches</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;-a&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Specifies the Topographica qsub switches (flags without arguments) as a
+          list of strings. By default the -a switch is always used to auto import
+          commands.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">allowed_list</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>An optional, explicit list of the argument names that the
+        CommandTemplate is expected to accept. If the empty list, no checking is
+        performed. This allows some degree of error checking before tasks are
+        launched. A command may exit if invalid parameters are supplied but it
+        is often better to explicitly check: this avoids waiting in a cluster
+        queue or invalid simulations due to unrecognised parameters.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchCommand.queue">
+<tt class="descname">queue</tt><big>(</big><em>tid</em>, <em>info</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchCommand.queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchCommand.queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses load_kwargs helper function in topo.command.misc to get the
+run_batch settings from the specifications directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchCommand.specify">
+<tt class="descname">specify</tt><big>(</big><em>spec</em>, <em>tid</em>, <em>info</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchCommand.specify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchCommand.specify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the specification as a Python dictionary to file (to the
+specifications subdirectory of root directory) as required by the
+load_kwargs helper method in topo.misc.command.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.tlancet.RunBatchCommand.topo_args">
+<tt class="descname">topo_args</tt><big>(</big><em>switch_override=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#RunBatchCommand.topo_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.RunBatchCommand.topo_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to generate Popen style argument list for Topographica using the
+topo_switches and topo_flag_options parameters. Switches are returned first,
+sorted alphanumerically.  The qsub_flag_options follow in keys() ordered if
+not a vanilla Python dictionary (ie. a Python 2.7+ or param.external
+OrderedDict). Otherwise the keys are sorted alphanumerically.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.tlancet.param_formatter">
+<em class="property">class </em><tt class="descclassname">topo.misc.tlancet.</tt><tt class="descname">param_formatter</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#param_formatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.param_formatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<dl class="docutils">
+<dt>This class is closely related to the param_formatter class in</dt>
+<dd>topo/command/__init__.py.  Like that default class, it formats parameters
+as a string for use in a directory name.  Unlike that default, it does
+not use the parameters repr directly but instead their commandline
+representation as returned by the TaskSpecifier.</dd>
+</dl>
+<p>Unlike the default param_formatter, this version has several important
+advantages:
+- It allows for a custom separator and an optional trunctation</p>
+<blockquote>
+<div>length for values.</div></blockquote>
+<ul class="simple">
+<li>It removes the need to import param.misc.OrderedDict in
+the command string to specify map.</li>
+<li>Parameters are sorted from slowest to fastest varying or
+(optionally) alphanumerically.</li>
+<li>Does not support custom ordering but does still support abbreviations.</li>
+<li>It formats a string for the parameters that vary by default (can be toggled)</li>
+<li>Most importantly, it formats values <em>exactly</em> as they appear in a command.  For example, a value
+specified as 6.00 on the commandline remains this way and is never represented to higher
+precision or with floating point error.</li>
+</ul>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">truncation_limit</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If None, no truncation is performed, otherwise specifies the maximum
+        length of any given specification value.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">abbreviations</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A dictionary of abbreviations to use of type {&lt;key&gt;:&lt;abbrev&gt;}.
+       If a specifier key has an entry in the dictionary, the abbreviation is used.
+       Useful for shortening long parameter names in the directory structure.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">alphanumeric_sort</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to sort the (possibly abbreviated) keys alphabetically or not.
+        By default, keys are ordered from slowest varying to fastest varying
+        provided this information is available from the TaskSpecifier.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">format_constant_keys</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not to format the parameters that are known to be constant across batches.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">separator</span></tt> (<em>allow_None=False, constant=False, default=,, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The separator to use between &lt;key&gt;=&lt;value&gt; pairs.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.tlancet.topo_param_string">
+<tt class="descclassname">topo.misc.tlancet.</tt><tt class="descname">topo_param_string</tt><big>(</big><em>p, exclude=['print_level', 'name'], sep=', '</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/tlancet.html#topo_param_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.tlancet.topo_param_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats global parameters nicely for use in version control (for example).</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.misc.tlancet</a><ul>
+<li><a class="reference internal" href="#module-topo.misc.tlancet">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.misc.tlancet-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Apr 28, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

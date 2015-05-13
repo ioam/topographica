@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Generating patterns &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="generating-patterns">
+<h1>Generating patterns<a class="headerlink" href="#generating-patterns" title="Permalink to this headline">¶</a></h1>
+<p>Topographica provides comprehensive support for creating
+two-dimensional patterns of various sorts. These patterns can be
+used for generating training or testing inputs, generating initial
+or fixed weight patterns, neighborhood kernels, or any similar
+application. Pattern support is provided by the <a class="reference external" href="../Reference_Manual/imagen-module.html">ImaGen</a> package,
+which was developed alongside Topographica but is completely
+independent and usable for any simulator.</p>
+<div class="section" id="simple-patterns">
+<h2>Simple patterns<a class="headerlink" href="#simple-patterns" title="Permalink to this headline">¶</a></h2>
+<p>The basic types of patterns supported by Topographica include:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/patterntypes_small.png" />
+</div>
+<p>These patterns are created using objects of type
+<a class="reference external" href="../Reference_Manual/topo.base.patterngenerator.PatternGenerator-class.html">PatternGenerator</a>, which is an object that will return a 2D
+pattern when it is called as a function. For instance, the Gaussian
+PatternGenerator will return Gaussian-shaped patterns:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ topographica -g
+Topographica&gt; from topo import pattern
+Topographica&gt; pg=pattern.Gaussian(xdensity=60,ydensity=60,size=0.3,aspect_ratio=1.0)
+Topographica&gt;
+Topographica&gt; matrixplot(pg())
+Topographica&gt; matrixplot(pg(size=0.5))
+</pre></div>
+</div>
+<p><img alt="image0" src="../_images/gaussian_0.3.png" /><img alt="image1" src="../_images/gaussian_0.5.png" /></p>
+<p>As you can see, the parameters of a PatternGenerator can be set up
+when you create the object, or they can be supplied when you
+generate the pattern. Any parameter not supplied in either location
+inherits the default value set for it in that PatternGenerator
+class.</p>
+<p>The reason for the name PatternGenerator is that the objects can
+each actually return an infinite number of different patterns, if
+any of the parameters are set to Dynamic values. For instance, a
+Gaussian input pattern can be specified to have a random orientation
+and (x,y) location:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ topographica -g
+Topographica&gt; from topo import pattern, numbergen
+Topographica&gt; input_pattern = pattern.Gaussian(size=0.08, aspect_ratio=4,
+                 xdensity=60,ydensity=60,
+                 x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=12),
+                 y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=34),
+                 orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56))
+Topographica&gt; matrixplot(input_pattern())
+Topographica&gt; topo.sim.run(1.0)
+Topographica&gt; matrixplot(input_pattern())
+</pre></div>
+</div>
+<p><img alt="image2" src="../_images/or_gaussian_1.png" /><img alt="image3" src="../_images/or_gaussian_2.png" /></p>
+<p>There are many other types of patterns available already defined in
+the <a class="reference external" href="../Reference_Manual/topo.pattern-module.html">topo/pattern</a> directory, and adding new patterns is
+straightforward. Just create a new class inheriting from
+PatternGenerator or one of its subclasses, make sure it is loaded
+before you start the GUI, and it will then show up in the Test
+Pattern window of the GUI automatically, and can be used in scripts
+the same way.</p>
+</div>
+<div class="section" id="composite-patterns">
+<h2>Composite patterns<a class="headerlink" href="#composite-patterns" title="Permalink to this headline">¶</a></h2>
+<p>Often, rather than writing a new PatternGenerator class, you can
+combine existing PatternGenerators to make a new pattern. To do
+this, Topographica provides the special Composite PatternGenerator,
+which accepts a list of other PatternGenerators and an operator for
+combining them. For instance, you can make connection weights be
+random but with a Gaussian falloff in strength by setting:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">CFProjection</span><span class="o">.</span><span class="n">weights_generator</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">Composite</span><span class="p">(</span>
+    <span class="n">generators</span><span class="o">=</span><span class="p">[</span><span class="n">pattern</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(),</span>
+                <span class="n">pattern</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)],</span>
+    <span class="n">operator</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="figure align-center">
+<img alt="" src="../_images/gaussianrandomweights_dense.png" />
+</div>
+<p>More complex patterns can be created by combining multiple Composite
+PatternGenerators:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ topographica -g
+Topographica&gt; from topo import pattern
+Topographica&gt; import numpy
+Topographica&gt; surroundsine   = pattern.SineGrating(frequency=8.0,orientation=0.25*pi,
+Topographica&gt;                                  phase=3*pi/2)
+Topographica&gt; centersine = pattern.SineGrating(frequency=8.0,orientation=0.60*pi)
+Topographica&gt; centerdisk = pattern.Disk(aspect_ratio=1.0, size=0.35, smoothing=0.005)
+Topographica&gt; surrounddisk   = pattern.Disk(aspect_ratio=1.0, size=0.90, smoothing=0.005)
+Topographica&gt; surroundring   = pattern.Composite(generators=[surrounddisk,centerdisk],
+Topographica&gt;                                operator=numpy.subtract)
+Topographica&gt; center     = pattern.Composite(generators=[centersine,centerdisk],
+Topographica&gt;                                operator=numpy.multiply)
+Topographica&gt; surround   = pattern.Composite(generators=[surroundsine,surroundring],
+Topographica&gt;                                operator=numpy.multiply)
+Topographica&gt; centersurround = pattern.Composite(generators=[center,surround],
+Topographica&gt;                                operator=numpy.add,
+Topographica&gt;                                xdensity=160,ydensity=160)
+Topographica&gt; matrixplot(centersurround())
+</pre></div>
+</div>
+<div class="figure align-center">
+<img alt="" src="../_images/centersurround.png" />
+</div>
+<p>Once created, even very complex composite patterns can be scaled,
+rotated, and placed together as a unit:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ topographica -g
+Topographica&gt; from topo import pattern
+Topographica&gt; import numpy
+Topographica&gt; pattern.Disk.smoothing=0.005
+Topographica&gt; lefteye= pattern.Disk(aspect_ratio=0.7, x=0.04, y=0.10, size=0.08, scale=1.00)
+Topographica&gt; leftpupil  = pattern.Disk(aspect_ratio=1.0, x=0.03, y=0.08, size=0.04, scale=-1.6)
+Topographica&gt; righteye   = pattern.Disk(aspect_ratio=0.7, x=0.04, y=-0.1, size=0.08, scale=1.00)
+Topographica&gt; rightpupil = pattern.Disk(aspect_ratio=1.0, x=0.03, y=-0.08,size=0.04, scale=-1.6)
+Topographica&gt; nose   = pattern.Gaussian(aspect_ratio=0.8, x=-0.1, y=0.00, size=0.04, scale=-0.5)
+Topographica&gt; mouth  = pattern.Gaussian(aspect_ratio=0.8, x=-0.2, y=0.00, size=0.06, scale=-0.8)
+Topographica&gt; head   = pattern.Disk(aspect_ratio=1.5, x=-0.02,y=0.00, size=0.40, scale=0.70)
+Topographica&gt; pg=pattern.Composite(generators=[lefteye,leftpupil,righteye,rightpupil,nose,mouth,head],
+Topographica&gt;                  operator=numpy.add,xdensity=160,ydensity=160)
+Topographica&gt; matrixplot(pg(orientation=pi/1.8, x=0.2, y=0.1, offset=0.5, size=0.75))
+</pre></div>
+</div>
+<div class="figure align-center">
+<img alt="" src="../_images/face.png" />
+</div>
+<p>A wide variety of operators are provided for combining the patterns;
+see the <a class="reference external" href="../Reference_Manual/topo.pattern.Composite-class.html#operator">Composite parameter &#8220;operator&#8221;</a> for more details.</p>
+</div>
+<div class="section" id="selector-patterns">
+<h2>Selector patterns<a class="headerlink" href="#selector-patterns" title="Permalink to this headline">¶</a></h2>
+<p>Instead of combining the patterns, it can also be useful to choose
+one from a set of different patterns, such as choosing randomly from
+a database of natural images. This can be done with the Selector
+PatternGenerator. As a contrived example, weights can be choosen at
+random from a set of four different pattern generators:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">CFProjection</span><span class="o">.</span><span class="n">weights_generator</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">Selector</span><span class="p">(</span><span class="n">generators</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">pattern</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="n">pi</span><span class="p">,</span><span class="n">ubound</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">99</span><span class="p">)),</span>
+    <span class="n">pattern</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                     <span class="n">x</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span><span class="n">ubound</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">12</span><span class="p">),</span>
+                     <span class="n">y</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span><span class="n">ubound</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">34</span><span class="p">)),</span>
+    <span class="n">pattern</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">lbound</span><span class="o">=-</span><span class="n">pi</span><span class="p">,</span><span class="n">ubound</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">99</span><span class="p">),</span>
+                      <span class="n">size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">pattern</span><span class="o">.</span><span class="n">Disk</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)])</span>
+</pre></div>
+</div>
+<div class="figure align-center">
+<img alt="" src="../_images/fourclassweights.png" />
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">Generating patterns</a><ul>
+<li><a class="reference internal" href="#simple-patterns">Simple patterns</a></li>
+<li><a class="reference internal" href="#composite-patterns">Composite patterns</a></li>
+<li><a class="reference internal" href="#selector-patterns">Selector patterns</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/User_Manual/patterns.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1005 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.ipython &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="dataviews" href="../dataviews.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../dataviews.html" accesskey="U">dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataviews.ipython</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="k">try</span><span class="p">:</span>    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">animation</span>
+<span class="k">except</span><span class="p">:</span> <span class="n">animation</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="kn">from</span> <span class="nn">IPython.core.pylabtools</span> <span class="kn">import</span> <span class="n">print_figure</span>
+<span class="kn">from</span> <span class="nn">IPython.core</span> <span class="kn">import</span> <span class="n">page</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">IPython.core.magic</span> <span class="kn">import</span> <span class="n">Magics</span><span class="p">,</span> <span class="n">magics_class</span><span class="p">,</span> <span class="n">cell_magic</span><span class="p">,</span> <span class="n">line_cell_magic</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">nose.plugins.skip</span> <span class="kn">import</span> <span class="n">SkipTest</span>
+    <span class="k">raise</span> <span class="n">SkipTest</span><span class="p">(</span><span class="s">&quot;IPython extension requires IPython &gt;= 0.13&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">ipython</span> <span class="k">as</span> <span class="n">param_ext</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">string</span>
+
+<span class="kn">from</span> <span class="nn">dataviews</span> <span class="kn">import</span> <span class="n">Stack</span>
+<span class="kn">from</span> <span class="nn">plots</span> <span class="kn">import</span> <span class="n">Plot</span><span class="p">,</span> <span class="n">GridLayoutPlot</span><span class="p">,</span> <span class="n">viewmap</span><span class="p">,</span> <span class="n">channel_modes</span>
+<span class="kn">from</span> <span class="nn">sheetviews</span> <span class="kn">import</span> <span class="n">GridLayout</span><span class="p">,</span> <span class="n">CoordinateGrid</span>
+<span class="kn">from</span> <span class="nn">views</span> <span class="kn">import</span> <span class="n">View</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">Annotation</span><span class="p">,</span> <span class="n">Layout</span>
+<span class="kn">from</span> <span class="nn">options</span> <span class="kn">import</span> <span class="n">options</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">PlotOpts</span><span class="p">,</span> <span class="n">StyleOpts</span><span class="p">,</span> <span class="n">ChannelOpts</span>
+
+<span class="c"># Variables controlled via the %view magic</span>
+<span class="n">PERCENTAGE_SIZE</span><span class="p">,</span> <span class="n">FPS</span><span class="p">,</span> <span class="n">FIGURE_FORMAT</span>  <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="s">&#39;png&#39;</span>
+
+<span class="n">ENABLE_TRACEBACKS</span><span class="o">=</span><span class="bp">True</span> <span class="c"># To assist with debugging of display hooks</span>
+
+<span class="n">GIF_TAG</span> <span class="o">=</span> <span class="s">&quot;&lt;center&gt;&lt;img src=&#39;data:image/gif;base64,{b64}&#39;/&gt;&lt;center/&gt;&quot;</span>
+<span class="n">VIDEO_TAG</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;center&gt;&lt;video controls&gt;</span>
+<span class="s"> &lt;source src=&quot;data:video/{mime_type};base64,{b64}&quot; type=&quot;video/{mime_type}&quot;&gt;</span>
+<span class="s"> Your browser does not support the video tag.</span>
+<span class="s">&lt;/video&gt;&lt;center/&gt;&quot;&quot;&quot;</span>
+
+<span class="c"># &#39;format name&#39;:(animation writer, mime_type,  anim_kwargs, extra_args, tag)</span>
+<span class="n">ANIMATION_OPTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;webm&#39;</span><span class="p">:(</span><span class="s">&#39;ffmpeg&#39;</span><span class="p">,</span> <span class="s">&#39;webm&#39;</span><span class="p">,</span>  <span class="p">{},</span>
+            <span class="p">[</span><span class="s">&#39;-vcodec&#39;</span><span class="p">,</span> <span class="s">&#39;libvpx&#39;</span><span class="p">,</span> <span class="s">&#39;-b&#39;</span><span class="p">,</span> <span class="s">&#39;1000k&#39;</span><span class="p">],</span>
+            <span class="n">VIDEO_TAG</span><span class="p">),</span>
+    <span class="s">&#39;h264&#39;</span><span class="p">:(</span><span class="s">&#39;ffmpeg&#39;</span><span class="p">,</span> <span class="s">&#39;mp4&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;codec&#39;</span><span class="p">:</span><span class="s">&#39;libx264&#39;</span><span class="p">},</span>
+            <span class="p">[</span><span class="s">&#39;-pix_fmt&#39;</span><span class="p">,</span> <span class="s">&#39;yuv420p&#39;</span><span class="p">],</span>
+            <span class="n">VIDEO_TAG</span><span class="p">),</span>
+    <span class="s">&#39;gif&#39;</span><span class="p">:(</span><span class="s">&#39;imagemagick&#39;</span><span class="p">,</span> <span class="s">&#39;gif&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fps&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">},</span> <span class="p">[],</span>
+           <span class="n">GIF_TAG</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">#========#</span>
+<span class="c"># Magics #</span>
+<span class="c">#========#</span>
+
+<span class="c"># ANSI color codes for the IPython pager</span>
+<span class="n">red</span>   <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;31m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+<span class="n">blue</span>  <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;34m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+<span class="n">green</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;32m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+<span class="n">cyan</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;36m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+
+<span class="c"># Corresponding HTML color codes</span>
+<span class="n">html_red</span> <span class="o">=</span> <span class="s">&#39;#980f00&#39;</span>
+<span class="n">html_blue</span> <span class="o">=</span> <span class="s">&#39;#00008e&#39;</span>
+
+
+<span class="nd">@magics_class</span>
+<div class="viewcode-block" id="ViewMagic"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.ViewMagic">[docs]</a><span class="k">class</span> <span class="nc">ViewMagic</span><span class="p">(</span><span class="n">Magics</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Magic to allow easy control over the display of dataviews. The</span>
+<span class="sd">    figure and animation output formats, the animation frame rate and</span>
+<span class="sd">    figure size can all be controlled.</span>
+
+<span class="sd">    Usage: %view [png|svg] [webm|h264|gif[:&lt;fps&gt;]] [&lt;percent size&gt;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">anim_formats</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;webm&#39;</span><span class="p">,</span><span class="s">&#39;h264&#39;</span><span class="p">,</span><span class="s">&#39;gif&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ViewMagic</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">usage_info</span> <span class="o">=</span> <span class="s">&quot;Usage: %view [png|svg] [webm|h264|gif[:&lt;fps&gt;]] [&lt;percent size&gt;]&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">usage_info</span> <span class="o">+=</span> <span class="s">&quot; (Arguments may be in any order)&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">option_completer</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">anim_formats</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">,</span> <span class="s">&#39;svg&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_set_animation_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">anim_spec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse the animation format and fps from the specification string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">global</span> <span class="n">VIDEO_FORMAT</span><span class="p">,</span> <span class="n">FPS</span>
+        <span class="n">format_choice</span><span class="p">,</span> <span class="n">fps_str</span> <span class="o">=</span> <span class="p">((</span><span class="n">anim_spec</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="s">&#39;:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anim_spec</span><span class="p">)</span>
+                                  <span class="k">else</span> <span class="n">anim_spec</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">format_choice</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">anim_formats</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Valid animations types: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anim_formats</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="n">fps_str</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">VIDEO_FORMAT</span> <span class="o">=</span> <span class="n">format_choice</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fps_str</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Invalid frame rate: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span>  <span class="n">fps_str</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">VIDEO_FORMAT</span><span class="p">,</span> <span class="n">FPS</span> <span class="o">=</span> <span class="n">format_choice</span><span class="p">,</span> <span class="n">fps</span>
+        <span class="k">if</span> <span class="n">format_choice</span> <span class="o">==</span> <span class="s">&#39;gif&#39;</span><span class="p">:</span>
+            <span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="s">&#39;gif&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="s">&#39;fps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">_set_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size_spec</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">PERCENTAGE_SIZE</span>
+        <span class="k">try</span><span class="p">:</span>     <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">size_spec</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="n">size</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;Percentage size must be an integer larger than zero.&quot;</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">PERCENTAGE_SIZE</span> <span class="o">=</span> <span class="n">size</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">_parse_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opts</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">FIGURE_FORMAT</span>
+        <span class="n">fig_fmt</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;svg&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;png&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">fig_fmt</span><span class="p">):</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">print</span> <span class="s">&quot;Please select either png or svg for static output&quot;</span>
+        <span class="k">elif</span> <span class="bp">True</span> <span class="ow">in</span> <span class="n">fig_fmt</span><span class="p">:</span>
+            <span class="n">figure_format</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;svg&#39;</span><span class="p">,</span> <span class="s">&#39;png&#39;</span><span class="p">][</span><span class="n">fig_fmt</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">True</span><span class="p">)]</span>
+            <span class="n">FIGURE_FORMAT</span><span class="o">=</span> <span class="n">figure_format</span>
+            <span class="n">opts</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">figure_format</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_set_animation_options</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                       <span class="k">if</span> <span class="n">opts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_size</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="nb">sum</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">opts</span> <span class="k">if</span> <span class="n">opts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span>
+                            <span class="k">else</span> <span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">opts</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">anim_success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_animation_options</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+            <span class="n">size_success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_size</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">success</span> <span class="o">=</span>  <span class="n">anim_success</span> <span class="ow">and</span> <span class="n">size_success</span>
+
+        <span class="k">return</span> <span class="n">success</span>
+
+    <span class="nd">@line_cell_magic</span>
+    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">FIGURE_FORMAT</span><span class="p">,</span>  <span class="n">VIDEO_FORMAT</span><span class="p">,</span> <span class="n">PERCENTAGE_SIZE</span><span class="p">,</span>  <span class="n">FPS</span>
+        <span class="n">start_opts</span> <span class="o">=</span> <span class="p">[</span><span class="n">FIGURE_FORMAT</span><span class="p">,</span>  <span class="n">VIDEO_FORMAT</span><span class="p">,</span> <span class="n">PERCENTAGE_SIZE</span><span class="p">,</span>  <span class="n">FPS</span><span class="p">]</span>
+
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_settings</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cell</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="n">VIDEO_FORMAT</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">FIGURE_FORMAT</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">PERCENTAGE_SIZE</span><span class="p">,</span> <span class="n">FPS</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;Displaying </span><span class="si">%s</span><span class="s"> animation and </span><span class="si">%s</span><span class="s"> figures [</span><span class="si">%d%%</span><span class="s"> size, </span><span class="si">%s</span><span class="s"> FPS]&quot;</span> <span class="o">%</span> <span class="n">info</span>
+        <span class="k">elif</span> <span class="n">cell</span> <span class="ow">and</span> <span class="n">success</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">run_cell</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+            <span class="p">[</span><span class="n">FIGURE_FORMAT</span><span class="p">,</span>  <span class="n">VIDEO_FORMAT</span><span class="p">,</span> <span class="n">PERCENTAGE_SIZE</span><span class="p">,</span>  <span class="n">FPS</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_opts</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">usage_info</span>
+
+
+</div>
+<span class="nd">@magics_class</span>
+<span class="k">class</span> <span class="nc">ChannelMagic</span><span class="p">(</span><span class="n">Magics</span><span class="p">):</span>
+
+    <span class="n">custom_channels</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@cell_magic</span>
+    <span class="k">def</span> <span class="nf">channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">ChannelMagic</span><span class="o">.</span><span class="n">custom_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_channels</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">run_cell</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+        <span class="n">ChannelMagic</span><span class="o">.</span><span class="n">custom_channels</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_set_overlay_labels</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Labels on Overlays are used to index channel definitions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">GridLayout</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">subview</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">cls</span><span class="o">.</span><span class="n">_set_overlay_labels</span><span class="p">(</span><span class="n">subview</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Stack</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">overlay</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+                <span class="n">overlay</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_set_channels</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">custom_channels</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_set_overlay_labels</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="ow">in</span> <span class="n">custom_channels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">channels</span><span class="p">[</span><span class="n">prefix</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ChannelOpts</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span>
+                                                        <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_channels</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;Custom[&lt;&#39;</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;&gt;]&#39;</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">custom_channels</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_set_channels</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">custom_channels</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_parse_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse the arguments to the magic, returning a dictionary of</span>
+<span class="sd">        {&#39;channel op name&#39; : (&#39;pattern&#39;, kwargs).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tokens</span> <span class="o">==</span> <span class="p">[]:</span> <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="n">channel_split</span> <span class="o">=</span> <span class="p">[(</span><span class="n">el</span><span class="o">+</span><span class="s">&#39;]&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+        <span class="n">spec_split</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;=&gt;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">channel_split</span><span class="p">]</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">tail</span> <span class="ow">in</span> <span class="n">spec_split</span><span class="p">:</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">head</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">op_match</span> <span class="o">=</span> <span class="p">[</span><span class="n">op</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">channel_modes</span> <span class="k">if</span> <span class="n">tail</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">op</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">op_match</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unrecognized channel operation: &quot;</span><span class="p">,</span> <span class="n">tail</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">argument_str</span> <span class="o">=</span> <span class="n">tail</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">op_match</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">eval_str</span> <span class="o">=</span> <span class="n">argument_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">,</span><span class="s">&#39;dict(&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">,</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">eval_str</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Could not evaluate: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">argument_str</span><span class="p">)</span>
+
+            <span class="n">op</span> <span class="o">=</span> <span class="n">op_match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">channel_modes</span><span class="p">[</span><span class="n">op</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">!=</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+
+            <span class="n">mismatch_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="n">params</span>
+            <span class="k">if</span> <span class="n">mismatch_keys</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Parameter(s) </span><span class="si">%r</span><span class="s"> not accepted by </span><span class="si">%s</span><span class="s"> operation&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mismatch_keys</span><span class="p">),</span> <span class="n">op</span><span class="p">))</span>
+
+            <span class="n">valid_chars</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span> <span class="o">+</span> <span class="s">&#39;_* &#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">head</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;*&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_chars</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">head</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid characters in overlay pattern specification: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">head</span><span class="p">)</span>
+
+            <span class="n">pattern</span> <span class="o">=</span>  <span class="s">&#39; * &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">head</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;*&#39;</span><span class="p">))</span>
+            <span class="n">channel_modes</span><span class="p">[</span><span class="n">op</span><span class="p">]</span><span class="o">.</span><span class="n">instance</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">channels</span><span class="p">[</span><span class="n">op</span><span class="p">]</span> <span class="o">=</span>  <span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">channels</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">option_completer</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tab completion hook for the %opts and %%opts magic.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">text_until_cursor</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">))</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">line_tail</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%%</span><span class="s">channels&#39;</span><span class="p">):]</span>
+            <span class="n">op_name</span> <span class="o">=</span> <span class="n">line_tail</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">op_name</span> <span class="ow">in</span>  <span class="n">channel_modes</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">channel_modes</span><span class="p">[</span><span class="n">op_name</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">channel_modes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+
+<span class="nd">@magics_class</span>
+<div class="viewcode-block" id="OptsMagic"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.OptsMagic">[docs]</a><span class="k">class</span> <span class="nc">OptsMagic</span><span class="p">(</span><span class="n">Magics</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The %opts and %%opts line and cell magics allow customization of</span>
+<span class="sd">    how dataviews are displayed. The %opts line magic updates or</span>
+<span class="sd">    creates new options for either StyleOpts (i.e. matplotlib options)</span>
+<span class="sd">    or in the PlotOpts (plot settings). The %%opts cell magic sets</span>
+<span class="sd">    custom display options associated on the displayed view object</span>
+<span class="sd">    which will persist every time that object is displayed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Attributes set by the magic and read when display hooks run</span>
+    <span class="n">custom_options</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">show_info</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">show_labels</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OptsMagic</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">styles_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">style_opts</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">viewmap</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">params_lists</span> <span class="o">=</span> <span class="p">[[</span><span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">el</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                         <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">viewmap</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="c"># List of all parameters and styles for tab completion</span>
+        <span class="n">OptsMagic</span><span class="o">.</span><span class="n">all_styles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">styles</span> <span class="ow">in</span> <span class="n">styles_list</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">styles</span><span class="p">]))</span>
+        <span class="n">OptsMagic</span><span class="o">.</span><span class="n">all_params</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">plist</span> <span class="ow">in</span> <span class="n">params_lists</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">plist</span><span class="p">]))</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">pprint_kws</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">style</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="OptsMagic.collect"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.OptsMagic.collect">[docs]</a>    <span class="k">def</span> <span class="nf">collect</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s">&#39;style&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a composite view object, build a dictionary of either</span>
+<span class="sd">        the &#39;style&#39; or &#39;label&#39; attributes across all contained</span>
+<span class="sd">        atoms. This method works across overlays, grid layouts and</span>
+<span class="sd">        stacks. The return is a dictionary with the collected string</span>
+<span class="sd">        values as keys for the the associated view type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="n">Overlay</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">GridLayout</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">subview</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">subview</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Stack</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">):</span>
+            <span class="n">key_lists</span> <span class="o">=</span> <span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">el</span> <span class="k">for</span> <span class="n">els</span> <span class="ow">in</span> <span class="n">key_lists</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">els</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">val</span><span class="p">:</span><span class="n">obj</span><span class="o">.</span><span class="n">type</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Stack</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">subview</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">last</span><span class="p">:</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">subview</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">value</span><span class="p">:</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="n">group</span>
+
+</div>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_basename</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Strips out the &#39;Custom&#39; prefix from styles names that have</span>
+<span class="sd">        been customized by an object identifier.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;&gt;]_&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Custom&#39;</span><span class="p">):</span>   <span class="k">return</span> <span class="n">name</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>               <span class="k">return</span> <span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid style name </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_set_style_names</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">custom_name_map</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the style names on a composite view to the custom style</span>
+<span class="sd">        name for all matches. A match occurs when the basename of the</span>
+<span class="sd">        view.style is found in the supplied dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">GridLayout</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">subview</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">cls</span><span class="o">.</span><span class="n">_set_style_names</span><span class="p">(</span><span class="n">subview</span><span class="p">,</span> <span class="n">custom_name_map</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">style</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="p">[</span><span class="n">custom_name_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_basename</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">style</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">style</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_basename</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">style</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="n">custom_name_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">style</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">style</span><span class="p">)</span>
+
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="OptsMagic.set_view_options"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.OptsMagic.set_view_options">[docs]</a>    <span class="k">def</span> <span class="nf">set_view_options</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        To be called by the display hook which supplies the view</span>
+<span class="sd">        object to be displayed. Any custom options are defined on the</span>
+<span class="sd">        object as necessary and if there is an error, an HTML message</span>
+<span class="sd">        is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;Custom[&lt;&#39;</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;&gt;]_&#39;</span>
+
+        <span class="c"># Implements the %%labels magic</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">show_labels</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;label&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span> <span class="n">labels</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+            <span class="n">summary</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s"> objects inspected, </span><span class="si">%d</span><span class="s"> without labels. &quot;</span>
+                       <span class="s">&quot;The set of labels found:&lt;br&gt;&lt;br&gt;&amp;emsp;&quot;</span> <span class="o">%</span> <span class="n">info</span><span class="p">)</span>
+            <span class="n">label_list</span> <span class="o">=</span> <span class="s">&#39;&lt;br&gt;&amp;emsp;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="k">if</span> <span class="n">l</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">summary</span> <span class="o">+</span> <span class="n">label_list</span>
+
+        <span class="c"># Nothing to be done</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">cls</span><span class="o">.</span><span class="n">custom_options</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">show_info</span><span class="p">]):</span> <span class="k">return</span>
+
+        <span class="n">styles</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;style&#39;</span><span class="p">)</span>
+        <span class="c"># The set of available style basenames present in the object</span>
+        <span class="n">available_styles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_basename</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">styles</span><span class="p">)</span>
+        <span class="n">custom_styles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">styles</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Custom&#39;</span><span class="p">))</span>
+
+        <span class="n">mismatches</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">custom_options</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="p">(</span><span class="n">available_styles</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">channel_modes</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">show_info</span> <span class="ow">or</span> <span class="n">mismatches</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_option_key_info</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">available_styles</span><span class="p">,</span> <span class="n">mismatches</span><span class="p">,</span> <span class="n">custom_styles</span><span class="p">)</span>
+
+        <span class="c"># Test the options are valid</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_keyword_info</span><span class="p">(</span><span class="n">styles</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">custom_options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">error</span><span class="p">:</span> <span class="k">return</span> <span class="n">error</span>
+
+        <span class="c"># Link the object to the new custom style</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_set_style_names</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">custom_options</span><span class="p">))</span>
+        <span class="c"># Define the Styles in the OptionMaps</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_define_options</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">custom_options</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+
+</div>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_keyword_info</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">styles</span><span class="p">,</span> <span class="n">custom_options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the keywords in the StyleOpts or PlotOpts are</span>
+<span class="sd">        valid. If not, the appropriate HTML error message is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">plot_kws</span><span class="p">,</span> <span class="n">style_kws</span><span class="p">)</span> <span class="ow">in</span> <span class="n">custom_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">viewtype</span> <span class="ow">in</span> <span class="n">styles</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">plottype</span> <span class="o">=</span> <span class="n">viewmap</span><span class="p">[</span><span class="n">viewtype</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_basename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">key</span><span class="p">:</span> <span class="k">continue</span>
+                <span class="c"># Plot options checks</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">plottype</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span><span class="p">]</span>
+                <span class="n">mismatched_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">plot_kws</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">mismatched_params</span><span class="p">:</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;&lt;b&gt;</span><span class="si">%r</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">mismatched_params</span><span class="p">),</span>
+                            <span class="s">&#39;&lt;b&gt;</span><span class="si">%r</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">plottype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">params</span><span class="p">))</span>
+                    <span class="n">errmsg</span> <span class="o">+=</span> <span class="s">&quot;Keywords </span><span class="si">%s</span><span class="s"> not in valid </span><span class="si">%s</span><span class="s"> plot options: &lt;br&gt;&amp;nbsp;&amp;nbsp;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">info</span>
+
+                <span class="c"># Style options checks</span>
+                <span class="n">style_opts</span> <span class="o">=</span> <span class="n">plottype</span><span class="o">.</span><span class="n">style_opts</span>
+                <span class="n">mismatched_opts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">style_kws</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">style_opts</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">style_opts</span> <span class="o">==</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">mismatched_opts</span><span class="p">:</span>
+                    <span class="n">errmsg</span> <span class="o">+=</span> <span class="s">&#39;No styles accepted by </span><span class="si">%s</span><span class="s">. &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">plottype</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">elif</span> <span class="n">mismatched_opts</span><span class="p">:</span>
+                    <span class="n">spacing</span> <span class="o">=</span> <span class="s">&#39;&lt;br&gt;&lt;br&gt;&#39;</span> <span class="k">if</span> <span class="n">errmsg</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="n">spacing</span><span class="p">,</span>
+                            <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;&lt;b&gt;</span><span class="si">%r</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">mismatched_opts</span><span class="p">),</span>
+                            <span class="s">&#39;&lt;b&gt;</span><span class="si">%r</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">plottype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">style_opts</span><span class="p">))</span>
+                    <span class="n">errmsg</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">Keywords </span><span class="si">%s</span><span class="s"> not in valid </span><span class="si">%s</span><span class="s"> style options: &lt;br&gt;&amp;nbsp;&amp;nbsp;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">info</span>
+        <span class="k">return</span> <span class="n">errmsg</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_option_key_info</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">available_styles</span><span class="p">,</span> <span class="n">mismatches</span><span class="p">,</span> <span class="n">custom_styles</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Format the information about valid options keys as HTML,</span>
+<span class="sd">        listing mismatched names and the available keys.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="s">&#39;&amp;emsp;&lt;code&gt;&lt;font color=&quot;</span><span class="si">%s</span><span class="s">&quot;&gt;</span><span class="si">%%</span><span class="s">s&lt;/font&gt;</span><span class="si">%%</span><span class="s">s : &#39;</span> <span class="o">%</span> <span class="n">html_red</span>
+        <span class="n">fmt</span><span class="o">+=</span> <span class="s">&#39;&lt;font color=&quot;</span><span class="si">%s</span><span class="s">&quot;&gt;[</span><span class="si">%%</span><span class="s">s]&lt;/font&gt; </span><span class="si">%%</span><span class="s">s&lt;/code&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">html_blue</span>
+        <span class="n">obj_name</span> <span class="o">=</span> <span class="s">&quot;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&quot;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">available_styles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;&lt;b&gt;No keys are available in the current </span><span class="si">%s</span><span class="s">&lt;/b&gt;&quot;</span> <span class="o">%</span> <span class="n">obj_name</span>
+
+        <span class="n">mismatch_str</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;&lt;b&gt;</span><span class="si">%r</span><span class="s">&lt;/b&gt;&#39;</span> <span class="o">%</span> <span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">mismatches</span><span class="p">)</span>
+        <span class="n">unavailable_msg</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> not in customizable&#39;</span> <span class="o">%</span> <span class="n">mismatch_str</span> <span class="k">if</span> <span class="n">mismatch_str</span> <span class="k">else</span> <span class="s">&#39;Customizable&#39;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> options:&lt;br&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">unavailable_msg</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">)</span>
+        <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">available_styles</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">available_styles</span><span class="p">):</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="s">&#39;&amp;nbsp;&#39;</span><span class="o">*</span><span class="p">(</span><span class="n">max_len</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span>
+                        <span class="n">cls</span><span class="o">.</span><span class="n">pprint_kws</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="p">(</span><span class="n">name</span><span class="p">)),</span>
+                        <span class="n">cls</span><span class="o">.</span><span class="n">pprint_kws</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">style</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">custom_styles</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&#39;&lt;br&gt;Options that have been customized for the displayed view only:&lt;br&gt;&#39;</span>
+            <span class="n">custom_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">style_name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;&gt;]_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">style_name</span> <span class="ow">in</span> <span class="n">custom_styles</span><span class="p">]</span>
+            <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">custom_names</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">custom_style</span><span class="p">,</span> <span class="n">custom_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">custom_styles</span><span class="p">,</span> <span class="n">custom_names</span><span class="p">):</span>
+                <span class="n">padding</span> <span class="o">=</span> <span class="s">&#39;&amp;nbsp;&#39;</span><span class="o">*</span><span class="p">(</span><span class="n">max_len</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">custom_name</span><span class="p">))</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">custom_name</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span>
+                            <span class="n">cls</span><span class="o">.</span><span class="n">pprint_kws</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="p">(</span><span class="n">custom_style</span><span class="p">)),</span>
+                            <span class="n">cls</span><span class="o">.</span><span class="n">pprint_kws</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">style</span><span class="p">(</span><span class="n">custom_style</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+
+    <span class="k">def</span> <span class="nf">_parse_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse the arguments to the magic, returning a dictionary with</span>
+<span class="sd">        style name keys and tuples of keywords as values. The first</span>
+<span class="sd">        element of the tuples are the plot keyword options and the</span>
+<span class="sd">        second element are the style keyword options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tokens</span> <span class="o">==</span> <span class="p">[]:</span> <span class="k">return</span> <span class="p">{}</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s">&quot;First token must be a option name (a capitalized string)&quot;</span><span class="p">)</span>
+
+        <span class="c"># Split the input by the capitalized tokens</span>
+        <span class="n">style_names</span><span class="p">,</span> <span class="n">tuples</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">upper</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">()):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">upper</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s">&quot;Options should be split by keywords&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">upper</span><span class="p">:</span>
+                <span class="n">style_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parse_string</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">parse_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parse_string</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">plotstr</span><span class="p">,</span> <span class="n">stylestr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="n">parse_string</span>
+                <span class="k">elif</span> <span class="p">[</span><span class="n">parse_string</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="s">&#39;[]&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s">&quot;Plot options not supplied in a well formed list.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">split_ind</span> <span class="o">=</span> <span class="n">parse_string</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)</span>
+                    <span class="n">plotstr</span> <span class="o">=</span> <span class="n">parse_string</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">split_ind</span><span class="p">]</span>
+                    <span class="n">stylestr</span> <span class="o">=</span> <span class="n">parse_string</span><span class="p">[</span><span class="n">split_ind</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># Evalute the strings to obtain dictionaries</span>
+                    <span class="n">dicts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">eval</span><span class="p">(</span><span class="s">&#39;dict(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">els</span><span class="p">))</span>
+                             <span class="k">for</span> <span class="n">els</span> <span class="ow">in</span> <span class="p">[</span><span class="n">plotstr</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">stylestr</span><span class="o">.</span><span class="n">split</span><span class="p">()]]</span>
+                    <span class="n">tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dicts</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s">&quot;Could not parse keywords from &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">parse_string</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">style_names</span><span class="p">,</span> <span class="n">tuples</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="p">({},{}))</span>
+
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_define_options</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">kwarg_map</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the style and plot options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lens</span><span class="p">,</span> <span class="n">strs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">plot_kws</span><span class="p">,</span> <span class="n">style_kws</span><span class="p">)</span> <span class="ow">in</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">plot_update</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">plotting</span>
+            <span class="k">if</span> <span class="n">plot_update</span> <span class="ow">and</span> <span class="n">plot_kws</span><span class="p">:</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">prefix</span><span class="o">+</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="o">**</span><span class="n">plot_kws</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">plot_kws</span><span class="p">:</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">prefix</span><span class="o">+</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">PlotOpts</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kws</span><span class="p">)</span>
+
+            <span class="n">style_update</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">style</span>
+            <span class="k">if</span> <span class="n">style_update</span> <span class="ow">and</span> <span class="n">style_kws</span><span class="p">:</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">prefix</span><span class="o">+</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">style</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="o">**</span><span class="n">style_kws</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">style_kws</span><span class="p">:</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">prefix</span><span class="o">+</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">StyleOpts</span><span class="p">(</span><span class="o">**</span><span class="n">style_kws</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="n">plotstr</span> <span class="o">=</span> <span class="s">&#39;[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="n">cls</span><span class="o">.</span><span class="n">pprint_kws</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">plotting</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+                <span class="n">stylestr</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">pprint_kws</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">style</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">style</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+                <span class="n">strs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="n">plotstr</span><span class="p">,</span> <span class="n">stylestr</span><span class="p">))</span>
+                <span class="n">lens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">lens</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                        <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plotstr</span><span class="p">),</span> <span class="n">lens</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stylestr</span><span class="p">),</span><span class="n">lens</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">heading</span> <span class="o">=</span> <span class="s">&quot;Plot and Style Options&quot;</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">heading</span><span class="p">,</span> <span class="s">&#39;=&#39;</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">heading</span><span class="p">))</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;Each line describes the options associated with a single key:&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n\n</span><span class="si">%s</span><span class="se">\n\n</span><span class="s">    </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">green</span> <span class="o">%</span> <span class="n">title</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span>
+                                                    <span class="n">red</span> <span class="o">%</span> <span class="s">&#39;Name:&#39;</span><span class="p">,</span> <span class="n">blue</span> <span class="o">%</span> <span class="s">&#39;[Plot Options]&#39;</span><span class="p">,</span>
+                                                    <span class="s">&#39;Style Options&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">plot_str</span><span class="p">,</span> <span class="n">style_str</span><span class="p">)</span> <span class="ow">in</span> <span class="n">strs</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">red</span> <span class="o">%</span> <span class="n">name</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">lens</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                       <span class="n">blue</span> <span class="o">%</span> <span class="n">plot_str</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">lens</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                       <span class="n">style_str</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">lens</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">page</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="OptsMagic.option_completer"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.OptsMagic.option_completer">[docs]</a>    <span class="k">def</span> <span class="nf">option_completer</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tab completion hook for the %opts and %%opts magic.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">text_until_cursor</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">))</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">el</span><span class="o">+</span><span class="s">&#39;=&#39;</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">all_params</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">el</span><span class="o">+</span><span class="s">&#39;=&#39;</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">all_styles</span><span class="p">]</span> <span class="o">+</span> <span class="n">options</span><span class="o">.</span><span class="n">options</span><span class="p">()</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_line_magic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update or create new options in for the plot or style</span>
+<span class="sd">        options. Plot options keyword-value pairs, when supplied need</span>
+<span class="sd">        to be give in square brackets after the option key. Any style</span>
+<span class="sd">        keywords then following the closing square bracket. The -v</span>
+<span class="sd">        flag toggles verbose output.</span>
+
+<span class="sd">        Usage: %opts [-v] &lt;Key&gt; [ [&lt;keyword&gt;=&lt;value&gt;...]] [&lt;keyword&gt;=&lt;value&gt;...]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verbose</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;-v&#39;</span><span class="p">):</span>
+            <span class="n">verbose</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;-v&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="n">kwarg_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_keywords</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwarg_map</span><span class="p">:</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                    <span class="nb">len</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Custom&#39;</span><span class="p">)]))</span>
+            <span class="k">print</span> <span class="s">&quot;There are </span><span class="si">%d</span><span class="s"> style options defined (</span><span class="si">%d</span><span class="s"> custom object styles).&quot;</span> <span class="o">%</span> <span class="n">info</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                    <span class="nb">len</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Custom&#39;</span><span class="p">)]))</span>
+            <span class="k">print</span> <span class="s">&quot;There are </span><span class="si">%d</span><span class="s"> plot options defined (</span><span class="si">%d</span><span class="s"> custom object plot settings).&quot;</span> <span class="o">%</span> <span class="n">info</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_define_options</span><span class="p">(</span><span class="n">kwarg_map</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+
+    <span class="nd">@cell_magic</span>
+<div class="viewcode-block" id="OptsMagic.labels"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.OptsMagic.labels">[docs]</a>    <span class="k">def</span> <span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simple magic to see the full list of defined labels for the</span>
+<span class="sd">        displayed view object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">line</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%%</span><span class="s">labels magics accepts no arguments.&quot;</span><span class="p">)</span>
+        <span class="n">OptsMagic</span><span class="o">.</span><span class="n">show_labels</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">run_cell</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+        <span class="n">OptsMagic</span><span class="o">.</span><span class="n">show_labels</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+    <span class="nd">@line_cell_magic</span>
+<div class="viewcode-block" id="OptsMagic.opts"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.OptsMagic.opts">[docs]</a>    <span class="k">def</span> <span class="nf">opts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set custom display options unique to the displayed view. The</span>
+<span class="sd">        keyword-value pairs in the square brackets (if present) set</span>
+<span class="sd">        the plot parameters. Keyword-value pairs outside the square</span>
+<span class="sd">        brackets are matplotlib style options.</span>
+
+<span class="sd">        Usage: %%opts &lt;Key&gt; [ [&lt;keyword&gt;=&lt;value&gt;...] ] [&lt;keyword&gt;=&lt;value&gt;...]</span>
+
+<span class="sd">        Multiple keys may be listed, setting plot and style options in</span>
+<span class="sd">        this way.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cell</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_line_magic</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">OptsMagic</span><span class="o">.</span><span class="n">show_info</span><span class="o">=</span><span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">OptsMagic</span><span class="o">.</span><span class="n">custom_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_keywords</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+
+        <span class="c"># Run the cell in the updated environment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">run_cell</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+        <span class="c"># Reset the class attributes</span>
+        <span class="n">OptsMagic</span><span class="o">.</span><span class="n">custom_options</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">OptsMagic</span><span class="o">.</span><span class="n">show_info</span><span class="o">=</span><span class="bp">False</span>
+
+
+<span class="c">#==================#</span>
+<span class="c"># Helper functions #</span>
+<span class="c">#==================#</span>
+</div></div>
+<span class="k">def</span> <span class="nf">select_format</span><span class="p">(</span><span class="n">format_priority</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">format_priority</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anim</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(),</span>
+                                           <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="o">*</span><span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">fmt</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">fmt</span>
+        <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">format_priority</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">get_plot_size</span><span class="p">():</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="n">PERCENTAGE_SIZE</span> <span class="o">/</span> <span class="mf">100.0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">Plot</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span><span class="p">,</span>
+            <span class="n">Plot</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">mime_type</span><span class="p">,</span> <span class="n">anim_kwargs</span><span class="p">,</span> <span class="n">extra_args</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">extra_args</span> <span class="o">!=</span> <span class="p">[]:</span>
+        <span class="n">anim_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">anim_kwargs</span><span class="p">,</span> <span class="n">extra_args</span><span class="o">=</span><span class="n">extra_args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="s">&#39;_encoded_video&#39;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">mime_type</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">writer</span><span class="p">,</span> <span class="o">**</span><span class="n">anim_kwargs</span><span class="p">)</span>
+            <span class="n">video</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">anim</span><span class="o">.</span><span class="n">_encoded_video</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;base64&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tag</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b64</span><span class="o">=</span><span class="n">anim</span><span class="o">.</span><span class="n">_encoded_video</span><span class="p">,</span>
+                      <span class="n">mime_type</span><span class="o">=</span><span class="n">mime_type</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">HTML_video</span><span class="p">(</span><span class="n">plot</span><span class="p">):</span>
+    <span class="n">anim</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">anim</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="n">FPS</span><span class="p">)</span>
+    <span class="n">writers</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">writers</span><span class="o">.</span><span class="n">avail</span>
+    <span class="k">for</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="p">[</span><span class="n">VIDEO_FORMAT</span><span class="p">]</span> <span class="o">+</span> <span class="n">ANIMATION_OPTS</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">fmt</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">writers</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="o">*</span><span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">fmt</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">return</span> <span class="s">&quot;&lt;b&gt;Could not generate </span><span class="si">%s</span><span class="s"> animation&lt;/b&gt;&quot;</span> <span class="o">%</span> <span class="n">VIDEO_FORMAT</span>
+
+
+<div class="viewcode-block" id="first_frame"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.first_frame">[docs]</a><span class="k">def</span> <span class="nf">first_frame</span><span class="p">(</span><span class="n">plot</span><span class="p">):</span>
+    <span class="s">&quot;Only display the first frame of an animated plot&quot;</span>
+    <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">plot</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="middle_frame"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.middle_frame">[docs]</a><span class="k">def</span> <span class="nf">middle_frame</span><span class="p">(</span><span class="n">plot</span><span class="p">):</span>
+    <span class="s">&quot;Only display the (approximately) middle frame of an animated plot&quot;</span>
+    <span class="n">middle_frame</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">plot</span><span class="p">[</span><span class="n">middle_frame</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="last_frame"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.last_frame">[docs]</a><span class="k">def</span> <span class="nf">last_frame</span><span class="p">(</span><span class="n">plot</span><span class="p">):</span>
+    <span class="s">&quot;Only display the last frame of an animated plot&quot;</span>
+    <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">plot</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">plot</span><span class="p">)])</span>
+
+</div>
+<span class="k">def</span> <span class="nf">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">inches</span> <span class="o">=</span> <span class="n">size</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="n">inches</span><span class="p">,</span> <span class="n">inches</span><span class="p">)</span>
+
+    <span class="n">mime_type</span> <span class="o">=</span> <span class="s">&#39;svg+xml&#39;</span> <span class="k">if</span> <span class="n">FIGURE_FORMAT</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s">&#39;svg&#39;</span> <span class="k">else</span> <span class="s">&#39;png&#39;</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;data:image/</span><span class="si">%s</span><span class="s">;base64,&#39;</span> <span class="o">%</span> <span class="n">mime_type</span>
+    <span class="n">b64</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">print_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">FIGURE_FORMAT</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;base64&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="s">&quot;&lt;center&gt;&lt;img height=&#39;</span><span class="si">%d</span><span class="s">&#39; width=&#39;</span><span class="si">%d</span><span class="s">&#39; src=&#39;</span><span class="si">%s</span><span class="s">&#39;/&gt;&lt;center/&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">b64</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="s">&quot;&lt;center&gt;&lt;img src=&#39;</span><span class="si">%s</span><span class="s">&#39; /&gt;&lt;center/&gt;&quot;</span> <span class="o">%</span> <span class="n">b64</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">html</span> <span class="k">if</span> <span class="p">(</span><span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="k">else</span> <span class="s">&#39;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/br&gt;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">html</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">figure_fallback</span><span class="p">(</span><span class="n">plotobj</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Cannot import matplotlib.animation&#39;</span> <span class="k">if</span> <span class="n">animation</span> <span class="ow">is</span> <span class="bp">None</span>
+                   <span class="k">else</span> <span class="s">&#39;Failed to generate matplotlib animation&#39;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span>  <span class="n">plotobj</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+
+
+<span class="c">#===============#</span>
+<span class="c"># Display hooks #</span>
+<span class="c">#===============#</span>
+
+
+<div class="viewcode-block" id="process_view_magics"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.process_view_magics">[docs]</a><span class="k">def</span> <span class="nf">process_view_magics</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="s">&quot;Hook into </span><span class="si">%%</span><span class="s">opts and </span><span class="si">%%</span><span class="s">channels magics to process display view&quot;</span>
+    <span class="n">invalid_styles</span> <span class="o">=</span> <span class="n">OptsMagic</span><span class="o">.</span><span class="n">set_view_options</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">invalid_styles</span><span class="p">:</span> <span class="k">return</span> <span class="n">invalid_styles</span>
+    <span class="n">invalid_channels</span> <span class="o">=</span> <span class="n">ChannelMagic</span><span class="o">.</span><span class="n">set_channels</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">invalid_channels</span><span class="p">:</span> <span class="k">return</span> <span class="n">invalid_channels</span>
+</div>
+<span class="k">def</span> <span class="nf">display_hook</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">retval</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ENABLE_TRACEBACKS</span><span class="p">:</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">retval</span>
+    <span class="k">return</span> <span class="n">wrapped</span>
+
+
+<span class="nd">@display_hook</span>
+<span class="k">def</span> <span class="nf">animation_display</span><span class="p">(</span><span class="n">anim</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">animate</span><span class="p">(</span><span class="n">anim</span><span class="p">,</span> <span class="o">*</span><span class="n">ANIMATION_OPTS</span><span class="p">[</span><span class="n">VIDEO_FORMAT</span><span class="p">])</span>
+
+<span class="nd">@display_hook</span>
+<span class="k">def</span> <span class="nf">stack_display</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">Stack</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">magic_info</span> <span class="o">=</span> <span class="n">process_view_magics</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">magic_info</span><span class="p">:</span> <span class="k">return</span> <span class="n">magic_info</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span><span class="o">.</span><span class="n">opts</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">get_plot_size</span><span class="p">())</span>
+    <span class="n">stackplot</span> <span class="o">=</span> <span class="n">viewmap</span><span class="p">[</span><span class="n">stack</span><span class="o">.</span><span class="n">type</span><span class="p">](</span><span class="n">stack</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stackplot</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">stackplot</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">stackplot</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>    <span class="k">return</span> <span class="n">render_anim</span><span class="p">(</span><span class="n">stackplot</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span> <span class="k">return</span> <span class="n">figure_fallback</span><span class="p">(</span><span class="n">stackplot</span><span class="p">)</span>
+
+
+<span class="nd">@display_hook</span>
+<span class="k">def</span> <span class="nf">layout_display</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">GridLayout</span><span class="p">([</span><span class="n">grid</span><span class="p">])</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">Layout</span><span class="p">)</span> <span class="k">else</span> <span class="n">grid</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="p">(</span><span class="n">GridLayout</span><span class="p">)):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">magic_info</span> <span class="o">=</span> <span class="n">process_view_magics</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">magic_info</span><span class="p">:</span> <span class="k">return</span> <span class="n">magic_info</span>
+    <span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">get_plot_size</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+                 <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">get_plot_size</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">grid_size</span><span class="p">)</span>
+    <span class="n">gridplot</span> <span class="o">=</span> <span class="n">GridLayoutPlot</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span>  <span class="n">gridplot</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>     <span class="k">return</span> <span class="n">render_anim</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>  <span class="k">return</span> <span class="n">figure_fallback</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span>
+
+<span class="nd">@display_hook</span>
+<span class="k">def</span> <span class="nf">projection_display</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">CoordinateGrid</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">size_factor</span> <span class="o">=</span> <span class="mf">0.17</span>
+    <span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">size_factor</span><span class="o">*</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">get_plot_size</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+                 <span class="n">size_factor</span><span class="o">*</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">get_plot_size</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">magic_info</span> <span class="o">=</span> <span class="n">process_view_magics</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">magic_info</span><span class="p">:</span> <span class="k">return</span> <span class="n">magic_info</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">opts</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">grid_size</span><span class="p">)</span>
+    <span class="n">gridplot</span> <span class="o">=</span> <span class="n">viewmap</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">__class__</span><span class="p">](</span><span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span>  <span class="n">gridplot</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>     <span class="k">return</span> <span class="n">render_anim</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>  <span class="k">return</span> <span class="n">figure_fallback</span><span class="p">(</span><span class="n">gridplot</span><span class="p">)</span>
+
+<span class="nd">@display_hook</span>
+<span class="k">def</span> <span class="nf">view_display</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">View</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">Annotation</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">magic_info</span> <span class="o">=</span> <span class="n">process_view_magics</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">magic_info</span><span class="p">:</span> <span class="k">return</span> <span class="n">magic_info</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="p">(</span><span class="n">view</span><span class="p">)</span><span class="o">.</span><span class="n">opts</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">get_plot_size</span><span class="p">())</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">viewmap</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">__class__</span><span class="p">](</span><span class="n">view</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)()</span>
+    <span class="k">return</span> <span class="n">figure_display</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="update_matplotlib_rc"><a class="viewcode-back" href="../../Reference_Manual/dataviews.ipython-module.html#dataviews.ipython.update_matplotlib_rc">[docs]</a><span class="k">def</span> <span class="nf">update_matplotlib_rc</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Default changes to the matplotlib rc used by IPython Notebook.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">matplotlib</span>
+    <span class="n">rc</span><span class="o">=</span> <span class="p">{</span><span class="s">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">6.0</span><span class="p">,</span><span class="mf">4.0</span><span class="p">),</span>
+         <span class="s">&#39;figure.facecolor&#39;</span><span class="p">:</span> <span class="s">&#39;white&#39;</span><span class="p">,</span>
+         <span class="s">&#39;figure.edgecolor&#39;</span><span class="p">:</span> <span class="s">&#39;white&#39;</span><span class="p">,</span>
+         <span class="s">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+         <span class="s">&#39;savefig.dpi&#39;</span><span class="p">:</span> <span class="mi">72</span><span class="p">,</span>
+         <span class="s">&#39;figure.subplot.bottom&#39;</span> <span class="p">:</span> <span class="o">.</span><span class="mi">125</span>
+         <span class="p">}</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rc</span><span class="p">)</span>
+
+</div>
+<span class="n">all_line_magics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="s">&#39;%params&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%o</span><span class="s">pts&#39;</span><span class="p">,</span> <span class="s">&#39;%view&#39;</span><span class="p">])</span>
+<span class="n">all_cell_magics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%%</span><span class="s">view&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">opts&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">labels&#39;</span><span class="p">])</span>
+<span class="n">message</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;Welcome to the Dataviews IPython extension! (http://ioam.github.io/imagen/)&quot;&quot;&quot;</span>
+<span class="n">message</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Available magics: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">all_line_magics</span> <span class="o">+</span> <span class="n">all_cell_magics</span><span class="p">)</span>
+
+<span class="n">_loaded</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">VIDEO_FORMAT</span> <span class="o">=</span> <span class="n">select_format</span><span class="p">([</span><span class="s">&#39;webm&#39;</span><span class="p">,</span><span class="s">&#39;h264&#39;</span><span class="p">,</span><span class="s">&#39;gif&#39;</span><span class="p">])</span>
+
+<span class="c"># HTML_video output by default, but may be set to first_frame,</span>
+<span class="c"># middle_frame or last_frame (e.g. for testing purposes)</span>
+
+<span class="n">render_anim</span> <span class="o">=</span> <span class="n">HTML_video</span>
+
+<span class="k">def</span> <span class="nf">load_ipython_extension</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="n">message</span>
+
+    <span class="k">global</span> <span class="n">_loaded</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_loaded</span><span class="p">:</span>
+        <span class="n">_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">param_ext</span><span class="o">.</span><span class="n">load_ipython_extension</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+
+        <span class="n">ip</span><span class="o">.</span><span class="n">register_magics</span><span class="p">(</span><span class="n">ViewMagic</span><span class="p">)</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">register_magics</span><span class="p">(</span><span class="n">OptsMagic</span><span class="p">)</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">register_magics</span><span class="p">(</span><span class="n">ChannelMagic</span><span class="p">)</span>
+
+
+        <span class="c"># Configuring tab completion</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="s">&#39;complete_command&#39;</span><span class="p">,</span> <span class="n">ChannelMagic</span><span class="o">.</span><span class="n">option_completer</span><span class="p">,</span> <span class="n">str_key</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%c</span><span class="s">hannels&#39;</span><span class="p">)</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="s">&#39;complete_command&#39;</span><span class="p">,</span> <span class="n">ChannelMagic</span><span class="o">.</span><span class="n">option_completer</span><span class="p">,</span> <span class="n">str_key</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">channels&#39;</span><span class="p">)</span>
+
+        <span class="n">ip</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="s">&#39;complete_command&#39;</span><span class="p">,</span> <span class="n">ViewMagic</span><span class="o">.</span><span class="n">option_completer</span><span class="p">,</span> <span class="n">str_key</span> <span class="o">=</span> <span class="s">&#39;%view&#39;</span><span class="p">)</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="s">&#39;complete_command&#39;</span><span class="p">,</span> <span class="n">ViewMagic</span><span class="o">.</span><span class="n">option_completer</span><span class="p">,</span> <span class="n">str_key</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">view&#39;</span><span class="p">)</span>
+
+        <span class="n">ip</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="s">&#39;complete_command&#39;</span><span class="p">,</span> <span class="n">OptsMagic</span><span class="o">.</span><span class="n">option_completer</span><span class="p">,</span> <span class="n">str_key</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">opts&#39;</span><span class="p">)</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="s">&#39;complete_command&#39;</span><span class="p">,</span> <span class="n">OptsMagic</span><span class="o">.</span><span class="n">option_completer</span><span class="p">,</span> <span class="n">str_key</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%o</span><span class="s">pts&#39;</span><span class="p">)</span>
+
+
+        <span class="n">html_formatter</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">display_formatter</span><span class="o">.</span><span class="n">formatters</span><span class="p">[</span><span class="s">&#39;text/html&#39;</span><span class="p">]</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type_by_name</span><span class="p">(</span><span class="s">&#39;matplotlib.animation&#39;</span><span class="p">,</span> <span class="s">&#39;FuncAnimation&#39;</span><span class="p">,</span> <span class="n">animation_display</span><span class="p">)</span>
+
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">View</span><span class="p">,</span> <span class="n">view_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">Stack</span><span class="p">,</span> <span class="n">stack_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="n">layout_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">GridLayout</span><span class="p">,</span> <span class="n">layout_display</span><span class="p">)</span>
+        <span class="n">html_formatter</span><span class="o">.</span><span class="n">for_type</span><span class="p">(</span><span class="n">CoordinateGrid</span><span class="p">,</span> <span class="n">projection_display</span><span class="p">)</span>
+
+        <span class="n">update_matplotlib_rc</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/dataviews/ipython.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../dataviews.html" >dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

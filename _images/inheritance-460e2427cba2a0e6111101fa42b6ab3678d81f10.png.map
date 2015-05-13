@@ -1,0 +1,12 @@
+<map id="inheritance814dd881d7" name="inheritance814dd881d7">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,78,261,103"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="308,5,564,30"/>
+<area shape="rect" id="node3" href="#topo.misc.trace.ActivityMovie" title="An object encapsulating a series of movie frames displaying the" alt="" coords="333,53,540,78"/>
+<area shape="rect" id="node6" href="#topo.misc.trace.Trace" title="A specification for generating 1D traces of data from recorded" alt="" coords="358,102,515,127"/>
+<area shape="rect" id="node10" href="#topo.misc.trace.TraceGroup" title="A group of data traces to be plotted together." alt="" coords="338,151,534,176"/>
+<area shape="rect" id="node4" href="#topo.misc.trace.DataRecorder" title="Record time&#45;series data from a simulation." alt="" coords="629,5,840,30"/>
+<area shape="rect" id="node7" href="#topo.misc.trace.InMemoryRecorder" title="A data recorder that stores all recorded data in memory." alt="" coords="904,5,1147,30"/>
+<area shape="rect" id="node5" href="#topo.misc.trace.IdentityTrace" title="A Trace that returns the data, unmodified." alt="" coords="632,53,836,78"/>
+<area shape="rect" id="node8" href="#topo.misc.trace.IndexTrace" title="A Trace that assumes that each data item is a sequence that can be" alt="" coords="639,102,830,127"/>
+<area shape="rect" id="node9" href="#topo.misc.trace.SheetPositionTrace" title="A trace that assumes that the data are sheet activity matrices," alt="" coords="612,151,856,176"/>
+</map>

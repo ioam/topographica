@@ -1,0 +1,14 @@
+<map id="inheritancee3a8736439" name="inheritancee3a8736439">
+<area shape="rect" id="node1" title="Internal class." alt="" coords="153,149,258,168"/>
+<area shape="rect" id="node4" title="Internal class." alt="" coords="376,76,458,95"/>
+<area shape="rect" id="node2" title="Internal class." alt="" coords="4,149,75,168"/>
+<area shape="rect" id="node3" title="Frame widget which may contain other widgets and can have a 3D border." alt="" coords="562,71,641,90"/>
+<area shape="rect" id="node11" href="#topo.tkgui.plotgrouppanel.PlotGroupPanel" title="params(Back=Button, Enlarge=Button, Fwd=Button, Redraw=Button, Reduce=Button, Refresh=Button, dock=Boolean, gui_desired_maximum_plot_height=Integer, maximum_plot_history_length=Integer, pretty_parameters=Boolean, name=String)" alt="" coords="706,49,918,67"/>
+<area shape="rect" id="node5" title="Geometry manager Grid." alt="" coords="171,40,240,58"/>
+<area shape="rect" id="node6" title="Geometry manager Pack." alt="" coords="170,76,241,95"/>
+<area shape="rect" id="node7" title="Geometry manager Place." alt="" coords="168,113,243,131"/>
+<area shape="rect" id="node8" title="params(name=String)" alt="" coords="110,3,301,22"/>
+<area shape="rect" id="node10" title="params(name=String)" alt="" coords="336,8,497,27"/>
+<area shape="rect" id="node9" title="params(pretty_parameters=Boolean, name=String)" alt="" coords="533,26,670,45"/>
+<area shape="rect" id="node12" href="#topo.tkgui.plotgrouppanel.SheetPanel" title="params(Back=Button, Enlarge=Button, Fwd=Button, Redraw=Button, Reduce=Button, Refresh=Button, dock=Boolean, gui_desired_maximum_plot_height=Integer, maximum_plot_history_length=Integer, pretty_parameters=Boolean, name=String)" alt="" coords="954,49,1148,67"/>
+</map>

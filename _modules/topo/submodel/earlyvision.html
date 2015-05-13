@@ -1,0 +1,493 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.submodel.earlyvision &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.submodel" href="../submodel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../submodel.html" accesskey="U">topo.submodel</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.submodel.earlyvision</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains a variety of sensory models, specifically models for the</span>
+<span class="sd">visual pathway.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">numbergen</span>
+<span class="kn">import</span> <span class="nn">lancet</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">imagen</span>
+
+
+<span class="kn">from</span> <span class="nn">imagen.patterncoordinator</span> <span class="kn">import</span> <span class="n">PatternCoordinator</span><span class="p">,</span> <span class="n">PatternCoordinatorImages</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">DivideWithConstant</span>
+<span class="kn">from</span> <span class="nn">topo.submodel</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ArraySpec</span> <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">transferfn</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<div class="viewcode-block" id="SensoryModel"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.earlyvision.SensoryModel">[docs]</a><span class="k">class</span> <span class="nc">SensoryModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+
+    <span class="n">dims</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;xy&#39;</span><span class="p">],</span><span class="n">class_</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Stimulus dimensions to include, out of the possible list:</span>
+<span class="s">          :&#39;xy&#39;: Position in x and y coordinates&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">num_inputs</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        How many input patterns to present per unit area at each</span>
+<span class="s">        iteration, when using discrete patterns (e.g. Gaussians).&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="VisualInputModel"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.earlyvision.VisualInputModel">[docs]</a><span class="k">class</span> <span class="nc">VisualInputModel</span><span class="p">(</span><span class="n">SensoryModel</span><span class="p">):</span>
+
+    <span class="n">allowed_dims</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;xy&#39;</span><span class="p">,</span> <span class="s">&#39;or&#39;</span><span class="p">,</span> <span class="s">&#39;od&#39;</span><span class="p">,</span> <span class="s">&#39;dy&#39;</span><span class="p">,</span> <span class="s">&#39;dr&#39;</span><span class="p">,</span> <span class="s">&#39;sf&#39;</span><span class="p">]</span>
+
+    <span class="n">period</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Simulation time between pattern updates on the generator</span>
+<span class="s">       sheets. If None, the model is allowed to compute an appropriate</span>
+<span class="s">       value for the period property (a period of 1.0 is typical)&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;Gaussian&#39;</span><span class="p">,</span><span class="n">objects</span><span class="o">=</span>
+        <span class="p">[</span><span class="s">&#39;Gaussian&#39;</span><span class="p">,</span><span class="s">&#39;Nature&#39;</span><span class="p">,</span><span class="s">&#39;FoliageA&#39;</span><span class="p">,</span><span class="s">&#39;FoliageB&#39;</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Set of input patterns to use::</span>
+
+<span class="s">          :&#39;Gaussian&#39;: Two-dimensional Gaussians</span>
+<span class="s">          :&#39;Nature&#39;:   Shouval&#39;s 1999 monochrome 256x256 images</span>
+<span class="s">          :&#39;FoliageA&#39;: McGill calibrated LMS foliage/ image subset (5)</span>
+<span class="s">          :&#39;FoliageB&#39;: McGill calibrated LMS foliage/ image subset (25)&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">dims</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;xy&#39;</span><span class="p">,</span><span class="s">&#39;or&#39;</span><span class="p">],</span><span class="n">class_</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Stimulus dimensions to include, out of the possible list:</span>
+<span class="s">          :&#39;xy&#39;: Position in x and y coordinates</span>
+<span class="s">          :&#39;or&#39;: Orientation</span>
+<span class="s">          :&#39;od&#39;: Ocular dominance</span>
+<span class="s">          :&#39;dy&#39;: Disparity</span>
+<span class="s">          :&#39;dr&#39;: Direction of motion</span>
+<span class="s">          :&#39;sf&#39;: Spatial frequency</span>
+<span class="s">          :&#39;cr&#39;: Color (if available, see submodels.color)&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">area</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Linear size of cortical area to simulate.</span>
+<span class="s">        2.0 gives a 2.0x2.0 Sheet area in V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">dim_fraction</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Fraction by which the input brightness varies between the two</span>
+<span class="s">        eyes.  Only used if &#39;od&#39; in &#39;dims&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">contrast</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Brightness of the input patterns as a contrast (percent). Only</span>
+<span class="s">        used if &#39;od&#39; not in &#39;dims&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">sf_spacing</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Determines the factor by which successive SF channels increase</span>
+<span class="s">        in size.  Only used if &#39;sf&#39; in &#39;dims&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">sf_channels</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of spatial frequency channels. Only used if &#39;sf&#39; in &#39;dims&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">max_disparity</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Maximum disparity between input pattern positions in the left</span>
+<span class="s">        and right eye. Only used if &#39;dy&#39; in &#39;dims&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">num_lags</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of successive frames before showing a new input</span>
+<span class="s">        pattern.  This also determines the number of connections</span>
+<span class="s">        between each individual LGN sheet and V1. Only used if &#39;dr&#39; in</span>
+<span class="s">        &#39;dims&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">speed</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">24.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+                       <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">3.0</span><span class="o">/</span><span class="mf">24.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Distance in sheet coordinates between successive frames, when</span>
+<span class="s">        translating patterns. Only used if &#39;dr&#39; in &#39;dims&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">align_orientations</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                       <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether or not to align pattern orientations together if</span>
+<span class="s">        composing multiple patterns together. If None,</span>
+<span class="s">        align_orientations will be set to True when speed is non-zero</span>
+<span class="s">        (and &#39;dr&#39; in dims), otherwise it is set to False.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">property_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+
+        <span class="n">disallowed_dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">dim</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="k">if</span> <span class="n">dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_dims</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">disallowed_dims</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> not in the list of allowed dimensions&#39;</span>
+                            <span class="o">%</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">disallowed_dims</span><span class="p">))</span>
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">VisualInputModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">property_setup</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+
+        <span class="c"># The default period for most Topographica models is 1.0</span>
+        <span class="n">properties</span><span class="p">[</span><span class="s">&#39;period&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span>
+        <span class="n">properties</span><span class="p">[</span><span class="s">&#39;binocular&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;od&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="ow">or</span> <span class="s">&#39;dy&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span>
+        <span class="n">properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_channels</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;sf&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="k">else</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">properties</span><span class="p">[</span><span class="s">&#39;lags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_lags</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;dr&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&#39;dr&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">numbergen</span><span class="o">.</span><span class="n">RandomDistribution</span><span class="o">.</span><span class="n">time_dependent</span><span class="p">:</span>
+            <span class="n">numbergen</span><span class="o">.</span><span class="n">RandomDistribution</span><span class="o">.</span><span class="n">time_dependent</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&#39;Setting time_dependent to True for motion model.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">properties</span>
+
+
+    <span class="k">def</span> <span class="nf">training_pattern_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">):</span>
+        <span class="c"># all the below will eventually end up in PatternCoordinator!</span>
+        <span class="n">disparity_bound</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">position_bound_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="mf">0.25</span>
+        <span class="n">position_bound_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="mf">0.25</span>
+
+        <span class="k">if</span> <span class="s">&#39;dy&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">disparity_bound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_disparity</span><span class="o">*</span><span class="mf">0.041665</span><span class="o">/</span><span class="mf">2.0</span>
+            <span class="c">#TFALERT: Formerly: position_bound_x = self.area/2.0+0.2</span>
+            <span class="n">position_bound_x</span> <span class="o">-=</span> <span class="n">disparity_bound</span>
+
+        <span class="n">align_orientations</span> <span class="o">=</span> <span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s">&#39;dr&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+                              <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">align_orientations</span> <span class="ow">is</span> <span class="bp">None</span>
+                              <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">align_orientations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;dr&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">position_bound_x</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="o">*</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;lags&#39;</span><span class="p">])</span>
+            <span class="n">position_bound_y</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="o">*</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;lags&#39;</span><span class="p">])</span>
+
+        <span class="n">pattern_labels</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;LeftRetina&#39;</span><span class="p">,</span><span class="s">&#39;RightRetina&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;binocular&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="p">[</span><span class="s">&#39;Retina&#39;</span><span class="p">]</span>
+        <span class="c"># all the above will eventually end up in PatternCoordinator!</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">features_to_vary</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
+                      <span class="n">pattern_labels</span><span class="o">=</span><span class="n">pattern_labels</span><span class="p">,</span>
+                      <span class="n">pattern_parameters</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mf">0.088388</span> <span class="k">if</span> <span class="s">&#39;or&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">==</span><span class="s">&#39;Gaussian&#39;</span> \
+                                           <span class="k">else</span> <span class="mi">3</span><span class="o">*</span><span class="mf">0.088388</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">==</span><span class="s">&#39;Gaussian&#39;</span> <span class="k">else</span> <span class="mf">10.0</span><span class="p">,</span>
+                                          <span class="s">&#39;aspect_ratio&#39;</span><span class="p">:</span> <span class="mf">4.66667</span> <span class="k">if</span> <span class="s">&#39;or&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
+                                          <span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">contrast</span><span class="o">/</span><span class="mf">100.0</span><span class="p">},</span>
+                      <span class="n">disparity_bound</span><span class="o">=</span><span class="n">disparity_bound</span><span class="p">,</span>
+                      <span class="n">position_bound_x</span><span class="o">=</span><span class="n">position_bound_x</span><span class="p">,</span>
+                      <span class="n">position_bound_y</span><span class="o">=</span><span class="n">position_bound_y</span><span class="p">,</span>
+                      <span class="n">dim_fraction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim_fraction</span><span class="p">,</span>
+                      <span class="n">reset_period</span><span class="o">=</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;lags&#39;</span><span class="p">])</span><span class="o">*</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;period&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;period&#39;</span><span class="p">]),</span>
+                      <span class="n">speed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span>
+                      <span class="n">align_orientations</span> <span class="o">=</span> <span class="n">align_orientations</span><span class="p">,</span>
+                      <span class="n">sf_spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="p">,</span>
+                      <span class="n">sf_max_channel</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]),</span>
+                      <span class="n">patterns_per_label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_inputs</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">==</span><span class="s">&#39;Gaussian&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">PatternCoordinator</span><span class="p">(</span><span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">))()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">image_folder</span> <span class="o">=</span> <span class="s">&#39;images/shouval&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">==</span><span class="s">&#39;Nature&#39;</span> \
+                           <span class="k">else</span> <span class="s">&#39;images/mcgill/foliage_a_combined&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">==</span><span class="s">&#39;FoliageA&#39;</span> \
+                           <span class="k">else</span> <span class="s">&#39;images/mcgill/foliage_b_combined&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">==</span><span class="s">&#39;FoliageB&#39;</span> \
+                           <span class="k">else</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="n">PatternCoordinatorImages</span><span class="p">(</span><span class="n">image_folder</span><span class="p">,</span> <span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">))()</span>
+
+</div>
+<span class="nd">@Model.definition</span>
+<div class="viewcode-block" id="EarlyVisionModel"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.earlyvision.EarlyVisionModel">[docs]</a><span class="k">class</span> <span class="nc">EarlyVisionModel</span><span class="p">(</span><span class="n">VisualInputModel</span><span class="p">):</span>
+
+    <span class="n">retina_density</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">24.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The nominal_density to use for the retina.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lgn_density</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">24.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The nominal_density to use for the LGN.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lgnaff_strength</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.33</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Overall strength of the afferent projection from the retina to</span>
+<span class="s">        the LGN sheets.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lgnaff_radius</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.375</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Connection field radius of a unit in the LGN level to units in</span>
+<span class="s">        a retina sheet.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lgnlateral_radius</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Connection field radius of a unit in the LGN level to</span>
+<span class="s">        surrounding units, in case gain control is used.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">v1aff_radius</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.27083</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Connection field radius of a unit in V1 to units in a LGN</span>
+<span class="s">        sheet.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">center_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.07385</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The size of the central Gaussian used to compute the</span>
+<span class="s">        center-surround receptive field.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">surround_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">4</span><span class="o">*</span><span class="mf">0.07385</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The size of the surround Gaussian used to compute the</span>
+<span class="s">        center-surround receptive field.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">gain_control_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The size of the divisive inhibitory suppressive field used for</span>
+<span class="s">        contrast-gain control in the LGN sheets. This also acts as the</span>
+<span class="s">        corresponding bounds radius.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">gain_control</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to use divisive lateral inhibition in the LGN for</span>
+<span class="s">        contrast gain control.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">gain_control_SF</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to use divisive lateral inhibition in the LGN for</span>
+<span class="s">        contrast gain control across Spatial Frequency Sheets.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">property_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">EarlyVisionModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">property_setup</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+        <span class="n">sheet</span><span class="o">.</span><span class="n">SettlingCFSheet</span><span class="o">.</span><span class="n">joint_norm_fn</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">optimized</span><span class="o">.</span><span class="n">compute_joint_norm_totals_opt</span>
+        <span class="n">center_polarities</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;On&#39;</span><span class="p">,</span><span class="s">&#39;Off&#39;</span><span class="p">]</span>
+
+        <span class="c"># Useful for setting up sheets</span>
+        <span class="n">properties</span><span class="p">[</span><span class="s">&#39;polarities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lancet</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="s">&#39;polarity&#39;</span><span class="p">,</span> <span class="n">center_polarities</span><span class="p">)</span>
+        <span class="n">properties</span><span class="p">[</span><span class="s">&#39;eyes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lancet</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="s">&#39;eye&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Left&#39;</span><span class="p">,</span><span class="s">&#39;Right&#39;</span><span class="p">])</span>
+                              <span class="k">if</span> <span class="n">properties</span><span class="p">[</span><span class="s">&#39;binocular&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">lancet</span><span class="o">.</span><span class="n">Identity</span><span class="p">())</span>
+        <span class="n">properties</span><span class="p">[</span><span class="s">&#39;SFs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lancet</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="s">&#39;SF&#39;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">])</span>
+                             <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="n">lancet</span><span class="o">.</span><span class="n">Identity</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">properties</span>
+
+    <span class="k">def</span> <span class="nf">sheet_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="n">sheets</span><span class="p">[</span><span class="s">&#39;Retina&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;eyes&#39;</span><span class="p">]</span>
+        <span class="n">sheets</span><span class="p">[</span><span class="s">&#39;LGN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;polarities&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;eyes&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;SFs&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">sheets</span>
+
+    <span class="nd">@Model.GeneratorSheet</span>
+    <span class="k">def</span> <span class="nf">Retina</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">GeneratorSheet</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">period</span><span class="o">=</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;period&#39;</span><span class="p">],</span>
+            <span class="n">phase</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">nominal_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">retina_density</span><span class="p">,</span>
+            <span class="n">nominal_bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span>
+                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgnaff_radius</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgnlateral_radius</span><span class="p">),</span>
+            <span class="n">input_generator</span><span class="o">=</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;training_patterns&#39;</span><span class="p">][</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;eye&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;Retina&#39;</span>
+                                                      <span class="k">if</span> <span class="s">&#39;eye&#39;</span> <span class="ow">in</span> <span class="n">properties</span>
+                                                      <span class="k">else</span> <span class="s">&#39;Retina&#39;</span><span class="p">])</span>
+
+
+    <span class="nd">@Model.SettlingCFSheet</span>
+    <span class="k">def</span> <span class="nf">LGN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="n">channel</span><span class="o">=</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s">&#39;SF&#39;</span> <span class="ow">in</span> <span class="n">properties</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="n">sf_aff_multiplier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control_SF</span> <span class="k">else</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">channel</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">gain_control</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control_SF</span> <span class="k">if</span> <span class="s">&#39;SF&#39;</span> <span class="ow">in</span> <span class="n">properties</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control</span>
+
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">SettlingCFSheet</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">SheetMask</span><span class="p">(),</span>
+            <span class="n">measure_maps</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">transferfn</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">HalfRectify</span><span class="p">()],</span>
+            <span class="n">nominal_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lgn_density</span><span class="p">,</span>
+            <span class="n">nominal_bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span>
+                                             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span>
+                                             <span class="o">*</span> <span class="n">sf_aff_multiplier</span>
+                                             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgnlateral_radius</span><span class="p">),</span>
+            <span class="n">tsettle</span><span class="o">=</span><span class="mi">2</span> <span class="k">if</span> <span class="n">gain_control</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">strict_tsettle</span><span class="o">=</span><span class="mi">1</span> <span class="k">if</span> <span class="n">gain_control</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+
+
+    <span class="nd">@Model.matchconditions</span><span class="p">(</span><span class="s">&#39;LGN&#39;</span><span class="p">,</span> <span class="s">&#39;afferent&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">afferent_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="s">&#39;Retina&#39;</span><span class="p">,</span> <span class="s">&#39;eye&#39;</span><span class="p">:</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;eye&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">)}</span>
+
+
+    <span class="nd">@Model.SharedWeightCFProjection</span>
+    <span class="k">def</span> <span class="nf">afferent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_properties</span><span class="p">,</span> <span class="n">dest_properties</span><span class="p">):</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">dest_properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s">&#39;SF&#39;</span> <span class="ow">in</span> <span class="n">dest_properties</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="n">centerg</span>   <span class="o">=</span> <span class="n">imagen</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">center_size</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">channel</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                                    <span class="n">output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">transferfn</span><span class="o">.</span><span class="n">DivisiveNormalizeL1</span><span class="p">()])</span>
+        <span class="n">surroundg</span> <span class="o">=</span> <span class="n">imagen</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surround_size</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">channel</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                                    <span class="n">output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">transferfn</span><span class="o">.</span><span class="n">DivisiveNormalizeL1</span><span class="p">()])</span>
+        <span class="n">on_weights</span>  <span class="o">=</span> <span class="n">imagen</span><span class="o">.</span><span class="n">Composite</span><span class="p">(</span><span class="n">generators</span><span class="o">=</span><span class="p">[</span><span class="n">centerg</span><span class="p">,</span><span class="n">surroundg</span><span class="p">],</span><span class="n">operator</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">subtract</span><span class="p">)</span>
+        <span class="n">off_weights</span> <span class="o">=</span> <span class="n">imagen</span><span class="o">.</span><span class="n">Composite</span><span class="p">(</span><span class="n">generators</span><span class="o">=</span><span class="p">[</span><span class="n">surroundg</span><span class="p">,</span><span class="n">centerg</span><span class="p">],</span><span class="n">operator</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">subtract</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">SharedWeightCFProjection</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">delay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">strength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lgnaff_strength</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s">&#39;Afferent&#39;</span><span class="p">,</span>
+            <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lgnaff_radius</span>
+                                                      <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">channel</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span>
+            <span class="n">weights_generator</span><span class="o">=</span><span class="n">on_weights</span> <span class="k">if</span> <span class="n">dest_properties</span><span class="p">[</span><span class="s">&#39;polarity&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;On&#39;</span> <span class="k">else</span> <span class="n">off_weights</span><span class="p">)</span>
+
+
+    <span class="nd">@Model.matchconditions</span><span class="p">(</span><span class="s">&#39;LGN&#39;</span><span class="p">,</span> <span class="s">&#39;lateral_gain_control&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">lateral_gain_control_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">({</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="s">&#39;LGN&#39;</span><span class="p">,</span> <span class="s">&#39;polarity&#39;</span><span class="p">:</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;polarity&#39;</span><span class="p">]}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control_SF</span> <span class="k">else</span>
+            <span class="p">{</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="s">&#39;LGN&#39;</span><span class="p">,</span> <span class="s">&#39;polarity&#39;</span><span class="p">:</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;polarity&#39;</span><span class="p">],</span>
+             <span class="s">&#39;SF&#39;</span><span class="p">:</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SF&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">)}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+
+    <span class="nd">@Model.SharedWeightCFProjection</span>
+    <span class="k">def</span> <span class="nf">lateral_gain_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_properties</span><span class="p">,</span> <span class="n">dest_properties</span><span class="p">):</span>
+        <span class="c">#TODO: Are those 0.25 the same as lgnlateral_radius/2.0?</span>
+        <span class="n">name</span><span class="o">=</span><span class="s">&#39;LateralGC&#39;</span>
+        <span class="k">if</span> <span class="s">&#39;eye&#39;</span> <span class="ow">in</span> <span class="n">src_properties</span><span class="p">:</span>
+            <span class="n">name</span><span class="o">+=</span><span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;eye&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;SF&#39;</span> <span class="ow">in</span> <span class="n">src_properties</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control_SF</span><span class="p">:</span>
+            <span class="n">name</span><span class="o">+=</span><span class="p">(</span><span class="s">&#39;SF&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">SharedWeightCFProjection</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">delay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">dest_port</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;Activity&#39;</span><span class="p">),</span>
+            <span class="n">activity_group</span><span class="o">=</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span><span class="n">DivideWithConstant</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="mf">0.11</span><span class="p">)),</span>
+            <span class="n">weights_generator</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gain_control_size</span><span class="p">,</span>
+                                              <span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                                              <span class="n">output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">transferfn</span><span class="o">.</span><span class="n">DivisiveNormalizeL1</span><span class="p">()]),</span>
+            <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gain_control_size</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">strength</span><span class="o">=</span><span class="mf">0.6</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;binocular&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">1</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/submodel/earlyvision.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../submodel.html" >topo.submodel</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

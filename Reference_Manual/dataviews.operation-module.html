@@ -1,0 +1,244 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.operation &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataviews-operation">
+<h1>dataviews.operation<a class="headerlink" href="#dataviews-operation" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance50788f43fb.svg" usemap="#inheritance50788f43fb" class="inheritance"/></div><map id="inheritance50788f43fb" name="inheritance50788f43fb">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="dataviews.operation.pyc-module.html">dataviews.operation.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-dataviews.operation">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-dataviews.operation" title="Permalink to this headline">¶</a></h2>
+<p>ViewOperations manipulate dataviews, typically for the purposes of
+visualization. Such operations often apply to SheetViews or
+SheetStacks and compose the data together in ways that can be viewed
+conveniently, often by creating or manipulating color channels.</p>
+<dl class="class">
+<dt id="dataviews.operation.AlphaOverlay">
+<em class="property">class </em><tt class="descclassname">dataviews.operation.</tt><tt class="descname">AlphaOverlay</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#AlphaOverlay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.AlphaOverlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.operation.ViewOperation" title="dataviews.operation.ViewOperation"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.operation.ViewOperation</span></tt></a></p>
+<p>Accepts an overlay of a SheetView defined with a cmap and converts
+it to an RGBA SheetView. The alpha channel of the result is
+defined by the second layer of the overlay.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.operation.Colorize">
+<em class="property">class </em><tt class="descclassname">dataviews.operation.</tt><tt class="descname">Colorize</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#Colorize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.Colorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.operation.ViewOperation" title="dataviews.operation.ViewOperation"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.operation.ViewOperation</span></tt></a></p>
+<p>Given a SheetOverlay consisting of a grayscale colormap and a
+second Sheetview with some specified colour map, use the second
+layer to colorize the data of the first layer.</p>
+<p>Currently, colorize only support the &#8216;hsv&#8217; color map and is just a
+shortcut to the HCS operation using a constant confidence
+value. Arbitrary colorization will be supported in future.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.operation.HCS">
+<em class="property">class </em><tt class="descclassname">dataviews.operation.</tt><tt class="descname">HCS</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#HCS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.HCS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.operation.ViewOperation" title="dataviews.operation.ViewOperation"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.operation.ViewOperation</span></tt></a></p>
+<p>Hue-Confidence-Strength plot.</p>
+<p>Accepts an overlay containing either 2 or 3 layers. The first two
+layers are hue and confidence and the third layer (if available)
+is the strength channel.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">flipSC</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to flip the strength and confidence channels</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">S_multiplier</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Multiplier for the strength value.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">C_multiplier</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Multiplier for the confidence value.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.operation.RGBA">
+<em class="property">class </em><tt class="descclassname">dataviews.operation.</tt><tt class="descname">RGBA</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#RGBA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.RGBA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.operation.ViewOperation" title="dataviews.operation.ViewOperation"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.operation.ViewOperation</span></tt></a></p>
+<p>Accepts an overlay containing either 3 or 4 layers. The first
+three layers are the R,G, B channels and the last layer (if given)
+is the alpha channel.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.operation.ViewOperation">
+<em class="property">class </em><tt class="descclassname">dataviews.operation.</tt><tt class="descname">ViewOperation</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#ViewOperation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.ViewOperation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<p>A ViewOperation takes one or more views as inputs and processes
+them, returning arbitrary new view objects as output. Individual
+dataviews may be passed in directly while multiple dataviews must
+be passed in as a Stack of the appropriate type. A ViewOperation
+may be used to implement simple dataview manipulations or perform
+complex analysis.</p>
+<p>Internally, ViewOperations operate on the level of individual
+dataviews, processing each layer on an input Stack independently.</p>
+<dl class="method">
+<dt id="dataviews.operation.ViewOperation.get_views">
+<tt class="descname">get_views</tt><big>(</big><em>view</em>, <em>pattern</em>, <em>view_type=&lt;class 'dataviews.sheetviews.SheetView'&gt;</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#ViewOperation.get_views"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.ViewOperation.get_views" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method that return a list of views with labels ending
+with the given pattern and which have the specified type. This
+may be useful to check is a single view satisfies some
+condition or to extract the appropriate views from an Overlay.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.operation.cmap2rgb">
+<em class="property">class </em><tt class="descclassname">dataviews.operation.</tt><tt class="descname">cmap2rgb</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#cmap2rgb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.cmap2rgb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.operation.ViewOperation" title="dataviews.operation.ViewOperation"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.operation.ViewOperation</span></tt></a></p>
+<p>Convert SheetViews using colormaps to RGBA mode.  The colormap of
+the style is used, if available. Otherwise, the colormap may be
+forced as a parameter.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">cmap</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Force the use of a specific color map. Otherwise, the cmap
+          property of the applicable style is used.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.operation.split">
+<em class="property">class </em><tt class="descclassname">dataviews.operation.</tt><tt class="descname">split</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/dataviews/operation.html#split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.operation.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.operation.ViewOperation" title="dataviews.operation.ViewOperation"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.operation.ViewOperation</span></tt></a></p>
+<p>Given SheetViews in RGBA mode, return the R,G,B and A channels as
+a GridLayout.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">dataviews.operation</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-dataviews.operation">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/dataviews.operation-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Using multiple cores with Topographica &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-multiple-cores-with-topographica">
+<h1>Using multiple cores with Topographica<a class="headerlink" href="#using-multiple-cores-with-topographica" title="Permalink to this headline">¶</a></h1>
+<p>Topographica supports multiple-core processors using the OpenMP
+library (<a class="reference external" href="http://openmp.org/wp/">openmp.org</a>). This functionality can result in significant
+speedup when running simulations on multicore machines.</p>
+<p>OpenMP support is enabled by default for any system with OpenMP
+installed and working.  Most modern compilers come with OpenMP
+support; see the <a class="reference external" href="http://openmp.org/wp/openmp-compilers/">list at openmp.org</a>.  Topographica will still run
+correctly if OpenMP is not installed or if you only have a single
+core.</p>
+<p>In general, adding more cores to a process makes it faster.  However,
+because cores typically share the same memory subsystem on a
+processor, and because most Topographica simulations rely heavily on
+memory accesses, you are unlikely to find that performance scales
+linearly with the number of cores.  Often, some of these cores will
+end up waiting while other cores access memory, giving you diminishing
+returns from the additional cores.  Thus there&#8217;s usually not much harm
+from leaving one core free for other processes, such as your windowing
+system, at least for machines with more than a couple of cores.  You
+are only likely to find linear scaling for simulations involving high
+levels of computation per memory access, whereas most Topographica
+simulations involve simple computations performed on a very large
+number of memory elements.  Even so, there is no reason not to use the
+extra cores if they would otherwise go unused!</p>
+<div class="section" id="controlling-openmp">
+<h2>Controlling OpenMP<a class="headerlink" href="#controlling-openmp" title="Permalink to this headline">¶</a></h2>
+<p>By default, OpenMP will use all the cores available on your machine.
+To change this behavior, you can set the <tt class="docutils literal"><span class="pre">OMP_NUM_THREADS</span></tt>
+environment variable, either in your shell&#8217;s startup files or by
+specifying the number of cores in your call to Topographica:</p>
+<div class="highlight-python"><div class="highlight"><pre>OMP_NUM_THREADS=3 ./topographica examples/gcal.ty -c &quot;topo.sim.run(10000)&quot;
+</pre></div>
+</div>
+<p>For instance, you might want to leave one core free to keep your
+system responding quickly during interactive use, specifying
+OMP_NUM_THREADS=3 (for a four-core machine).  Or you can disable
+OpenMP altogether by specifying OMP_NUM_THREADS=1, to get
+single-threaded performance.</p>
+<p>Once Topographica is running, you can check that the correct number of
+cores is being used by monitoring your system&#8217;s processor usage
+externally, e.g. using the <tt class="docutils literal"><span class="pre">top</span></tt> command in Unix in a separate
+window.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+
+<ul>
+<li><a class="reference internal" href="#">Using multiple cores with Topographica</a><ul>
+<li><a class="reference internal" href="#controlling-openmp">Controlling OpenMP</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/User_Manual/multicore.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

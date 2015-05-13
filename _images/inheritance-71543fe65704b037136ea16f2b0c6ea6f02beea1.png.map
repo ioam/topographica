@@ -1,0 +1,14 @@
+<map id="inheritance595dfe9011" name="inheritance595dfe9011">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="310,68,441,85"/>
+<area shape="rect" id="node11" title="params(name=String)" alt="" coords="578,68,680,85"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="36,85,208,102"/>
+<area shape="rect" id="node5" title="params(name=String)" alt="" coords="272,101,479,118"/>
+<area shape="rect" id="node3" title="params(input_ranges=ClassSelector, group=String, name=String)" alt="" coords="780,101,978,118"/>
+<area shape="rect" id="node13" title="params(input_ranges=ClassSelector, group=String, name=String)" alt="" coords="1018,101,1141,118"/>
+<area shape="rect" id="node4" title="params(group=String, name=String)" alt="" coords="547,101,711,118"/>
+<area shape="rect" id="node6" title="Class used for comparing two HoloViews objects, including complex" alt="" coords="276,36,475,53"/>
+<area shape="rect" id="node8" title="Class to integrate the Comparison class with unittest.TestCase." alt="" coords="511,20,747,37"/>
+<area shape="rect" id="node7" title="This class is designed to allow equality testing to work" alt="" coords="4,36,240,53"/>
+<area shape="rect" id="node10" title="This class extends ComparisonTestCase to handle IPython specific" alt="" coords="811,20,947,37"/>
+<area shape="rect" id="node9" title="A class whose instances are single test cases." alt="" coords="320,3,431,20"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="inheritancee1b2df4fe6" name="inheritancee1b2df4fe6">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="4,78,198,97"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EPConnection" title="EPConnection stores basic information for a connection between" alt="" coords="255,4,441,23"/>
+<area shape="rect" id="node5" title="CFSPLearningFunction applying the specified single_cf_fn to each Sparse CF." alt="" coords="254,41,442,60"/>
+<area shape="rect" id="node6" title="Applies the specified single_cf_fn to each SparseCF in the SparseCFProjection." alt="" coords="253,78,444,97"/>
+<area shape="rect" id="node9" title="Generic large&#45;scale response function based on a simple single&#45;CF function." alt="" coords="254,115,443,134"/>
+<area shape="rect" id="node11" title="A set of weights on one input Sheet." alt="" coords="234,152,462,171"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFProjection" title="A projection composed of ConnectionFields from a Sheet into a ProjectionSheet." alt="" coords="763,4,900,23"/>
+<area shape="rect" id="node10" title="A projection composed of SparseConnectionFields from a Sheet into" alt="" coords="936,4,1148,23"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.projection.Projection" title="A projection from a Sheet into a ProjectionSheet." alt="" coords="530,4,695,23"/>
+<area shape="rect" id="node7" title="Prunes specified percentage of connections from CFs in SparseCFProjection" alt="" coords="517,60,707,79"/>
+<area shape="rect" id="node8" title="Sprouting and retraction weights output function. At a preset time" alt="" coords="498,97,726,116"/>
+</map>

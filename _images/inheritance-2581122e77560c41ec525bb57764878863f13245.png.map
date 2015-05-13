@@ -1,0 +1,9 @@
+<map id="inheritancee1aac473e9" name="inheritancee1aac473e9">
+<area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="234,4,536,23"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="572,23,698,42"/>
+<area shape="rect" id="node2" title="Base class for named objects that support Parameters and message" alt="" coords="4,41,198,60"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="288,41,482,60"/>
+<area shape="rect" id="node6" href="#topo.sheet.ptztracker.PtzTracker" title="Given an incoming Activity pattern, find the brightest pixel and" alt="" coords="735,23,906,42"/>
+<area shape="rect" id="node5" href="#topo.sheet.ptztracker.BrightPixelTracker" title="This class is used to define the position of the brightest pixel" alt="" coords="942,4,1148,23"/>
+<area shape="rect" id="node7" href="#topo.sheet.ptztracker.FaceTracker" title="This class is used to detect face in the image and draws a" alt="" coords="956,41,1134,60"/>
+</map>

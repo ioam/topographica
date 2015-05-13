@@ -1,0 +1,15 @@
+<map id="inheritance5c943e4cbf" name="inheritance5c943e4cbf">
+<area shape="rect" id="node1" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="265,43,379,54"/>
+<area shape="rect" id="node4" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="399,43,523,54"/>
+<area shape="rect" id="node2" title="params(label=String, value=String, name=String)" alt="" coords="130,43,244,54"/>
+<area shape="rect" id="node3" title="params(name=String)" alt="" coords="2,54,110,64"/>
+<area shape="rect" id="node13" href="#topo.base.sheetview.SheetView" title="params(bounds=Parameter, cyclic=Boolean, cyclic_range=Parameter, precedence=Number, row_precedence=Number, src_name=String, timestamp=Number, name=String)" alt="" coords="141,64,234,74"/>
+<area shape="rect" id="node5" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="543,22,639,33"/>
+<area shape="rect" id="node8" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="659,22,762,33"/>
+<area shape="rect" id="node6" title="Composable is a mix&#45;in class to allow Dimensioned object to be" alt="" coords="410,2,512,12"/>
+<area shape="rect" id="node7" title="Overlayable provides a mix&#45;in class to support the" alt="" coords="410,22,512,33"/>
+<area shape="rect" id="node11" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="810,22,904,33"/>
+<area shape="rect" id="node9" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="782,2,932,12"/>
+<area shape="rect" id="node10" title="params(bounds=ClassSelector, key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="952,12,1045,23"/>
+<area shape="rect" id="node12" href="#topo.base.sheetview.CFView" title="params(input_sheet_slice=NumericTuple, roi_bounds=ClassSelector, situated_bounds=ClassSelector, bounds=ClassSelector, key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="1066,12,1150,23"/>
+</map>

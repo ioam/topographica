@@ -1,0 +1,454 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.analysis.vision &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.analysis.vision</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Vision-specific analysis functions.</span>
+
+<span class="sd">$Id: featureresponses.py 7714 2008-01-24 16:42:21Z antolikjan $</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__version__</span><span class="o">=</span><span class="s">&#39;$Revision: 7714 $&#39;</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span><span class="n">sin</span><span class="p">,</span><span class="n">cos</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">import</span> <span class="n">Float</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">object_</span>
+<span class="c">#import scipy</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">normalize_path</span>
+<span class="kn">from</span> <span class="nn">topo.misc.distribution</span> <span class="kn">import</span> <span class="n">DSF_WeightedAverage</span>
+
+<span class="kn">from</span> <span class="nn">imagen.views</span> <span class="kn">import</span> <span class="n">SheetView</span><span class="p">,</span> <span class="n">NdMapping</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib</span>
+    <span class="kn">import</span> <span class="nn">pylab</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Could not import matplotlib; module will not be useable.&quot;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">ImportErrorRaisingFakeModule</span>
+    <span class="n">pylab</span> <span class="o">=</span> <span class="n">ImportErrorRaisingFakeModule</span><span class="p">(</span><span class="s">&quot;matplotlib&quot;</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (try/except import)</span>
+
+<span class="c"># CEBALERT: commands in here should inherit from the appropriate base</span>
+<span class="c"># class (Command or PylabPlotCommand).</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.plotgroup</span> <span class="kn">import</span> <span class="n">create_plotgroup</span>
+<span class="kn">from</span> <span class="nn">topo.command.analysis</span> <span class="kn">import</span> <span class="n">measure_sine_pref</span>
+
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">numbergen</span>
+
+<span class="n">max_value</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">global_index</span> <span class="o">=</span> <span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">_complexity_rec</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">index</span><span class="p">,</span><span class="n">depth</span><span class="p">,</span><span class="n">fm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recurrent helper function for complexity()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">global</span> <span class="n">max_value</span>
+        <span class="k">global</span> <span class="n">global_index</span>
+        <span class="k">if</span> <span class="n">depth</span><span class="o">&lt;</span><span class="n">size</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">features</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">depth</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+                <span class="n">_complexity_rec</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">index</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="p">,),</span><span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">fm</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">max_value</span> <span class="o">&lt;</span> <span class="n">fm</span><span class="o">.</span><span class="n">full_matrix</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]:</span>
+                <span class="n">global_index</span> <span class="o">=</span> <span class="n">index</span>
+                <span class="n">max_value</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">full_matrix</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span>
+
+
+
+<span class="k">def</span> <span class="nf">complexity</span><span class="p">(</span><span class="n">full_matrix</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">global_index</span>
+    <span class="k">global</span> <span class="n">max_value</span>
+    <span class="sd">&quot;&quot;&quot;This function expects as an input a object of type FullMatrix which contains</span>
+<span class="sd">    responses of all neurons in a sheet to stimuly with different varying parameter values.</span>
+<span class="sd">    One of these parameters (features) has to be phase. In such case it computes the classic</span>
+<span class="sd">    modulation ratio (see Hawken et al. for definition) for each neuron and returns them as a matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">full_matrix</span><span class="o">.</span><span class="n">matrix_shape</span>
+    <span class="n">complex_matrix</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">matrix_shape</span><span class="p">,</span><span class="n">object_</span><span class="p">)</span>
+    <span class="n">fftmeasure</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">matrix_shape</span><span class="p">,</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;phase&quot;</span><span class="p">:</span>
+
+            <span class="n">phase_index</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">break</span>
+        <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">average</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">print</span> <span class="s">&quot;Z&quot;</span>
+    <span class="k">print</span> <span class="n">size</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+            <span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span><span class="c">#</span>
+            <span class="n">max_value</span><span class="o">=-</span><span class="mf">0.01</span>
+            <span class="n">global_index</span> <span class="o">=</span> <span class="p">()</span>
+            <span class="n">_complexity_rec</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,(),</span><span class="mi">0</span><span class="p">,</span><span class="n">full_matrix</span><span class="p">)</span>
+
+            <span class="c">#compute the sum of the responses over phases given the found index of highest response</span>
+
+            <span class="n">iindex</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">global_index</span><span class="p">)</span>
+            <span class="nb">sum</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">phase_index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+                <span class="n">iindex</span><span class="p">[</span><span class="n">phase_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="nb">sum</span> <span class="o">=</span> <span class="nb">sum</span> <span class="o">+</span> <span class="n">full_matrix</span><span class="o">.</span><span class="n">full_matrix</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">iindex</span><span class="o">.</span><span class="n">tolist</span><span class="p">())][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span>
+
+            <span class="c">#average</span>
+            <span class="n">average</span> <span class="o">=</span> <span class="nb">sum</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">phase_index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+
+            <span class="n">res</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="c">#compute the sum of absolute values of the responses minus average</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">phase_index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+                <span class="n">iindex</span><span class="p">[</span><span class="n">phase_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">res</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">full_matrix</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">iindex</span><span class="o">.</span><span class="n">tolist</span><span class="p">())][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">-</span> <span class="n">average</span><span class="p">)</span>
+                <span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">full_matrix</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">iindex</span><span class="o">.</span><span class="n">tolist</span><span class="p">())][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]]</span>
+
+            <span class="k">if</span> <span class="n">x</span><span class="o">==</span><span class="mi">43</span> <span class="ow">and</span> <span class="n">y</span><span class="o">==</span><span class="mi">43</span><span class="p">:</span>
+                <span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">pylab</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">][:]</span>
+            <span class="n">z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">xmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">xmax</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;pi/2&#39;</span><span class="p">,</span><span class="s">&#39;pi&#39;</span><span class="p">])</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">normalize_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span> <span class="s">&#39;modulation_response[43,43].png&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">x</span><span class="o">==</span><span class="mi">45</span> <span class="ow">and</span> <span class="n">y</span><span class="o">==</span><span class="mi">45</span><span class="p">:</span>
+                <span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">pylab</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">][:]</span>
+            <span class="n">z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">xmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">xmax</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;pi/2&#39;</span><span class="p">,</span><span class="s">&#39;pi&#39;</span><span class="p">])</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">normalize_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span> <span class="s">&#39;modulation_response[45,45].png&#39;</span><span class="p">))</span>
+
+            <span class="n">fft</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">+</span><span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">+</span><span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">+</span><span class="n">complex_matrix</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">],</span><span class="mi">2048</span><span class="p">)</span>
+            <span class="n">first_har</span> <span class="o">=</span> <span class="mi">2048</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">complex_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">fftmeasure</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">[</span><span class="n">first_har</span><span class="p">])</span> <span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fftmeasure</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">fftmeasure</span>
+
+
+<div class="viewcode-block" id="compute_ACDC_orientation_tuning_curves"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.vision-module.html#topo.analysis.vision.compute_ACDC_orientation_tuning_curves">[docs]</a><span class="k">def</span> <span class="nf">compute_ACDC_orientation_tuning_curves</span><span class="p">(</span><span class="n">full_matrix</span><span class="p">,</span><span class="n">curve_label</span><span class="p">,</span><span class="n">sheet</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This function allows and alternative computation of orientation tuning curve where</span>
+<span class="sd">    for each given orientation the response is computed as a maximum of AC or DC component</span>
+<span class="sd">    across the phases instead of the maximum used as a standard in Topographica&quot;&quot;&quot;</span>
+    <span class="c"># this method assumes that only single frequency has been used</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;phase&quot;</span><span class="p">:</span>
+            <span class="n">phase_index</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;orientation&quot;</span><span class="p">:</span>
+            <span class="n">orientation_index</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;frequency&quot;</span><span class="p">:</span>
+            <span class="n">frequency_index</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span> <span class="n">row_precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                    <span class="n">src_name</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="k">if</span> <span class="s">&quot;orientationACDC&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">curves</span><span class="p">:</span>
+        <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">curves</span><span class="p">[</span><span class="s">&quot;orientationACDC&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NdMapping</span><span class="p">(</span><span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+    <span class="n">curve_storage</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">curves</span><span class="p">[</span><span class="s">&quot;orientationACDC&quot;</span><span class="p">]</span>
+
+    <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">full_matrix</span><span class="o">.</span><span class="n">matrix_shape</span>
+
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">orientation_index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+        <span class="n">s_w</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">matrix_shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+                <span class="n">or_response</span><span class="o">=</span><span class="p">[]</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">phase_index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">index</span><span class="p">[</span><span class="n">phase_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+                    <span class="n">index</span><span class="p">[</span><span class="n">orientation_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">o</span>
+                    <span class="n">index</span><span class="p">[</span><span class="n">frequency_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">or_response</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">full_matrix</span><span class="o">.</span><span class="n">full_matrix</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">)][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+
+                <span class="n">fft</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">or_response</span><span class="o">+</span><span class="n">or_response</span><span class="o">+</span><span class="n">or_response</span><span class="o">+</span><span class="n">or_response</span><span class="p">,</span><span class="mi">2048</span><span class="p">)</span>
+                <span class="n">first_har</span> <span class="o">=</span> <span class="mi">2048</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">or_response</span><span class="p">)</span>
+                <span class="n">s_w</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">[</span><span class="n">first_har</span><span class="p">]),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">fvs</span> <span class="o">=</span> <span class="n">full_matrix</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">orientation_index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">o</span><span class="p">]</span>
+        <span class="n">sv</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="n">s_w</span><span class="p">,</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">new_item</span> <span class="o">=</span> <span class="n">NdMapping</span><span class="p">((</span><span class="n">fvs</span><span class="p">,</span> <span class="n">sv</span><span class="p">),</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="n">curve_storage</span><span class="p">[</span><span class="n">curve_label</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_item</span>
+
+</div>
+<span class="k">def</span> <span class="nf">phase_preference_scatter_plot</span><span class="p">(</span><span class="n">sheet_name</span><span class="p">,</span><span class="n">diameter</span><span class="o">=</span><span class="mf">0.39</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">numbergen</span><span class="o">.</span><span class="n">UniformRandom</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">1023</span><span class="p">)</span>
+    <span class="n">preference_map</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;PhasePreference&#39;</span><span class="p">]</span>
+    <span class="n">offset_magnitude</span> <span class="o">=</span> <span class="mf">0.03</span>
+    <span class="n">datax</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">datay</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">bb</span><span class="p">)</span> <span class="o">=</span> <span class="n">preference_map</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">66</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">diameter</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">diameter</span>
+        <span class="n">rand</span> <span class="o">=</span> <span class="n">r</span><span class="p">()</span>
+        <span class="n">xoff</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">rand</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">offset_magnitude</span>
+        <span class="n">yoff</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">rand</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">offset_magnitude</span>
+        <span class="n">xx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">xoff</span><span class="p">,</span><span class="n">diameter</span><span class="p">),</span><span class="o">-</span><span class="n">diameter</span><span class="p">)</span>
+        <span class="n">yy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="n">yoff</span><span class="p">,</span><span class="n">diameter</span><span class="p">),</span><span class="o">-</span><span class="n">diameter</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">diameter</span><span class="p">),</span><span class="o">-</span><span class="n">diameter</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">diameter</span><span class="p">),</span><span class="o">-</span><span class="n">diameter</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">xc1</span><span class="p">,</span><span class="n">yc1</span><span class="p">]</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span><span class="n">yy</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">xc2</span><span class="p">,</span><span class="n">yc2</span><span class="p">]</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">((</span><span class="n">xc1</span><span class="o">==</span><span class="n">xc2</span><span class="p">)</span> <span class="o">&amp;</span>  <span class="p">(</span><span class="n">yc1</span><span class="o">==</span><span class="n">yc2</span><span class="p">)):</span> <span class="k">continue</span>
+        <span class="n">datax</span> <span class="o">=</span> <span class="n">datax</span> <span class="o">+</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="n">xc1</span><span class="p">,</span><span class="n">yc1</span><span class="p">]]</span>
+        <span class="n">datay</span> <span class="o">=</span> <span class="n">datay</span> <span class="o">+</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="n">xc2</span><span class="p">,</span><span class="n">yc2</span><span class="p">]]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">datax</span><span class="p">)):</span>
+        <span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">360</span>
+        <span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">360</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">180</span><span class="p">):</span> <span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span>  <span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span> <span class="mi">360</span>
+        <span class="k">if</span><span class="p">((</span><span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span> <span class="mi">180</span><span class="p">)):</span> <span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">360</span><span class="p">;</span> <span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">360</span>
+        <span class="k">if</span><span class="p">((</span><span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">datay</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="mi">180</span><span class="p">))):</span> <span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">datax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">360</span><span class="p">;</span> <span class="c">#datay[i] = datay[i] - 360</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;equal&#39;</span><span class="p">)</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datax</span><span class="p">,</span><span class="n">datay</span><span class="p">,</span><span class="s">&#39;ro&#39;</span><span class="p">)</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">360</span><span class="p">],[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">180</span><span class="p">])</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">180</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">360</span><span class="p">])</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="o">-</span><span class="mi">180</span><span class="p">],[</span><span class="mi">360</span><span class="p">,</span><span class="mi">360</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">360</span><span class="p">,</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">360</span><span class="p">])</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">360</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">360</span><span class="p">])</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">360</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">360</span><span class="p">])</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">pylab</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">normalize_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">())</span> <span class="o">+</span> <span class="n">sheet_name</span> <span class="o">+</span> <span class="s">&quot;_scatter.png&quot;</span><span class="p">))</span>
+
+
+
+<span class="c">###############################################################################</span>
+<span class="c"># JABALERT: Should we move this plot and command to analysis.py or</span>
+<span class="c"># pylabplot.py, where all the rest are?</span>
+<span class="c">#</span>
+<span class="c"># In any case, it requires generalization; it should not be hardcoded</span>
+<span class="c"># to any particular map name, and should just do the right thing for</span>
+<span class="c"># most networks for which it makes sense.  E.g. it already measures</span>
+<span class="c"># the ComplexSelectivity for all measured_sheets, but then</span>
+<span class="c"># plot_modulation_ratio only accepts two with specific names.</span>
+<span class="c"># plot_modulation_ratio should just plot whatever it is given, and</span>
+<span class="c"># then analyze_complexity can simply pass in whatever was measured,</span>
+<span class="c"># with the user controlling what is measured using the measure_map</span>
+<span class="c"># attribute of each Sheet.  That way the complexity of any sheet could</span>
+<span class="c"># be measured, which is what we want.</span>
+<span class="c">#</span>
+<span class="c"># Specific changes needed:</span>
+<span class="c">#   - Make plot_modulation_ratio accept a list of sheets and</span>
+<span class="c">#      plot their individual modulation ratios and combined ratio.</span>
+<span class="c">#   - Remove complex_sheet_name argument, which is no longer needed</span>
+<span class="c">#   - Make sure it still works fine even if V1Simple doesn&#39;t exist;</span>
+<span class="c">#     as this is just for an optional scatter plot, it&#39;s fine to skip</span>
+<span class="c">#     it.</span>
+<span class="c">#   - Preferably remove the filename argument by default, so that</span>
+<span class="c">#     plots will show up in the GUI</span>
+
+
+<div class="viewcode-block" id="analyze_complexity"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.vision-module.html#topo.analysis.vision.analyze_complexity">[docs]</a><span class="k">def</span> <span class="nf">analyze_complexity</span><span class="p">(</span><span class="n">full_matrix</span><span class="p">,</span><span class="n">simple_sheet_name</span><span class="p">,</span><span class="n">complex_sheet_name</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute modulation ratio for each neuron, to distinguish complex from simple cells.</span>
+
+<span class="sd">    Uses full_matrix data obtained from measure_or_pref().</span>
+
+<span class="sd">    If there is a sheet named as specified in simple_sheet_name,</span>
+<span class="sd">    also plots its phase preference as a scatter plot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">topo</span>
+    <span class="n">measured_sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">CFSheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="s">&#39;measure_maps&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">measure_maps</span><span class="p">]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">measured_sheets</span><span class="p">:</span>
+        <span class="c"># Divide by two to get into 0-1 scale - that means simple/complex boundry is now at 0.5</span>
+        <span class="n">complx</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">complexity</span><span class="p">(</span><span class="n">full_matrix</span><span class="p">[</span><span class="n">sheet</span><span class="p">]))</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="c"># Should this be renamed to ModulationRatio?</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span> <span class="n">row_precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                      <span class="n">src_name</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">sv</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="n">complx</span><span class="p">,</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;ComplexSelectivity&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;ComplexSelectivity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NdMapping</span><span class="p">((</span><span class="n">time</span><span class="p">,</span> <span class="n">sv</span><span class="p">),</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;ComplexSelectivity&#39;</span><span class="p">][</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()]</span> <span class="o">=</span> <span class="n">sv</span>
+    <span class="kn">import</span> <span class="nn">topo.command.pylabplot</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">pylabplot</span><span class="o">.</span><span class="n">plot_modulation_ratio</span><span class="p">(</span><span class="n">full_matrix</span><span class="p">,</span>
+                                                 <span class="n">simple_sheet_name</span><span class="o">=</span><span class="n">simple_sheet_name</span><span class="p">,</span>
+                                                 <span class="n">complex_sheet_name</span><span class="o">=</span><span class="n">complex_sheet_name</span><span class="p">,</span>
+                                                 <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c"># Avoid error if no simple sheet exists</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">phase_preference_scatter_plot</span><span class="p">(</span><span class="n">simple_sheet_name</span><span class="p">,</span><span class="n">diameter</span><span class="o">=</span><span class="mf">0.24999</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Skipping phase preference scatter plot; could not analyze region </span><span class="si">%s</span><span class="s">.&quot;</span> \
+              <span class="o">%</span> <span class="n">simple_sheet_name</span>
+</div>
+<div class="viewcode-block" id="measure_and_analyze_complexity"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.vision-module.html#topo.analysis.vision.measure_and_analyze_complexity">[docs]</a><span class="k">class</span> <span class="nc">measure_and_analyze_complexity</span><span class="p">(</span><span class="n">measure_sine_pref</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Macro for measuring orientation preference and then analyzing its complexity.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">fm</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">measure_and_analyze_complexity</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="c">#analyze_complexity(fm,simple_sheet_name=&quot;V1Simple&quot;,complex_sheet_name=&quot;V1Complex&quot;,filename=&quot;ModulationRatio&quot;)</span>
+        <span class="k">return</span> <span class="n">fm</span>
+</div>
+<span class="n">pg</span><span class="o">=</span> <span class="n">create_plotgroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;Orientation Preference and Complexity&#39;</span><span class="p">,</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;Preference Maps&quot;</span><span class="p">,</span>
+             <span class="n">doc</span><span class="o">=</span><span class="s">&#39;Measure preference for sine grating orientation.&#39;</span><span class="p">,</span>
+              <span class="n">pre_plot_hooks</span><span class="o">=</span><span class="p">[</span><span class="n">measure_and_analyze_complexity</span><span class="o">.</span><span class="n">instance</span><span class="p">(</span>
+                             <span class="n">preference_fn</span><span class="o">=</span><span class="n">DSF_WeightedAverage</span><span class="p">(</span><span class="n">selectivity_scale</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="mf">17.0</span><span class="p">)))])</span>
+
+<span class="n">pg</span><span class="o">.</span><span class="n">add_plot</span><span class="p">(</span><span class="s">&#39;Orientation Preference&#39;</span><span class="p">,[(</span><span class="s">&#39;Hue&#39;</span><span class="p">,</span><span class="s">&#39;OrientationPreference&#39;</span><span class="p">)])</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">add_plot</span><span class="p">(</span><span class="s">&#39;Orientation Preference&amp;Selectivity&#39;</span><span class="p">,[(</span><span class="s">&#39;Hue&#39;</span><span class="p">,</span><span class="s">&#39;OrientationPreference&#39;</span><span class="p">),</span>
+                                                   <span class="p">(</span><span class="s">&#39;Confidence&#39;</span><span class="p">,</span><span class="s">&#39;OrientationSelectivity&#39;</span><span class="p">)])</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">add_plot</span><span class="p">(</span><span class="s">&#39;Orientation Selectivity&#39;</span><span class="p">,[(</span><span class="s">&#39;Strength&#39;</span><span class="p">,</span><span class="s">&#39;OrientationSelectivity&#39;</span><span class="p">)])</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">add_plot</span><span class="p">(</span><span class="s">&#39;Modulation Ratio&#39;</span><span class="p">,[(</span><span class="s">&#39;Strength&#39;</span><span class="p">,</span><span class="s">&#39;ComplexSelectivity&#39;</span><span class="p">)])</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">add_plot</span><span class="p">(</span><span class="s">&#39;Phase Preference&#39;</span><span class="p">,[(</span><span class="s">&#39;Hue&#39;</span><span class="p">,</span><span class="s">&#39;PhasePreference&#39;</span><span class="p">)])</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">add_static_image</span><span class="p">(</span><span class="s">&#39;Color Key&#39;</span><span class="p">,</span><span class="s">&#39;command/or_key_white_vert_small.png&#39;</span><span class="p">)</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;measure_and_analyze_complexity&quot;</span><span class="p">,</span>
+    <span class="s">&quot;complexity&quot;</span><span class="p">,</span>
+    <span class="s">&quot;compute_ACDC_orientation_tuning_curves&quot;</span><span class="p">,</span>
+    <span class="s">&quot;phase_preference_scatter_plot&quot;</span><span class="p">,</span>
+    <span class="s">&quot;analyze_complexity&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/analysis/vision.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Nov 04, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

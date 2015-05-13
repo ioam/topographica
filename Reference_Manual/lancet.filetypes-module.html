@@ -1,0 +1,426 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet.filetypes &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lancet-filetypes">
+<h1>lancet.filetypes<a class="headerlink" href="#lancet-filetypes" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance3af1fc917b.svg" usemap="#inheritance3af1fc917b" class="inheritance"/></div><map id="inheritance3af1fc917b" name="inheritance3af1fc917b">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="lancet.filetypes.pyc-module.html">lancet.filetypes.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-lancet.filetypes">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-lancet.filetypes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lancet.filetypes.CustomFile">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">CustomFile</tt><big>(</big><em>data_fn=None</em>, <em>metadata_fn=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#CustomFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.CustomFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.filetypes.FileType" title="lancet.filetypes.FileType"><tt class="xref py py-class docutils literal"><span class="pre">lancet.filetypes.FileType</span></tt></a></p>
+<p>A customizable FileType that takes two functions as input and maps
+them to the loading interface for all FileTypes.</p>
+<dl class="docutils">
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">data_fn</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A callable that takes a filename and returns a dictionary of
+       data values</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=data, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the file contents if the key cannot be
+       determined from the file itself.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">metadata_fn</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A callable that takes a filename and returns a dictionary of
+        metadata values</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.FileOption">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">FileOption</tt><big>(</big><em>first</em>, <em>second</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#FileOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.FileOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.filetypes.FileType" title="lancet.filetypes.FileType"><tt class="xref py py-class docutils literal"><span class="pre">lancet.filetypes.FileType</span></tt></a></p>
+<p>Allows a FileType out of a pair of FileTypes to handle a given
+file. For instance, given a mixed list of .png image filenames and
+.npz Numpy filenames, the ImageFile() | NumpyFile() object an
+handle either type of filename appropriately.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">second</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The second potential FileType to handle a given filename.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=data, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the file contents if the key cannot be
+       determined from the file itself.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">first</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The first potential FileType to handle a given filename.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.FileType">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">FileType</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#FileType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.FileType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="lancet.core-module.html#lancet.core.PrettyPrinted" title="lancet.core.PrettyPrinted"><tt class="xref py py-class docutils literal"><span class="pre">lancet.core.PrettyPrinted</span></tt></a>, <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>The base class for all supported file types in Lancet. This class
+is designed to be simple and easily extensible to support new
+files and has only three essential methods: &#8216;save&#8217;, &#8216;data&#8217; and
+&#8216;metadata&#8217;).</p>
+<p>Optionally, a &#8216;display&#8217; classmethod may be implemented to
+allow the file contents to be quickly visualized.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=data, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the file contents if the key cannot be
+       determined from the file itself.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.filetypes.FileType.data">
+<tt class="descname">data</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#FileType.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.FileType.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data returned as a dictionary.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="lancet.filetypes.FileType.display">
+<em class="property">classmethod </em><tt class="descname">display</tt><big>(</big><em>value</em>, <em>size=64</em>, <em>format='png'</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#FileType.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.FileType.display" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function that generates a display image as a base64 encoded
+HTMl image (png format). The input should either by a filename
+with an appropriate extension or the appropriate object
+type. Should be implemented if there is an obvious
+visualization suitable for the file type/object. If the value
+cannot be visualized with this class, return None.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="lancet.filetypes.FileType.file_supported">
+<em class="property">classmethod </em><tt class="descname">file_supported</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#FileType.file_supported"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.FileType.file_supported" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean indicating whether the filename has an
+appropriate extension for this class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.filetypes.FileType.metadata">
+<tt class="descname">metadata</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#FileType.metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.FileType.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>The metadata returned as a dictionary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lancet.filetypes.FileType.save">
+<tt class="descname">save</tt><big>(</big><em>filename</em>, <em>metadata={}</em>, <em>**data</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#FileType.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.FileType.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>The implementation in the base class simply checks there is no
+clash between the metadata and data keys.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.ImageFile">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">ImageFile</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#ImageFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.ImageFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.filetypes.FileType" title="lancet.filetypes.FileType"><tt class="xref py py-class docutils literal"><span class="pre">lancet.filetypes.FileType</span></tt></a></p>
+<p>Image support - requires PIL or Pillow.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">data_mode</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=RGBA, instantiate=False, objects=[&#8216;L&#8217;, &#8216;RGB&#8217;, &#8216;RGBA&#8217;, &#8216;I&#8217;, &#8216;F&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Sets the mode of the mode of the Image object. Palette
+        mode&#8217;P is not supported</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">image_info</span></tt> (<em>allow_None=False, constant=False, default={&#8216;format&#8217;: &#8216;format&#8217;, &#8216;mode&#8217;: &#8216;mode&#8217;, &#8216;size&#8217;: &#8216;size&#8217;}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Dictionary of the metadata to load. Each key is the
+        name given to the metadata item and each value is the PIL
+        Image attribute to return.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[&#8216;.png&#8217;, &#8216;.jpg&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=images, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the loaded image data.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.filetypes.ImageFile.save">
+<tt class="descname">save</tt><big>(</big><em>filename</em>, <em>imdata</em>, <em>**data</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#ImageFile.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.ImageFile.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data may be either a PIL Image object or a Numpy array.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.JSONFile">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">JSONFile</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#JSONFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.JSONFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.filetypes.FileType" title="lancet.filetypes.FileType"><tt class="xref py py-class docutils literal"><span class="pre">lancet.filetypes.FileType</span></tt></a></p>
+<p>It is assumed you won&#8217;t store very large volumes of data as JSON.
+For this reason, the contents of JSON files are loaded as
+metadata.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=data, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the file contents if the key cannot be
+       determined from the file itself.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[&#8216;.json&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.MatplotlibFile">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">MatplotlibFile</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#MatplotlibFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.MatplotlibFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.filetypes.FileType" title="lancet.filetypes.FileType"><tt class="xref py py-class docutils literal"><span class="pre">lancet.filetypes.FileType</span></tt></a></p>
+<p>Since version 1.0, Matplotlib figures support pickling. An mpkl
+file is simply a pickled matplotlib figure.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=data, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the file contents if the key cannot be
+       determined from the file itself.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[&#8216;.mpkl&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.NumpyFile">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">NumpyFile</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#NumpyFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.NumpyFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.filetypes.FileType" title="lancet.filetypes.FileType"><tt class="xref py py-class docutils literal"><span class="pre">lancet.filetypes.FileType</span></tt></a></p>
+<p>An npz file is the standard way to save Numpy arrays. This is a
+highly flexible FileType that supports most native Python objects
+including Numpy arrays.</p>
+<p><em>param Boolean</em> <tt class="docutils literal"><span class="pre">compress</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[&#8216;.npz&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=data, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the file contents if the key cannot be
+       determined from the file itself.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.SVGFile">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">SVGFile</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#SVGFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.SVGFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lancet.filetypes.FileType" title="lancet.filetypes.FileType"><tt class="xref py py-class docutils literal"><span class="pre">lancet.filetypes.FileType</span></tt></a></p>
+<p>There is no standard way to handle SVG files in Python, therefore
+this class implements display only. For custom SVG handling, this
+can be subclassed by the user for a more complete implementation.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">directory</span></tt> (<em>allow_None=True, constant=False, default=., instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Directory in which to load or save the file. Note that this
+       is a class level parameter only.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_key</span></tt> (<em>allow_None=False, constant=False, default=data, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The name (key) given to the file contents if the key cannot be
+       determined from the file itself.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">extensions</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of supported file extensions.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">hash_suffix</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to ensure the saved filename is unique by adding a
+       short hash suffix. Note that this is a class level parameter
+       only.</dd>
+</dl>
+<dl class="classmethod">
+<dt id="lancet.filetypes.SVGFile.display">
+<em class="property">classmethod </em><tt class="descname">display</tt><big>(</big><em>value</em>, <em>size=256</em>, <em>format='svg'</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#SVGFile.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.SVGFile.display" title="Permalink to this definition">¶</a></dt>
+<dd><p>SVG is a tricky format to support for saving and loading but
+it is easy to display.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lancet.filetypes.ViewFrame">
+<em class="property">class </em><tt class="descclassname">lancet.filetypes.</tt><tt class="descname">ViewFrame</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#ViewFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.ViewFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<p>A FileViewer allows a DataFrame to be viewed as a HTML table
+containing image thumbnails in IPython Notebook.  Any filenames in
+the rows or columns of the DataFrame will be viewed as thumbnails
+according to the display functions in display_fns.</p>
+<p>Requires both Pandas and IPython Notebook.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=256, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>The size of the display image to generate.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">display_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[&lt;bound method ParameterizedMetaclass.display of &lt;class &#8216;lancet.filetypes.ImageFile&#8217;&gt;&gt;, &lt;bound method ParameterizedMetaclass.display of &lt;class &#8216;lancet.filetypes.MatplotlibFile&#8217;&gt;&gt;, &lt;bound method ParameterizedMetaclass.display of &lt;class &#8216;lancet.filetypes.SVGFile&#8217;&gt;&gt;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A list of display functions that return raster images
+       (base64 encoded png images) based on filename or Python objects
+       as input.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">format</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=png, instantiate=False, objects=[&#8216;png&#8217;, &#8216;svg&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The image format of the display. Either &#8216;png&#8217; or &#8216;svg&#8217;.</dd>
+</dl>
+<dl class="method">
+<dt id="lancet.filetypes.ViewFrame.formatter">
+<tt class="descname">formatter</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../_modules/lancet/filetypes.html#ViewFrame.formatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lancet.filetypes.ViewFrame.formatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple Pandas formatter that approximates the usual
+behaviour but also allows display of HTML images.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">lancet.filetypes</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-lancet.filetypes">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/lancet.filetypes-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

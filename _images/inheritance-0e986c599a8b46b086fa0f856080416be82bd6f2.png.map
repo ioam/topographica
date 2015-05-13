@@ -1,0 +1,9 @@
+<map id="inheritance595dfe9011" name="inheritance595dfe9011">
+<area shape="rect" id="node1" title="Class used for comparing two holoview objects, including complex" alt="" coords="290,73,501,91"/>
+<area shape="rect" id="node3" title="Class to integrate the Comparison class with unittest.TestCase." alt="" coords="536,56,787,74"/>
+<area shape="rect" id="node2" title="This class is designed to allow equality testing to work" alt="" coords="4,73,255,91"/>
+<area shape="rect" id="node6" title="This class extends ComparisonTestCase to handle IPython specific" alt="" coords="822,56,967,74"/>
+<area shape="rect" id="node4" title="A class whose instances are single test cases." alt="" coords="337,38,454,56"/>
+<area shape="rect" id="node5" title="A Reference allows access to an object to be deferred until it is" alt="" coords="36,3,224,21"/>
+<area shape="rect" id="node7" title="A SimRef instance is installed on Collector to allow Topographica" alt="" coords="341,3,450,21"/>
+</map>

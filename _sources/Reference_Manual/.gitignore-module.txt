@@ -1,0 +1,14 @@
+***************
+.gitignore
+***************
+
+.. inheritance-diagram:: .gitignore
+
+
+
+Module
+======
+
+.. automodule:: .gitignore
+   :members:
+   :show-inheritance:

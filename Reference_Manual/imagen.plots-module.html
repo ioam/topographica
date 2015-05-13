@@ -1,0 +1,242 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.plots &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="imagen-plots">
+<h1>imagen.plots<a class="headerlink" href="#imagen-plots" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance203ca4e712.svg" usemap="#inheritance203ca4e712" class="inheritance"/></div><map id="inheritance203ca4e712" name="inheritance203ca4e712">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="imagen.plots.pyc-module.html">imagen.plots.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-imagen.plots">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-imagen.plots" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="imagen.plots.GridLayoutPlot">
+<em class="property">class </em><tt class="descclassname">imagen.plots.</tt><tt class="descname">GridLayoutPlot</tt><big>(</big><em>grid</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/plots.html#GridLayoutPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.plots.GridLayoutPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#imagen.plots.Plot" title="imagen.plots.Plot"><tt class="xref py py-class docutils literal"><span class="pre">imagen.plots.Plot</span></tt></a></p>
+<p>Plot a group of views in a grid layout based on a GridLayout view
+object.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_axes</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=True, default=True, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show labelled axes for individual subplots.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">roi</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the ROI to each element of the grid.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>constant=False, default=(5, 5), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The matplotlib figure size in inches.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_grid</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show a Cartesian grid on the plot</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="imagen.plots.Plot">
+<em class="property">class </em><tt class="descclassname">imagen.plots.</tt><tt class="descname">Plot</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/plots.html#Plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.plots.Plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A Plot object returns either a matplotlib figure object (when
+called or indexed) or a matplotlib animation object as
+appropriate. Plots take view objects such as SheetViews,
+SheetLines or SheetPoints as inputs and plots them in the
+appropriate format. As views may vary over time, all plots support
+animation via the anim() method.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_axes</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show labelled axes for the plot.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>constant=False, default=(5, 5), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The matplotlib figure size in inches.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_grid</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show a Cartesian grid on the plot</dd>
+</dl>
+<dl class="method">
+<dt id="imagen.plots.Plot.anim">
+<tt class="descname">anim</tt><big>(</big><em>start=0</em>, <em>stop=None</em>, <em>fps=30</em><big>)</big><a class="reference internal" href="../_modules/imagen/plots.html#Plot.anim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.plots.Plot.anim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to return an Matplotlib animation. The start and stop
+frames may be specified as well as the fps.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.plots.Plot.update_frame">
+<tt class="descname">update_frame</tt><big>(</big><em>n</em><big>)</big><a class="reference internal" href="../_modules/imagen/plots.html#Plot.update_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.plots.Plot.update_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the plot(s) to the given frame number.  Operates by
+manipulating the matplotlib objects held in the self._handles
+dictionary.</p>
+<p>If n is greater than the number of available frames, update
+using the last available frame.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="imagen.plots.ProjectionGridPlot">
+<em class="property">class </em><tt class="descclassname">imagen.plots.</tt><tt class="descname">ProjectionGridPlot</tt><big>(</big><em>grid</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/plots.html#ProjectionGridPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.plots.ProjectionGridPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#imagen.plots.Plot" title="imagen.plots.Plot"><tt class="xref py py-class docutils literal"><span class="pre">imagen.plots.Plot</span></tt></a></p>
+<p>ProjectionGridPlot evenly spaces out plots of individual projections on
+a grid, even when they differ in size. The projections can be situated
+or an ROI can be applied to each element. Since this class uses a single
+axis to generate all the individual plots it is much faster than the
+equivalent using subplots.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">situate</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Determines whether to situate the projection in the full bounds or
+        apply the ROI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_grid</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show a Cartesian grid on the plot</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_axes</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show labelled axes for the plot.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">border</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=10, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Aggregate border as a fraction of total plot size.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>constant=False, default=(5, 5), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The matplotlib figure size in inches.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="imagen.plots.SheetPlot">
+<em class="property">class </em><tt class="descclassname">imagen.plots.</tt><tt class="descname">SheetPlot</tt><big>(</big><em>overlays</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/plots.html#SheetPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.plots.SheetPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#imagen.plots.Plot" title="imagen.plots.Plot"><tt class="xref py py-class docutils literal"><span class="pre">imagen.plots.Plot</span></tt></a></p>
+<p>A generic plot that visualizes SheetOverlays which themselves may
+contain SheetLayers of type SheetView, SheetPoints or SheetLine
+objects.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_axes</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show labelled axes for the plot.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>constant=False, default=(5, 5), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The matplotlib figure size in inches.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">show_grid</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to show a Cartesian grid on the plot</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">imagen.plots</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-imagen.plots">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/imagen.plots-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Jan 25, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

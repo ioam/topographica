@@ -1,0 +1,296 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.ndmapping &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="imagen-ndmapping">
+<h1>imagen.ndmapping<a class="headerlink" href="#imagen-ndmapping" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance530d41a019.svg" usemap="#inheritance530d41a019" class="inheritance"/></div><map id="inheritance530d41a019" name="inheritance530d41a019">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="imagen.ndmapping.pyc-module.html">imagen.ndmapping.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-imagen.ndmapping">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-imagen.ndmapping" title="Permalink to this headline">¶</a></h2>
+<p>NdIndexableMapping and NdMapping objects.</p>
+<dl class="class">
+<dt id="imagen.ndmapping.AttrDict">
+<em class="property">class </em><tt class="descclassname">imagen.ndmapping.</tt><tt class="descname">AttrDict</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#AttrDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.AttrDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></a></p>
+<p>A dictionary type object that supports attribute access (e.g. for IPython
+tab completion).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="imagen.ndmapping.NdIndexableMapping">
+<em class="property">class </em><tt class="descclassname">imagen.ndmapping.</tt><tt class="descname">NdIndexableMapping</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>An NdIndexableMapping is a type of mapping (like a dictionary or array)
+that uses fixed-length multidimensional keys. The effect is like an
+N-dimensional array, without requiring that the entire multidimensional
+space be populated.</p>
+<p>If the underlying type of data for each (key,value) pair also supports
+indexing (such as a dictionary, array, or list), fully qualified indexing
+can be used from the top level, with the first N dimensions of the index
+selecting a particular piece of data stored in the NdIndexableMapping
+object, and the remaining dimensions used to index into the underlying data.</p>
+<p>For instance, for an NdIndexableMapping x with dimensions &#8220;Year&#8221; and
+&#8220;Month&#8221; and an underlying data type that is a 2D floating-point array
+indexed by (r,c), a 2D array can be indexed with x[2000,3] and a single
+floating-point number may be indexed as x[2000,3,1,9].</p>
+<p>In practice, this class is typically only used as an abstract base class,
+because the NdMapping subclass extends it with a range of useful slicing
+methods for selecting subsets of the data. Even so, keeping the slicing
+support separate from the indexing and data storage methods helps make both
+classes easier to understand.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">key_type</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Type checking of the
+        keys, if empty no type checking is applied.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">dimension_labels</span></tt> (<em>bounds=(0, None), constant=True, default=[None], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The dimension_labels parameter accepts a list of the features
+        along which the data will indexed.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.add_dimension">
+<tt class="descname">add_dimension</tt><big>(</big><em>dim_name</em>, <em>dim_pos</em>, <em>dim_val</em>, <em>dim_type=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.add_dimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.add_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new object with an additional dimension along which items are
+indexed. Requires the dimension name, the desired position in the
+dimension labels and a dimension value that applies to all existing
+elements.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.clone">
+<tt class="descname">clone</tt><big>(</big><em>items=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a clone with matching parameter values and metadata, containing
+the specified items (empty by default).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.dim_index">
+<tt class="descname">dim_index</tt><big>(</big><em>dimension_label</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.dim_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.dim_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the tuple index of the requested dimension.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.dimension_keys">
+<tt class="descname">dimension_keys</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.dimension_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.dimension_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of keys together with the dimension labels.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.keys">
+<tt class="descname">keys</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns indices for all data elements.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements the iterable interface, returning values unlike a standard
+dictionary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.reindex">
+<tt class="descname">reindex</tt><big>(</big><em>dimension_labels</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.reindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.reindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new object with a re-ordered or reduced set of dimension
+labels. Accepts either a single dimension label or a list of chosen
+dimension labels.</p>
+<p>Reducing the number of dimension labels will discard information held in
+the dropped dimensions. All data values are accessible in the newly
+created object as the new labels must be sufficient to address each
+value uniquely.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imagen.ndmapping.NdIndexableMapping.timestamp">
+<tt class="descname">timestamp</tt><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks for the latest timestamp along the indexed dimensions, if &#8216;Time&#8217;
+is one of the dimension labels, otherwise looks in the metadata or
+returns None, if none is defined.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imagen.ndmapping.NdIndexableMapping.top">
+<tt class="descname">top</tt><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.top"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.top" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#8221;
+Returns the item highest data item along the map dimensions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.update">
+<tt class="descname">update</tt><big>(</big><em>other</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the NdMapping with another NdMapping or map_type
+instance, checking that they are indexed along the same number
+of dimensions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.ndmapping.NdIndexableMapping.write_metadata">
+<tt class="descname">write_metadata</tt><big>(</big><em>kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdIndexableMapping.write_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdIndexableMapping.write_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acts as a param override, placing any kwargs, which are not parameters
+into the metadata dictionary.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="imagen.ndmapping.NdMapping">
+<em class="property">class </em><tt class="descclassname">imagen.ndmapping.</tt><tt class="descname">NdMapping</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/imagen/ndmapping.html#NdMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.ndmapping.NdMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#imagen.ndmapping.NdIndexableMapping" title="imagen.ndmapping.NdIndexableMapping"><tt class="xref py py-class docutils literal"><span class="pre">imagen.ndmapping.NdIndexableMapping</span></tt></a></p>
+<p>NdMapping supports the same indexing semantics as NdIndexableMapping but
+also supports filtering of items using slicing ranges.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">key_type</span></tt> (<em>bounds=(0, None), constant=True, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Type checking of the
+        keys, if empty no type checking is applied.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">dimension_labels</span></tt> (<em>bounds=(0, None), constant=True, default=[None], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The dimension_labels parameter accepts a list of the features
+        along which the data will indexed.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">imagen.ndmapping</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-imagen.ndmapping">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/imagen.ndmapping-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Jan 25, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+<map id="inheritancea80f92a813" name="inheritancea80f92a813">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,118,245,142"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFPLearningFn" title="params(name=String)" alt="" coords="290,118,474,142"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="582,27,755,50"/>
+<area shape="rect" id="node4" href="#topo.learningfn.optimized.CFPLF_BCMFixed" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="868,4,1141,28"/>
+<area shape="rect" id="node6" href="#topo.learningfn.optimized.CFPLF_Hebbian" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="872,50,1138,74"/>
+<area shape="rect" id="node5" href="#topo.learningfn.optimized.CFPLF_BCMFixed_opt" title="params(unit_threshold=Number, name=String)" alt="" coords="519,72,818,96"/>
+<area shape="rect" id="node7" href="#topo.learningfn.optimized.CFPLF_Hebbian_opt" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="523,118,815,142"/>
+<area shape="rect" id="node9" href="#topo.learningfn.projfn.CFPLF_PluginScaled" title="params(learning_rate_scaling_factor=Parameter, single_cf_fn=ClassSelector, name=String)" alt="" coords="535,164,802,187"/>
+<area shape="rect" id="node11" href="#topo.learningfn.optimized.CFPLF_Trace_opt" title="params(single_cf_fn=ClassSelector, trace_strength=Number, name=String)" alt="" coords="532,210,805,233"/>
+<area shape="rect" id="node8" href="#topo.learningfn.optimized.CFPLF_Scaled" title="params(learning_rate_scaling_factor=Parameter, single_cf_fn=ClassSelector, name=String)" alt="" coords="876,142,1133,165"/>
+<area shape="rect" id="node10" href="#topo.learningfn.optimized.CFPLF_Scaled_opt" title="params(learning_rate_scaling_factor=Parameter, single_cf_fn=ClassSelector, name=String)" alt="" coords="863,187,1146,211"/>
+</map>

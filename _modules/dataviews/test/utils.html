@@ -1,0 +1,421 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.test.utils &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="dataviews" href="../../dataviews.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../dataviews.html" accesskey="U">dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataviews.test.utils</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;../..&#39;</span><span class="p">))</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_array_almost_equal</span>
+
+<span class="kn">from</span> <span class="nn">dataviews.views</span> <span class="kn">import</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">GridLayout</span>
+<span class="kn">from</span> <span class="nn">dataviews</span> <span class="kn">import</span> <span class="n">DataOverlay</span><span class="p">,</span>  <span class="n">DataStack</span><span class="p">,</span>  <span class="n">Annotation</span><span class="p">,</span> <span class="n">Curve</span><span class="p">,</span> <span class="n">Histogram</span>
+<span class="kn">from</span> <span class="nn">dataviews</span> <span class="kn">import</span> <span class="n">TableStack</span><span class="p">,</span> <span class="n">Table</span>
+<span class="kn">from</span> <span class="nn">dataviews</span> <span class="kn">import</span> <span class="n">SheetOverlay</span><span class="p">,</span> <span class="n">SheetStack</span><span class="p">,</span> <span class="n">SheetView</span><span class="p">,</span> <span class="n">Points</span><span class="p">,</span> <span class="n">Contours</span>
+<span class="kn">from</span> <span class="nn">dataviews</span> <span class="kn">import</span> <span class="n">CoordinateGrid</span><span class="p">,</span> <span class="n">DataGrid</span>
+
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">SVG</span>
+
+<div class="viewcode-block" id="ViewTestCase"><a class="viewcode-back" href="../../../Reference_Manual/dataviews.test.utils-module.html#dataviews.test.utils.ViewTestCase">[docs]</a><span class="k">class</span> <span class="nc">ViewTestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The class implements comparisons between View objects for the</span>
+<span class="sd">    purposes of testing. The most important attribute that needs to be</span>
+<span class="sd">    compared is the data attribute as this contains the raw data held</span>
+<span class="sd">    by the View object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ViewTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># General view classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">GridLayout</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">compare_gridlayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span>       <span class="bp">self</span><span class="o">.</span><span class="n">compare_layouts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">Annotation</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">compare_annotations</span><span class="p">)</span>
+        <span class="c"># DataLayers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">DataOverlay</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">compare_dataoverlays</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">DataStack</span><span class="p">,</span>    <span class="bp">self</span><span class="o">.</span><span class="n">compare_datastack</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">Curve</span><span class="p">,</span>        <span class="bp">self</span><span class="o">.</span><span class="n">compare_curve</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">Histogram</span><span class="p">,</span>    <span class="bp">self</span><span class="o">.</span><span class="n">compare_histogram</span><span class="p">)</span>
+        <span class="c"># Tables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">TableStack</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">compare_tablestack</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">Table</span><span class="p">,</span>        <span class="bp">self</span><span class="o">.</span><span class="n">compare_tables</span><span class="p">)</span>
+        <span class="c"># SheetLayers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">SheetOverlay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compare_sheetoverlays</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">SheetStack</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">compare_sheetstack</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">SheetView</span><span class="p">,</span>    <span class="bp">self</span><span class="o">.</span><span class="n">compare_sheetviews</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">Contours</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">compare_contours</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span>       <span class="bp">self</span><span class="o">.</span><span class="n">compare_points</span><span class="p">)</span>
+        <span class="c"># CoordinateGrid and DataGrid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">CoordinateGrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compare_coordgrids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">DataGrid</span><span class="p">,</span>       <span class="bp">self</span><span class="o">.</span><span class="n">compare_datagrids</span><span class="p">)</span>
+
+    <span class="c">#================#</span>
+    <span class="c"># Helper methods #</span>
+    <span class="c">#================#</span>
+
+    <span class="k">def</span> <span class="nf">compare_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr1</span><span class="p">,</span> <span class="n">arr2</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">arr1</span><span class="p">,</span> <span class="n">arr2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;: &#39;</span><span class="o">+</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">bounds_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;BoundingBoxes are mismatched.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">ndims</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">ndims</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Stacks have different numbers of dimensions.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">dimension_labels</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">dimension_labels</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Stacks have different dimension labels.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Stacks have different numbers of keys.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">view2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Stacks have different sets of keys.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">el1</span><span class="p">,</span> <span class="n">el2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">el1</span><span class="p">,</span><span class="n">el2</span><span class="p">)</span>
+
+    <span class="c">#=================#</span>
+    <span class="c"># Generic classes #</span>
+    <span class="c">#=================#</span>
+
+    <span class="k">def</span> <span class="nf">compare_gridlayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;GridLayouts have different sizes.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">view2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;GridLayouts have different keys.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">el1</span><span class="p">,</span> <span class="n">el2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">el1</span><span class="p">,</span><span class="n">el2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">compare_layouts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">el1</span><span class="p">,</span> <span class="n">el2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">el1</span><span class="p">,</span> <span class="n">el2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">compare_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">view2</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Annotations contain different sets of annotations.&quot;</span><span class="p">)</span>
+
+    <span class="c">#============#</span>
+    <span class="c"># DataLayers #</span>
+    <span class="c">#============#</span>
+
+    <span class="k">def</span> <span class="nf">compare_datastack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_stack</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_dataoverlays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;DataOverlays have different lengths.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">layer1</span><span class="p">,</span> <span class="n">layer2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">layer1</span><span class="p">,</span> <span class="n">layer2</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">cyclic_range</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">cyclic_range</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Curves do not have matching cyclic_range.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_arrays</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">view2</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Curve data&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">cyclic_range</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">cyclic_range</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Histograms do not have matching cyclic_range.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_arrays</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">view2</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="s">&quot;Histogram edges&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_arrays</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">view2</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s">&quot;Histogram values&quot;</span><span class="p">)</span>
+
+    <span class="c">#========#</span>
+    <span class="c"># Tables #</span>
+    <span class="c">#========#</span>
+
+    <span class="k">def</span> <span class="nf">compare_tablestack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_stack</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">rows</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">rows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Tables have different numbers of rows.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">cols</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">cols</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Tables have different numbers of columns.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">view1</span><span class="o">.</span><span class="n">headings</span> <span class="o">!=</span> <span class="n">view2</span><span class="o">.</span><span class="n">headings</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Tables have different headings.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">view1</span><span class="o">.</span><span class="n">headings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">view1</span><span class="p">[</span><span class="n">heading</span><span class="p">],</span> <span class="n">view2</span><span class="p">[</span><span class="n">heading</span><span class="p">])</span>
+
+    <span class="c">#=============#</span>
+    <span class="c"># SheetLayers #</span>
+    <span class="c">#=============#</span>
+
+    <span class="k">def</span> <span class="nf">compare_sheetstack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_check</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span><span class="n">view2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_stack</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_sheetoverlays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;SheetOverlays have different lengths.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_check</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">layer1</span><span class="p">,</span> <span class="n">layer2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">layer1</span><span class="p">,</span> <span class="n">layer2</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_sheetviews</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_arrays</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">view2</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;SheetView&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_check</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span><span class="n">view2</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_contours</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_check</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Contours do not have a matching number of contours.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">view2</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compare_arrays</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="s">&#39;Contour data&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_check</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;Points objects have different numbers of points.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_arrays</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">view2</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Points data&#39;</span><span class="p">)</span>
+
+    <span class="c">#=======#</span>
+    <span class="c"># Grids #</span>
+    <span class="c">#=======#</span>
+
+    <span class="k">def</span> <span class="nf">compare_grids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">name</span> <span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">s have different numbers of items.&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">view1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">view2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">s have different keys.&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">view1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureException</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">s have different depths.&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">el1</span><span class="p">,</span> <span class="n">el2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">el1</span><span class="p">,</span> <span class="n">el2</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_coordgrids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_check</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_grids</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="s">&#39;CoordinateGrid&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">compare_datagrids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_grids</span><span class="p">(</span><span class="n">view1</span><span class="p">,</span> <span class="n">view2</span><span class="p">,</span> <span class="s">&#39;DataGrid&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="IPTestCase"><a class="viewcode-back" href="../../../Reference_Manual/dataviews.test.utils-module.html#dataviews.test.utils.IPTestCase">[docs]</a><span class="k">class</span> <span class="nc">IPTestCase</span><span class="p">(</span><span class="n">ViewTestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class extends ViewTestCase to handle IPython specific objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">IPTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">HTML</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_comparison</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTypeEqualityFunc</span><span class="p">(</span><span class="n">SVG</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">skip_comparison</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">skip_comparison</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="IPHookTestCase"><a class="viewcode-back" href="../../../Reference_Manual/dataviews.test.utils-module.html#dataviews.test.utils.IPHookTestCase">[docs]</a><span class="k">class</span> <span class="nc">IPHookTestCase</span><span class="p">(</span><span class="n">IPTestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">IPHookTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ipython</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="s">&quot;from dataviews.ipython import view_display&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_extension</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_display_hooks</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># Removes unnecessary IPython prompts (and moves one line up)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%c</span><span class="s">onfig PromptManager.out_template = &#39;</span><span class="se">\x1b\x5b\x31\x41</span><span class="s">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_ipython</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">IPython</span> <span class="kn">import</span> <span class="n">get_ipython</span>
+        <span class="k">return</span> <span class="n">get_ipython</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">proxy_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hook</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">capture_hook</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span>  <span class="n">pprinter</span><span class="p">,</span> <span class="n">cycles</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="k">return</span> <span class="n">hook</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">capture_hook</span>
+
+    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">run_cell</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="k">def</span> <span class="nf">set_display_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">html_formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">display_formatter</span><span class="o">.</span><span class="n">formatters</span><span class="p">[</span><span class="s">&#39;text/html&#39;</span><span class="p">]</span>
+        <span class="n">printers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">tp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy_hook</span><span class="p">(</span><span class="n">h</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">tp</span><span class="p">,</span><span class="n">h</span><span class="p">)</span> <span class="ow">in</span> <span class="n">html_formatter</span><span class="o">.</span><span class="n">type_printers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">display_formatter</span><span class="o">.</span><span class="n">formatters</span><span class="p">[</span><span class="s">&#39;text/plain&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">type_printers</span> <span class="o">=</span> <span class="n">printers</span>
+
+    <span class="k">def</span> <span class="nf">load_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">run_line_magic</span><span class="p">(</span><span class="s">&quot;load_ext&quot;</span><span class="p">,</span> <span class="s">&quot;dataviews.ipython&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IPHookTestCase.cell"><a class="viewcode-back" href="../../../Reference_Manual/dataviews.test.utils-module.html#dataviews.test.utils.IPHookTestCase.cell">[docs]</a>    <span class="k">def</span> <span class="nf">cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="s">&quot;Run an IPython cell&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">run_cell</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="IPHookTestCase.cell_magic"><a class="viewcode-back" href="../../../Reference_Manual/dataviews.test.utils-module.html#dataviews.test.utils.IPHookTestCase.cell_magic">[docs]</a>    <span class="k">def</span> <span class="nf">cell_magic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s">&quot;Run an IPython cell magic&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">run_cell_magic</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/dataviews/test/utils.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../dataviews.html" >dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

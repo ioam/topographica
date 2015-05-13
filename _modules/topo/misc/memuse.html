@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.memuse &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.memuse</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for measuring memory usage, to allow usage to be optimized.</span>
+
+<span class="sd">Examples::</span>
+
+<span class="sd">  bin/python -c &#39;execfile(&quot;topo/misc/memuse.py&quot;) ; print topsize_mb()&#39;</span>
+
+<span class="sd">  ./topographica -c &#39;from topo.misc import memuse&#39; -c &#39;print memuse.topsize_mb()&#39;</span>
+
+<span class="sd">  ./topographica -c &#39;from topo.misc import memuse, asizeof&#39; -c &#39;print memuse.topsize_mb()&#39;</span>
+
+<span class="sd">  ./topographica -a -c &#39;from topo.misc import memuse, asizeof&#39; -c &#39;print memuse.topsize_mb()&#39;</span>
+
+<span class="sd">  ./topographica -a -c &#39;from topo.misc import memuse, asizeof&#39; examples/tiny.ty -c &#39;print memuse.allsizes_mb()&#39;</span>
+
+<span class="sd">  ./topographica -a -c &#39;from topo.misc import memuse, asizeof&#39; -c &#39;memuse.memuse_batch(&quot;examples/tiny.ty&quot;,cortex_density=20)&#39;</span>
+
+<span class="sd">  ./topographica -a -c &#39;from topo.misc import memuse, asizeof&#39; -c &#39;memuse.memuse_batch(&quot;examples/tiny.ty&quot;,times=[0,100],analysis_fn=memuse.plotting_and_saving_analysis_fn,cortex_density=20)&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># If functions in this file need anything other than the very basic</span>
+<span class="c"># imports declared here at the top, they must do so using import</span>
+<span class="c"># statements *within* the function definition to avoid polluting</span>
+<span class="c"># memory.  Otherwise, the simplest functions in this file would end up</span>
+<span class="c"># measuring memory taken by unused and irrelevant imports like &#39;topo&#39;,</span>
+<span class="c"># which doesn&#39;t ever need to be loaded for the &#39;execfile&#39; example</span>
+<span class="c"># shown above.</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+
+<div class="viewcode-block" id="cmd_to_string"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.cmd_to_string">[docs]</a><span class="k">def</span> <span class="nf">cmd_to_string</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run a system command as in os.system(), but capture the stdout and return it as a string.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span><span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+
+</div>
+<div class="viewcode-block" id="topsize"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.topsize">[docs]</a><span class="k">def</span> <span class="nf">topsize</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Return the RES size of this process as reported by the top(1) command.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="n">top_line</span><span class="o">=</span><span class="n">cmd_to_string</span><span class="p">(</span><span class="s">&quot;top -n 1 -b -p </span><span class="si">%d</span><span class="s"> | grep &#39;^[ ]*</span><span class="si">%d</span><span class="s"> &#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="n">top_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">5</span><span class="p">]</span>
+
+
+</div>
+<div class="viewcode-block" id="simsize"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.simsize">[docs]</a><span class="k">def</span> <span class="nf">simsize</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the size of topo.sim reported by asizeof.asizeof().</span>
+<span class="sd">    This estimate does not currently include any numpy arrays, and</span>
+<span class="sd">    may also be missing other important items.</span>
+
+<span class="sd">    Python 2.6 supports getsizeof() and a __sizeof__ attribute that user</span>
+<span class="sd">    code can implement, which should provide a more accurate estimate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">asizeof</span><span class="o">,</span><span class="nn">topo</span>
+    <span class="k">return</span> <span class="n">asizeof</span><span class="o">.</span><span class="n">asizeof</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">)</span>
+
+
+
+<span class="c">###############################################################################</span>
+<span class="c"># String-formatted versions of the above</span>
+</div>
+<div class="viewcode-block" id="mb"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.mb">[docs]</a><span class="k">def</span> <span class="nf">mb</span><span class="p">(</span><span class="nb">bytes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Format the given value in bytes as a string in megabytes&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">MB&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">bytes</span><span class="o">/</span><span class="mf">1024.0</span><span class="o">/</span><span class="mf">1024.0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="topsize_mb"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.topsize_mb">[docs]</a><span class="k">def</span> <span class="nf">topsize_mb</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;String-formatted version of the RES size of this process reported by top(1).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;topsize:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">topsize</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="simsize_mb"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.simsize_mb">[docs]</a><span class="k">def</span> <span class="nf">simsize_mb</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;String-formatted version of the value reported by asizeof(topo.sim).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;simsize:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mb</span><span class="p">(</span><span class="n">simsize</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="wtsize_mb"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.wtsize_mb">[docs]</a><span class="k">def</span> <span class="nf">wtsize_mb</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;String-formatted version of the memory taken by the weights, from print_sizes().&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">n_bytes</span>
+    <span class="k">return</span> <span class="s">&quot;wtsize:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mb</span><span class="p">(</span><span class="n">n_bytes</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="allsizes_mb"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.allsizes_mb">[docs]</a><span class="k">def</span> <span class="nf">allsizes_mb</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collates results from topsize, simsize, and wtsize.</span>
+
+<span class="sd">    Formatted to suggest that the topsize is made up of code (not</span>
+<span class="sd">    currently estimated), topo.sim (apart from weights), and weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">n_bytes</span>
+    <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> =? code + </span><span class="si">%s</span><span class="s"> + </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s"> tot)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">topsize_mb</span><span class="p">(),</span><span class="n">simsize_mb</span><span class="p">(),</span><span class="n">wtsize_mb</span><span class="p">(),</span><span class="n">mb</span><span class="p">(</span><span class="n">simsize</span><span class="p">()</span><span class="o">+</span><span class="n">n_bytes</span><span class="p">()))</span>
+
+
+<span class="c">###############################################################################</span>
+<span class="c"># Batch commands</span>
+
+</div>
+<div class="viewcode-block" id="default_memuse_analysis_fn"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.default_memuse_analysis_fn">[docs]</a><span class="k">def</span> <span class="nf">default_memuse_analysis_fn</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Basic memuse function for use with memuse_batch()&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">topo</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">t</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(),</span><span class="n">allsizes_mb</span><span class="p">())</span>
+
+
+</div>
+<div class="viewcode-block" id="plotting_and_saving_analysis_fn"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.plotting_and_saving_analysis_fn">[docs]</a><span class="k">def</span> <span class="nf">plotting_and_saving_analysis_fn</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;For use with memuse_batch() to test snapshot and plotting memory usage.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">topo</span>
+    <span class="kn">from</span> <span class="nn">topo.command</span> <span class="kn">import</span> <span class="n">save_snapshot</span>
+    <span class="kn">from</span> <span class="nn">topo.command.analysis</span> <span class="kn">import</span> <span class="n">measure_sine_pref</span><span class="p">,</span><span class="n">save_plotgroup</span>
+
+    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">Memuse at time </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(),</span><span class="n">allsizes_mb</span><span class="p">())</span>
+    <span class="n">measure_sine_pref</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">After measure_sine_pref:  </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span><span class="n">allsizes_mb</span><span class="p">())</span>
+    <span class="n">save_plotgroup</span><span class="p">(</span><span class="s">&quot;Orientation Preference&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">After save_plotgroup:     </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span><span class="n">allsizes_mb</span><span class="p">())</span>
+    <span class="n">save_snapshot</span><span class="p">(</span><span class="s">&quot;/tmp/tmp.typ&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">After save_snapshot:      </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span><span class="n">allsizes_mb</span><span class="p">())</span>
+
+
+</div>
+<div class="viewcode-block" id="memuse_batch"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.memuse.memuse_batch">[docs]</a><span class="k">def</span> <span class="nf">memuse_batch</span><span class="p">(</span><span class="n">script_file</span><span class="p">,</span><span class="n">times</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">analysis_fn</span><span class="o">=</span><span class="n">default_memuse_analysis_fn</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Similar to run_batch, but analyzes the memory requirement of a simulation at different times.</span>
+
+<span class="sd">    First, the specified script file will be run using the specified parameters.</span>
+<span class="sd">    Then at each of the specified times, the given analysis_fn (which</span>
+<span class="sd">    calls allsizes_mb() by default) is run.  The output is labeled</span>
+<span class="sd">    with the script file, time, and parameters so that results from</span>
+<span class="sd">    different runs can be compared.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">re</span><span class="o">,</span><span class="nn">__main__</span><span class="o">,</span><span class="nn">topo</span>
+    <span class="kn">from</span> <span class="nn">topo.misc.commandline</span> <span class="kn">import</span> <span class="n">global_params</span>
+
+    <span class="c"># Construct simulation name, etc.</span>
+    <span class="n">scriptbase</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;.ty$&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">script_file</span><span class="p">))</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="c">#prefix += time.strftime(&quot;%Y%m%d%H%M&quot;) + &quot;_&quot;</span>
+    <span class="n">prefix</span> <span class="o">+=</span> <span class="n">scriptbase</span>
+    <span class="n">simname</span> <span class="o">=</span> <span class="n">prefix</span>
+
+    <span class="c"># Construct parameter-value portion of filename; should do more filtering</span>
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="c"># Special case to give reasonable filenames for lists</span>
+        <span class="n">valstr</span><span class="o">=</span> <span class="p">(</span><span class="s">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">val</span><span class="p">])</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span><span class="nb">list</span><span class="p">)</span>
+                 <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        <span class="n">prefix</span> <span class="o">+=</span> <span class="s">&quot;,&quot;</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="s">&quot;=&quot;</span> <span class="o">+</span> <span class="n">valstr</span>
+
+    <span class="c"># Set provided parameter values in main namespace</span>
+    <span class="n">global_params</span><span class="o">.</span><span class="n">set_in_context</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="c"># Run script in main</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">execfile</span><span class="p">(</span><span class="n">script_file</span><span class="p">,</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span> <span class="c">#global_params.context</span>
+        <span class="n">global_params</span><span class="o">.</span><span class="n">check_for_unused_names</span><span class="p">()</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">simname</span>
+
+        <span class="c"># Run each segment, doing the analysis and saving the script state each time</span>
+        <span class="k">for</span> <span class="n">run_to</span> <span class="ow">in</span> <span class="n">times</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run_to</span> <span class="o">-</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+            <span class="n">analysis_fn</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="o">+</span><span class="s">&quot;: &quot;</span><span class="p">)</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">traceback</span><span class="o">,</span><span class="nn">sys</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Warning -- Error detected: execution halted.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/misc/memuse.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

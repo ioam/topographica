@@ -1,0 +1,8 @@
+<map id="inheritance3835fd925f" name="inheritance3835fd925f">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="53,103,312,129"/>
+<area shape="rect" id="node6" href="#topo.misc.commandline.GlobalParams" title="A Parameterized class providing script&#45;level parameters." alt="" coords="426,153,694,178"/>
+<area shape="rect" id="node3" href="#topo.misc.commandline.CommandPrompt" title="Control over input prompt." alt="" coords="413,5,707,30"/>
+<area shape="rect" id="node4" href="#topo.misc.commandline.IPCommandPromptHandler" title="Allows control over IPython&#39;s dynamic command prompts." alt="" coords="5,54,360,79"/>
+<area shape="rect" id="node5" href="#topo.misc.commandline.CommandPrompt2" title="Control over continuation prompt." alt="" coords="409,54,711,79"/>
+<area shape="rect" id="node7" href="#topo.misc.commandline.OutputPrompt" title="Control over output prompt." alt="" coords="425,103,695,129"/>
+</map>

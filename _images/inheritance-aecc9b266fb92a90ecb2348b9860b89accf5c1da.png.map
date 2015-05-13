@@ -1,0 +1,20 @@
+<map id="inheritancebede3c61fc" name="inheritancebede3c61fc">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="3,151,159,166"/>
+<area shape="rect" id="node2" title="Acts like a Python function, but with arguments that are Parameters." alt="" coords="188,151,375,166"/>
+<area shape="rect" id="node3" href="#topo.command.Command" title="Parameterized command: any error when the command is run (called)" alt="" coords="405,151,519,166"/>
+<area shape="rect" id="node4" href="#topo.command.pylabplot.PylabPlotCommand" title="Parameterized command for plotting using Matplotlib/Pylab." alt="" coords="549,151,736,166"/>
+<area shape="rect" id="node6" href="#topo.command.pylabplot.matrixplot" title="Simple plotting for any matrix as a bitmap with axes." alt="" coords="775,47,926,62"/>
+<area shape="rect" id="node10" href="#topo.command.pylabplot.histogramplot" title="Compute and plot the histogram of the supplied data." alt="" coords="768,77,933,92"/>
+<area shape="rect" id="node11" href="#topo.command.pylabplot.matrixplot3d" title="Simple plotting for any matrix as a 3D wireframe with axes." alt="" coords="770,106,931,122"/>
+<area shape="rect" id="node12" href="#topo.command.pylabplot.matrixplot3dx3" title="Plot three matching matrices x,y,z as a 3D wireframe with axes." alt="" coords="765,136,935,151"/>
+<area shape="rect" id="node13" href="#topo.command.pylabplot.overlaid_plot" title="Use matplotlib to make a plot combining a bitmap and line&#45;based" alt="" coords="770,166,931,181"/>
+<area shape="rect" id="node16" href="#topo.command.pylabplot.xy_grid" title="By default, plot the x and y coordinate preferences as a grid." alt="" coords="781,195,920,211"/>
+<area shape="rect" id="node17" href="#topo.command.pylabplot.tuning_curve" title="Plot a tuning curve for a feature, such as orientation, contrast, or size." alt="" coords="770,225,931,240"/>
+<area shape="rect" id="node18" href="#topo.command.pylabplot.vectorplot" title="Simple line plotting for any vector or list of numbers." alt="" coords="775,255,926,270"/>
+<area shape="rect" id="node5" href="#topo.command.pylabplot.activityplot" title="Plots the activity in a sheet with axis labels in Sheet (not matrix) coordinates." alt="" coords="980,3,1133,18"/>
+<area shape="rect" id="node7" href="#topo.command.pylabplot.autocorrelationplot" title="Compute and show the 2D autocorrelation of the supplied data." alt="" coords="964,32,1149,48"/>
+<area shape="rect" id="node8" href="#topo.command.pylabplot.fftplot" title="Compute and show the 2D Fast Fourier Transform (FFT) of the supplied data." alt="" coords="990,62,1124,77"/>
+<area shape="rect" id="node9" href="#topo.command.pylabplot.gradientplot" title="Compute and show the gradient plot of the supplied data." alt="" coords="978,92,1136,107"/>
+<area shape="rect" id="node14" href="#topo.command.pylabplot.overlaid_plots" title="Use matplotlib to make a plot combining a bitmap and line&#45;based overlays." alt="" coords="974,166,1139,181"/>
+<area shape="rect" id="node15" href="#topo.command.pylabplot.topographic_grid" title="By default, plot the XPreference and YPreference preferences for all" alt="" coords="968,195,1145,211"/>
+</map>

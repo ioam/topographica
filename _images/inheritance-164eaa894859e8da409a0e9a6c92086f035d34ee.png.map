@@ -1,0 +1,5 @@
+<map id="inheritancec2708a0c37" name="inheritancec2708a0c37">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,5,264,30"/>
+<area shape="rect" id="node3" href="#topo.plotting.plotfilesaver.PlotGroupSaver" title="params(file_format=String, filename_format=String, filename_prefix=String, filename_suffix=String, name=String)" alt="" coords="313,5,599,30"/>
+<area shape="rect" id="node2" href="#topo.plotting.plotfilesaver.CFProjectionPlotGroupSaver" title="params(file_format=String, filename_format=String, filename_prefix=String, filename_suffix=String, name=String)" alt="" coords="649,5,1015,30"/>
+</map>

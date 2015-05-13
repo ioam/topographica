@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.optimized &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.sheet" href="../sheet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" accesskey="U">topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sheet.optimized</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Inline-optimized Sheet classes</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFIter</span>
+<span class="kn">from</span> <span class="nn">topo.base.projection</span> <span class="kn">import</span> <span class="n">NeighborhoodMask</span>
+<span class="kn">from</span> <span class="nn">topo.misc.inlinec</span> <span class="kn">import</span> <span class="n">inline</span><span class="p">,</span><span class="n">provide_unoptimized_equivalent</span><span class="p">,</span><span class="n">c_header</span>
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">SettlingCFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">compute_joint_norm_totals</span>  <span class="c"># pyflakes:ignore (optimized version provided)</span>
+
+<span class="k">def</span> <span class="nf">compute_joint_norm_totals_opt</span><span class="p">(</span><span class="n">projlist</span><span class="p">,</span><span class="n">active_units_mask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute norm_total for each CF in each projections from a</span>
+<span class="sd">    group to be normalized jointly.  The same assumptions are</span>
+<span class="sd">    made as in the original function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Assumes that all Projections in the list have the same r,c size</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">projlist</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">length</span><span class="o">&gt;=</span><span class="mi">1</span>
+
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">projlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="n">CFIter</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="n">active_units_mask</span><span class="p">)</span>
+    <span class="n">num_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+    <span class="n">active_units_mask</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_active_units_mask</span><span class="p">()</span>
+    <span class="n">sheet_mask</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_sheet_mask</span><span class="p">()</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+    <span class="n">cf_type</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">cf_type</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+    <span class="c"># CEBALERT: Not consistent with other C code. E.g. could be</span>
+    <span class="c"># simplified to use active_units_mask[] and sheet_mask[]?</span>
+
+    <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">        DECLARE_SLOT_OFFSET(_norm_total,cf_type);</span>
+<span class="s">        DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);</span>
+<span class="s">        DECLARE_SLOT_OFFSET(weights,cf_type);</span>
+<span class="s">        DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);</span>
+<span class="s">        DECLARE_SLOT_OFFSET(mask,cf_type);</span>
+
+<span class="s">        npfloat *x = active_units_mask;</span>
+<span class="s">        npfloat *m = sheet_mask;</span>
+<span class="s">        for (int r=0; r&lt;num_cfs; ++r) {</span>
+<span class="s">            double load = *x++;</span>
+<span class="s">            double msk = *m++;</span>
+<span class="s">            if (msk!=0 &amp;&amp; load != 0) {</span>
+<span class="s">                double nt = 0;</span>
+
+<span class="s">                for(int p=0; p&lt;length; p++) {</span>
+<span class="s">                    PyObject *proj = PyList_GetItem(projlist,p);</span>
+<span class="s">                    PyObject *cfs = PyObject_GetAttrString(proj,&quot;flatcfs&quot;);</span>
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);</span>
+<span class="s">                    if (_has_norm_total[0] == 0) {</span>
+<span class="s">                        LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);</span>
+<span class="s">                        LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);</span>
+
+<span class="s">                        UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);</span>
+
+<span class="s">                        SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2);</span>
+<span class="s">                    }</span>
+<span class="s">                    nt += _norm_total[0];</span>
+<span class="s">                    Py_DECREF(cfs);</span>
+<span class="s">                }</span>
+
+<span class="s">                for(int p=0; p&lt;length; p++) {</span>
+<span class="s">                    PyObject *proj = PyList_GetItem(projlist,p);</span>
+<span class="s">                    PyObject *cfs = PyObject_GetAttrString(proj,&quot;flatcfs&quot;);</span>
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);</span>
+<span class="s">                    _norm_total[0] = nt;</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);</span>
+<span class="s">                    _has_norm_total[0] = 1;</span>
+
+<span class="s">                    Py_DECREF(cfs);</span>
+<span class="s">                }</span>
+<span class="s">            }</span>
+
+<span class="s">        }</span>
+<span class="s">    &quot;&quot;&quot;</span>
+    <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;projlist&#39;</span><span class="p">,</span><span class="s">&#39;active_units_mask&#39;</span><span class="p">,</span><span class="s">&#39;sheet_mask&#39;</span><span class="p">,</span><span class="s">&#39;num_cfs&#39;</span><span class="p">,</span><span class="s">&#39;length&#39;</span><span class="p">,</span><span class="s">&#39;cf_type&#39;</span><span class="p">],</span>
+           <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+           <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&lt;structmember.h&gt;&#39;</span><span class="p">])</span>
+
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;compute_joint_norm_totals_opt&quot;</span><span class="p">,</span>
+                               <span class="s">&quot;compute_joint_norm_totals&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+
+<span class="c"># CEBALERT: not tested</span>
+<span class="k">class</span> <span class="nc">SettlingCFSheet_Opt</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Faster but potentially unsafe optimized version of SettlingCFSheet.</span>
+
+<span class="sd">    Adds a NeighborhoodMask that skips computation for neurons</span>
+<span class="sd">    sufficiently distant from all those activated in the first few</span>
+<span class="sd">    steps of settling.  This is safe only if activity bubbles reliably</span>
+<span class="sd">    shrink after the first few steps; otherwise the results will</span>
+<span class="sd">    differ from SettlingCFSheet.</span>
+
+<span class="sd">    Typically useful only for standard SettlingCFSheet simulations with</span>
+<span class="sd">    localized (e.g. Gaussian) inputs and that shrink the lateral</span>
+<span class="sd">    excitatory radius, which results in small patches of activity in</span>
+<span class="sd">    an otherwise inactive sheet.</span>
+
+<span class="sd">    Also overrides the function</span>
+<span class="sd">    JointNormalizingCFSheet.__compute_joint_norm_totals with</span>
+<span class="sd">    C-optimized code for SettlingCFSheets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">joint_norm_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">compute_joint_norm_totals_opt</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SettlingCFSheet_Opt</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="c"># CEBALERT: this wipes out any user-specified sheet mask.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">NeighborhoodMask_Opt</span><span class="p">(</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.00001</span><span class="p">,</span><span class="n">radius</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span><span class="n">sheet</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;SettlingCFSheet_Opt&quot;</span><span class="p">,</span><span class="s">&quot;SettlingCFSheet&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+
+<span class="c"># Legacy declaration for backwards compatibility</span>
+<span class="n">LISSOM_Opt</span><span class="o">=</span><span class="n">SettlingCFSheet_Opt</span>
+
+
+<span class="k">class</span> <span class="nc">NeighborhoodMask_Opt</span><span class="p">(</span><span class="n">NeighborhoodMask</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">ignore1</span><span class="p">,</span><span class="n">matradius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ignore2</span><span class="p">,</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">matradius</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">matradius</span> <span class="o">-</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">thr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">activity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">activity</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">            #define min(x,y) (x&lt;y?x:y)</span>
+<span class="s">            #define max(x,y) (x&gt;y?x:y)</span>
+
+<span class="s">            npfloat *X = mask;</span>
+<span class="s">            npfloat *A = activity;</span>
+<span class="s">            for (int r=0; r&lt;rows; ++r) {</span>
+<span class="s">                for (int l=0; l&lt;cols; ++l) {</span>
+<span class="s">                    int lbx = max(0,r-matradius);</span>
+<span class="s">                    int lby = max(0,l-matradius);</span>
+<span class="s">                    int hbx = min(r+matradius+1,rows);</span>
+<span class="s">                    int hby = min(l+matradius+1,cols);</span>
+
+<span class="s">                    *X = 0.0;</span>
+<span class="s">                    int breakFlag = 0;</span>
+<span class="s">                    for(int k=lbx;k&lt;hbx;k++)</span>
+<span class="s">                    {</span>
+<span class="s">                        for(int l=lby;l&lt;hby;l++)</span>
+<span class="s">                        {</span>
+<span class="s">                            npfloat *a = A+k*rows + l;</span>
+<span class="s">                            if(*a &gt; thr)</span>
+<span class="s">                            {</span>
+<span class="s">                                *X = 1.0;</span>
+<span class="s">                                //JAALERT HACK. Want to jump out both nested loops!!!</span>
+<span class="s">                                breakFlag = 1;</span>
+<span class="s">                                break;</span>
+<span class="s">                            }</span>
+<span class="s">                        }</span>
+<span class="s">                        if(breakFlag)break;</span>
+<span class="s">                    }</span>
+
+<span class="s">                    X++;</span>
+<span class="s">                }</span>
+<span class="s">            }</span>
+<span class="s">        &quot;&quot;&quot;</span>
+        <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;thr&#39;</span><span class="p">,</span><span class="s">&#39;activity&#39;</span><span class="p">,</span><span class="s">&#39;matradius&#39;</span><span class="p">,</span><span class="s">&#39;mask&#39;</span><span class="p">,</span><span class="s">&#39;rows&#39;</span><span class="p">,</span><span class="s">&#39;cols&#39;</span><span class="p">],</span> <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">())</span>
+
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;NeighborhoodMask_Opt&quot;</span><span class="p">,</span><span class="s">&quot;NeighborhoodMask&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;compute_joint_norm_totals&quot;</span><span class="p">,</span>
+    <span class="s">&quot;SettlingCFSheet&quot;</span><span class="p">,</span>
+    <span class="s">&quot;NeighborhoodMask&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/sheet/optimized.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" >topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+<map id="inheritancef415e0380d" name="inheritancef415e0380d">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="37,202,296,227"/>
+<area shape="rect" id="node2" title="Acts like a Python function, but with arguments that are Parameters." alt="" coords="376,202,688,227"/>
+<area shape="rect" id="node4" href="#topo.command.Command" title="Parameterized command: any error when the command is run (called)" alt="" coords="758,127,949,153"/>
+<area shape="rect" id="node10" href="#topo.command.run_batch" title="Run a Topographica simulation in batch mode." alt="" coords="759,226,947,251"/>
+<area shape="rect" id="node11" href="#topo.command.runscript" title="Runs a script that has been parameterized with script parameters." alt="" coords="763,275,943,301"/>
+<area shape="rect" id="node3" title="The metaclass of Parameterized (and all its descendents)." alt="" coords="5,153,328,178"/>
+<area shape="rect" id="node5" title="A class having this as a metaclass will have its __call__() method" alt="" coords="405,153,659,178"/>
+<area shape="rect" id="node6" href="#topo.command.ImportErrorObject" title="Raises an ImportError on any attempt to access an attribute, call," alt="" coords="47,103,286,129"/>
+<area shape="rect" id="node7" href="#topo.command.ImportErrorRaisingFakeModule" title="Returns an ImportErrorObject for any attribute request." alt="" coords="8,54,325,79"/>
+<area shape="rect" id="node8" href="#topo.command.UnpickleEnvironmentCreator" title="When unpickled, installs any necessary legacy support." alt="" coords="13,5,320,30"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="inheritance618017bad5" name="inheritance618017bad5">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="2,2,120,14"/>
+<area shape="rect" id="node2" href="#topo.submodel.Model" title="The available setup options are:" alt="" coords="142,2,215,14"/>
+<area shape="rect" id="node3" href="#topo.submodel.color.ColorEarlyVisionModel" title="An EarlyVisionModel extended with color support." alt="" coords="705,2,839,14"/>
+<area shape="rect" id="node6" href="#topo.submodel.color.ModelGCALInheritingColor" title="This class file is identical to ModelGCAL (gcal.py) except for" alt="" coords="861,2,1007,14"/>
+<area shape="rect" id="node5" href="#topo.submodel.color.ModelGCALColor" title="Implementing of ModelGCAL including color support." alt="" coords="1030,2,1149,14"/>
+</map>

@@ -1,0 +1,58 @@
+topo.plotting Package
+=====================
+
+:mod:`plotting` Package
+-----------------------
+
+.. inheritance-diagram:: topo.plotting
+
+
+.. automodule:: topo.plotting
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`bitmap` Module
+--------------------
+
+.. inheritance-diagram:: topo.plotting.bitmap
+
+
+.. automodule:: topo.plotting.bitmap
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`plot` Module
+------------------
+
+.. inheritance-diagram:: topo.plotting.plot
+
+
+.. automodule:: topo.plotting.plot
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`plotfilesaver` Module
+---------------------------
+
+.. inheritance-diagram:: topo.plotting.plotfilesaver
+
+
+.. automodule:: topo.plotting.plotfilesaver
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`plotgroup` Module
+-----------------------
+
+.. inheritance-diagram:: topo.plotting.plotgroup
+
+
+.. automodule:: topo.plotting.plotgroup
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

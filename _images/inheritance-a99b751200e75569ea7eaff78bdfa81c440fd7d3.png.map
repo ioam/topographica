@@ -1,0 +1,12 @@
+<map id="inheritancecfedd44b41" name="inheritancecfedd44b41">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="4,63,214,84"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFPLearningFn" title="Compute new CFs for a CFProjection based on input and output activity values." alt="" coords="255,23,416,44"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.cf.CFPOutputFn" title="Type for an object that applies some operation (typically something" alt="" coords="260,63,411,84"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.cf.CFPResponseFn" title="Map an input activity matrix into an output matrix using the CFs" alt="" coords="253,103,418,124"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="CFPLearningFunction applying the specified single_cf_fn to each CF." alt="" coords="557,23,708,44"/>
+<area shape="rect" id="node7" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython" title="Same as CFPLF_Plugin(single_cf_fn=BCMFixed()); just for non&#45;optimized fallback." alt="" coords="851,4,1143,24"/>
+<area shape="rect" id="node8" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython" title="Same as CFPLF_Plugin(single_cf_fn=Hebbian()); just for non&#45;optimized fallback." alt="" coords="854,44,1140,64"/>
+<area shape="rect" id="node9" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython" title="Non&#45;optimized version of CFPOF_DivisiveNormalizeL1_cython." alt="" coords="458,63,806,84"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.cf.CFPRF_Plugin" title="Generic large&#45;scale response function based on a simple single&#45;CF function." alt="" coords="556,103,708,124"/>
+<area shape="rect" id="node10" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython" title="Wrapper written to allow transparent non&#45;optimized fallback;" alt="" coords="846,103,1148,124"/>
+</map>

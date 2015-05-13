@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.submodel.gcal &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.submodel" href="../submodel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../submodel.html" accesskey="U">topo.submodel</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.submodel.gcal</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">imagen</span>
+
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">projection</span><span class="p">,</span> <span class="n">responsefn</span><span class="p">,</span> <span class="n">learningfn</span><span class="p">,</span> <span class="n">transferfn</span><span class="p">,</span> <span class="n">sheet</span>
+<span class="kn">import</span> <span class="nn">topo.learningfn.optimized</span>
+<span class="kn">import</span> <span class="nn">topo.transferfn.optimized</span>
+<span class="kn">import</span> <span class="nn">topo.responsefn.optimized</span>
+<span class="kn">import</span> <span class="nn">topo.sheet.optimized</span>
+<span class="kn">import</span> <span class="nn">topo.transferfn.misc</span>
+
+<span class="kn">from</span> <span class="nn">topo.submodel</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ArraySpec</span><span class="p">,</span> <span class="n">order_projections</span> <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">topo.submodel.earlyvision</span> <span class="kn">import</span> <span class="n">EarlyVisionModel</span>
+
+<span class="nd">@Model.definition</span>
+<div class="viewcode-block" id="ModelGCAL"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.gcal.ModelGCAL">[docs]</a><span class="k">class</span> <span class="nc">ModelGCAL</span><span class="p">(</span><span class="n">EarlyVisionModel</span><span class="p">):</span>
+
+    <span class="n">cortex_density</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">47.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The nominal_density to use for V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">homeostasis</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether or not the homeostatic adaption should be applied in V1&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">t_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The initial V1 threshold value. This value is static in the L and GCL models</span>
+<span class="s">        and adaptive in the AL and GCAL models.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">target_activity</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.024</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The target average activity for the homeostatic threshold mechanism.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">latexc_radius</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.104</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Radius of the lateral excitatory bounds within V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">latinh_radius</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.22917</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Radius of the lateral inhibitory bounds within V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">latexc_size</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Size of the lateral excitatory connections within V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">latinh_size</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Size of the lateral inhibitory connections within V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">aff_lr</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Learning rate for the afferent projection(s) to V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">exc_lr</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Learning rate for the lateral excitatory projection to V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">inh_lr</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Learning rate for the lateral inhibitory projection to V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">aff_strength</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Overall strength of the afferent projection to V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">exc_strength</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.7</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Overall strength of the lateral excitatory projection to V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">inh_strength</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Overall strength of the lateral inhibitory projection to V1.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">expand_sf_test_range</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        By default, measure_sine_pref() measures SF at the sizes of RF</span>
+<span class="s">        used, for speed, but if expand_sf_test_range is True, it will</span>
+<span class="s">        test over a larger range, including half the size of the</span>
+<span class="s">        smallest and twice the size of the largest.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">property_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ModelGCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">property_setup</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+        <span class="s">&quot;Specify weight initialization, response function, and learning function&quot;</span>
+
+        <span class="n">projection</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">cf_shape</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">Disk</span><span class="p">(</span><span class="n">smoothing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">response_fn</span><span class="o">=</span><span class="n">responsefn</span><span class="o">.</span><span class="n">optimized</span><span class="o">.</span><span class="n">CFPRF_DotProduct_opt</span><span class="p">()</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">learning_fn</span><span class="o">=</span><span class="n">learningfn</span><span class="o">.</span><span class="n">optimized</span><span class="o">.</span><span class="n">CFPLF_Hebbian_opt</span><span class="p">()</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">weights_output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">transferfn</span><span class="o">.</span><span class="n">optimized</span><span class="o">.</span><span class="n">CFPOF_DivisiveNormalizeL1_opt</span><span class="p">()]</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">SharedWeightCFProjection</span><span class="o">.</span><span class="n">response_fn</span><span class="o">=</span><span class="n">responsefn</span><span class="o">.</span><span class="n">optimized</span><span class="o">.</span><span class="n">CFPRF_DotProduct_opt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">properties</span>
+
+    <span class="k">def</span> <span class="nf">sheet_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ModelGCAL</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">sheet_setup</span><span class="p">()</span>
+        <span class="n">sheets</span><span class="p">[</span><span class="s">&#39;V1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{}]</span>
+        <span class="k">return</span> <span class="n">sheets</span>
+
+
+    <span class="nd">@Model.SettlingCFSheet</span>
+    <span class="k">def</span> <span class="nf">V1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">SettlingCFSheet</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">tsettle</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="n">plastic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">joint_norm_fn</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">optimized</span><span class="o">.</span><span class="n">compute_joint_norm_totals_opt</span><span class="p">,</span>
+            <span class="n">output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">transferfn</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">HomeostaticResponse</span><span class="p">(</span><span class="n">t_init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init</span><span class="p">,</span>
+                                                            <span class="n">target_activity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_activity</span><span class="p">,</span>
+                                                            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">homeostasis</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)],</span>
+            <span class="n">nominal_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cortex_density</span><span class="p">,</span>
+            <span class="n">nominal_bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="p">))</span>
+
+
+    <span class="nd">@Model.matchconditions</span><span class="p">(</span><span class="s">&#39;V1&#39;</span><span class="p">,</span> <span class="s">&#39;V1_afferent&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">V1_afferent_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="s">&#39;LGN&#39;</span><span class="p">}</span>
+
+
+    <span class="nd">@Model.CFProjection</span>
+    <span class="k">def</span> <span class="nf">V1_afferent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_properties</span><span class="p">,</span> <span class="n">dest_properties</span><span class="p">):</span>
+        <span class="n">sf_channel</span> <span class="o">=</span> <span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s">&#39;SF&#39;</span> <span class="ow">in</span> <span class="n">src_properties</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="c"># Adjust delays so same measurement protocol can be used with and without gain control.</span>
+        <span class="n">LGN_V1_delay</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control</span> <span class="k">else</span> <span class="mf">0.10</span>
+
+        <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="s">&#39;eye&#39;</span> <span class="ow">in</span> <span class="n">src_properties</span><span class="p">:</span> <span class="n">name</span><span class="o">+=</span><span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;eye&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;opponent&#39;</span> <span class="ow">in</span> <span class="n">src_properties</span><span class="p">:</span>
+            <span class="n">name</span><span class="o">+=</span><span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;opponent&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;surround&#39;</span><span class="p">]</span>
+        <span class="n">name</span><span class="o">+=</span><span class="p">(</span><span class="s">&#39;LGN&#39;</span><span class="o">+</span><span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;polarity&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;Afferent&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sf_channel</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span> <span class="n">name</span><span class="o">+=</span><span class="p">(</span><span class="s">&#39;SF&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">src_properties</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]))</span>
+
+        <span class="n">gaussian_size</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">sf_channel</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">weights_generator</span> <span class="o">=</span> <span class="n">imagen</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">GaussianCloud</span><span class="p">(</span><span class="n">gaussian_size</span><span class="o">=</span><span class="n">gaussian_size</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">Model</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+                <span class="n">delay</span><span class="o">=</span><span class="n">LGN_V1_delay</span><span class="o">+</span><span class="n">lag</span><span class="p">,</span>
+                <span class="n">dest_port</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="s">&#39;JointNormalize&#39;</span><span class="p">,</span><span class="s">&#39;Afferent&#39;</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">lag</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">name</span><span class="o">+</span><span class="p">(</span><span class="s">&#39;Lag&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">lag</span><span class="p">)),</span>
+                <span class="n">learning_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">aff_lr</span><span class="p">,</span>
+                <span class="n">strength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">aff_strength</span><span class="o">*</span><span class="p">(</span><span class="mf">1.5</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_control</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">),</span>
+                <span class="n">weights_generator</span><span class="o">=</span><span class="n">weights_generator</span><span class="p">,</span>
+                <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">sf_channel</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">lag</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;lags&#39;</span><span class="p">]]</span>
+
+
+    <span class="nd">@Model.matchconditions</span><span class="p">(</span><span class="s">&#39;V1&#39;</span><span class="p">,</span> <span class="s">&#39;lateral_excitatory&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">lateral_excitatory_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="s">&#39;V1&#39;</span><span class="p">}</span>
+
+    <span class="nd">@Model.CFProjection</span>
+    <span class="k">def</span> <span class="nf">lateral_excitatory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_properties</span><span class="p">,</span> <span class="n">dest_properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">delay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s">&#39;LateralExcitatory&#39;</span><span class="p">,</span>
+            <span class="n">weights_generator</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latexc_size</span><span class="p">),</span>
+            <span class="n">strength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exc_strength</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exc_lr</span><span class="p">,</span>
+            <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latexc_radius</span><span class="p">))</span>
+
+
+    <span class="nd">@Model.matchconditions</span><span class="p">(</span><span class="s">&#39;V1&#39;</span><span class="p">,</span> <span class="s">&#39;lateral_inhibitory&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">lateral_inhibitory_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="s">&#39;V1&#39;</span><span class="p">}</span>
+
+
+    <span class="nd">@Model.CFProjection</span>
+    <span class="k">def</span> <span class="nf">lateral_inhibitory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_properties</span><span class="p">,</span> <span class="n">dest_properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">delay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s">&#39;LateralInhibitory&#39;</span><span class="p">,</span>
+            <span class="n">weights_generator</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">GaussianCloud</span><span class="p">(</span><span class="n">gaussian_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latinh_size</span><span class="p">),</span>
+            <span class="n">strength</span><span class="o">=-</span><span class="mf">1.0</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">inh_strength</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inh_lr</span><span class="p">,</span>
+            <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latinh_radius</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">analysis_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># TODO: This is different in gcal.ty, stevens/gcal.ty and gcal_od.ty</span>
+        <span class="c"># And depends whether gain control is used or not</span>
+        <span class="kn">import</span> <span class="nn">topo.analysis.featureresponses</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">featureresponses</span><span class="o">.</span><span class="n">FeatureMaps</span><span class="o">.</span><span class="n">selectivity_multiplier</span><span class="o">=</span><span class="mf">2.0</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">featureresponses</span><span class="o">.</span><span class="n">FeatureCurveCommand</span><span class="o">.</span><span class="n">contrasts</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;dr&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">featureresponses</span><span class="o">.</span><span class="n">MeasureResponseCommand</span><span class="o">.</span><span class="n">durations</span><span class="o">=</span><span class="p">[(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;lags&#39;</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mf">1.0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;sf&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">topo.analysis.command</span> <span class="kn">import</span> <span class="n">measure_sine_pref</span>
+            <span class="n">sf_relative_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span><span class="o">**</span><span class="p">(</span><span class="n">sf_channel</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">sf_channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]]</span>
+            <span class="n">wide_relative_sizes</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="o">*</span><span class="n">sf_relative_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">sf_relative_sizes</span> <span class="o">+</span> <span class="p">[</span><span class="mf">2.0</span><span class="o">*</span><span class="n">sf_relative_sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">relative_sizes</span><span class="o">=</span><span class="p">(</span><span class="n">wide_relative_sizes</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_sf_test_range</span> <span class="k">else</span> <span class="n">sf_relative_sizes</span><span class="p">)</span>
+            <span class="c">#The default 2.4 spatial frequency value here is</span>
+            <span class="c">#chosen because it results in a sine grating with bars whose</span>
+            <span class="c">#width approximately matches the width of the Gaussian training</span>
+            <span class="c">#patterns, and thus the typical width of an ON stripe in one of the</span>
+            <span class="c">#receptive fields</span>
+            <span class="n">measure_sine_pref</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.4</span><span class="o">*</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">relative_sizes</span><span class="p">]</span>
+
+
+</div>
+<span class="nd">@Model.definition</span>
+<div class="viewcode-block" id="ExamplesGCAL"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.gcal.ExamplesGCAL">[docs]</a><span class="k">class</span> <span class="nc">ExamplesGCAL</span><span class="p">(</span><span class="n">ModelGCAL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reproduces the results of the legacy examples/gcal.ty file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExamplesGCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">time_dependent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">([</span> <span class="s">&#39;xy&#39;</span><span class="p">,</span> <span class="s">&#39;or&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;ExamplesGCAL only reproducible for dims = [&#39;xy&#39;, &#39;or&#39;]&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">setup_options</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ExamplesGCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">setup_options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">setup_options</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">or</span> <span class="s">&#39;sheets&#39;</span> <span class="ow">in</span> <span class="n">setup_options</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">Retina</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="mf">1.125</span><span class="p">))</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">LGNOn</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="mf">0.75</span><span class="p">))</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">LGNOff</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="mf">0.75</span><span class="p">))</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">V1</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">setup_options</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">or</span> <span class="s">&#39;projections&#39;</span> <span class="ow">in</span> <span class="n">setup_options</span><span class="p">:</span>
+            <span class="n">order_projections</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;afferent&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;lateral_gain_control&#39;</span><span class="p">,</span>
+                                      <span class="p">(</span><span class="s">&#39;V1_afferent&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;polarity&#39;</span><span class="p">:</span><span class="s">&#39;On&#39;</span><span class="p">}),</span>
+                                      <span class="p">(</span><span class="s">&#39;V1_afferent&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;polarity&#39;</span><span class="p">:</span><span class="s">&#39;Off&#39;</span><span class="p">}),</span>
+                                      <span class="s">&#39;lateral_excitatory&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;lateral_inhibitory&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/submodel/gcal.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../submodel.html" >topo.submodel</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

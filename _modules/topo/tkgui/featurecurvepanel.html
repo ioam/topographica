@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui.featurecurvepanel &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" accesskey="U">topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tkgui.featurecurvepanel</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Panels for displaying tuning curves.</span>
+
+<span class="sd">Uses a PlotGroup to generate the pylab plots</span>
+<span class="sd">which are currently displayed separately from the gui.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.projection</span> <span class="kn">import</span> <span class="n">ProjectionSheet</span>
+
+<span class="kn">from</span> <span class="nn">plotgrouppanel</span> <span class="kn">import</span> <span class="n">PlotGroupPanel</span>
+
+
+<span class="c">## CEBALERT: same as for featurecurveplotgroup: shares code with templateplotgrouppanel</span>
+<span class="c"># Should be changed to inherit from UnitPGPanel, or whatever is created to handle the PlotGroup</span>
+<span class="c"># hierarchy.</span>
+<div class="viewcode-block" id="FeatureCurvePanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.featurecurvepanel.FeatureCurvePanel">[docs]</a><span class="k">class</span> <span class="nc">FeatureCurvePanel</span><span class="p">(</span><span class="n">PlotGroupPanel</span><span class="p">):</span>
+
+    <span class="c"># CEBHACKALERT: to which types of sheet is this plotgroup supposed to be applicable?</span>
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">ProjectionSheet</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">valid_context</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+	<span class="n">PlotGroupPanel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&quot;sheet&quot;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_3</span><span class="p">,</span>
+            <span class="n">on_modify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_change</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">widget_options</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;new_default&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="s">&#39;sort_fn_args&#39;</span><span class="p">:{</span><span class="s">&#39;cmp&#39;</span><span class="p">:</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">.</span><span class="n">precedence</span><span class="p">)}})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_4</span><span class="p">)</span>
+
+        <span class="c"># remove currently irrelevant widgets (plots are drawn in a separate window by pylab)</span>
+        <span class="c"># CEBNOTE: when plots are in this window, remove this line.</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;Enlarge&#39;</span><span class="p">,</span><span class="s">&#39;Reduce&#39;</span><span class="p">,</span><span class="s">&#39;Back&#39;</span><span class="p">,</span><span class="s">&#39;Fwd&#39;</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide_param</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span><span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plot_immediately</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_change</span><span class="p">()</span>
+
+
+
+    <span class="k">def</span> <span class="nf">sheet_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span>
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter_object</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter_object</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+
+        <span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="s">&#39;x&#39;</span> <span class="ow">and</span> <span class="s">&#39;y&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">:</span>
+            <span class="n">w1</span><span class="p">,</span><span class="n">w2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">][</span><span class="s">&#39;widget&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">][</span><span class="s">&#39;widget&#39;</span><span class="p">]</span>
+            <span class="n">w1</span><span class="o">.</span><span class="n">set_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+            <span class="n">w2</span><span class="o">.</span><span class="n">set_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">y</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+
+            <span class="n">w1</span><span class="o">.</span><span class="n">tag_set</span><span class="p">();</span><span class="n">w2</span><span class="o">.</span><span class="n">tag_set</span><span class="p">()</span>
+
+
+
+    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FeatureCurvePanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup_plotgroup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populate_sheet_param</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">populate_sheet_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">params</span><span class="p">()[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">sheets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheet</span> <span class="o">=</span> <span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># CB: necessary?</span>
+
+    <span class="k">def</span> <span class="nf">_plot_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&#39; at time &#39;</span> <span class="o">+</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FeatureCurvePanel.display_labels"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.featurecurvepanel.FeatureCurvePanel.display_labels">[docs]</a>    <span class="k">def</span> <span class="nf">display_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plots are displayed in new windows, so do not add any labels.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/tkgui/featurecurvepanel.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" >topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

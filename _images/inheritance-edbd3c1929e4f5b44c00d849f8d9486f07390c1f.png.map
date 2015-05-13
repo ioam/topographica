@@ -1,0 +1,10 @@
+<map id="inheritance2832b575c1" name="inheritance2832b575c1">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="3,62,159,77"/>
+<area shape="rect" id="node2" title="Acts like a Python function, but with arguments that are Parameters." alt="" coords="188,62,376,77"/>
+<area shape="rect" id="node3" href="#topo.analysis.command.ProjectionSheetMeasurementCommand" title="A callable Parameterized command for measuring or plotting a specified Sheet." alt="" coords="406,32,669,47"/>
+<area shape="rect" id="node5" href="#topo.analysis.command.measure_cog" title="Calculate center of gravity (CoG) for each CF of each unit in each CFSheet." alt="" coords="457,62,618,77"/>
+<area shape="rect" id="node4" href="#topo.analysis.command.UnitMeasurementCommand" title="A callable Parameterized command for measuring or plotting specified units from a Sheet." alt="" coords="699,17,917,33"/>
+<area shape="rect" id="node9" href="#topo.analysis.command.update_projectionactivity" title="Add SheetViews for all of the Projections of the ProjectionSheet" alt="" coords="706,47,910,62"/>
+<area shape="rect" id="node7" href="#topo.analysis.command.update_connectionfields" title="A callable Parameterized command for measuring or plotting a unit from a Projection." alt="" coords="946,3,1148,18"/>
+<area shape="rect" id="node8" href="#topo.analysis.command.update_projection" title="A callable Parameterized command for measuring or plotting units from a Projection." alt="" coords="959,33,1136,48"/>
+</map>

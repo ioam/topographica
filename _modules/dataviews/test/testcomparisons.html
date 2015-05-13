@@ -1,0 +1,332 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.test.testcomparisons &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="dataviews" href="../../dataviews.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../dataviews.html" accesskey="U">dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataviews.test.testcomparisons</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Test cases for ViewTestCase which implements view comparison.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">ViewTestCase</span>
+<span class="kn">from</span> <span class="nn">dataviews</span> <span class="kn">import</span> <span class="n">SheetView</span><span class="p">,</span> <span class="n">SheetStack</span>
+<span class="kn">from</span> <span class="nn">dataviews.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">dataviews.ndmapping</span> <span class="kn">import</span> <span class="n">Dimension</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+<span class="k">class</span> <span class="nc">SheetViewTestCase</span><span class="p">(</span><span class="n">ViewTestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arr1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arr3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">40</span><span class="p">]])</span>
+        <span class="c"># Varying arrays, default bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr1</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr2</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sv3</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr3</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">())</span>
+        <span class="c"># Varying arrays, different bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sv4</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr1</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sv5</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr2</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">SheetOverlayTestCase</span><span class="p">(</span><span class="n">SheetViewTestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SheetOverlayTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="c"># Two overlays of depth two with different layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlay1_depth2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlay2_depth2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv3</span><span class="p">)</span>
+        <span class="c"># Overlay of depth 2 with different bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlay3_depth2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv5</span><span class="p">)</span>
+        <span class="c"># # Overlay of depth 3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlay4_depth3</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv3</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">StackTestCase</span><span class="p">(</span><span class="n">SheetOverlayTestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StackTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="c"># Example 1D stack</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span>
+        <span class="c"># Changed keys...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack2_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack2_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack2_1D</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span>
+        <span class="c"># Changed number of keys...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack3_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack3_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack3_1D</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack3_1D</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv3</span>
+        <span class="c"># Changed values...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack4_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack4_1D</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack4_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv3</span>
+        <span class="c"># Changed bounds...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack5_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack5_1D</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack5_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv5</span>
+        <span class="c"># Example dimension label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack6_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int_v2&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack6_1D</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack6_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span>
+        <span class="c"># A SheetStack of Overlays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack7_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack7_1D</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">overlay1_depth2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack7_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">overlay2_depth2</span>
+        <span class="c"># A different SheetStack of Overlays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack8_1D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack8_1D</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">overlay2_depth2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack8_1D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">overlay1_depth2</span>
+
+        <span class="c"># Example 2D stack</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack1_2D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">Dimension</span><span class="p">(</span><span class="s">&#39;float&#39;</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack1_2D</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack1_2D</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span>
+        <span class="c"># Changed 2D keys...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack2_2D</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">Dimension</span><span class="p">(</span><span class="s">&#39;float&#39;</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack2_2D</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack2_2D</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span>
+
+
+
+<div class="viewcode-block" id="SheetComparisonTest"><a class="viewcode-back" href="../../../Reference_Manual/dataviews.test.testcomparisons-module.html#dataviews.test.testcomparisons.SheetComparisonTest">[docs]</a><span class="k">class</span> <span class="nc">SheetComparisonTest</span><span class="p">(</span><span class="n">SheetViewTestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This tests the ViewTestCase class which is an important component</span>
+<span class="sd">    of other tests.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_unequal_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv2</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Array mismatch not detected&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;SheetView: </span><span class="se">\n</span><span class="s">Arrays are not almost equal to 6 decimals&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_bounds_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv4</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;BoundingBoxes are mismatched.&#39;</span><span class="p">)</span>
+
+
+</div>
+<span class="k">class</span> <span class="nc">SheetOverlayComparisonTest</span><span class="p">(</span><span class="n">SheetOverlayTestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_depth_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlay1_depth2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlay4_depth3</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;SheetOverlays have different lengths.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_element_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlay1_depth2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlay2_depth2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;SheetView: </span><span class="se">\n</span><span class="s">Arrays are not almost equal to 6 decimals&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_bounds_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlay1_depth2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlay3_depth2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;BoundingBoxes are mismatched.&#39;</span><span class="p">)</span>
+
+
+
+<span class="k">class</span> <span class="nc">StackComparisonTest</span><span class="p">(</span><span class="n">StackTestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_dimension_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+         <span class="k">try</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack1_2D</span><span class="p">)</span>
+             <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Mismatch in dimension number not detected.&quot;</span><span class="p">)</span>
+         <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+             <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;Stacks have different numbers of dimensions.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_dimension_label_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+         <span class="k">try</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack6_1D</span><span class="p">)</span>
+             <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Mismatch in dimension labels not detected.&quot;</span><span class="p">)</span>
+         <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+             <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;Stacks have different dimension labels.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">test_key_len_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack3_1D</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Mismatch in stack key number not detected.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;Stacks have different numbers of keys.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_key_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack2_1D</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Mismatch in stack keys not detected.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;Stacks have different sets of keys.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_bounds_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack5_1D</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Mismatch in element bounding boxes.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;BoundingBoxes are mismatched.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_element_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack1_1D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack4_1D</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Element mismatch in array data not detected.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;SheetView: </span><span class="se">\n</span><span class="s">Arrays are not almost equal to 6 decimals&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">test_overlay_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack7_1D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack8_1D</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Overlay element mismatch in array data not detected.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;SheetView: </span><span class="se">\n</span><span class="s">Arrays are not almost equal to 6 decimals&#39;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">nose</span>
+    <span class="n">nose</span><span class="o">.</span><span class="n">runmodule</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&quot;--logging-level&quot;</span><span class="p">,</span> <span class="s">&quot;ERROR&quot;</span><span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/dataviews/test/testcomparisons.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../dataviews.html" >dataviews</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

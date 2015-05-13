@@ -1,0 +1,17 @@
+<map id="inheritance7784a43624" name="inheritance7784a43624">
+<area shape="rect" id="node1" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="344,78,484,91"/>
+<area shape="rect" id="node4" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="509,78,693,91"/>
+<area shape="rect" id="node2" title="params(label=String, value=String, name=String)" alt="" coords="170,78,309,91"/>
+<area shape="rect" id="node3" title="params(name=String)" alt="" coords="3,53,135,66"/>
+<area shape="rect" id="node8" title="params(do_format=Boolean, executable=String, name=String)" alt="" coords="194,28,285,41"/>
+<area shape="rect" id="node9" title="params(name=String)" alt="" coords="160,103,319,116"/>
+<area shape="rect" id="node11" href="#topo.misc.lancext.BatchCollector" title="params(metadata=List, name=String)" alt="" coords="180,2,299,15"/>
+<area shape="rect" id="node15" href="#topo.misc.lancext.topo_metadata" title="params(commands=Dict, max_log_length=Integer, paths=List, repository_names=List, summarized=List, name=String)" alt="" coords="178,53,301,66"/>
+<area shape="rect" id="node5" title="params(key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="718,78,854,91"/>
+<area shape="rect" id="node6" title="params(drop=List, key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="879,78,1009,91"/>
+<area shape="rect" id="node10" href="#topo.misc.lancext.BatchCollator" title="params(fileinfo=ClassSelector, filekey=String, filetype=ClassSelector, log=ClassSelector, drop=List, key_dimensions=List, value_dimensions=List, label=String, value=String, name=String)" alt="" coords="1034,78,1149,91"/>
+<area shape="rect" id="node7" title="A mixin class for generating pretty&#45;printed representations." alt="" coords="23,15,115,28"/>
+<area shape="rect" id="node13" href="#topo.misc.lancext.TopoCommand" title="params(analysis_fn=String, max_name_length=Number, param_formatter=Callable, progress_bar=String, progress_interval=Number, save_global_params=Boolean, snapshot=Boolean, tag=Boolean, topo_flag_options=Dict, topo_switches=List, tyfile=String, vc_info=Boolean, do_format=Boolean, executable=String, name=String)" alt="" coords="354,28,474,41"/>
+<area shape="rect" id="node14" href="#topo.misc.lancext.param_formatter" title="params(abbreviations=Dict, alphanumeric_sort=Boolean, format_constant_keys=Boolean, separator=String, truncation_limit=Number, name=String)" alt="" coords="350,103,478,116"/>
+<area shape="rect" id="node12" href="#topo.misc.lancext.RunBatchCommand" title="params(analysis=ClassSelector, metadata=List, model_params=Parameter, analysis_fn=String, max_name_length=Number, param_formatter=Callable, progress_bar=String, progress_interval=Number, save_global_params=Boolean, snapshot=Boolean, tag=Boolean, topo_flag_options=Dict, topo_switches=List, tyfile=String, vc_info=Boolean, do_format=Boolean, executable=String, name=String)" alt="" coords="533,28,669,41"/>
+</map>

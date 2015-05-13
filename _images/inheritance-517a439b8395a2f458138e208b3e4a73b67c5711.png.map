@@ -1,0 +1,8 @@
+<map id="inheritance23d65fc6d3" name="inheritance23d65fc6d3">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="5,47,230,69"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFPResponseFn" title="Map an input activity matrix into an output matrix using the CFs" alt="" coords="272,47,450,69"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPRF_Plugin" title="Generic large&#45;scale response function based on a simple single&#45;CF function." alt="" coords="580,4,744,26"/>
+<area shape="rect" id="node4" href="#topo.responsefn.optimized.CFPRF_DotProduct" title="Wrapper written to allow transparent non&#45;optimized fallback;" alt="" coords="873,4,1147,26"/>
+<area shape="rect" id="node5" href="#topo.responsefn.optimized.CFPRF_DotProduct_opt" title="Dot&#45;product response function." alt="" coords="513,47,811,69"/>
+<area shape="rect" id="node6" href="#topo.responsefn.optimized.CFPRF_EuclideanDistance_opt" title="Euclidean&#45;distance response function." alt="" coords="493,90,831,112"/>
+</map>

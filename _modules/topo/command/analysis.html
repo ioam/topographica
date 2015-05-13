@@ -1,0 +1,383 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.command.analysis &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.command" href="../command.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../command.html" accesskey="U">topo.command</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.command.analysis</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">User-level analysis commands, typically for measuring or generating</span>
+<span class="sd">SheetViews.</span>
+
+<span class="sd">This file mostly consists of plotgroup declarations for existing</span>
+<span class="sd">measurement commands defined in the FeatureMapper project. It also</span>
+<span class="sd">implements several Topographica specific measurement commands,</span>
+<span class="sd">including activity measurements (implemented by update_activity())</span>
+<span class="sd">and weight matrix visualizations (e.g. update_projection).</span>
+
+<span class="sd">The implementation of Activity plots for instance consists of the</span>
+<span class="sd">update_activity() command plus the Activity PlotGroupTemplate.  The</span>
+<span class="sd">update_activity() command reads the activity array of each Sheet and</span>
+<span class="sd">makes a corresponding SheetView to put in the Sheet&#39;s sheet_views</span>
+<span class="sd">dictionary, while the Activity PlotGroupTemplate specifies which</span>
+<span class="sd">SheetViews should be plotted in which combination.  See the help for</span>
+<span class="sd">PlotGroupTemplate for more information.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">imagen.views</span> <span class="kn">import</span> <span class="n">SheetView</span><span class="p">,</span> <span class="n">SheetStack</span><span class="p">,</span> <span class="n">SheetContours</span>
+
+<span class="kn">from</span> <span class="nn">featuremapper.command</span> <span class="kn">import</span> <span class="o">*</span> <span class="c"># pyflakes:ignore (API import)</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">ParameterizedFunction</span><span class="p">,</span> <span class="n">ParamOverrides</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFSheet</span><span class="p">,</span> <span class="n">Projection</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">centroid</span>
+
+<span class="kn">from</span> <span class="nn">topo.analysis.featureresponses</span> <span class="kn">import</span> <span class="n">pattern_present</span><span class="p">,</span> <span class="n">pattern_response</span><span class="p">,</span> <span class="n">update_activity</span> <span class="c"># pyflakes:ignore (API import)</span>
+
+
+<div class="viewcode-block" id="ProjectionSheetMeasurementCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.analysis-module.html#topo.command.analysis.ProjectionSheetMeasurementCommand">[docs]</a><span class="k">class</span> <span class="nc">ProjectionSheetMeasurementCommand</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A callable Parameterized command for measuring or plotting a specified Sheet.&quot;&quot;&quot;</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of sheets to use in measurements.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+</div>
+<div class="viewcode-block" id="UnitMeasurementCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.analysis-module.html#topo.command.analysis.UnitMeasurementCommand">[docs]</a><span class="k">class</span> <span class="nc">UnitMeasurementCommand</span><span class="p">(</span><span class="n">ProjectionSheetMeasurementCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A callable Parameterized command for measuring or plotting specified units from a Sheet.&quot;&quot;&quot;</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of coordinates of unit(s) to measure.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">projection</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the projection to measure; None means all projections.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">outputs</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">,</span><span class="n">output</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">update_unit_view</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">projection</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="update_rgb_activities"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.analysis-module.html#topo.command.analysis.update_rgb_activities">[docs]</a><span class="k">def</span> <span class="nf">update_rgb_activities</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make available Red, Green, and Blue activity matrices for all appropriate sheets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bounds</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span><span class="n">src_name</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span>
+                        <span class="n">row_precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                        <span class="n">timestamp</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;Red&#39;</span><span class="p">,</span><span class="s">&#39;Green&#39;</span><span class="p">,</span><span class="s">&#39;Blue&#39;</span><span class="p">]:</span>
+            <span class="c"># should this ensure all of r,g,b are present?</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span><span class="s">&#39;activity_</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+                <span class="n">activity_copy</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span><span class="s">&#39;activity_</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">new_view</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="n">activity_copy</span><span class="p">,</span><span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+                <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">Activity&#39;</span><span class="o">%</span><span class="n">c</span><span class="p">]</span><span class="o">=</span><span class="n">new_view</span>
+
+
+</div>
+<div class="viewcode-block" id="update_connectionfields"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.analysis-module.html#topo.command.analysis.update_connectionfields">[docs]</a><span class="k">class</span> <span class="nc">update_connectionfields</span><span class="p">(</span><span class="n">UnitMeasurementCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A callable Parameterized command for measuring or plotting a unit from a Projection.&quot;&quot;&quot;</span>
+
+    <span class="c"># Force plotting of all CFs, not just one Projection</span>
+    <span class="n">projection</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="update_projection"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.analysis-module.html#topo.command.analysis.update_projection">[docs]</a><span class="k">class</span> <span class="nc">update_projection</span><span class="p">(</span><span class="n">UnitMeasurementCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A callable Parameterized command for measuring or plotting units from a Projection.&quot;&quot;&quot;</span>
+
+
+</div>
+<span class="k">class</span> <span class="nc">measure_projection</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Number of CF rows.&quot;</span><span class="p">)</span>
+
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Number of CF columns.&quot;</span><span class="p">)</span>
+
+    <span class="n">projection</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="update_projectionactivity"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.analysis-module.html#topo.command.analysis.update_projectionactivity">[docs]</a><span class="k">class</span> <span class="nc">update_projectionactivity</span><span class="p">(</span><span class="n">ProjectionSheetMeasurementCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add SheetViews for all of the Projections of the ProjectionSheet</span>
+<span class="sd">    specified by the sheet parameter, for use in template-based plots.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sheet_name</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">outputs</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span><span class="n">Projection</span><span class="p">):</span>
+                        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Skipping non-Projection &quot;</span><span class="o">+</span><span class="n">conn</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">v</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">projection_view</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+                        <span class="n">key</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">proj_name</span> <span class="o">+</span> <span class="s">&#39;ProjectionActivity&#39;</span>
+                        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">src_name</span><span class="p">]</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+
+</div>
+<div class="viewcode-block" id="measure_cog"><a class="viewcode-back" href="../../../Reference_Manual/topo.command.analysis-module.html#topo.command.analysis.measure_cog">[docs]</a><span class="k">class</span> <span class="nc">measure_cog</span><span class="p">(</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate center of gravity (CoG) for each CF of each unit in each CFSheet.</span>
+
+<span class="sd">    Unlike measure_position_pref and other measure commands, this one</span>
+<span class="sd">    does not work by collating the responses to a set of input patterns.</span>
+<span class="sd">    Instead, the CoG is calculated directly from each set of incoming</span>
+<span class="sd">    weights.  The CoG value thus is an indirect estimate of what</span>
+<span class="sd">    patterns the neuron will prefer, but is not limited by the finite</span>
+<span class="sd">    number of test patterns as the other measure commands are.</span>
+
+<span class="sd">    Measures only one projection for each sheet, as specified by the</span>
+<span class="sd">    proj_name parameter.  The default proj_name of &#39;&#39; selects the</span>
+<span class="sd">    first non-self connection, which is usually useful to examine for</span>
+<span class="sd">    simple feedforward networks, but will not necessarily be useful in</span>
+<span class="sd">    other cases.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">proj_name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the projection to measure; the empty string means &#39;the first</span>
+<span class="s">        non-self connection available&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">stride</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Stride by which to skip grid lines&quot;</span>
+                                          <span class="s">&quot;in the CoG Wireframe.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="n">measured_sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">CFSheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                           <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="s">&#39;measure_maps&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">measure_maps</span><span class="p">]</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># Could easily be extended to measure CoG of all projections</span>
+        <span class="c"># and e.g. register them using different names (e.g. &quot;Afferent</span>
+        <span class="c"># XCoG&quot;), but then it&#39;s not clear how the PlotGroup would be</span>
+        <span class="c"># able to find them automatically (as it currently supports</span>
+        <span class="c"># only a fixed-named plot).</span>
+        <span class="n">requested_proj</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">proj_name</span>
+        <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">measured_sheets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sheet</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">requested_proj</span><span class="p">)</span> <span class="ow">or</span> \
+                   <span class="p">(</span><span class="n">requested_proj</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">src</span> <span class="o">!=</span> <span class="n">sheet</span><span class="p">)):</span>
+                   <span class="n">results</span><span class="p">[</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_proj_cog</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">proj</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">results</span>
+
+
+    <span class="k">def</span> <span class="nf">_update_proj_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">proj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Measure the CoG of the specified projection and register corresponding SheetViews.&quot;&quot;&quot;</span>
+
+        <span class="n">sheet</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">dest</span>
+        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">xcog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">ycog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+                <span class="n">cf</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">cfs</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
+                <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">input_sheet_slice</span>
+                <span class="n">row_centroid</span><span class="p">,</span> <span class="n">col_centroid</span> <span class="o">=</span> <span class="n">centroid</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+                <span class="n">xcentroid</span><span class="p">,</span> <span class="n">ycentroid</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span>
+                    <span class="n">r1</span> <span class="o">+</span> <span class="n">row_centroid</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span>
+                    <span class="n">c1</span> <span class="o">+</span> <span class="n">col_centroid</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+
+                <span class="n">xcog</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">xcentroid</span>
+                <span class="n">ycog</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">ycentroid</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span> <span class="n">row_precedence</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">row_precedence</span><span class="p">,</span>
+                        <span class="n">src_name</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">dimension_labels</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Time&#39;</span><span class="p">])</span>
+
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">xsv</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="n">xcog</span><span class="p">,</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">ysv</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">(</span><span class="n">ycog</span><span class="p">,</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hlines</span><span class="p">,</span> <span class="n">vlines</span> <span class="o">=</span> <span class="n">xsv</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">for</span> <span class="n">hind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">hlines</span><span class="p">)[::</span><span class="n">p</span><span class="o">.</span><span class="n">stride</span><span class="p">]:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">xsv</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">hind</span><span class="p">,:]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">ysv</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">hind</span><span class="p">,:]])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vlines</span><span class="p">)[::</span><span class="n">p</span><span class="o">.</span><span class="n">stride</span><span class="p">]:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">xsv</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="n">vind</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">ysv</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="n">vind</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="n">xcog_stack</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">xsv</span><span class="p">),</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="n">ycog_stack</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">ysv</span><span class="p">),</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="n">contour_stack</span> <span class="o">=</span> <span class="n">SheetStack</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">SheetContours</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">)),</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;XCoG&#39;</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;XCoG&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">xcog_stack</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;XCoG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xcog_stack</span>
+
+        <span class="k">if</span> <span class="s">&#39;YCoG&#39;</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;YCoG&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ycog_stack</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;YCoG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ycog_stack</span>
+
+        <span class="k">if</span> <span class="s">&#39;CoG&#39;</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;CoG&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">contour_stack</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sheet</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s">&#39;CoG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">contour_stack</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;XCoG&#39;</span><span class="p">:</span> <span class="n">xcog_stack</span><span class="p">,</span> <span class="s">&#39;YCoG&#39;</span><span class="p">:</span> <span class="n">ycog_stack</span><span class="p">,</span> <span class="s">&#39;CoG&#39;</span><span class="p">:</span> <span class="n">contour_stack</span><span class="p">}</span>
+
+</div>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">ParameterizedFunction</span><span class="p">))</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)]))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/command/analysis.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../command.html" >topo.command</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on Jan 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

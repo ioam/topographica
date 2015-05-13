@@ -1,0 +1,9 @@
+<map id="inheritance084e3a6692" name="inheritance084e3a6692">
+<area shape="rect" id="node1" title="A FeatureCoordinator modifies a supplied PatternGenerator." alt="" coords="535,63,789,83"/>
+<area shape="rect" id="node4" href="#topo.misc.featurecoordinators.DisparityCoordinator" title="Coordinates the disparity (difference of pattern locations) of two" alt="" coords="848,4,1127,24"/>
+<area shape="rect" id="node5" href="#topo.misc.featurecoordinators.MotionCoordinator" title="Coordinates the motion of patterns." alt="" coords="853,43,1122,63"/>
+<area shape="rect" id="node6" href="#topo.misc.featurecoordinators.OcularityCoordinator" title="Coordinates the ocularity (brightness difference) of two pattern" alt="" coords="848,82,1127,102"/>
+<area shape="rect" id="node7" href="#topo.misc.featurecoordinators.SpatialFrequencyCoordinator" title="Coordinates the size of pattern generators. This is useful when" alt="" coords="827,121,1148,142"/>
+<area shape="rect" id="node2" title="Acts like a Python function, but with arguments that are Parameters." alt="" coords="248,63,496,83"/>
+<area shape="rect" id="node3" title="Base class for named objects that support Parameters and message" alt="" coords="4,63,210,83"/>
+</map>

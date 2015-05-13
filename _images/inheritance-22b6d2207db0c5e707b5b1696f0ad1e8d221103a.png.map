@@ -1,0 +1,16 @@
+<map id="inheritance5c943e4cbf" name="inheritance5c943e4cbf">
+<area shape="rect" id="node1" title="DataLayer is a 2D View type used to hold data indexed" alt="" coords="338,63,445,75"/>
+<area shape="rect" id="node5" title="Matrix is a basic 2D atomic View type." alt="" coords="540,75,634,88"/>
+<area shape="rect" id="node2" title="A view is a data structure for holding data, which may be plotted" alt="" coords="184,27,259,39"/>
+<area shape="rect" id="node11" title="A SheetLayer is a data structure for holding one or more numpy" alt="" coords="317,27,467,39"/>
+<area shape="rect" id="node3" title="A DataStack can hold any number of DataLayers indexed by a list of" alt="" coords="726,3,834,15"/>
+<area shape="rect" id="node12" title="A SheetStack is a stack of SheetLayers over some dimensions. The" alt="" coords="877,3,1026,15"/>
+<area shape="rect" id="node4" title="A Stack is a stack of Views over a number of specified dimensions. The" alt="" coords="548,3,626,15"/>
+<area shape="rect" id="node13" title="SheetView is the atomic unit as which 2D data is stored, along with its" alt="" coords="707,52,853,64"/>
+<area shape="rect" id="node6" title="Abstract baseclass implementing common methods for objects with associated" alt="" coords="6,4,123,16"/>
+<area shape="rect" id="node7" title="An NdIndexableMapping is a type of mapping (like a dictionary or array)" alt="" coords="150,4,294,16"/>
+<area shape="rect" id="node9" title="NdMapping supports the same indexing semantics as NdIndexableMapping but" alt="" coords="335,4,449,16"/>
+<area shape="rect" id="node8" title="Base class for named objects that support Parameters and message" alt="" coords="3,27,127,39"/>
+<area shape="rect" id="node16" href="#topo.base.sheetview.SheetView" title="Class provided for backward compatibility with earlier SheetView" alt="" coords="168,51,275,63"/>
+<area shape="rect" id="node10" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="490,52,684,64"/>
+</map>

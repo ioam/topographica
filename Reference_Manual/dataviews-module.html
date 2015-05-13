@@ -1,0 +1,878 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataviews">
+<h1>dataviews<a class="headerlink" href="#dataviews" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="dataviews.options.pyc-module.html">dataviews.options.pyc</a></li>
+<li><a class="reference external" href="dataviews.views.pyc-module.html">dataviews.views.pyc</a></li>
+<li><a class="reference external" href="dataviews.operation-module.html">dataviews.operation</a></li>
+<li><a class="reference external" href="dataviews.__init__.pyc-module.html">dataviews.__init__.pyc</a></li>
+<li><a class="reference external" href="dataviews.odict.pyc-module.html">dataviews.odict.pyc</a></li>
+<li><a class="reference external" href="dataviews.dataviews.pyc-module.html">dataviews.dataviews.pyc</a></li>
+<li><a class="reference external" href="dataviews.boundingregion-module.html">dataviews.boundingregion</a></li>
+<li><a class="reference external" href="dataviews.sheetviews-module.html">dataviews.sheetviews</a></li>
+<li><a class="reference external" href="dataviews.ipython-module.html">dataviews.ipython</a></li>
+<li><a class="reference external" href="dataviews.ipython.pyc-module.html">dataviews.ipython.pyc</a></li>
+<li><a class="reference external" href="dataviews.plots-module.html">dataviews.plots</a></li>
+<li><a class="reference external" href="dataviews.boundingregion.pyc-module.html">dataviews.boundingregion.pyc</a></li>
+<li><a class="reference external" href="dataviews.ndmapping.pyc-module.html">dataviews.ndmapping.pyc</a></li>
+<li><a class="reference external" href="dataviews.odict-module.html">dataviews.odict</a></li>
+<li><a class="reference external" href="dataviews.views-module.html">dataviews.views</a></li>
+<li><a class="reference external" href="dataviews.sheetviews.pyc-module.html">dataviews.sheetviews.pyc</a></li>
+<li><a class="reference external" href="dataviews.dataviews-module.html">dataviews.dataviews</a></li>
+<li><a class="reference external" href="dataviews.options-module.html">dataviews.options</a></li>
+<li><a class="reference external" href="dataviews.sheetcoords-module.html">dataviews.sheetcoords</a></li>
+<li><a class="reference external" href="dataviews.operation.pyc-module.html">dataviews.operation.pyc</a></li>
+<li><a class="reference external" href="dataviews.sheetcoords.pyc-module.html">dataviews.sheetcoords.pyc</a></li>
+<li><a class="reference external" href="dataviews.plots.pyc-module.html">dataviews.plots.pyc</a></li>
+<li><a class="reference external" href="dataviews.ndmapping-module.html">dataviews.ndmapping</a></li>
+<li><a class="reference external" href="dataviews.test.testviews-module.html">dataviews.test.testviews</a></li>
+<li><a class="reference external" href="dataviews.test.testcomparisons-module.html">dataviews.test.testcomparisons</a></li>
+<li><a class="reference external" href="dataviews.test-module.html">dataviews.test</a></li>
+<li><a class="reference external" href="dataviews.test.verify_notebook-module.html">dataviews.test.verify_notebook</a></li>
+<li><a class="reference external" href="dataviews.test.testboundingregion-module.html">dataviews.test.testboundingregion</a></li>
+<li><a class="reference external" href="dataviews.test.testndmapping-module.html">dataviews.test.testndmapping</a></li>
+<li><a class="reference external" href="dataviews.test.utils-module.html">dataviews.test.utils</a></li>
+<li><a class="reference external" href="dataviews.test.testsheetviews-module.html">dataviews.test.testsheetviews</a></li>
+</ul>
+</div>
+<div class="section" id="module">
+<h2>Module<a class="headerlink" href="#module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-dataviews"></span><dl class="class">
+<dt id="dataviews.Overlay">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Overlay</tt><big>(</big><em>overlays</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Overlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.views-module.html#dataviews.views.View" title="dataviews.views.View"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.View</span></tt></a></p>
+<p>An Overlay allows a group of Layers to be overlaid together. Layers can
+be indexed out of an overlay and an overlay is an iterable that iterates
+over the contained layers.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.
+
+      Overlays should not have their label set directly by the user as
+      the label is only for defining custom channel operations.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+</dl>
+<dl class="method">
+<dt id="dataviews.Overlay.add">
+<tt class="descname">add</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#dataviews.Overlay.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlay a single layer on top of the existing overlay.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Overlay.set">
+<tt class="descname">set</tt><big>(</big><em>layers</em><big>)</big><a class="headerlink" href="#dataviews.Overlay.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a collection of layers to be overlaid with each other.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.SheetStack">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">SheetStack</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.SheetStack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.dataviews-module.html#dataviews.dataviews.Stack" title="dataviews.dataviews.Stack"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.dataviews.Stack</span></tt></a></p>
+<p>A SheetStack is a stack of SheetLayers over some dimensions. The
+dimension may be a spatial dimension (i.e., a ZStack), time
+(specifying a frame sequence) or any other dimensions along
+which SheetLayers may vary.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label} 
+ {dims}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short description of the stack that may be used as a title
+       (e.g. the title of an animation) but may also accept a
+       formatting string to generate a unique title per layer.
+       The formatters {label}, {type} and {dims} referring to
+       the View lable, type and dimensions key/value pairs
+       respectively.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=True, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Default&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="method">
+<dt id="dataviews.SheetStack.drop_dimension">
+<tt class="descname">drop_dimension</tt><big>(</big><em>dim</em>, <em>val</em><big>)</big><a class="headerlink" href="#dataviews.SheetStack.drop_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop dimension from the NdMapping using the supplied
+dimension name and value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.SheetStack.grid_sample">
+<tt class="descname">grid_sample</tt><big>(</big><em>rows</em>, <em>cols</em>, <em>lbrt=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.SheetStack.grid_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a CoordinateGrid of curves according sampled according to
+the supplied rows and cols. A sub-region to be sampled can be specified
+using the lbrt argument, which expresses the subsampling in sheet
+coordinates. The usual sampling semantics apply.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.SheetStack.map">
+<tt class="descname">map</tt><big>(</big><em>map_fn</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.SheetStack.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map a function across the stack, using the bounds of first
+mapped item.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.SheetStack.overlay_type">
+<tt class="descname">overlay_type</tt><a class="headerlink" href="#dataviews.SheetStack.overlay_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#dataviews.SheetOverlay" title="dataviews.SheetOverlay"><tt class="xref py py-class docutils literal"><span class="pre">SheetOverlay</span></tt></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.DataGrid">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">DataGrid</tt><big>(</big><em>bounds</em>, <em>shape</em>, <em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.DataGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.sheetviews-module.html#dataviews.sheetviews.CoordinateGrid" title="dataviews.sheetviews.CoordinateGrid"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.sheetviews.CoordinateGrid</span></tt></a></p>
+<p>DataGrid is mostly the same as CoordinateGrid, however it contains
+DataLayers or DataStacks as elements and can therefore not be overlaid
+with SheetLayer elements.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=False, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;X&#8217;, range=(0, 0), type=None, unit=None), Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Y&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.SheetLayer">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">SheetLayer</tt><big>(</big><em>data</em>, <em>bounds</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.SheetLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.views-module.html#dataviews.views.View" title="dataviews.views.View"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.View</span></tt></a></p>
+<p>A SheetLayer is a data structure for holding one or more numpy
+arrays embedded within a two-dimensional space. The array(s) may
+correspond to a discretisation of an image (i.e. a rasterisation)
+or vector elements such as points or lines. Lines may be linearly
+interpolated or correspond to control nodes of a smooth vector
+representation such as Bezier splines.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">roi_bounds</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The ROI can be specified to select only a sub-region of the bounds to
+        be stored as data.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The bounding region in sheet coordinates containing the data.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.Histogram">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Histogram</tt><big>(</big><em>values</em>, <em>edges</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.dataviews-module.html#dataviews.dataviews.DataLayer" title="dataviews.dataviews.DataLayer"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.dataviews.DataLayer</span></tt></a></p>
+<p>Histogram contains a number of bins, which are defined by the upper
+and lower bounds of their edges and the computed bin values.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">xlabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>X-axis label</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">ylabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Y-axis label</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">cyclic_range</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>Cyclic-range should be set when the bins are sampling a cyclic
+       quantity.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">legend_label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Legend labels</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.CoordinateGrid">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">CoordinateGrid</tt><big>(</big><em>bounds</em>, <em>shape</em>, <em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.CoordinateGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.ndmapping-module.html#dataviews.ndmapping.NdMapping" title="dataviews.ndmapping.NdMapping"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.ndmapping.NdMapping</span></tt></a>, <a class="reference internal" href="dataviews.sheetcoords-module.html#dataviews.sheetcoords.SheetCoordinateSystem" title="dataviews.sheetcoords.SheetCoordinateSystem"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.sheetcoords.SheetCoordinateSystem</span></tt></a></p>
+<p>CoordinateGrid indexes other NdMapping objects, containing projections
+onto coordinate systems. The X and Y dimensions are mapped onto the bounds
+object, allowing for bounds checking and grid-snapping.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=False, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;X&#8217;, range=(0, 0), type=None, unit=None), Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Y&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="method">
+<dt id="dataviews.CoordinateGrid.clone">
+<tt class="descname">clone</tt><big>(</big><em>items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.CoordinateGrid.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an empty duplicate of itself with all parameter values and
+metadata copied across.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.CoordinateGrid.last">
+<tt class="descname">last</tt><a class="headerlink" href="#dataviews.CoordinateGrid.last" title="Permalink to this definition">¶</a></dt>
+<dd><p>The last of a ProjectionGrid is another ProjectionGrid
+constituted of the last of the individual elements. To access
+the elements by their X,Y position, either index the position
+directly or use the items() method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.CoordinateGrid.map">
+<tt class="descname">map</tt><big>(</big><em>map_fn</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.CoordinateGrid.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map a function across the stack, using the bounds of first
+mapped item.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.CoordinateGrid.style">
+<tt class="descname">style</tt><a class="headerlink" href="#dataviews.CoordinateGrid.style" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the style that may be used to control display of
+this view. If a style name is not set and but a label is
+assigned, then the closest existing style name is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.CoordinateGrid.update">
+<tt class="descname">update</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#dataviews.CoordinateGrid.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds bounds checking to the default update behavior.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.NdMapping">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">NdMapping</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.NdMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.ndmapping-module.html#dataviews.ndmapping.NdIndexableMapping" title="dataviews.ndmapping.NdIndexableMapping"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.ndmapping.NdIndexableMapping</span></tt></a></p>
+<p>NdMapping supports the same indexing semantics as NdIndexableMapping but
+also supports filtering of items using slicing ranges.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=True, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Default&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.Annotation">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Annotation</tt><big>(</big><em>boxes=</em><span class="optional">[</span><span class="optional">]</span>, <em>vlines=</em><span class="optional">[</span><span class="optional">]</span>, <em>hlines=</em><span class="optional">[</span><span class="optional">]</span>, <em>arrows=</em><span class="optional">[</span><span class="optional">]</span>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.views-module.html#dataviews.views.View" title="dataviews.views.View"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.View</span></tt></a></p>
+<p>An annotation is a type of View that is displayed on the top of an
+overlay. Annotations elements do not depend on the details of the
+data displayed and are generally for the convenience of the user
+(e.g. to draw attention to specific areas of the figure using
+arrows, boxes or labels).</p>
+<p>All annotations have an optional interval argument that indicates
+which stack elements they apply to. For instance, this allows
+annotations for a specific time interval when overlaid over a
+SheetStack or DataStack with a &#8216;time&#8217; dimension. The interval
+argument is a dictionary of dimension keys and tuples containing
+(start, end) values. A value of None, indicates an unspecified
+constraint.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+</dl>
+<dl class="method">
+<dt id="dataviews.Annotation.arrow">
+<tt class="descname">arrow</tt><big>(</big><em>xy</em>, <em>text=''</em>, <em>direction='&lt;'</em>, <em>points=40</em>, <em>arrowstyle='-&gt;'</em>, <em>interval=None</em><big>)</big><a class="headerlink" href="#dataviews.Annotation.arrow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an arrow along one of the cardinal directions with option
+text. The direction indicates the direction the arrow is
+pointing and the points argument defines the length of the
+arrow in points. Different arrow head styles are supported via
+the arrowstyle argument.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Annotation.box">
+<tt class="descname">box</tt><big>(</big><em>box</em>, <em>interval=None</em><big>)</big><a class="headerlink" href="#dataviews.Annotation.box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a box with corners specified in the positions specified
+by ((left, bottom), (right, top)). Alternatively, a
+BoundingBox may be supplied.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Annotation.hline">
+<tt class="descname">hline</tt><big>(</big><em>y</em>, <em>interval=None</em><big>)</big><a class="headerlink" href="#dataviews.Annotation.hline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an axis hline (horizontal line) at the given y value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Annotation.line">
+<tt class="descname">line</tt><big>(</big><em>coords</em>, <em>interval=None</em><big>)</big><a class="headerlink" href="#dataviews.Annotation.line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an arbitrary polyline that goes through the listed
+coordinates.  Coordinates are specified using a list of (x,y)
+tuples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Annotation.vline">
+<tt class="descname">vline</tt><big>(</big><em>x</em>, <em>interval=None</em><big>)</big><a class="headerlink" href="#dataviews.Annotation.vline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw an axis vline (vertical line) at the given x value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.DataLayer">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">DataLayer</tt><big>(</big><em>data</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.DataLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.views-module.html#dataviews.views.View" title="dataviews.views.View"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.View</span></tt></a></p>
+<p>General purpose DataLayer for holding data to be plotted along some
+axes. Subclasses can implement specialized containers for data such as
+curves, points, bars or surfaces.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">xlabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>X-axis label</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">ylabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Y-axis label</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">legend_label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Legend labels</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.SheetView">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">SheetView</tt><big>(</big><em>data</em>, <em>bounds=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.SheetView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.sheetviews-module.html#dataviews.sheetviews.SheetLayer" title="dataviews.sheetviews.SheetLayer"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.sheetviews.SheetLayer</span></tt></a>, <a class="reference internal" href="dataviews.sheetcoords-module.html#dataviews.sheetcoords.SheetCoordinateSystem" title="dataviews.sheetcoords.SheetCoordinateSystem"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.sheetcoords.SheetCoordinateSystem</span></tt></a></p>
+<p>SheetView is the atomic unit as which 2D data is stored, along with its
+bounds object. Allows slicing operations of the data in sheet coordinates or
+direct access to the data, via the .data attribute.</p>
+<p>Arrays with a shape of (X,Y) or (X,Y,Z) are valid. In the case of
+3D arrays, each depth layer is interpreted as a channel of the 2D
+representation.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">roi_bounds</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The ROI can be specified to select only a sub-region of the bounds to
+        be stored as data.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The bounding region in sheet coordinates containing the data.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">cyclic_range</span></tt> (<em>allow_None=True, bounds=(0, None), constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</dt>
+<dd>For a cyclic quantity, the range over which the values repeat. For
+        instance, the orientation of a mirror-symmetric pattern in a plane is
+        pi-periodic, with orientation x the same as orientation x+pi (and
+        x+2pi, etc.) A cyclic_range of None declares that the data are not
+        cyclic. This parameter is metadata, declaring properties of the data
+        that can be useful for automatic plotting and/or normalization, and is
+        not used within this class itself.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+<dl class="method">
+<dt id="dataviews.SheetView.hist">
+<tt class="descname">hist</tt><big>(</big><em>num_bins=20</em>, <em>bin_range=None</em>, <em>individually=True</em>, <em>style_prefix=None</em><big>)</big><a class="headerlink" href="#dataviews.SheetView.hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Layout of the SheetView with an attached histogram.
+num_bins allows customizing the bin number. The container_name
+can additionally be specified to set a common cmap when viewing
+a Stack or Overlay.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.SheetView.mode">
+<tt class="descname">mode</tt><a class="headerlink" href="#dataviews.SheetView.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mode specifying the color space for visualizing the array data
+and is a function of the depth. For a depth of one, a colormap
+is used as determined by the style. If the depth is 3 or 4,
+the mode is &#8216;rgb&#8217; or &#8216;rgba&#8217; respectively.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.Curve">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Curve</tt><big>(</big><em>data</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.dataviews-module.html#dataviews.dataviews.DataLayer" title="dataviews.dataviews.DataLayer"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.dataviews.DataLayer</span></tt></a></p>
+<p>Curve can contain a list of curves with associated metadata and
+cyclic_range parameter to indicate with what periodicity the curve wraps.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">xlabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>X-axis label</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">ylabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Y-axis label</dd>
+</dl>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">cyclic_range</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=False, time_fn=&lt;Time Time00001&gt;</em>)</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">legend_label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Legend labels</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.DataOverlay">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">DataOverlay</tt><big>(</big><em>overlays</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.DataOverlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.dataviews-module.html#dataviews.dataviews.DataLayer" title="dataviews.dataviews.DataLayer"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.dataviews.DataLayer</span></tt></a>, <a class="reference internal" href="dataviews.views-module.html#dataviews.views.Overlay" title="dataviews.views.Overlay"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.Overlay</span></tt></a></p>
+<p>A DataOverlay can contain a number of DataLayer objects, which are to be
+overlayed on one axis. When adding new DataLayers to the DataOverlay
+it ensures the DataLayers have the same x- and y-label and recomputes the
+axis limits.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.
+
+      Overlays should not have their label set directly by the user as
+      the label is only for defining custom channel operations.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">xlabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>X-axis label</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">ylabel</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Y-axis label</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">legend_label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Legend labels</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.DataStack">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">DataStack</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.DataStack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.dataviews-module.html#dataviews.dataviews.Stack" title="dataviews.dataviews.Stack"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.dataviews.Stack</span></tt></a></p>
+<p>A DataStack can hold any number of DataLayers indexed by a list of
+dimension values. It also has a number of properties, which can find
+the x- and y-dimension limits and labels.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label} 
+ {dims}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short description of the stack that may be used as a title
+       (e.g. the title of an animation) but may also accept a
+       formatting string to generate a unique title per layer.
+       The formatters {label}, {type} and {dims} referring to
+       the View lable, type and dimensions key/value pairs
+       respectively.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=True, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Default&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="attribute">
+<dt id="dataviews.DataStack.overlay_type">
+<tt class="descname">overlay_type</tt><a class="headerlink" href="#dataviews.DataStack.overlay_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#dataviews.DataOverlay" title="dataviews.DataOverlay"><tt class="xref py py-class docutils literal"><span class="pre">DataOverlay</span></tt></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.View">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">View</tt><big>(</big><em>data</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A view is a data structure for holding data, which may be plotted
+using matplotlib. Views have an associated title, style name and
+metadata information.  All Views may be composed together into a
+GridLayout using the addition operator.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+</dl>
+<dl class="attribute">
+<dt id="dataviews.View.style">
+<tt class="descname">style</tt><a class="headerlink" href="#dataviews.View.style" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the style that may be used to control display of
+this view. If a style name is not set and but a label is
+assigned, then the closest existing style name is returned.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.SheetOverlay">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">SheetOverlay</tt><big>(</big><em>data</em>, <em>bounds</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.SheetOverlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.sheetviews-module.html#dataviews.sheetviews.SheetLayer" title="dataviews.sheetviews.SheetLayer"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.sheetviews.SheetLayer</span></tt></a>, <a class="reference internal" href="dataviews.views-module.html#dataviews.views.Overlay" title="dataviews.views.Overlay"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.Overlay</span></tt></a></p>
+<p>SheetOverlay extends a regular Overlay with bounds checking and an
+ROI property, which applies the roi_bounds to all SheetLayer
+objects it contains. When adding SheetLayers to an Overlay, a
+common ROI bounds is enforced.</p>
+<p>A SheetOverlay may be used to overlay lines or points over a
+SheetView. In addition, if an overlay consists of three or four
+SheetViews of depth 1, the overlay may be converted to an RGB(A)
+SheetView via the rgb property.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">roi_bounds</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The ROI can be specified to select only a sub-region of the bounds to
+        be stored as data.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The bounding region in sheet coordinates containing the data.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.
+
+      Overlays should not have their label set directly by the user as
+      the label is only for defining custom channel operations.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+<dl class="method">
+<dt id="dataviews.SheetOverlay.add">
+<tt class="descname">add</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#dataviews.SheetOverlay.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlay a single layer on top of the existing overlay.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.SheetOverlay.roi">
+<tt class="descname">roi</tt><a class="headerlink" href="#dataviews.SheetOverlay.roi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the roi_bounds to all elements in the SheetOverlay</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.TableStack">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">TableStack</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.TableStack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.dataviews-module.html#dataviews.dataviews.Stack" title="dataviews.dataviews.Stack"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.dataviews.Stack</span></tt></a></p>
+<p>A TableStack may hold any number of TableViews indexed by a list
+of dimension values. It also allows the values of a particular
+cell to be sampled by name across any valid dimension.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label} 
+ {dims}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short description of the stack that may be used as a title
+       (e.g. the title of an animation) but may also accept a
+       formatting string to generate a unique title per layer.
+       The formatters {label}, {type} and {dims} referring to
+       the View lable, type and dimensions key/value pairs
+       respectively.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=True, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Default&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="method">
+<dt id="dataviews.TableStack.sample">
+<tt class="descname">sample</tt><big>(</big><em>samples=</em><span class="optional">[</span><span class="optional">]</span>, <em>x_axis=None</em>, <em>group_by=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#dataviews.TableStack.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample across the stored TableViews according the the headings
+specified in samples and across the specified x_axis.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.Stack">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Stack</tt><big>(</big><em>initial_items=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Stack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.ndmapping-module.html#dataviews.ndmapping.NdMapping" title="dataviews.ndmapping.NdMapping"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.ndmapping.NdMapping</span></tt></a></p>
+<p>A Stack is a stack of Views over some dimensions. The
+dimension may be a spatial dimension (i.e., a ZStack), time
+(specifying a frame sequence) or any other dimensions.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label} 
+ {dims}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short description of the stack that may be used as a title
+       (e.g. the title of an animation) but may also accept a
+       formatting string to generate a unique title per layer.
+       The formatters {label}, {type} and {dims} referring to
+       the View lable, type and dimensions key/value pairs
+       respectively.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional labels to be associated with the Dataview.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">data_type</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">dimensions</span></tt> (<em>bounds=(0, None), constant=True, default=[Dimension(cyclic=False, format_string=&#8217;{name} = {val}{unit}&#8217;, name=&#8217;Default&#8217;, range=(0, 0), type=None, unit=None)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="attribute">
+<dt id="dataviews.Stack.data_type">
+<tt class="descname">data_type</tt><a class="headerlink" href="#dataviews.Stack.data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#dataviews.View" title="dataviews.View"><tt class="xref py py-class docutils literal"><span class="pre">View</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.Stack.overlay_type">
+<tt class="descname">overlay_type</tt><a class="headerlink" href="#dataviews.Stack.overlay_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#dataviews.Overlay" title="dataviews.Overlay"><tt class="xref py py-class docutils literal"><span class="pre">Overlay</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Stack.split">
+<tt class="descname">split</tt><big>(</big><big>)</big><a class="headerlink" href="#dataviews.Stack.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a SheetStack of SheetOverlays of N layers, split out the
+layers into N separate SheetStacks.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Stack.split_axis">
+<tt class="descname">split_axis</tt><big>(</big><em>x_axis</em><big>)</big><a class="headerlink" href="#dataviews.Stack.split_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all stored views such that the specified x_axis
+is eliminated from the full set of stack keys (i.e. each tuple
+key has one element removed corresponding to eliminated dimension).</p>
+<p>As the set of reduced keys is a subset of the original data, each
+reduced key must store multiple x_axis values.</p>
+<p>The return value is an OrderedDict with reduced tuples keys and
+OrderedDict x_axis values (views).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.Stack.style">
+<tt class="descname">style</tt><a class="headerlink" href="#dataviews.Stack.style" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of elements stored in the stack.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dataviews.Stack.type">
+<tt class="descname">type</tt><a class="headerlink" href="#dataviews.Stack.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of elements stored in the stack.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.Points">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Points</tt><big>(</big><em>data</em>, <em>bounds=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.sheetviews-module.html#dataviews.sheetviews.SheetLayer" title="dataviews.sheetviews.SheetLayer"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.sheetviews.SheetLayer</span></tt></a></p>
+<p>Allows sets of points to be positioned over a sheet coordinate
+system.</p>
+<p>The input data is an Nx2 Numpy array where each point in the numpy
+array corresponds to an X,Y coordinate in sheet coordinates,
+within the declared bounding region.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">roi_bounds</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The ROI can be specified to select only a sub-region of the bounds to
+        be stored as data.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The bounding region in sheet coordinates containing the data.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.Table">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Table</tt><big>(</big><em>data</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.views-module.html#dataviews.views.View" title="dataviews.views.View"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.views.View</span></tt></a></p>
+<p>A tabular view type to allow convenient visualization of either a
+standard Python dictionary or an OrderedDict. If an OrderedDict is
+used, the headings will be kept in the correct order.</p>
+<dl class="docutils">
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+</dl>
+<dl class="method">
+<dt id="dataviews.Table.cell_type">
+<tt class="descname">cell_type</tt><big>(</big><em>row</em>, <em>col</em><big>)</big><a class="headerlink" href="#dataviews.Table.cell_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cell type given a row and column index. The common
+basic cell types are &#8216;data&#8217; and &#8216;heading&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.Table.cell_value">
+<tt class="descname">cell_value</tt><big>(</big><em>row</em>, <em>col</em><big>)</big><a class="headerlink" href="#dataviews.Table.cell_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stored value for a given row and column indices.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.Contours">
+<em class="property">class </em><tt class="descclassname">dataviews.</tt><tt class="descname">Contours</tt><big>(</big><em>data</em>, <em>bounds=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataviews.Contours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dataviews.sheetviews-module.html#dataviews.sheetviews.SheetLayer" title="dataviews.sheetviews.SheetLayer"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.sheetviews.SheetLayer</span></tt></a></p>
+<p>Allows sets of contour lines to be defined over a
+SheetCoordinateSystem.</p>
+<p>The input data is a list of Nx2 numpy arrays where each array
+corresponds to a contour in the group. Each point in the numpy
+array corresponds to an X,Y coordinate.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">title</span></tt> (<em>allow_None=False, constant=False, default={label}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The title formatting string allows the title to be composed from
+       the view label and view type but can also be set to a simple string.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">roi_bounds</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The ROI can be specified to select only a sub-region of the bounds to
+        be stored as data.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>allow_None=False, constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The bounding region in sheet coordinates containing the data.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">label</span></tt> (<em>allow_None=False, constant=True, default=, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A short label used to indicate what kind of data is contained
+      within the view object.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">metadata</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additional information to be associated with the Layer.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">dataviews</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/dataviews-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

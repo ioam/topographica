@@ -1,0 +1,7 @@
+<map id="inheritance595dfe9011" name="inheritance595dfe9011">
+<area shape="rect" id="node1" title="A Reference allows access to an object to be deferred until it is" alt="" coords="5,54,272,79"/>
+<area shape="rect" id="node5" title="A SimRef instance is installed on Collector to allow Topographica" alt="" coords="353,54,508,79"/>
+<area shape="rect" id="node2" title="This class extends ViewTestCase to handle IPython specific objects." alt="" coords="589,5,792,30"/>
+<area shape="rect" id="node3" title="The class implements comparisons between View objects for the" alt="" coords="320,5,541,30"/>
+<area shape="rect" id="node4" title="A class whose instances are single test cases." alt="" coords="55,5,222,30"/>
+</map>

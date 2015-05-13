@@ -1,0 +1,9 @@
+<map id="inheritance580fb0a561" name="inheritance580fb0a561">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,103,264,129"/>
+<area shape="rect" id="node2" href="#topo.plotting.bitmap.Bitmap" title="params(name=String)" alt="" coords="312,103,515,129"/>
+<area shape="rect" id="node3" href="#topo.plotting.bitmap.DrawBitmap" title="params(name=String)" alt="" coords="575,5,809,30"/>
+<area shape="rect" id="node4" href="#topo.plotting.bitmap.HSVBitmap" title="params(name=String)" alt="" coords="577,54,807,79"/>
+<area shape="rect" id="node5" href="#topo.plotting.bitmap.MontageBitmap" title="params(bg_color=NumericTuple, bitmaps=List, cols=Integer, hooks=List, margin=Integer, resize_filter=Integer, rows=Integer, shape=Composite, tile_size=NumericTuple, title_options=Dict, title_pos=NumericTuple, titles=List, name=String)" alt="" coords="563,103,821,129"/>
+<area shape="rect" id="node6" href="#topo.plotting.bitmap.PaletteBitmap" title="params(name=String)" alt="" coords="569,153,815,178"/>
+<area shape="rect" id="node7" href="#topo.plotting.bitmap.RGBBitmap" title="params(name=String)" alt="" coords="577,202,807,227"/>
+</map>

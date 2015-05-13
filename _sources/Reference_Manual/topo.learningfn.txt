@@ -1,0 +1,47 @@
+topo.learningfn Package
+=======================
+
+:mod:`learningfn` Package
+-------------------------
+
+.. inheritance-diagram:: topo.learningfn
+
+
+.. automodule:: topo.learningfn
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`optimized` Module
+-----------------------
+
+.. inheritance-diagram:: topo.learningfn.optimized
+
+
+.. automodule:: topo.learningfn.optimized
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`projfn` Module
+--------------------
+
+.. inheritance-diagram:: topo.learningfn.projfn
+
+
+.. automodule:: topo.learningfn.projfn
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`som` Module
+-----------------
+
+.. inheritance-diagram:: topo.learningfn.som
+
+
+.. automodule:: topo.learningfn.som
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

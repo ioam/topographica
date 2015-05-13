@@ -1,0 +1,36 @@
+topo.sparse Package
+===================
+
+:mod:`sparse` Package
+---------------------
+
+.. inheritance-diagram:: topo.sparse
+
+
+.. automodule:: topo.sparse
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`compile` Module
+---------------------
+
+.. inheritance-diagram:: topo.sparse.compile
+
+
+.. automodule:: topo.sparse.compile
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`sparsecf` Module
+----------------------
+
+.. inheritance-diagram:: topo.sparse.sparsecf
+
+
+.. automodule:: topo.sparse.sparsecf
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

@@ -1,0 +1,5 @@
+<map id="inheritance1355a88f2e" name="inheritance1355a88f2e">
+<area shape="rect" id="node1" title="Base class for named objects that support Parameters and message" alt="" coords="3,3,148,17"/>
+<area shape="rect" id="node2" href="#topo.submodel.Model" title="The available setup options are:" alt="" coords="175,3,265,17"/>
+<area shape="rect" id="node7" href="#topo.submodel.scal.ModelSCAL" title="Spatially&#45;tuned GCAL (SCAL) calibrated to represent a 3 degree" alt="" coords="1024,3,1149,17"/>
+</map>

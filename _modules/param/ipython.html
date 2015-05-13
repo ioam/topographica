@@ -1,0 +1,453 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>param.ipython &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="param" href="../param.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../param.html" accesskey="U">param</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for param.ipython</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Optional IPython extension for working with Parameters.</span>
+
+<span class="sd">This extension offers extended but completely optional functionality</span>
+<span class="sd">for IPython users.  From within IPython, it may be loaded using:</span>
+
+<span class="sd">%load_ext param.ipython</span>
+
+<span class="sd">This will register the %params line magic to allow easy inspection of</span>
+<span class="sd">all the parameters defined on a parameterized class or object:</span>
+
+<span class="sd">%params &lt;parameterized class or object&gt;</span>
+
+<span class="sd">All parameters of the class or object will be listed in the IPython</span>
+<span class="sd">pager together with all their corresponding attributes and</span>
+<span class="sd">docstrings. Note that the class or object to be inspected must already</span>
+<span class="sd">exist in the active namespace.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Jean-Luc Stevens&quot;</span>
+
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">IPython.core.magic</span> <span class="kn">import</span> <span class="n">Magics</span><span class="p">,</span> <span class="n">magics_class</span><span class="p">,</span> <span class="n">line_magic</span>
+<span class="kn">from</span> <span class="nn">IPython.core</span> <span class="kn">import</span> <span class="n">page</span>
+
+<span class="c"># Whether to generate warnings when misformatted docstrings are found</span>
+<span class="n">WARN_MISFORMATTED_DOCSTRINGS</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="c"># ANSI color codes for the IPython pager</span>
+<span class="n">red</span>   <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;31m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+<span class="n">blue</span>  <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;34m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+<span class="n">green</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;32m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+<span class="n">cyan</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[1;36m</span><span class="si">%s</span><span class="se">\x1b</span><span class="s">[0m&#39;</span>
+
+
+
+<div class="viewcode-block" id="ParamPager"><a class="viewcode-back" href="../../Reference_Manual/param.ipython-module.html#param.ipython.ParamPager">[docs]</a><span class="k">class</span> <span class="nc">ParamPager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Callable class that displays information about the supplied</span>
+<span class="sd">    parameterized object or class in the IPython pager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Order of the information to be listed in the table (left to right)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;changed&#39;</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">,</span> <span class="s">&#39;bounds&#39;</span><span class="p">,</span> <span class="s">&#39;mode&#39;</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_param_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">include_super</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the parameter dictionary, the list of modifed parameters</span>
+<span class="sd">        and the dictionary or parameter values. If include_super is</span>
+<span class="sd">        True, parameters are also collected from the super classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">params</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="nb">type</span><span class="p">):</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">val_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+            <span class="n">self_class</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">(</span><span class="n">onlychanged</span><span class="o">=</span><span class="bp">True</span><span class="p">)]</span>
+            <span class="n">val_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">())</span>
+            <span class="n">self_class</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">include_super</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                          <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">self_class</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="c"># Already displayed in the title.</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">,</span> <span class="n">changed</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_param_docstrings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">max_col_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">only_changed</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build a string to that presents all of the parameter</span>
+<span class="sd">        docstrings in a clean format (alternating red and blue for</span>
+<span class="sd">        readability).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">,</span> <span class="n">changed</span><span class="p">)</span> <span class="o">=</span> <span class="n">info</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">displayed_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">only_changed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">displayed_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+
+        <span class="n">right_shift</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">displayed_params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">+</span><span class="mi">2</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">displayed_params</span><span class="p">)):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">displayed_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">heading</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: &quot;</span> <span class="o">%</span> <span class="n">name</span>
+            <span class="n">unindented</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&lt; No docstring available &gt;&quot;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">doc</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">doc</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">WARN_MISFORMATTED_DOCSTRINGS</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">unindented</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>  <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">unindented</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Multi-line docstring for </span><span class="si">%r</span><span class="s"> is incorrectly formatted &quot;</span>
+                                   <span class="s">&quot; (should start with newline)&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="c"># Strip any starting newlines</span>
+            <span class="k">while</span> <span class="n">unindented</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">):</span>
+                <span class="n">unindented</span> <span class="o">=</span> <span class="n">unindented</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">unindented</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">tail</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;</span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span>  <span class="o">*</span> <span class="n">right_shift</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+                <span class="n">all_lines</span> <span class="o">=</span> <span class="p">[</span> <span class="n">heading</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">right_shift</span><span class="p">)</span> <span class="o">+</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">tail</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_lines</span> <span class="o">=</span> <span class="p">[</span> <span class="n">heading</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">right_shift</span><span class="p">)</span> <span class="o">+</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>  <span class="c"># Alternate red and blue for docstrings</span>
+                <span class="n">contents</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">red</span> <span class="o">%</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">all_lines</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">contents</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">blue</span> <span class="o">%</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">all_lines</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_build_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">max_col_len</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">only_changed</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Collect the information about parameters needed to build a</span>
+<span class="sd">        properly formatted table and then tabulate it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">info_dict</span><span class="p">,</span> <span class="n">bounds_dict</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
+        <span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">,</span> <span class="n">changed</span><span class="p">)</span> <span class="o">=</span> <span class="n">info</span>
+        <span class="n">col_widths</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">order</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">only_changed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">constant</span> <span class="o">=</span> <span class="s">&#39;C&#39;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">constant</span> <span class="k">else</span> <span class="s">&#39;V&#39;</span>
+            <span class="n">readonly</span> <span class="o">=</span> <span class="s">&#39;RO&#39;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">readonly</span> <span class="k">else</span> <span class="s">&#39;RW&#39;</span>
+            <span class="n">allow_None</span> <span class="o">=</span> <span class="s">&#39; AN&#39;</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#39;allow_None&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">allow_None</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+
+            <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">constant</span><span class="p">,</span> <span class="n">readonly</span><span class="p">,</span> <span class="n">allow_None</span><span class="p">)</span>
+            <span class="n">info_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">:</span><span class="n">p</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                               <span class="s">&#39;mode&#39;</span><span class="p">:</span><span class="n">mode</span><span class="p">}</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#39;bounds&#39;</span><span class="p">):</span>
+                <span class="n">lbound</span><span class="p">,</span> <span class="n">ubound</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">bounds</span>
+
+                <span class="n">mark_lbound</span><span class="p">,</span> <span class="n">mark_ubound</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span>
+                <span class="c"># Use soft_bounds when bounds not defined.</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#39;get_soft_bounds&#39;</span><span class="p">):</span>
+                    <span class="n">soft_lbound</span><span class="p">,</span> <span class="n">soft_ubound</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">get_soft_bounds</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">lbound</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">soft_lbound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">lbound</span> <span class="o">=</span> <span class="n">soft_lbound</span>
+                        <span class="n">mark_lbound</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">ubound</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">soft_ubound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">ubound</span> <span class="o">=</span> <span class="n">soft_ubound</span>
+                        <span class="n">mark_ubound</span> <span class="o">=</span> <span class="bp">True</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">lbound</span><span class="p">,</span> <span class="n">ubound</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">):</span>
+                    <span class="n">bounds_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">mark_lbound</span><span class="p">,</span> <span class="n">mark_ubound</span><span class="p">)</span>
+                    <span class="n">info_dict</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;(</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lbound</span><span class="p">,</span> <span class="n">ubound</span><span class="p">)</span>
+
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">val_dict</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">max_col_len</span> <span class="o">-</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[:</span><span class="n">max_col_len</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;...&#39;</span>
+            <span class="n">info_dict</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="n">max_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">col_widths</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">info_dict</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">col</span><span class="p">])])</span>
+                <span class="n">col_widths</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_width</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabulate</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="n">col_widths</span><span class="p">,</span> <span class="n">changed</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">bounds_dict</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_tabulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">col_widths</span><span class="p">,</span> <span class="n">changed</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">bounds_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the supplied information as a table suitable for</span>
+<span class="sd">        printing or paging.</span>
+
+<span class="sd">        info_dict:  Dictionary of the parameters name, type and mode.</span>
+<span class="sd">        col_widths: Dictionary of column widths in characters</span>
+<span class="sd">        changed:    List of parameters modified from their defaults.</span>
+<span class="sd">        order:      The order of the table columns</span>
+<span class="sd">        bound_dict: Dictionary of appropriately formatted bounds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">contents</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">column_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">order</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">column_set</span><span class="p">]</span>
+
+        <span class="n">title_row</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c"># Generate the column headings</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">col_widths</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+            <span class="n">formatted</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">col</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+            <span class="n">title_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
+        <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">blue</span> <span class="o">%</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">title_row</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c"># Format the table rows</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">info_dict</span><span class="p">):</span>
+            <span class="n">row_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="n">col_widths</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">col</span> <span class="ow">in</span> <span class="n">info</span><span class="p">)</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+                <span class="n">formatted</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">val</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">col</span> <span class="o">==</span> <span class="s">&#39;bounds&#39;</span> <span class="ow">and</span> <span class="n">bounds_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="bp">False</span><span class="p">):</span>
+                    <span class="p">(</span><span class="n">mark_lbound</span><span class="p">,</span> <span class="n">mark_ubound</span><span class="p">)</span> <span class="o">=</span> <span class="n">bounds_dict</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+                    <span class="n">lval</span><span class="p">,</span> <span class="n">uval</span> <span class="o">=</span> <span class="n">formatted</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+                    <span class="n">lspace</span><span class="p">,</span> <span class="n">lstr</span> <span class="o">=</span> <span class="n">lval</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">)</span>
+                    <span class="n">ustr</span><span class="p">,</span> <span class="n">uspace</span> <span class="o">=</span> <span class="n">uval</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">)</span>
+                    <span class="n">lbound</span> <span class="o">=</span> <span class="n">lspace</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="p">(</span><span class="n">cyan</span> <span class="o">%</span> <span class="n">lstr</span><span class="p">)</span> <span class="k">if</span> <span class="n">mark_lbound</span> <span class="k">else</span> <span class="n">lval</span>
+                    <span class="n">ubound</span> <span class="o">=</span> <span class="p">(</span><span class="n">cyan</span> <span class="o">%</span> <span class="n">ustr</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="o">+</span><span class="n">uspace</span> <span class="k">if</span> <span class="n">mark_ubound</span> <span class="k">else</span> <span class="n">uval</span>
+                    <span class="n">formatted</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lbound</span><span class="p">,</span> <span class="n">ubound</span><span class="p">)</span>
+                <span class="n">row_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
+
+            <span class="n">row_text</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">row_list</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">:</span>
+                <span class="n">row_text</span> <span class="o">=</span> <span class="n">red</span> <span class="o">%</span> <span class="n">row_text</span>
+
+            <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_text</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">contents</span><span class="o">+</span><span class="n">tail</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a parameterized object or class, display information</span>
+<span class="sd">        about the parameters in the IPython pager.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">parameterized_object</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param_obj</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">)</span>
+        <span class="n">parameterized_class</span> <span class="o">=</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">param_obj</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span>
+                               <span class="ow">and</span>  <span class="nb">issubclass</span><span class="p">(</span><span class="n">param_obj</span><span class="p">,</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">parameterized_object</span> <span class="ow">or</span> <span class="n">parameterized_class</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Object is not a parameterized class or object.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Parameters of </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">param_obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">heading_line</span> <span class="o">=</span> <span class="s">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">heading_text</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">heading_line</span><span class="p">)</span>
+
+        <span class="n">param_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_param_info</span><span class="p">(</span><span class="n">param_obj</span><span class="p">,</span> <span class="n">include_super</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">param_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">page</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">((</span><span class="n">green</span> <span class="o">%</span> <span class="n">heading_text</span><span class="p">),</span> <span class="s">&quot;Object has no parameters.&quot;</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_table</span><span class="p">(</span><span class="n">param_info</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="n">max_col_len</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+                                  <span class="n">only_changed</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="n">docstrings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_param_docstrings</span><span class="p">(</span><span class="n">param_info</span><span class="p">,</span> <span class="n">max_col_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">only_changed</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="n">dflt_msg</span> <span class="o">=</span> <span class="s">&quot;Parameters changed from their default values are marked in red.&quot;</span>
+        <span class="n">top_heading</span> <span class="o">=</span> <span class="p">(</span><span class="n">green</span> <span class="o">%</span> <span class="n">heading_text</span><span class="p">)</span>
+        <span class="n">top_heading</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">red</span> <span class="o">%</span> <span class="n">dflt_msg</span><span class="p">)</span>
+        <span class="n">top_heading</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cyan</span> <span class="o">%</span> <span class="s">&quot;Soft bound values are marked in cyan.&quot;</span><span class="p">)</span>
+        <span class="n">top_heading</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None&#39;</span>
+
+        <span class="n">heading_text</span> <span class="o">=</span> <span class="s">&#39;Parameter docstrings:&#39;</span>
+        <span class="n">heading_string</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">heading_text</span><span class="p">,</span> <span class="s">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">heading_text</span><span class="p">))</span>
+        <span class="n">docstring_heading</span> <span class="o">=</span> <span class="p">(</span><span class="n">green</span> <span class="o">%</span> <span class="n">heading_string</span><span class="p">)</span>
+        <span class="n">page</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="se">\n\n</span><span class="si">%s</span><span class="se">\n\n</span><span class="si">%s</span><span class="se">\n\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">top_heading</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span>
+                                            <span class="n">docstring_heading</span><span class="p">,</span> <span class="n">docstrings</span><span class="p">))</span>
+
+
+</div>
+<span class="nd">@magics_class</span>
+<div class="viewcode-block" id="ParamMagics"><a class="viewcode-back" href="../../Reference_Manual/param.ipython-module.html#param.ipython.ParamMagics">[docs]</a><span class="k">class</span> <span class="nc">ParamMagics</span><span class="p">(</span><span class="n">Magics</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implements the %params line magic used to inspect the parameters</span>
+<span class="sd">    of a parameterized class or object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParamMagics</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_pager</span> <span class="o">=</span> <span class="n">ParamPager</span><span class="p">()</span>
+
+
+    <span class="nd">@line_magic</span>
+<div class="viewcode-block" id="ParamMagics.params"><a class="viewcode-back" href="../../Reference_Manual/param.ipython-module.html#param.ipython.ParamMagics.params">[docs]</a>    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_s</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The %params line magic accepts a single argument which is a</span>
+<span class="sd">        handle on the parameterized object to be inspected. If the</span>
+<span class="sd">        object can be found in the active namespace, information about</span>
+<span class="sd">        the object&#39;s parameters is displayed in the IPython pager.</span>
+
+<span class="sd">        Usage: %params &lt;parameterized class or object&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">parameter_s</span><span class="o">==</span><span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Please specify an object to inspect.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c"># Beware! Uses IPython internals that may change in future...</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">_object_find</span><span class="p">(</span><span class="n">parameter_s</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">found</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Object </span><span class="si">%r</span><span class="s"> not found in the namespace.&quot;</span> <span class="o">%</span> <span class="n">parameter_s</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_pager</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+
+</div></div>
+<span class="n">message</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;Welcome to the param IPython extension! (http://ioam.github.io/param/)&quot;&quot;&quot;</span>
+<span class="n">message</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Available magics: %params&#39;</span>
+
+<span class="n">_loaded</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">def</span> <span class="nf">load_ipython_extension</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">global</span> <span class="n">_loaded</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_loaded</span><span class="p">:</span>
+        <span class="n">_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">register_magics</span><span class="p">(</span><span class="n">ParamMagics</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+<li><a href="../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/param/ipython.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../param.html" >param</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 15, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

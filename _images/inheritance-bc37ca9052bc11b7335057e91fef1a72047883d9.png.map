@@ -1,0 +1,9 @@
+<map id="inheritance317af4f87e" name="inheritance317af4f87e">
+<area shape="rect" id="node1" title="Generic 2D image generator." alt="" coords="491,3,645,22"/>
+<area shape="rect" id="node5" href="#topo.hardware.robotics.CameraImage" title="An image pattern generator that gets its image from a Player" alt="" coords="681,3,878,22"/>
+<area shape="rect" id="node2" title="A class hierarchy for callable objects that can generate 2D patterns." alt="" coords="232,3,455,22"/>
+<area shape="rect" id="node3" title="Base class for named objects that support Parameters and message" alt="" coords="4,22,197,41"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="247,40,440,59"/>
+<area shape="rect" id="node7" href="#topo.hardware.robotics.PTZ" title="Pan/Tilt/Zoom control." alt="" coords="494,40,642,59"/>
+<area shape="rect" id="node6" href="#topo.hardware.robotics.CameraImageQueued" title="A version of CameraImage that gets the image from the camera&#39;s image queue," alt="" coords="914,3,1148,22"/>
+</map>

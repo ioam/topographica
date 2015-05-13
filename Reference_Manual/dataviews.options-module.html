@@ -1,0 +1,274 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataviews.options &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataviews-options">
+<h1>dataviews.options<a class="headerlink" href="#dataviews-options" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritanceae4658ee53.svg" usemap="#inheritanceae4658ee53" class="inheritance"/></div><map id="inheritanceae4658ee53" name="inheritanceae4658ee53">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="dataviews.options.pyc-module.html">dataviews.options.pyc</a></li>
+</ul>
+</div>
+<div class="section" id="module-dataviews.options">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-dataviews.options" title="Permalink to this headline">¶</a></h2>
+<p>Options abstract away different class of options (e.g. matplotlib
+specific styles and plot specific parameters) away from View and Stack
+objects, allowing these objects to share options by name.</p>
+<p>StyleOpts is an OptionMap that allows matplotlib style options to be
+defined, allowing customization of how individual View objects are
+displayed if they have the appropriate style name.</p>
+<dl class="class">
+<dt id="dataviews.options.ChannelOpts">
+<em class="property">class </em><tt class="descclassname">dataviews.options.</tt><tt class="descname">ChannelOpts</tt><big>(</big><em>mode</em>, <em>pattern</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#ChannelOpts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.ChannelOpts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.options.Opts" title="dataviews.options.Opts"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.options.Opts</span></tt></a></p>
+<p>A subclass of Opts designed to hold channel mode definitions that
+control how particular labelled layer combinations in an Overlay
+are displayed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.options.Cycle">
+<em class="property">class </em><tt class="descclassname">dataviews.options.</tt><tt class="descname">Cycle</tt><big>(</big><em>elements</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Cycle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Cycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A simple container class to allow specification of cyclic style
+patterns. A typical use would be to cycle styles on a plot with
+multiple curves.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.options.Options">
+<em class="property">class </em><tt class="descclassname">dataviews.options.</tt><tt class="descname">Options</tt><big>(</big><em>name</em>, <em>opt_type</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A Option is a collection of Opts objects that allows convenient
+attribute access and can compose styles through inheritance.
+Options are inherited by finding all matches which end in the
+same substring as the supplied style.</p>
+<p>For example supplying &#8216;Example_View&#8217; as a style would match
+these styles (if they are defined):</p>
+<p>&#8216;View&#8217; : Opts(a=1, b=2)
+&#8216;Example_View&#8217;: Opts(b=3)</p>
+<p>The resulting Opts object inherits a=1 from &#8216;Options&#8217; and b=3
+from &#8216;Example_Options&#8217;.</p>
+<dl class="method">
+<dt id="dataviews.options.Options.keys">
+<tt class="descname">keys</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Options.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Options.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of all options in the OptionMap, including options
+associated with individual view objects.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="dataviews.options.Options.normalize_key">
+<em class="property">classmethod </em><tt class="descname">normalize_key</tt><big>(</big><em>key</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Options.normalize_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Options.normalize_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a key which may contain spaces, such as a view label,
+convert it to a string suitable for attribute access.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.options.Options.options">
+<tt class="descname">options</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Options.options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Options.options" title="Permalink to this definition">¶</a></dt>
+<dd><p>The full list of base Style objects in the Options, excluding
+options customized per object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.options.Options.values">
+<tt class="descname">values</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Options.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Options.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the Style objects in the OptionMap.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.options.OptionsGroup">
+<em class="property">class </em><tt class="descclassname">dataviews.options.</tt><tt class="descname">OptionsGroup</tt><big>(</big><em>optmaps</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#OptionsGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.OptionsGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>An OptionsGroup coordinates the setting of OptionMaps to ensure
+they share a common set of keys. While it is safe to access Opts
+from OptionMaps directly, an OptionGroup object must be used to
+set Options when there are multiple different types of Options
+(plot options as distinct from style options for instance).</p>
+<p>When setting Options, it is important to use the appropriate
+subclass of Opts to disambiguate the OptionGroup to be set. For
+instance, PlotOpts will set plotting options while StyleOpts are
+designed for setting style options.</p>
+<dl class="classmethod">
+<dt id="dataviews.options.OptionsGroup.normalize_key">
+<em class="property">classmethod </em><tt class="descname">normalize_key</tt><big>(</big><em>key</em><big>)</big><a class="headerlink" href="#dataviews.options.OptionsGroup.normalize_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a key which may contain spaces, such as a view label,
+convert it to a string suitable for attribute access.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataviews.options.OptionsGroup.options">
+<tt class="descname">options</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#OptionsGroup.options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.OptionsGroup.options" title="Permalink to this definition">¶</a></dt>
+<dd><p>The full list of option keys in the OptionGroup, excluding
+options customized per object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.options.Opts">
+<em class="property">class </em><tt class="descclassname">dataviews.options.</tt><tt class="descname">Opts</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Opts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Opts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A Options object specified keyword options. In addition to the
+functionality of a simple dictionary, Opts support cyclic indexing
+if supplied with a Cycle object.</p>
+<dl class="method">
+<dt id="dataviews.options.Opts.keys">
+<tt class="descname">keys</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#Opts.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.Opts.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>The keyword names defined in the options.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.options.PlotOpts">
+<em class="property">class </em><tt class="descclassname">dataviews.options.</tt><tt class="descname">PlotOpts</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#PlotOpts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.PlotOpts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.options.Opts" title="dataviews.options.Opts"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.options.Opts</span></tt></a></p>
+<p>A subclass of Opts designed to hold plotting options that set the
+parameters of the Plot class that display View objects.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataviews.options.StyleOpts">
+<em class="property">class </em><tt class="descclassname">dataviews.options.</tt><tt class="descname">StyleOpts</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataviews/options.html#StyleOpts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataviews.options.StyleOpts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dataviews.options.Opts" title="dataviews.options.Opts"><tt class="xref py py-class docutils literal"><span class="pre">dataviews.options.Opts</span></tt></a></p>
+<p>A subclass of Opts designed to hold matplotlib options to set the
+display Style of View objects.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+<li><a href="../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">dataviews.options</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-dataviews.options">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/Reference_Manual/dataviews.options-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 07, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

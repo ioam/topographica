@@ -1,0 +1,9 @@
+<map id="inheritance49aa83dbeb" name="inheritance49aa83dbeb">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,79,264,105"/>
+<area shape="rect" id="node5" href="#topo.plotting.plot.Plot" title="params(staleness_warning=Number, name=String)" alt="" coords="313,79,471,105"/>
+<area shape="rect" id="node2" href="#topo.plotting.plot.MultiOrPlot" title="params(max_brightness=Number, min_brightness=Number, unit_size=Number, warn_time=Number, staleness_warning=Number, name=String)" alt="" coords="787,5,991,30"/>
+<area shape="rect" id="node3" href="#topo.plotting.plot.TemplatePlot" title="params(warn_time=Number, staleness_warning=Number, name=String)" alt="" coords="521,79,738,105"/>
+<area shape="rect" id="node4" href="#topo.plotting.plot.PalettePlot" title="params(warn_time=Number, staleness_warning=Number, name=String)" alt="" coords="788,54,991,79"/>
+<area shape="rect" id="node6" href="#topo.plotting.plot.RGBPlot" title="params(warn_time=Number, staleness_warning=Number, name=String)" alt="" coords="796,103,983,129"/>
+<area shape="rect" id="node7" href="#topo.plotting.plot.SHCPlot" title="params(warn_time=Number, staleness_warning=Number, name=String)" alt="" coords="796,153,983,178"/>
+</map>

@@ -1,0 +1,547 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.submodel.specifications &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="topo.submodel" href="../submodel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../submodel.html" accesskey="U">topo.submodel</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.submodel.specifications</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A set of objects that allows declarative specification of a model</span>
+<span class="sd">including training patterns, sheets and projections.</span>
+
+<span class="sd">The components of a model specification can be individually inspected,</span>
+<span class="sd">modified, resolved or instantiated.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">holoviews.core.tree</span> <span class="kn">import</span> <span class="n">AttrTree</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+
+<div class="viewcode-block" id="Specification"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.Specification">[docs]</a><span class="k">class</span> <span class="nc">Specification</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specifications are templates for sheet or projection objects which</span>
+<span class="sd">    may be resolved to the corresponding simulation object once</span>
+<span class="sd">    instantiated.</span>
+
+<span class="sd">    All specifications have the following attribute:</span>
+
+<span class="sd">    :&#39;parameters&#39;: Keyword argument dictionary specifying which</span>
+<span class="sd">    parameters should be passed to the sheet or projection object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Specification.update"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.Specification.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience method to easy update specification parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Specification.modified_parameters"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.Specification.modified_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">modified_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;Dictionary of modified specification parameters&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_parameters</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="p">}</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">resolved_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object_type</span>
+
+
+<div class="viewcode-block" id="Specification.resolve"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.Specification.resolve">[docs]</a>    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the object in topo.sim corresponding to this object,</span>
+<span class="sd">        typically a Sheet or a Projection.</span>
+
+<span class="sd">        The appropriate object must be available in topo.sim.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_precedence</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">sort_precedence</span>
+
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_precedence</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">sort_precedence</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_type</span> <span class="o">=</span> <span class="n">object_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_precedence</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">object_type</span><span class="p">,</span><span class="s">&#39;params&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">default_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="ow">in</span> <span class="n">object_type</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span><span class="o">=</span><span class="n">default_value</span><span class="o">.</span><span class="n">default</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">default_parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Specification.summary"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.Specification.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printed</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a succinct summary of the Specification object. If</span>
+<span class="sd">        printed is set to True, the summary is printed, otherwise it</span>
+<span class="sd">        is returned as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="s">&quot;Convenient property access.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Specification.keys"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.Specification.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;The list of available property keys.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Specification.items"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.Specification.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;The property items.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+
+</div></div>
+<div class="viewcode-block" id="ArraySpec"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.ArraySpec">[docs]</a><span class="k">class</span> <span class="nc">ArraySpec</span><span class="p">(</span><span class="n">Specification</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple specification used to resolve numpy arrays relative to a</span>
+<span class="sd">    Topographica simulation (i.e. topo.sim). This class is primarily</span>
+<span class="sd">    aimed for specifying arrays to a Collector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathspec</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ArraySpec uses a fairly unsophisticated implementation, making</span>
+<span class="sd">        use of eval to resolve the desired array.</span>
+
+<span class="sd">       :&#39;pathspec&#39;: A string specifying how to access the array</span>
+<span class="sd">                    relative to topo.sim.</span>
+<span class="sd">       :&#39;properties&#39;: Optional specification of array properties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">numpy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pathspec</span> <span class="o">=</span> <span class="n">pathspec</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ArraySpec</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sim</span>   <span class="c"># pyflakes:ignore (import for eval)</span>
+        <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&quot;sim.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathspec</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;topo.sim.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathspec</span>
+
+
+    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printed</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> : Numpy array&quot;</span> <span class="o">%</span> <span class="bp">self</span>
+        <span class="k">if</span> <span class="n">printed</span><span class="p">:</span> <span class="k">print</span> <span class="n">summary</span>
+        <span class="k">else</span><span class="p">:</span>       <span class="k">return</span> <span class="n">summary</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">properties_repr</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%r</span><span class="s">:</span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+                                    <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s">&quot;ArraySpec(</span><span class="si">%r</span><span class="s">, {</span><span class="si">%s</span><span class="s">})&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathspec</span><span class="p">,</span> <span class="n">properties_repr</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="SheetSpec"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.SheetSpec">[docs]</a><span class="k">class</span> <span class="nc">SheetSpec</span><span class="p">(</span><span class="n">Specification</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SheetSpec acts as a template for sheet objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name_ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;eye&#39;</span><span class="p">,</span><span class="s">&#39;level&#39;</span><span class="p">,</span> <span class="s">&#39;cone&#39;</span><span class="p">,</span> <span class="s">&#39;polarity&#39;</span><span class="p">,</span>
+                     <span class="s">&#39;SF&#39;</span><span class="p">,</span><span class="s">&#39;opponent&#39;</span><span class="p">,</span><span class="s">&#39;surround&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;level&#39;</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheet_type</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a SheetSpec object of a certain Sheet type with the</span>
+<span class="sd">        given properties.</span>
+
+<span class="sd">       :&#39;sheet_type&#39;: Subclass of topo.base.sheet.Sheet.</span>
+<span class="sd">       :&#39;properties&#39;: Dictionary specifying the properties of the</span>
+<span class="sd">       sheet. There must be a value given for the key &#39;level&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SheetSpec</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">sheet_type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;level&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;SheetSpec always requires &#39;level&#39; property.&quot;</span><span class="p">)</span>
+
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_ordering</span>
+                      <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span> <span class="o">=</span> <span class="n">sheet_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sim</span>
+        <span class="k">return</span> <span class="n">sim</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiate the sheet and register it in topo.sim.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">],</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">(</span><span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                                   <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a string representation of the SheetSpec from the</span>
+<span class="sd">        properties values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">name</span><span class="o">+=</span><span class="nb">str</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span>
+
+
+    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printed</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">printed</span><span class="p">:</span> <span class="k">print</span> <span class="n">summary</span>
+        <span class="k">else</span><span class="p">:</span>       <span class="k">return</span> <span class="n">summary</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">type_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">properties_repr</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%r</span><span class="s">:</span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+                                    <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s">&quot;SheetSpec(</span><span class="si">%s</span><span class="s">, {</span><span class="si">%s</span><span class="s">})&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">properties_repr</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="ProjectionSpec"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.ProjectionSpec">[docs]</a><span class="k">class</span> <span class="nc">ProjectionSpec</span><span class="p">(</span><span class="n">Specification</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ProjectionSpec acts as a template for projection objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection_type</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a ProjectionSpec object of a certain Projection</span>
+<span class="sd">        type with the given src and dest SheetSpecs.</span>
+
+<span class="sd">       :&#39;projection_type&#39;: Subclass of topo.base.projection.Projection</span>
+<span class="sd">       :&#39;src&#39;: SheetSpec of the source sheet</span>
+<span class="sd">       :&#39;dest&#39;: SheetSpec of the destination sheet</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSpec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">projection_type</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection_type</span> <span class="o">=</span> <span class="n">projection_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="n">src</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">dest</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># These parameters are directly passed into topo.sim.connect()!</span>
+        <span class="n">ignored_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;src&#39;</span><span class="p">,</span> <span class="s">&#39;dest&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                               <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignored_keys</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sim</span>
+        <span class="k">return</span> <span class="n">sim</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">)]</span><span class="o">.</span><span class="n">projections</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiate the projection and register it in topo.sim.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">projection_type</span><span class="p">,</span>
+                         <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printed</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> [</span><span class="si">%s</span><span class="s"> -&gt; </span><span class="si">%s</span><span class="s">] : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">projection_type</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">printed</span><span class="p">:</span> <span class="k">print</span> <span class="n">summary</span>
+        <span class="k">else</span><span class="p">:</span>       <span class="k">return</span> <span class="n">summary</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">type_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_type</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">return</span> <span class="s">&quot;ProjectionSpec(</span><span class="si">%s</span><span class="s">, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="ModelSpec"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.ModelSpec">[docs]</a><span class="k">class</span> <span class="nc">ModelSpec</span><span class="p">(</span><span class="n">Specification</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ModelSpec acts as a template for Topographica model including</span>
+<span class="sd">    training patterns, sheets and projections.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_patterns</span> <span class="o">=</span> <span class="n">AttrTree</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span> <span class="o">=</span> <span class="n">AttrTree</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projections</span> <span class="o">=</span> <span class="n">AttrTree</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModelSpec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span> <span class="n">model</span>
+
+
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sim</span>     <span class="c"># pyflakes:ignore (needed for eval)</span>
+        <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&#39;sim.model&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instantiate_options</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiates all sheets or projections in self.sheets or</span>
+<span class="sd">        self.projections and registers them in the topo.sim instance.</span>
+
+<span class="sd">        If instantiate_options=True, all items are initialised</span>
+<span class="sd">        instantiate_options can also be a list, whereas all list items</span>
+<span class="sd">        of available_instantiate_options are accepted.</span>
+
+<span class="sd">        Available instantiation options are: &#39;sheets&#39; and</span>
+<span class="sd">        &#39;projections&#39;.</span>
+
+<span class="sd">        Please consult the docstring of the Model class for more</span>
+<span class="sd">        information about each instantiation option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msglevel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="k">if</span> <span class="n">verbose</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated</span><span class="p">:</span>
+            <span class="n">msglevel</span><span class="p">(</span><span class="s">&#39;ModelSpec </span><span class="si">%r</span><span class="s"> already instantiated. Returning.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">available_instantiate_options</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sheets&#39;</span><span class="p">,</span><span class="s">&#39;projections&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">instantiate_options</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+            <span class="n">instantiate_options</span><span class="o">=</span><span class="n">available_instantiate_options</span>
+
+        <span class="k">if</span> <span class="s">&#39;sheets&#39;</span> <span class="ow">in</span> <span class="n">instantiate_options</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sheet_spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+                <span class="n">msglevel</span><span class="p">(</span><span class="s">&#39;Level &#39;</span> <span class="o">+</span> <span class="n">sheet_spec</span><span class="o">.</span><span class="n">level</span> <span class="o">+</span> <span class="s">&#39;: Sheet &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sheet_spec</span><span class="p">))</span>
+                <span class="n">sheet_spec</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s">&#39;projections&#39;</span> <span class="ow">in</span> <span class="n">instantiate_options</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projections</span><span class="p">):</span>
+                <span class="n">msglevel</span><span class="p">(</span><span class="s">&#39;Match: &#39;</span> <span class="o">+</span> <span class="n">proj</span><span class="o">.</span><span class="n">matchname</span> <span class="o">+</span> <span class="s">&#39;: Connection &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">src</span><span class="p">)</span> <span class="o">+</span> \
+                             <span class="s">&#39;-&gt;&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">dest</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">proj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                <span class="n">proj</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printed</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">heading_line</span> <span class="o">=</span> <span class="s">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">[</span><span class="n">heading_line</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">heading_line</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">sheet_spec</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">):</span>
+            <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sheet_spec</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">printed</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+            <span class="n">projections</span> <span class="o">=</span> <span class="p">[</span><span class="n">proj</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projections</span>
+                           <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">dest</span><span class="p">)</span><span class="o">==</span><span class="nb">str</span><span class="p">(</span><span class="n">sheet_spec</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">projection_spec</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)):</span>
+                <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;   &quot;</span> <span class="o">+</span> <span class="n">projection_spec</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">printed</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+            <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">printed</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>       <span class="k">return</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+
+
+    <span class="k">def</span> <span class="nf">_repr_pretty_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">printed</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="ModelSpec.modifications"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.specifications.ModelSpec.modifications">[docs]</a>    <span class="k">def</span> <span class="nf">modifications</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="s">&#39;sheets&#39;</span><span class="p">,</span> <span class="s">&#39;projections&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display the names of all modified parameters for the specified</span>
+<span class="sd">        set of components.</span>
+
+<span class="sd">        By default all modified parameters are listed - first with the</span>
+<span class="sd">        model parameters, then the sheet parameters and lastly the</span>
+<span class="sd">        projection parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;model&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="p">],</span>
+                   <span class="s">&#39;sheets&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">,</span>
+                   <span class="s">&#39;projections&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">projections</span><span class="p">}</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+            <span class="n">heading</span> <span class="o">=</span> <span class="s">&quot;=&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">heading</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span> <span class="n">heading</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">])</span>
+            <span class="n">specs</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">component</span><span class="p">]</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">))</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">specs</span><span class="p">):</span>
+                <span class="n">modified</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">modified_parameters</span><span class="p">)]</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> : [</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">padding</span><span class="p">),</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">modified</span><span class="p">)))</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/submodel/specifications.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../submodel.html" >topo.submodel</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

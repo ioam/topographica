@@ -1,0 +1,36 @@
+topo.optimized Package
+======================
+
+:mod:`optimized` Package
+------------------------
+
+.. inheritance-diagram:: topo.optimized
+
+
+.. automodule:: topo.optimized
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`compile` Module
+---------------------
+
+.. inheritance-diagram:: topo.optimized.compile
+
+
+.. automodule:: topo.optimized.compile
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`unoptimized` Module
+-------------------------
+
+.. inheritance-diagram:: topo.optimized.unoptimized
+
+
+.. automodule:: topo.optimized.unoptimized
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

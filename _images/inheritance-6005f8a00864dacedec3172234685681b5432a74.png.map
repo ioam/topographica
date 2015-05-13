@@ -1,0 +1,12 @@
+<map id="inheritance29649dbcd3" name="inheritance29649dbcd3">
+<area shape="rect" id="node1" title="Internal class." alt="" coords="147,143,247,161"/>
+<area shape="rect" id="node4" title="Internal class." alt="" coords="361,73,439,91"/>
+<area shape="rect" id="node2" title="Internal class." alt="" coords="4,143,72,161"/>
+<area shape="rect" id="node3" title="Frame widget which may contain other widgets and can have a 3D border." alt="" coords="539,68,615,86"/>
+<area shape="rect" id="node5" title="Geometry manager Grid." alt="" coords="164,38,230,56"/>
+<area shape="rect" id="node6" title="Geometry manager Pack." alt="" coords="163,73,231,91"/>
+<area shape="rect" id="node7" title="Geometry manager Place." alt="" coords="161,108,233,126"/>
+<area shape="rect" id="node8" title="Base class for named objects that support Parameters and message" alt="" coords="106,3,288,21"/>
+<area shape="rect" id="node10" title="A Parameterized subclass that maintains Tkinter.Variable shadows" alt="" coords="322,8,477,26"/>
+<area shape="rect" id="node9" title="Provide widgets for Parameters of itself and up to one additional" alt="" coords="511,25,643,43"/>
+</map>

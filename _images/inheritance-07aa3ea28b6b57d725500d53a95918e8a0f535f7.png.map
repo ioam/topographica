@@ -1,0 +1,8 @@
+<map id="inheritance0f827376bc" name="inheritance0f827376bc">
+<area shape="rect" id="node1" title="params(durations=Parameter, measurement_prefix=String, name=String)" alt="" coords="427,4,662,20"/>
+<area shape="rect" id="node5" href="#topo.analysis.featureresponses.pattern_present" title="params(apply_output_fns=Boolean, inputs=Dict, install_sheetview=Boolean, overwrite_previous=Boolean, plastic=Boolean, restore_events=Boolean, restore_state=Boolean, return_responses=Boolean, durations=Parameter, measurement_prefix=String, name=String)" alt="" coords="693,4,903,20"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="198,20,396,36"/>
+<area shape="rect" id="node4" title="params(only_latest=Boolean, sublabel=String, name=String)" alt="" coords="446,35,643,51"/>
+<area shape="rect" id="node3" title="params(name=String)" alt="" coords="3,20,168,36"/>
+<area shape="rect" id="node6" href="#topo.analysis.featureresponses.pattern_response" title="params(progress_bar=Boolean, apply_output_fns=Boolean, inputs=Dict, install_sheetview=Boolean, overwrite_previous=Boolean, plastic=Boolean, restore_events=Boolean, restore_state=Boolean, return_responses=Boolean, durations=Parameter, measurement_prefix=String, name=String)" alt="" coords="933,4,1149,20"/>
+</map>

@@ -1,0 +1,223 @@
+topo.misc Package
+=================
+
+:mod:`misc` Package
+-------------------
+
+.. inheritance-diagram:: topo.misc
+
+
+.. automodule:: topo.misc
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`asizeof` Module
+---------------------
+
+.. inheritance-diagram:: topo.misc.asizeof
+
+
+.. automodule:: topo.misc.asizeof
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`attrdict` Module
+----------------------
+
+.. inheritance-diagram:: topo.misc.attrdict
+
+
+.. automodule:: topo.misc.attrdict
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`color` Module
+-------------------
+
+.. inheritance-diagram:: topo.misc.color
+
+
+.. automodule:: topo.misc.color
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`commandline` Module
+-------------------------
+
+.. inheritance-diagram:: topo.misc.commandline
+
+
+.. automodule:: topo.misc.commandline
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`featurecoordinators` Module
+---------------------------------
+
+.. inheritance-diagram:: topo.misc.featurecoordinators
+
+
+.. automodule:: topo.misc.featurecoordinators
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`fixedpoint` Module
+------------------------
+
+.. inheritance-diagram:: topo.misc.fixedpoint
+
+
+.. automodule:: topo.misc.fixedpoint
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`gendocs` Module
+---------------------
+
+.. inheritance-diagram:: topo.misc.gendocs
+
+
+.. automodule:: topo.misc.gendocs
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`genexamples` Module
+-------------------------
+
+.. inheritance-diagram:: topo.misc.genexamples
+
+
+.. automodule:: topo.misc.genexamples
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`inlinec` Module
+---------------------
+
+.. inheritance-diagram:: topo.misc.inlinec
+
+
+.. automodule:: topo.misc.inlinec
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`ipython` Module
+---------------------
+
+.. inheritance-diagram:: topo.misc.ipython
+
+
+.. automodule:: topo.misc.ipython
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`lancext` Module
+---------------------
+
+.. inheritance-diagram:: topo.misc.lancext
+
+
+.. automodule:: topo.misc.lancext
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`legacy` Module
+--------------------
+
+.. inheritance-diagram:: topo.misc.legacy
+
+
+.. automodule:: topo.misc.legacy
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`memuse` Module
+--------------------
+
+.. inheritance-diagram:: topo.misc.memuse
+
+
+.. automodule:: topo.misc.memuse
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`picklemain` Module
+------------------------
+
+.. inheritance-diagram:: topo.misc.picklemain
+
+
+.. automodule:: topo.misc.picklemain
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`pyxhandler` Module
+------------------------
+
+.. inheritance-diagram:: topo.misc.pyxhandler
+
+
+.. automodule:: topo.misc.pyxhandler
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`snapshots` Module
+-----------------------
+
+.. inheritance-diagram:: topo.misc.snapshots
+
+
+.. automodule:: topo.misc.snapshots
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`trace` Module
+-------------------
+
+.. inheritance-diagram:: topo.misc.trace
+
+
+.. automodule:: topo.misc.trace
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`unitsupport` Module
+-------------------------
+
+.. inheritance-diagram:: topo.misc.unitsupport
+
+
+.. automodule:: topo.misc.unitsupport
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+:mod:`util` Module
+------------------
+
+.. inheritance-diagram:: topo.misc.util
+
+
+.. automodule:: topo.misc.util
+    :members:
+    :inherited-members:
+    :show-inheritance:
+

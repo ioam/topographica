@@ -1,0 +1,9 @@
+<map id="inheritance084e3a6692" name="inheritance084e3a6692">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="535,63,789,83"/>
+<area shape="rect" id="node4" href="#topo.misc.featurecoordinators.DisparityCoordinator" title="params(disparity_bound=Number, name=String)" alt="" coords="848,4,1127,24"/>
+<area shape="rect" id="node5" href="#topo.misc.featurecoordinators.MotionCoordinator" title="params(reset_period=Number, speed=Number, time_fn=Callable, name=String)" alt="" coords="853,43,1122,63"/>
+<area shape="rect" id="node6" href="#topo.misc.featurecoordinators.OcularityCoordinator" title="params(dim_fraction=Number, name=String)" alt="" coords="848,82,1127,102"/>
+<area shape="rect" id="node7" href="#topo.misc.featurecoordinators.SpatialFrequencyCoordinator" title="params(sf_max_channel=Integer, sf_spacing=Number, name=String)" alt="" coords="827,121,1148,142"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="248,63,496,83"/>
+<area shape="rect" id="node3" title="params(name=String)" alt="" coords="4,63,210,83"/>
+</map>
