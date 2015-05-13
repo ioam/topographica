@@ -1,6 +1,9 @@
 topo.gpu Package
 ================
 
+
+---------
+
 :mod:`projection` Module
 ------------------------
 
@@ -12,6 +15,8 @@ topo.gpu Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`sheet` Module
 -------------------
 
@@ -22,4 +27,6 @@ topo.gpu Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

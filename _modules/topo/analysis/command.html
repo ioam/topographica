@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
@@ -154,7 +157,7 @@
 
 
 </div>
-<div class="viewcode-block" id="measure_projection"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.command.measure_projection">[docs]</a><span class="k">class</span> <span class="nc">measure_projection</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">measure_projection</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
 
     <span class="n">rows</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Number of CF rows.&quot;</span><span class="p">)</span>
 
@@ -167,7 +170,7 @@
         <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
 
 
-</div>
+
 <div class="viewcode-block" id="update_projectionactivity"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.command.update_projectionactivity">[docs]</a><span class="k">class</span> <span class="nc">update_projectionactivity</span><span class="p">(</span><span class="n">ProjectionSheetMeasurementCommand</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add SheetViews for all of the Projections of the ProjectionSheet</span>

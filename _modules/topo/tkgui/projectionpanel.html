@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../../index.html" />
     <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
@@ -156,7 +159,7 @@
 
 
 </div>
-<div class="viewcode-block" id="ProjectionActivityPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.projectionpanel.ProjectionActivityPanel">[docs]</a><span class="k">class</span> <span class="nc">ProjectionActivityPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ProjectionActivityPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionActivityPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
@@ -166,8 +169,8 @@
         <span class="k">return</span> <span class="s">&quot;Activity in projections to </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
 
 
-</div>
-<div class="viewcode-block" id="UnitsPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.projectionpanel.UnitsPanel">[docs]</a><span class="k">class</span> <span class="nc">UnitsPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">UnitsPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
 
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
@@ -231,8 +234,8 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">UnitsPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">sheet_change</span><span class="p">()</span>
 <span class="c">##############################################################################</span>
 
-</div>
-<div class="viewcode-block" id="ConnectionFieldsPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.projectionpanel.ConnectionFieldsPanel">[docs]</a><span class="k">class</span> <span class="nc">ConnectionFieldsPanel</span><span class="p">(</span><span class="n">UnitsPanel</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">ConnectionFieldsPanel</span><span class="p">(</span><span class="n">UnitsPanel</span><span class="p">):</span>
 
     <span class="n">projection_type</span> <span class="o">=</span> <span class="n">CFProjection</span>
 
@@ -248,7 +251,7 @@
                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
                 <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
 
-</div>
+
 <div class="viewcode-block" id="PlotMatrixPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.projectionpanel.PlotMatrixPanel">[docs]</a><span class="k">class</span> <span class="nc">PlotMatrixPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    PlotGroupPanel for visualizing an array of bitmaps, such as for</span>
@@ -308,7 +311,7 @@
         <span class="k">pass</span>
 
 </div></div>
-<div class="viewcode-block" id="RFProjectionPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.projectionpanel.RFProjectionPanel">[docs]</a><span class="k">class</span> <span class="nc">RFProjectionPanel</span><span class="p">(</span><span class="n">PlotMatrixPanel</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RFProjectionPanel</span><span class="p">(</span><span class="n">PlotMatrixPanel</span><span class="p">):</span>
 
     <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">ProjectionSheet</span>
 
@@ -332,8 +335,8 @@
         <span class="k">return</span> <span class="s">&#39;RFs of </span><span class="si">%s</span><span class="s"> on </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                              <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
 
-</div>
-<div class="viewcode-block" id="ProjectionPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.projectionpanel.ProjectionPanel">[docs]</a><span class="k">class</span> <span class="nc">ProjectionPanel</span><span class="p">(</span><span class="n">PlotMatrixPanel</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">ProjectionPanel</span><span class="p">(</span><span class="n">PlotMatrixPanel</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;projection&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_3</span><span class="p">,</span>
@@ -388,7 +391,7 @@
 <span class="c">##         #################</span>
 
 
-</div>
+
 <div class="viewcode-block" id="CFProjectionPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.projectionpanel.CFProjectionPanel">[docs]</a><span class="k">class</span> <span class="nc">CFProjectionPanel</span><span class="p">(</span><span class="n">ProjectionPanel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Panel for displaying CFProjections.</span>

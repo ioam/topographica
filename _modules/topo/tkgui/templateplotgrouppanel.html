@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../../index.html" />
     <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
@@ -112,7 +115,7 @@
 
 <span class="c">### CB: I&#39;m working here at the moment.</span>
 </div>
-<div class="viewcode-block" id="TemplatePlotGroupPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.templateplotgrouppanel.TemplatePlotGroupPanel">[docs]</a><span class="k">class</span> <span class="nc">TemplatePlotGroupPanel</span><span class="p">(</span><span class="n">SheetPanel</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TemplatePlotGroupPanel</span><span class="p">(</span><span class="n">SheetPanel</span><span class="p">):</span>
 
     <span class="n">plotgroup_type</span> <span class="o">=</span> <span class="n">TemplatePlotGroup</span>
 
@@ -312,8 +315,8 @@
 
         <span class="k">return</span> <span class="n">info_string</span>
 
-</div>
-<div class="viewcode-block" id="SheetPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.templateplotgrouppanel.SheetPanel">[docs]</a><span class="k">class</span> <span class="nc">SheetPanel</span><span class="p">(</span><span class="n">TemplatePlotGroupPanel</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">SheetPanel</span><span class="p">(</span><span class="n">TemplatePlotGroupPanel</span><span class="p">):</span>
 
     <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">Sheet</span>
 
@@ -349,7 +352,7 @@
             <span class="n">channels</span> <span class="o">+=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;Preference&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">paths</span>
                          <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s">&#39;Preference&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">params</span><span class="p">()[</span><span class="s">&#39;color_channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">channels</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">color_channel</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">color_channel</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span>
 </pre></div>
 
           </div>

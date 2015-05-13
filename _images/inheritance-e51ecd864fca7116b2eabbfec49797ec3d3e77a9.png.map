@@ -1,0 +1,11 @@
+<map id="inheritance50e9782c42" name="inheritance50e9782c42">
+<area shape="rect" id="node1" title="Function object to modify a matrix in place, e.g. for normalization." alt="" coords="309,127,513,153"/>
+<area shape="rect" id="node3" title="Abstract base class for TransferFns that need to maintain a" alt="" coords="560,54,824,79"/>
+<area shape="rect" id="node6" href="#topo.transferfn.misc.HalfRectify" title="Transfer function that applies a half&#45;wave rectification (clips at zero)" alt="" coords="583,102,802,127"/>
+<area shape="rect" id="node7" href="#topo.transferfn.misc.KernelMax" title="Replaces the given matrix with a kernel function centered around the maximum value." alt="" coords="583,151,801,176"/>
+<area shape="rect" id="node8" href="#topo.transferfn.misc.PatternCombine" title="Combine the supplied pattern with one generated using a" alt="" coords="564,200,820,225"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="5,127,262,153"/>
+<area shape="rect" id="node4" href="#topo.transferfn.misc.AdaptiveThreshold" title="Adapts the parameters of a linear threshold function to maintain a" alt="" coords="874,5,1145,30"/>
+<area shape="rect" id="node5" href="#topo.transferfn.misc.AttributeTrackingTF" title="Keeps track of attributes of a specified Parameterized over time, for analysis or plotting." alt="" coords="873,54,1146,79"/>
+<area shape="rect" id="node9" href="#topo.transferfn.misc.TemporalScatter" title="Scatter values across time using a specified distribution," alt="" coords="881,102,1138,127"/>
+</map>

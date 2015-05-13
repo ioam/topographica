@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
@@ -153,12 +156,12 @@
                    <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
 
 </div></div>
-<div class="viewcode-block" id="GPUCFSheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.sheet.GPUCFSheet">[docs]</a><span class="k">class</span> <span class="nc">GPUCFSheet</span><span class="p">(</span><span class="n">CFSheet</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">GPUCFSheet</span><span class="p">(</span><span class="n">CFSheet</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">GPUCFSheet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GPUCFSheet.process_current_time"><a class="viewcode-back" href="../../../Reference_Manual/topo.gpu.html#topo.gpu.sheet.GPUCFSheet.process_current_time">[docs]</a>    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called by the simulation after all the events are processed for the</span>
 <span class="sd">        current time but before time advances.  Allows the event processor</span>
@@ -173,7 +176,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">False</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span></div></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
 </pre></div>
 
           </div>

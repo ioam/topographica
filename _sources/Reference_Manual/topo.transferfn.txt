@@ -1,6 +1,9 @@
 topo.transferfn Package
 =======================
 
+
+---------
+
 :mod:`transferfn` Package
 -------------------------
 
@@ -11,6 +14,8 @@ topo.transferfn Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`misc` Module
 ------------------
@@ -23,6 +28,8 @@ topo.transferfn Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`optimized` Module
 -----------------------
 
@@ -34,6 +41,8 @@ topo.transferfn Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`projfn` Module
 --------------------
 
@@ -44,4 +53,6 @@ topo.transferfn Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

@@ -1,6 +1,9 @@
 topo.submodel Package
 =====================
 
+
+---------
+
 :mod:`submodel` Package
 -----------------------
 
@@ -11,6 +14,8 @@ topo.submodel Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`color` Module
 -------------------
@@ -23,6 +28,8 @@ topo.submodel Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`earlyvision` Module
 -------------------------
 
@@ -33,6 +40,8 @@ topo.submodel Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`gcal` Module
 ------------------
@@ -45,6 +54,8 @@ topo.submodel Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`scal` Module
 ------------------
 
@@ -56,6 +67,8 @@ topo.submodel Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`specifications` Module
 ----------------------------
 
@@ -66,4 +79,6 @@ topo.submodel Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

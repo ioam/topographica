@@ -1,0 +1,8 @@
+<map id="inheritancebd0a1bc029" name="inheritancebd0a1bc029">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="4,3,174,20"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EPConnection" title="EPConnection stores basic information for a connection between" alt="" coords="205,3,369,20"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFProjection" title="A projection composed of ConnectionFields from a Sheet into a ProjectionSheet." alt="" coords="578,3,698,20"/>
+<area shape="rect" id="node6" title="A projection composed of SparseConnectionFields from a Sheet into" alt="" coords="731,3,917,20"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.projection.Projection" title="A projection from a Sheet into a ProjectionSheet." alt="" coords="401,3,546,20"/>
+<area shape="rect" id="node5" href="#topo.gpu.projection.GPUSparseCFProjection" title="A projection composed of SparseConnectionFields from a Sheet into" alt="" coords="949,3,1148,20"/>
+</map>

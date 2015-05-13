@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/custom.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../_static/require.js"></script>
     <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../index.html" /> 
   </head>
@@ -61,17 +64,17 @@
             
   <div class="section" id="topo-command-package">
 <h1>topo.command Package<a class="headerlink" href="#topo-command-package" title="Permalink to this headline">¶</a></h1>
+<hr class="docutils" />
 <div class="section" id="command-package">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">command</span></tt> Package<a class="headerlink" href="#command-package" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-d7d4e3f4c3b35d10c955438d5efbd5d3f705d30f.png" alt="Inheritance diagram of topo.command" usemap="#inheritancef415e0380d" class="inheritance"/>
+<img src="../_images/inheritance-9576153afd2fe55c157388079ddb8de8b54563db.png" alt="Inheritance diagram of topo.command" usemap="#inheritancef415e0380d" class="inheritance"/>
 <map id="inheritancef415e0380d" name="inheritancef415e0380d">
 <area shape="rect" id="node1" title="params(name=String)" alt="" coords="37,202,296,227"/>
 <area shape="rect" id="node2" title="params(name=String)" alt="" coords="376,202,688,227"/>
-<area shape="rect" id="node4" href="#topo.command.Command" title="params(name=String)" alt="" coords="758,127,949,153"/>
-<area shape="rect" id="node9" href="#topo.command.param_formatter" title="params(map=Dict, name=String)" alt="" coords="736,177,971,202"/>
-<area shape="rect" id="node10" href="#topo.command.run_batch" title="params(analysis_fn=Callable, compress_metadata=ObjectSelector, dirname_params_filter=Callable, dirname_prefix=String, max_name_length=Number, metadata_dir=String, name_time_format=String, output_directory=String, progress_bar=String, progress_interval=Number, save_global_params=Boolean, save_script_repr=ObjectSelector, snapshot=Boolean, tag=String, times=Parameter, timestamp=NumericTuple, vc_info=Boolean, name=String)" alt="" coords="759,226,947,251"/>
-<area shape="rect" id="node11" href="#topo.command.runscript" title="params(load=Boolean, ns=Parameter, push=Callable, name=String)" alt="" coords="763,275,943,301"/>
+<area shape="rect" id="node4" href="#topo.command.Command" title="Parameterized command: any error when the command is run (called)" alt="" coords="758,127,949,153"/>
+<area shape="rect" id="node10" href="#topo.command.run_batch" title="Run a Topographica simulation in batch mode." alt="" coords="759,226,947,251"/>
+<area shape="rect" id="node11" href="#topo.command.runscript" title="Runs a script that has been parameterized with script parameters." alt="" coords="763,275,943,301"/>
 <area shape="rect" id="node3" title="The metaclass of Parameterized (and all its descendents)." alt="" coords="5,153,328,178"/>
 <area shape="rect" id="node5" title="A class having this as a metaclass will have its __call__() method" alt="" coords="405,153,659,178"/>
 <area shape="rect" id="node6" href="#topo.command.ImportErrorObject" title="Raises an ImportError on any attempt to access an attribute, call," alt="" coords="47,103,286,129"/>
@@ -104,26 +107,9 @@ class for more information.</p>
 <dt id="topo.command.runscript">
 <em class="property">class </em><tt class="descclassname">topo.command.</tt><tt class="descname">runscript</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command.html#runscript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.runscript" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.ParameterizedFunction" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
-<p>params(load=Boolean, ns=Parameter, push=Callable, name=String)</p>
-<blockquote>
-<div>Runs a script that has been parameterized with script parameters.
+<p>Runs a script that has been parameterized with script parameters.
 For example, runscript(&#8216;tiny.ty&#8217;, cortex_density=10) will execute
-the &#8216;tiny.ty&#8217; script in the currently active namespace.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName  Value     Type    Bounds    Mode  [0m</p>
-<p>load   True   Boolean   (0, 1)    V RW  
-ns      {}   Parameter            V RW  
-push   None   Callable          V RW AN</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mload: Whether to automatically load class based models when called.[0m
-[1;34m      Useful for compatibility with older ty script definition files.[0m
-[1;31mns:   The namespace in which the script is to be executed.[0m
-[1;34mpush: Hook to push the updated namespace for handling more[0m
-[1;34m      complicated namespaces, such as IPython Notebook.[0m</p>
+the &#8216;tiny.ty&#8217; script in the currently active namespace.</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">load</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Whether to automatically load class based models when called.
@@ -152,7 +138,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.runscript.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c7e0&gt;</em><a class="headerlink" href="#topo.command.runscript.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873aae050&gt;</em><a class="headerlink" href="#topo.command.runscript.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -166,17 +152,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.runscript.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c520&gt;</em><a class="headerlink" href="#topo.command.runscript.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae873aae0a8&gt;</em><a class="headerlink" href="#topo.command.runscript.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.runscript.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c8e8&gt;</em><a class="headerlink" href="#topo.command.runscript.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873aae158&gt;</em><a class="headerlink" href="#topo.command.runscript.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.runscript.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c788&gt;</em><a class="headerlink" href="#topo.command.runscript.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae873aae100&gt;</em><a class="headerlink" href="#topo.command.runscript.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -230,12 +216,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.runscript.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c838&gt;</em><a class="headerlink" href="#topo.command.runscript.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873aae208&gt;</em><a class="headerlink" href="#topo.command.runscript.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.runscript.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c998&gt;</em><a class="headerlink" href="#topo.command.runscript.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873aae260&gt;</em><a class="headerlink" href="#topo.command.runscript.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -276,182 +262,6 @@ containing the arguments.</p>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="topo.command.param_formatter">
-<em class="property">class </em><tt class="descclassname">topo.command.</tt><tt class="descname">param_formatter</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command.html#param_formatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.param_formatter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.ParameterizedFunction" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
-<p>params(map=Dict, name=String)
-[1;32mParameters of &#8216;param_formatter&#8217;
-===============================
-[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName      Value      Type  Mode [0m</p>
-<p>map   OrderedDict()  Dict  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mmap: Optional ordered dictionary of alternative names to use for[0m
-[1;34m     parameters, parameter_name:alternative_name[0m
-[1;34m     [0m
-[1;34m     Use to shorten common parameter names (directory names are[0m
-[1;34m     limited in length on most file systems), and to specify an[0m
-[1;34m     order.[0m
-[1;34m     [0m
-[1;34m     Names not specified here will be sorted alphabetically.[0m</p>
-<dl class="docutils">
-<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">map</span></tt> (<em>allow_None=False, constant=False, default=OrderedDict(), instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>Optional ordered dictionary of alternative names to use for
-        parameters, parameter_name:alternative_name
-
-        Use to shorten common parameter names (directory names are
-        limited in length on most file systems), and to specify an
-        order.
-
-        Names not specified here will be sorted alphabetically.</dd>
-</dl>
-<dl class="method">
-<dt id="topo.command.param_formatter.debug">
-<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.debug" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a debugging statement.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.defaults">
-<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.command.param_formatter.defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return {parameter_name:parameter.default} for all non-constant
-Parameters.</p>
-<p>Note that a Parameter for which instantiate==True has its default
-instantiated.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.command.param_formatter.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c578&gt;</em><a class="headerlink" href="#topo.command.param_formatter.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.get_param_values">
-<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.get_param_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a list of name,value pairs for all Parameters of this
-object.</p>
-<p>If onlychanged is True, will only return values that are not
-equal to the default value.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.command.param_formatter.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c5d0&gt;</em><a class="headerlink" href="#topo.command.param_formatter.get_value_generator" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="topo.command.param_formatter.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c680&gt;</em><a class="headerlink" href="#topo.command.param_formatter.inspect_value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="topo.command.param_formatter.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c628&gt;</em><a class="headerlink" href="#topo.command.param_formatter.instance" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.message">
-<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a message.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="topo.command.param_formatter.params">
-<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the Parameters of this class as the
-dictionary {name: parameter_object}</p>
-<p>Includes Parameters from this class and its
-superclasses.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.pprint">
-<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix='n    '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.pprint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as Parameterized.pprint, except that X.classname(Y
-is replaced with X.classname.instance(Y</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="topo.command.param_formatter.print_param_defaults">
-<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.command.param_formatter.print_param_defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.print_param_values">
-<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.command.param_formatter.print_param_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print the values of all this object&#8217;s Parameters.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.script_repr">
-<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.script_repr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as Parameterized.script_repr, except that X.classname(Y
-is replaced with X.classname.instance(Y</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="topo.command.param_formatter.set_default">
-<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.set_default" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the default value of param_name.</p>
-<p>Equivalent to setting param_name on the class.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.command.param_formatter.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c7e0&gt;</em><a class="headerlink" href="#topo.command.param_formatter.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="topo.command.param_formatter.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c940&gt;</em><a class="headerlink" href="#topo.command.param_formatter.set_param" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.state_pop">
-<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.command.param_formatter.state_pop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restore the most recently saved state.</p>
-<p>See state_push() for more details.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.state_push">
-<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.command.param_formatter.state_push" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save this instance&#8217;s state.</p>
-<p>For Parameterized instances, this includes the state of
-dynamically generated values.</p>
-<p>Subclasses that maintain short-term state should additionally
-save and restore that state using state_push() and
-state_pop().</p>
-<p>Generally, this method is used by operations that need to test
-something without permanently altering the objects&#8217; state.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.verbose">
-<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.verbose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a verbose message.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.command.param_formatter.warning">
-<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.command.param_formatter.warning" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a warning, unless module variable
-warnings_as_exceptions is True, then raise an Exception
-containing the arguments.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="function">
 <dt id="topo.command.default_analysis_function">
 <tt class="descclassname">topo.command.</tt><tt class="descname">default_analysis_function</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/command.html#default_analysis_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.default_analysis_function" title="Permalink to this definition">¶</a></dt>
@@ -463,9 +273,7 @@ likely to need something similar but highly customized.</p>
 <dt id="topo.command.run_batch">
 <em class="property">class </em><tt class="descclassname">topo.command.</tt><tt class="descname">run_batch</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command.html#run_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.run_batch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.ParameterizedFunction" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
-<p>params(analysis_fn=Callable, compress_metadata=ObjectSelector, dirname_params_filter=Callable, dirname_prefix=String, max_name_length=Number, metadata_dir=String, name_time_format=String, output_directory=String, progress_bar=String, progress_interval=Number, save_global_params=Boolean, save_script_repr=ObjectSelector, snapshot=Boolean, tag=String, times=Parameter, timestamp=NumericTuple, vc_info=Boolean, name=String)</p>
-<blockquote>
-<div><p>Run a Topographica simulation in batch mode.</p>
+<p>Run a Topographica simulation in batch mode.</p>
 <p>Features:</p>
 <blockquote>
 <div><ul class="simple">
@@ -516,73 +324,6 @@ all output goes into the same location. The original value of
 param.normalize_path.prefix is deliberately not restored at the
 end of the function so that the output of any subsequent commands
 will go into the same place.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                     Value                         Type       Bounds  Mode [0m</p>
-<p>analysis_fn             &lt;function default_analysis_function a...     Callable             V RW 
-compress_metadata                         None                    ObjectSelector          V RW 
-dirname_params_filter   param_formatter(map=OrderedDict(), na...     Callable             V RW 
-dirname_prefix                             &#8216;&#8217;                         String              V RW 
-max_name_length                           200                         Number              V RW 
-metadata_dir                               &#8216;&#8217;                         String              V RW 
-name_time_format                      &#8216;%Y%m%d%H%M&#8217;                    String              V RW 
-output_directory                        &#8216;Output&#8217;                      String              V RW 
-progress_bar                            &#8216;stdout&#8217;                      String              V RW 
-progress_interval                         100                         Number              V RW 
-save_global_params                        True                       Boolean      (0, 1)  V RW 
-save_script_repr                        &#8216;first&#8217;                   ObjectSelector          V RW 
-snapshot                                  True                       Boolean      (0, 1)  V RW 
-tag                                        &#8216;&#8217;                         String              V RW 
-times                                     1.0                       Parameter             V RW 
-timestamp                                (0, 0)                    NumericTuple           V RW 
-vc_info                                   True                       Boolean      (0, 1)  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34manalysis_fn:           &lt; No docstring available &gt;[0m
-[1;31mcompress_metadata:     If not None and a metadata directory is specified, the[0m
-[1;31m                       metadata directory will be replaced by either a tar.gz file[0m
-[1;31m                       or a .zip file.[0m
-[1;34mdirname_params_filter: Function to control how the parameter names will appear in the[0m
-[1;34m                       output_directory&#8217;s name.[0m
-[1;31mdirname_prefix:        Optional prefix for the directory name (allowing e.g. easy[0m
-[1;31m                       grouping).[0m
-[1;34mmax_name_length:       The experiment&#8217;s directory name will be truncated at this[0m
-[1;34m                       number of characters (since most filesystems have a[0m
-[1;34m                       limit).[0m
-[1;31mmetadata_dir:          Specifies the name of a[0m
-[1;31m                               subdirectory used to output metadata from run_batch (if set).[0m
-[1;34mname_time_format:      String format for the time included in the output directory[0m
-[1;34m                       and file names.  See the Python time module library[0m
-[1;34m                       documentation for codes.[0m
-[1;34m                       [0m
-[1;34m                       E.g. Adding &#8216;%S&#8217; to the default would include seconds.[0m
-[1;31moutput_directory:      &lt; No docstring available &gt;[0m
-[1;34mprogress_bar:          The display mode for the progress bar. By default, the progress[0m
-[1;34m                       of run_batch is displayed using standard output but may also be[0m
-[1;34m                       set to &#8216;disabled&#8217; as necessary.[0m
-[1;31mprogress_interval:     Interval between updates of the progress bar (if enabled) in[0m
-[1;31m                       units of topo.sim.time.[0m
-[1;34msave_global_params:    Whether to save the script&#8217;s global_parameters to a pickle in[0m
-[1;34m                       the output_directory after the script has been loaded (for[0m
-[1;34m                       e.g. future inspection of the experiment).[0m
-[1;31msave_script_repr:      Whether to save a script_repr and if so, how often. If set to[0m
-[1;31m                       &#8216;first&#8217;, the script_repr is saved on the first time value, if[0m
-[1;31m                       set to &#8216;last&#8217; then it will be saved on the last time value. If[0m
-[1;31m                       set to &#8216;all&#8217; then a script repr is saved for all time values.[0m
-[1;31m                       Saving is disabled entirely if set to None.[0m
-[1;34msnapshot:              &lt; No docstring available &gt;[0m
-[1;31mtag:                   Optional tag to embed in directory prefix to allow unique[0m
-[1;31m                       directory naming across multiple independent batches that[0m
-[1;31m                       share a common timestamp.[0m
-[1;34mtimes:                 &lt; No docstring available &gt;[0m
-[1;31mtimestamp:             Optional override of timestamp in Python struct_time 8-tuple format.[0m
-[1;31m                       Useful when running many run_batch commands as part of a group with[0m
-[1;31m                       a shared timestamp. By default, the timestamp used is the time when[0m
-[1;31m                       run_batch is started.[0m
-[1;34mvc_info:               &lt; No docstring available &gt;[0m</p>
 <dl class="docutils">
 <dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">dirname_params_filter</span></tt> (<em>allow_None=False, constant=False, default=param_formatter(), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Function to control how the parameter names will appear in the
@@ -672,7 +413,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.run_batch.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c788&gt;</em><a class="headerlink" href="#topo.command.run_batch.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873ab7100&gt;</em><a class="headerlink" href="#topo.command.run_batch.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -686,17 +427,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.run_batch.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c520&gt;</em><a class="headerlink" href="#topo.command.run_batch.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae873ab70a8&gt;</em><a class="headerlink" href="#topo.command.run_batch.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.run_batch.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c890&gt;</em><a class="headerlink" href="#topo.command.run_batch.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873ab7158&gt;</em><a class="headerlink" href="#topo.command.run_batch.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.run_batch.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c578&gt;</em><a class="headerlink" href="#topo.command.run_batch.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae873ab7050&gt;</em><a class="headerlink" href="#topo.command.run_batch.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -750,12 +491,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.run_batch.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c8e8&gt;</em><a class="headerlink" href="#topo.command.run_batch.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873ab7208&gt;</em><a class="headerlink" href="#topo.command.run_batch.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.run_batch.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c6d8&gt;</em><a class="headerlink" href="#topo.command.run_batch.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873ab7260&gt;</em><a class="headerlink" href="#topo.command.run_batch.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -841,9 +582,7 @@ topo.misc.genexamples.</p>
 <dt id="topo.command.PatternDrivenAnalysis">
 <em class="property">class </em><tt class="descclassname">topo.command.</tt><tt class="descname">PatternDrivenAnalysis</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.command.PatternDrivenAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.ParameterizedFunction" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
-<p>params(post_analysis_session_hooks=HookList, post_presentation_hooks=HookList, pre_analysis_session_hooks=HookList, pre_presentation_hooks=HookList, name=String)</p>
-<blockquote>
-<div><p>Abstract base class for various stimulus-response types of analysis.</p>
+<p>Abstract base class for various stimulus-response types of analysis.</p>
 <p>This type of analysis consists of presenting a set of input
 patterns and collecting the responses to each one, which one will
 often want to do in a way that does not affect the current state
@@ -856,24 +595,8 @@ and that the initial state is restored after analysis.</p>
 <p>Any subclasses must ensure that these hook lists are run at the
 appropriate stage in their processing, using e.g.
 &#8220;for f in some_hook_list: f()&#8221;.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                         Value   Type      Bounds   Mode [0m</p>
-<p>post_analysis_session_hooks   []  HookList  (0, None)  V RW 
-post_presentation_hooks       []  HookList  (0, None)  V RW 
-pre_analysis_session_hooks    []  HookList  (0, None)  V RW 
-pre_presentation_hooks        []  HookList  (0, None)  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mpost_analysis_session_hooks: List of callable objects to be run after an analysis session ends.[0m
-[1;31mpost_presentation_hooks:     List of callable objects to be run after each pattern is presented.[0m
-[1;34mpre_analysis_session_hooks:  List of callable objects to be run before an analysis session begins.[0m
-[1;31mpre_presentation_hooks:      List of callable objects to be run before each pattern is presented.[0m</p>
 <dl class="docutils">
-<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_presentation_hooks</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[&lt;bound method Simulation.state_push of Simulation(basename_format=&#8217;%(name)s_%(timestr)s&#8217;, name=None, register=True, startup_commands=[], time=Time(label=&#8217;Time&#8217;, name=&#8217;Time00001&#8217;, time_type=&lt;built-in function mpq&gt;, timestep=1.0, unit=None, until=Infinity()), time_printing_format=&#8217;%(_time)09.2f&#8217;)&gt;, &lt;function wipe_out_activity at 0x2b849a1e2cf8&gt;, &lt;function clear_event_queue at 0x2b849a1e2320&gt;], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_presentation_hooks</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[&lt;bound method Simulation.state_push of Simulation(basename_format=&#8217;%(name)s_%(timestr)s&#8217;, name=None, register=True, startup_commands=[], time=Time(label=&#8217;Time&#8217;, name=&#8217;Time00001&#8217;, time_type=&lt;built-in function mpq&gt;, timestep=1.0, unit=None, until=Infinity()), time_printing_format=&#8217;%(_time)09.2f&#8217;)&gt;, &lt;function wipe_out_activity at 0x2ae870b2b320&gt;, &lt;function clear_event_queue at 0x2ae870b29a28&gt;], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>List of callable objects to be run before each pattern is presented.</dd>
 <dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_presentation_hooks</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[&lt;bound method Simulation.state_pop of Simulation(basename_format=&#8217;%(name)s_%(timestr)s&#8217;, name=None, register=True, startup_commands=[], time=Time(label=&#8217;Time&#8217;, name=&#8217;Time00001&#8217;, time_type=&lt;built-in function mpq&gt;, timestep=1.0, unit=None, until=Infinity()), time_printing_format=&#8217;%(_time)09.2f&#8217;)&gt;], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>List of callable objects to be run after each pattern is presented.</dd>
@@ -900,7 +623,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.PatternDrivenAnalysis.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c7e0&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf1b0&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -914,17 +637,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.PatternDrivenAnalysis.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c998&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf2b8&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.PatternDrivenAnalysis.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c9f0&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf310&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.PatternDrivenAnalysis.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27caf8&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf3c0&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -978,12 +701,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.PatternDrivenAnalysis.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27cec0&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf788&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.PatternDrivenAnalysis.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27cf18&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf7e0&gt;</em><a class="headerlink" href="#topo.command.PatternDrivenAnalysis.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1028,12 +751,8 @@ containing the arguments.</p>
 <dt id="topo.command.Command">
 <em class="property">class </em><tt class="descclassname">topo.command.</tt><tt class="descname">Command</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command.html#Command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.Command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.ParameterizedFunction" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
-<p>params(name=String)</p>
-<blockquote>
-<div>Parameterized command: any error when the command is run (called)
-will not raise an exception, but will instead generate a warning.</div></blockquote>
-<p>[0m
-Object has no parameters.</p>
+<p>Parameterized command: any error when the command is run (called)
+will not raise an exception, but will instead generate a warning.</p>
 <dl class="method">
 <dt id="topo.command.Command.debug">
 <tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.command.Command.debug" title="Permalink to this definition">¶</a></dt>
@@ -1052,7 +771,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.Command.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c9f0&gt;</em><a class="headerlink" href="#topo.command.Command.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf0a8&gt;</em><a class="headerlink" href="#topo.command.Command.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1066,17 +785,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.Command.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27caf8&gt;</em><a class="headerlink" href="#topo.command.Command.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf158&gt;</em><a class="headerlink" href="#topo.command.Command.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.Command.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c730&gt;</em><a class="headerlink" href="#topo.command.Command.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf1b0&gt;</em><a class="headerlink" href="#topo.command.Command.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.Command.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27cba8&gt;</em><a class="headerlink" href="#topo.command.Command.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf2b8&gt;</em><a class="headerlink" href="#topo.command.Command.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1130,12 +849,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.Command.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27caa0&gt;</em><a class="headerlink" href="#topo.command.Command.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf208&gt;</em><a class="headerlink" href="#topo.command.Command.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.Command.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27cd08&gt;</em><a class="headerlink" href="#topo.command.Command.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf368&gt;</em><a class="headerlink" href="#topo.command.Command.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1234,7 +953,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.normalize_path.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c7e0&gt;</em><a class="headerlink" href="#topo.command.normalize_path.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf158&gt;</em><a class="headerlink" href="#topo.command.normalize_path.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1248,17 +967,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.normalize_path.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c9f0&gt;</em><a class="headerlink" href="#topo.command.normalize_path.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf100&gt;</em><a class="headerlink" href="#topo.command.normalize_path.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.normalize_path.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c628&gt;</em><a class="headerlink" href="#topo.command.normalize_path.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf1b0&gt;</em><a class="headerlink" href="#topo.command.normalize_path.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.normalize_path.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c998&gt;</em><a class="headerlink" href="#topo.command.normalize_path.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf260&gt;</em><a class="headerlink" href="#topo.command.normalize_path.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1312,12 +1031,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.normalize_path.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c520&gt;</em><a class="headerlink" href="#topo.command.normalize_path.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf208&gt;</em><a class="headerlink" href="#topo.command.normalize_path.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.normalize_path.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27cc58&gt;</em><a class="headerlink" href="#topo.command.normalize_path.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf310&gt;</em><a class="headerlink" href="#topo.command.normalize_path.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1396,7 +1115,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.ParameterizedFunction.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27caa0&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf050&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1410,17 +1129,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.ParameterizedFunction.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27cc00&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf368&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.ParameterizedFunction.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27ccb0&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf3c0&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.ParameterizedFunction.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27cdb8&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf470&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1474,12 +1193,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.ParameterizedFunction.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849b27c6d8&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf838&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.ParameterizedFunction.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c540050&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873abf890&gt;</em><a class="headerlink" href="#topo.command.ParameterizedFunction.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1585,32 +1304,34 @@ installation of a missing package.</p>
 </dd></dl>
 
 </div>
+<hr class="docutils" />
 <div class="section" id="analysis-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">analysis</span></tt> Module<a class="headerlink" href="#analysis-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-topo.command.analysis"></span></div>
+<hr class="docutils" />
 <div class="section" id="pylabplot-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">pylabplot</span></tt> Module<a class="headerlink" href="#pylabplot-module" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-3ffbebafbe1f7333b3eac686494007a9c5549390.png" alt="Inheritance diagram of topo.command.pylabplot" usemap="#inheritancebede3c61fc" class="inheritance"/>
+<img src="../_images/inheritance-8c17412757464394a4848438163aa86b573eaf39.png" alt="Inheritance diagram of topo.command.pylabplot" usemap="#inheritancebede3c61fc" class="inheritance"/>
 <map id="inheritancebede3c61fc" name="inheritancebede3c61fc">
 <area shape="rect" id="node1" title="params(name=String)" alt="" coords="3,151,159,166"/>
 <area shape="rect" id="node2" title="params(name=String)" alt="" coords="188,151,375,166"/>
-<area shape="rect" id="node3" href="#topo.command.Command" title="params(name=String)" alt="" coords="405,151,519,166"/>
-<area shape="rect" id="node4" href="#topo.command.pylabplot.PylabPlotCommand" title="params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="549,151,736,166"/>
-<area shape="rect" id="node6" href="#topo.command.pylabplot.matrixplot" title="params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="775,47,926,62"/>
-<area shape="rect" id="node10" href="#topo.command.pylabplot.histogramplot" title="params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="768,77,933,92"/>
-<area shape="rect" id="node11" href="#topo.command.pylabplot.matrixplot3d" title="params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="770,106,931,122"/>
-<area shape="rect" id="node12" href="#topo.command.pylabplot.matrixplot3dx3" title="params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="765,136,935,151"/>
-<area shape="rect" id="node13" href="#topo.command.pylabplot.overlaid_plot" title="params(normalize=Boolean, overlay=List, plot_template=Dict, sheet=ClassSelector, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="770,166,931,181"/>
-<area shape="rect" id="node16" href="#topo.command.pylabplot.xy_grid" title="params(axis=Parameter, skip=Integer, x=Array, y=Array, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="781,195,920,211"/>
-<area shape="rect" id="node17" href="#topo.command.pylabplot.tuning_curve" title="params(center=Boolean, coord=NumericTuple, coords=List, group_by=List, legend=Boolean, relative_labels=Boolean, sheet=ObjectSelector, x_axis=String, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="770,225,931,240"/>
-<area shape="rect" id="node18" href="#topo.command.pylabplot.vectorplot" title="params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="775,255,926,270"/>
-<area shape="rect" id="node5" href="#topo.command.pylabplot.activityplot" title="params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="980,3,1133,18"/>
-<area shape="rect" id="node7" href="#topo.command.pylabplot.autocorrelationplot" title="params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="964,32,1149,48"/>
-<area shape="rect" id="node8" href="#topo.command.pylabplot.fftplot" title="params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="990,62,1124,77"/>
-<area shape="rect" id="node9" href="#topo.command.pylabplot.gradientplot" title="params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="978,92,1136,107"/>
-<area shape="rect" id="node14" href="#topo.command.pylabplot.overlaid_plots" title="params(normalize=Boolean, overlay=List, plot_template=Dict, sheet=ClassSelector, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="974,166,1139,181"/>
-<area shape="rect" id="node15" href="#topo.command.pylabplot.topographic_grid" title="params(xsheet_view_name=String, ysheet_view_name=String, axis=Parameter, skip=Integer, x=Array, y=Array, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)" alt="" coords="968,195,1145,211"/>
+<area shape="rect" id="node3" href="#topo.command.Command" title="Parameterized command: any error when the command is run (called)" alt="" coords="405,151,519,166"/>
+<area shape="rect" id="node4" href="#topo.command.pylabplot.PylabPlotCommand" title="Parameterized command for plotting using Matplotlib/Pylab." alt="" coords="549,151,736,166"/>
+<area shape="rect" id="node6" href="#topo.command.pylabplot.matrixplot" title="Simple plotting for any matrix as a bitmap with axes." alt="" coords="775,47,926,62"/>
+<area shape="rect" id="node10" href="#topo.command.pylabplot.histogramplot" title="Compute and plot the histogram of the supplied data." alt="" coords="768,77,933,92"/>
+<area shape="rect" id="node11" href="#topo.command.pylabplot.matrixplot3d" title="Simple plotting for any matrix as a 3D wireframe with axes." alt="" coords="770,106,931,122"/>
+<area shape="rect" id="node12" href="#topo.command.pylabplot.matrixplot3dx3" title="Plot three matching matrices x,y,z as a 3D wireframe with axes." alt="" coords="765,136,935,151"/>
+<area shape="rect" id="node13" href="#topo.command.pylabplot.overlaid_plot" title="Use matplotlib to make a plot combining a bitmap and line&#45;based" alt="" coords="770,166,931,181"/>
+<area shape="rect" id="node16" href="#topo.command.pylabplot.xy_grid" title="By default, plot the x and y coordinate preferences as a grid." alt="" coords="781,195,920,211"/>
+<area shape="rect" id="node17" href="#topo.command.pylabplot.tuning_curve" title="Plot a tuning curve for a feature, such as orientation, contrast, or size." alt="" coords="770,225,931,240"/>
+<area shape="rect" id="node18" href="#topo.command.pylabplot.vectorplot" title="Simple line plotting for any vector or list of numbers." alt="" coords="775,255,926,270"/>
+<area shape="rect" id="node5" href="#topo.command.pylabplot.activityplot" title="Plots the activity in a sheet with axis labels in Sheet (not matrix) coordinates." alt="" coords="980,3,1133,18"/>
+<area shape="rect" id="node7" href="#topo.command.pylabplot.autocorrelationplot" title="Compute and show the 2D autocorrelation of the supplied data." alt="" coords="964,32,1149,48"/>
+<area shape="rect" id="node8" href="#topo.command.pylabplot.fftplot" title="Compute and show the 2D Fast Fourier Transform (FFT) of the supplied data." alt="" coords="990,62,1124,77"/>
+<area shape="rect" id="node9" href="#topo.command.pylabplot.gradientplot" title="Compute and show the gradient plot of the supplied data." alt="" coords="978,92,1136,107"/>
+<area shape="rect" id="node14" href="#topo.command.pylabplot.overlaid_plots" title="Use matplotlib to make a plot combining a bitmap and line&#45;based overlays." alt="" coords="974,166,1139,181"/>
+<area shape="rect" id="node15" href="#topo.command.pylabplot.topographic_grid" title="By default, plot the XPreference and YPreference preferences for all" alt="" coords="968,195,1145,211"/>
 </map>
 </p>
 <span class="target" id="module-topo.command.pylabplot"></span><p>Line-based and matrix-based plotting commands using MatPlotLib.</p>
@@ -1626,43 +1347,8 @@ different GUI or non-GUI uses.</p>
 <dt id="topo.command.pylabplot.fftplot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">fftplot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#fftplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.fftplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.matrixplot" title="topo.command.pylabplot.matrixplot"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.matrixplot</span></tt></a></p>
-<p>params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Compute and show the 2D Fast Fourier Transform (FFT) of the supplied data.</p>
+<p>Compute and show the 2D Fast Fourier Transform (FFT) of the supplied data.</p>
 <p>Example:: fftplot(topo.sim[&#8220;V1&#8221;].views.Maps[&#8220;OrientationPreference&#8221;].data,filename=&#8221;out&#8221;)</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                            Value                   Type      Bounds     Mode  [0m</p>
-<p>display_window                   True                 Boolean     (0, 1)     V RW  
-extent                           None                Parameter             V RW AN 
-file_dpi                        100.0                  Number   (0,[1;36m 1000[0m)    V RW  
-file_format                     &#8216;png&#8217;                  String                V RW  
-filename                         None                  String                V RW  
-filename_suffix                   &#8216;&#8217;                   String                V RW  
-plot_type         &lt;function gray at 0x2b849159b320&gt;   Callable               V RW  
-title                            None                  String                V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mextent:          Subregion of the matrix to plot, as a tuple (l,b,r,t).[0m
-[1;34mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;34m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:     Which image format to use when saving images.[0m
-[1;31m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                 supported by Matplotlib.[0m
-[1;34mfilename:        Optional base of the filename to use when saving images;[0m
-[1;34m                 if None the plot will be displayed interactively.[0m
-[1;34m                 [0m
-[1;34m                 The actual name is constructed from the filename base plus the[0m
-[1;34m                 suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mplot_type:       Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">extent</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Subregion of the matrix to plot, as a tuple (l,b,r,t).</dd>
@@ -1708,7 +1394,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.fftplot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e8e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1722,17 +1408,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.fftplot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1788&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.fftplot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e9f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1a48&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.fftplot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c19f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1793,12 +1479,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.fftplot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.fftplot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eb50&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.fftplot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1843,48 +1529,7 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.xy_grid">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">xy_grid</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#xy_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.xy_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(axis=Parameter, skip=Integer, x=Array, y=Array, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div>By default, plot the x and y coordinate preferences as a grid.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                      Value              Type      Bounds     Mode  [0m</p>
-<p>axis              [-0.5, 0.5, -0.5, 0.5]  Parameter               V RW  
-display_window             True            Boolean     (0, 1)     V RW  
-file_dpi                  100.0             Number   (0,[1;36m 1000[0m)    V RW  
-file_format               &#8216;png&#8217;             String                V RW  
-filename                   None             String                V RW  
-filename_suffix             &#8216;&#8217;              String                V RW  
-skip                        1              Integer    (1,[1;36m 10[0m)     V RW  
-title                      None             String                V RW  
-x                          None             Array               V RW AN 
-y                          None             Array               V RW AN</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34maxis:            Four-element list of the plot bounds, i.e. [xmin, xmax, ymin, ymax].[0m
-[1;31mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;31m                 Topographica is running in a non-batch mode.[0m
-[1;34mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;34m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:     Which image format to use when saving images.[0m
-[1;31m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                 supported by Matplotlib.[0m
-[1;34mfilename:        Optional base of the filename to use when saving images;[0m
-[1;34m                 if None the plot will be displayed interactively.[0m
-[1;34m                 [0m
-[1;34m                 The actual name is constructed from the filename base plus the[0m
-[1;34m                 suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mskip:            Plot every skipth line in each direction.[0m
-[1;34m                 E.g. skip=4 means to keep only every fourth horizontal line[0m
-[1;34m                 and every fourth vertical line, except that the first and last[0m
-[1;34m                 are always included. The default is to include all data points.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m
-[1;34mx:               Numpy array of x positions in the grid.[0m
-[1;31my:               Numpy array of y positions in the grid.[0m</p>
+<p>By default, plot the x and y coordinate preferences as a grid.</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">file_dpi</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=100.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Default DPI when rendering to a bitmap.
@@ -1937,7 +1582,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.xy_grid.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e788&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c17e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1951,17 +1596,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.xy_grid.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e8e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.xy_grid.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e6d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.xy_grid.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e680&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c16d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2015,12 +1660,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.xy_grid.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e7e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.xy_grid.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.xy_grid.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2110,40 +1755,10 @@ Note that <tt class="docutils literal"><span class="pre">y[0]</span></tt> is the
 <dt id="topo.command.pylabplot.matrixplot3dx3">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">matrixplot3dx3</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#matrixplot3dx3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div>Plot three matching matrices x,y,z as a 3D wireframe with axes.
+<p>Plot three matching matrices x,y,z as a 3D wireframe with axes.
 See matrixplot3d for caveats and description; this plot is the
 same but instead of using implicit r,c values of the matrix, allows
-them to be specified directly, thus plotting a series of 3D points.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName              Value    Type     Bounds   Mode [0m</p>
-<p>display_window     True  Boolean    (0, 1)   V RW 
-file_dpi          100.0   Number  (0,[1;36m 1000[0m)  V RW 
-file_format       &#8216;png&#8217;   String             V RW 
-filename           None   String             V RW 
-filename_suffix     &#8216;&#8217;    String             V RW 
-title              None   String             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;31m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;31m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;34mfile_format:     Which image format to use when saving images.[0m
-[1;34m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;34m                 supported by Matplotlib.[0m
-[1;31mfilename:        Optional base of the filename to use when saving images;[0m
-[1;31m                 if None the plot will be displayed interactively.[0m
-[1;31m                 [0m
-[1;31m                 The actual name is constructed from the filename base plus the[0m
-[1;31m                 suffix plus the current simulator time plus the file_format.[0m
-[1;34mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
+them to be specified directly, thus plotting a series of 3D points.</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">file_dpi</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=100.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Default DPI when rendering to a bitmap.
@@ -2185,7 +1800,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3dx3.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1788&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2199,17 +1814,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3dx3.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e9f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1a48&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3dx3.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eaa0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1af8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3dx3.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2263,12 +1878,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3dx3.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3dx3.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eaf8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1b50&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3dx3.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2400,9 +2015,7 @@ definitions and conventions used.</p>
 <dt id="topo.command.pylabplot.matrixplot3d">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">matrixplot3d</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#matrixplot3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Simple plotting for any matrix as a 3D wireframe with axes.</p>
+<p>Simple plotting for any matrix as a 3D wireframe with axes.</p>
 <p>Uses Matplotlib&#8217;s beta-quality features for 3D plotting.  These
 usually work fine for wireframe plots, although they don&#8217;t always
 format the axis labels properly, and do not support removal of
@@ -2414,35 +2027,6 @@ get a contour plot, or &#8220;surface&#8221; to get a solid surface plot, but
 surface plots currently fail in many cases, e.g. for small
 matrices.</p>
 <p>If you have trouble, you can try matrixplot3d_gnuplot instead.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName              Value    Type     Bounds   Mode [0m</p>
-<p>display_window     True  Boolean    (0, 1)   V RW 
-file_dpi          100.0   Number  (0,[1;36m 1000[0m)  V RW 
-file_format       &#8216;png&#8217;   String             V RW 
-filename           None   String             V RW 
-filename_suffix     &#8216;&#8217;    String             V RW 
-title              None   String             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;31m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;31m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;34mfile_format:     Which image format to use when saving images.[0m
-[1;34m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;34m                 supported by Matplotlib.[0m
-[1;31mfilename:        Optional base of the filename to use when saving images;[0m
-[1;31m                 if None the plot will be displayed interactively.[0m
-[1;31m                 [0m
-[1;31m                 The actual name is constructed from the filename base plus the[0m
-[1;31m                 suffix plus the current simulator time plus the file_format.[0m
-[1;34mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">file_dpi</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=100.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Default DPI when rendering to a bitmap.
@@ -2484,7 +2068,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3d.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e7e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2498,17 +2082,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3d.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c18e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3d.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eb50&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3d.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c19f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2562,12 +2146,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3d.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ea48&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1aa0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot3d.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1cb0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot3d.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2612,45 +2196,10 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.gradientplot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">gradientplot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#gradientplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.gradientplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.matrixplot" title="topo.command.pylabplot.matrixplot"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.matrixplot</span></tt></a></p>
-<p>params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Compute and show the gradient plot of the supplied data.
+<p>Compute and show the gradient plot of the supplied data.
 Translated from Octave code originally written by Yoonsuck Choe.</p>
 <p>If the data is specified to be cyclic, negative differences will
 be wrapped into the range specified (1.0 by default).</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                            Value                   Type      Bounds     Mode  [0m</p>
-<p>display_window                   True                 Boolean     (0, 1)     V RW  
-extent                           None                Parameter             V RW AN 
-file_dpi                        100.0                  Number   (0,[1;36m 1000[0m)    V RW  
-file_format                     &#8216;png&#8217;                  String                V RW  
-filename                         None                  String                V RW  
-filename_suffix                   &#8216;&#8217;                   String                V RW  
-plot_type         &lt;function gray at 0x2b849159b320&gt;   Callable               V RW  
-title                            None                  String                V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mextent:          Subregion of the matrix to plot, as a tuple (l,b,r,t).[0m
-[1;34mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;34m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:     Which image format to use when saving images.[0m
-[1;31m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                 supported by Matplotlib.[0m
-[1;34mfilename:        Optional base of the filename to use when saving images;[0m
-[1;34m                 if None the plot will be displayed interactively.[0m
-[1;34m                 [0m
-[1;34m                 The actual name is constructed from the filename base plus the[0m
-[1;34m                 suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mplot_type:       Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">extent</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Subregion of the matrix to plot, as a tuple (l,b,r,t).</dd>
@@ -2696,7 +2245,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.gradientplot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e7e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2710,17 +2259,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.gradientplot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e788&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c17e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.gradientplot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e8e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.gradientplot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e6d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2781,12 +2330,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.gradientplot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.gradientplot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.gradientplot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2838,12 +2387,8 @@ the mapping of the dests CF centers on the src sheet.</p>
 <dt id="topo.command.pylabplot.Command">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">Command</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.command.pylabplot.Command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.ParameterizedFunction" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
-<p>params(name=String)</p>
-<blockquote>
-<div>Parameterized command: any error when the command is run (called)
-will not raise an exception, but will instead generate a warning.</div></blockquote>
-<p>[0m
-Object has no parameters.</p>
+<p>Parameterized command: any error when the command is run (called)
+will not raise an exception, but will instead generate a warning.</p>
 <dl class="method">
 <dt id="topo.command.pylabplot.Command.debug">
 <tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.command.pylabplot.Command.debug" title="Permalink to this definition">¶</a></dt>
@@ -2862,7 +2407,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.Command.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c18e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2876,17 +2421,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.Command.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e7e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.Command.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.Command.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c19f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2940,12 +2485,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.Command.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eb50&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.Command.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eaf8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1b50&gt;</em><a class="headerlink" href="#topo.command.pylabplot.Command.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2990,56 +2535,8 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.overlaid_plot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">overlaid_plot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#overlaid_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(normalize=Boolean, overlay=List, plot_template=Dict, sheet=ClassSelector, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div>Use matplotlib to make a plot combining a bitmap and line-based
-overlays for a single plot template and sheet.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                               Value                         Type        Bounds     Mode  [0m</p>
-<p>display_window                      True                       Boolean       (0, 1)     V RW  
-file_dpi                           100.0                        Number     (0,[1;36m 1000[0m)    V RW  
-file_format                        &#8216;png&#8217;                        String                  V RW  
-filename                            None                        String                  V RW  
-filename_suffix                      &#8216;&#8217;                         String                  V RW  
-normalize                      &#8216;Individually&#8217;                  Boolean       (0, 1)     V RW  
-overlay           [(&#8216;contours&#8217;, &#8216;OcularPreference&#8217;, 0.5...       List      (0, None)    V RW  
-plot_template         {&#8216;Hue&#8217;: &#8216;OrientationPreference&#8217;}           Dict                   V RW  
-sheet                               None                    ClassSelector             V RW AN 
-title                               None                        String                  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;31m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;31m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;34mfile_format:     Which image format to use when saving images.[0m
-[1;34m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;34m                 supported by Matplotlib.[0m
-[1;31mfilename:        Optional base of the filename to use when saving images;[0m
-[1;31m                 if None the plot will be displayed interactively.[0m
-[1;31m                 [0m
-[1;31m                 The actual name is constructed from the filename base plus the[0m
-[1;31m                 suffix plus the current simulator time plus the file_format.[0m
-[1;34mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;31mnormalize:       Type of normalization, if any, to use. Options include &#8216;None&#8217;,[0m
-[1;31m                 &#8216;Individually&#8217;, and &#8216;AllTogether&#8217;. See[0m
-[1;31m                 topo.plotting.plotgroup.TemplatePlotGroup.normalize for more[0m
-[1;31m                 details.[0m
-[1;34moverlay:         List of overlaid plots, where each list item may be a 4-tuple[0m
-[1;34m                 specifying either a contour line or a field of arrows::[0m
-[1;34m                 [0m
-[1;34m                   (&#8216;contours&#8217;,map-name,contour-value,line-color)[0m
-[1;34m                 [0m
-[1;34m                   (&#8216;arrows&#8217;,arrow-location-map-name,arrow-size-map-name,arrow-color)[0m
-[1;34m                 [0m
-[1;34m                 Any number or combination of contours and arrows may be supplied.[0m
-[1;31mplot_template:   Template for the underlying bitmap plot.[0m
-[1;34msheet:           The sheet from which sheetViews are to be obtained for plotting.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
+<p>Use matplotlib to make a plot combining a bitmap and line-based
+overlays for a single plot template and sheet.</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=Individually, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Type of normalization, if any, to use. Options include &#8216;None&#8217;,
@@ -3099,7 +2596,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e788&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c17e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3113,17 +2610,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c18e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3177,12 +2674,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ea48&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1aa0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ecb0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1d08&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3237,9 +2734,7 @@ a description of the arguments.</p>
 <dt id="topo.command.pylabplot.vectorplot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">vectorplot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#vectorplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.vectorplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Simple line plotting for any vector or list of numbers.</p>
+<p>Simple line plotting for any vector or list of numbers.</p>
 <p>Intended for interactive debugging or analyzing from the command
 prompt.  See MatPlotLib&#8217;s pylab functions to create more elaborate
 or customized plots; this is just a simple example.</p>
@@ -3257,35 +2752,6 @@ that point in the vec array, but a explicit list of xvalues can be
 supplied; it should be the same length as vec.</p>
 <p>Execution of multiple vectorplot() commands with different styles
 will result in all those styles overlaid on a single plot window.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName              Value    Type     Bounds   Mode [0m</p>
-<p>display_window     True  Boolean    (0, 1)   V RW 
-file_dpi          100.0   Number  (0,[1;36m 1000[0m)  V RW 
-file_format       &#8216;png&#8217;   String             V RW 
-filename           None   String             V RW 
-filename_suffix     &#8216;&#8217;    String             V RW 
-title              None   String             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;31m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;31m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;34mfile_format:     Which image format to use when saving images.[0m
-[1;34m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;34m                 supported by Matplotlib.[0m
-[1;31mfilename:        Optional base of the filename to use when saving images;[0m
-[1;31m                 if None the plot will be displayed interactively.[0m
-[1;31m                 [0m
-[1;31m                 The actual name is constructed from the filename base plus the[0m
-[1;31m                 suffix plus the current simulator time plus the file_format.[0m
-[1;34mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">file_dpi</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=100.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Default DPI when rendering to a bitmap.
@@ -3327,7 +2793,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.vectorplot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e7e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c19f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3341,17 +2807,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.vectorplot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c18e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.vectorplot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.vectorplot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1cb0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3405,12 +2871,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.vectorplot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.vectorplot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eaf8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.vectorplot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3455,56 +2921,10 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.topographic_grid">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">topographic_grid</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#topographic_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.topographic_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.xy_grid" title="topo.command.pylabplot.xy_grid"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.xy_grid</span></tt></a></p>
-<p>params(xsheet_view_name=String, ysheet_view_name=String, axis=Parameter, skip=Integer, x=Array, y=Array, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>By default, plot the XPreference and YPreference preferences for all
+<p>By default, plot the XPreference and YPreference preferences for all
 Sheets for which they are defined, using MatPlotLib.</p>
 <p>If sheet_views other than XPreference and YPreference are desired,
 the names of these can be passed in as arguments.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                       Value              Type      Bounds     Mode  [0m</p>
-<p>axis               [-0.5, 0.5, -0.5, 0.5]  Parameter               V RW  
-display_window              True            Boolean     (0, 1)     V RW  
-file_dpi                   100.0             Number   (0,[1;36m 1000[0m)    V RW  
-file_format                &#8216;png&#8217;             String                V RW  
-filename                    None             String                V RW  
-filename_suffix              &#8216;&#8217;              String                V RW  
-skip                         1              Integer    (1,[1;36m 10[0m)     V RW  
-title                       None             String                V RW  
-x                           None             Array               C RW AN 
-xsheet_view_name       &#8216;XPreference&#8217;         String                V RW  
-y                           None             Array               C RW AN 
-ysheet_view_name       &#8216;YPreference&#8217;         String                V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34maxis:             Four-element list of the plot bounds, i.e. [xmin, xmax, ymin, ymax].[0m
-[1;31mdisplay_window:   Whether to open a display window containing the plot when[0m
-[1;31m                  Topographica is running in a non-batch mode.[0m
-[1;34mfile_dpi:         Default DPI when rendering to a bitmap.[0m
-[1;34m                  The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                  E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:      Which image format to use when saving images.[0m
-[1;31m                  The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                  supported by Matplotlib.[0m
-[1;34mfilename:         Optional base of the filename to use when saving images;[0m
-[1;34m                  if None the plot will be displayed interactively.[0m
-[1;34m                  [0m
-[1;34m                  The actual name is constructed from the filename base plus the[0m
-[1;34m                  suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix:  Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mskip:             Plot every skipth line in each direction.[0m
-[1;34m                  E.g. skip=4 means to keep only every fourth horizontal line[0m
-[1;34m                  and every fourth vertical line, except that the first and last[0m
-[1;34m                  are always included. The default is to include all data points.[0m
-[1;31mtitle:            Optional title to be used when displaying the plot interactively.[0m
-[1;34mx:                Numpy array of x positions in the grid.[0m
-[1;31mxsheet_view_name: Name of the Image holding the X position locations.[0m
-[1;34my:                Numpy array of y positions in the grid.[0m
-[1;31mysheet_view_name: Name of the Image holding the Y position locations.[0m</p>
 <dl class="docutils">
 <dt><em>param String</em> <tt class="docutils literal"><span class="pre">ysheet_view_name</span></tt> (<em>allow_None=False, basestring=&lt;type &#8216;basestring&#8217;&gt;, constant=False, default=YPreference, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Name of the Image holding the Y position locations.</dd>
@@ -3561,7 +2981,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.topographic_grid.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3575,17 +2995,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.topographic_grid.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.topographic_grid.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1aa0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.topographic_grid.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ea48&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1d08&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3639,12 +3059,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.topographic_grid.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e788&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.topographic_grid.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e6d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1d60&gt;</em><a class="headerlink" href="#topo.command.pylabplot.topographic_grid.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3689,44 +3109,9 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.autocorrelationplot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">autocorrelationplot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#autocorrelationplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.matrixplot" title="topo.command.pylabplot.matrixplot"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.matrixplot</span></tt></a></p>
-<p>params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Compute and show the 2D autocorrelation of the supplied data.
+<p>Compute and show the 2D autocorrelation of the supplied data.
 Requires the external SciPy package.</p>
 <p>Example:: autocorrelationplot(topo.sim[&#8220;V1&#8221;].views.Maps[&#8220;OrientationPreference&#8221;].data,filename=&#8221;out&#8221;)</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                             Value                    Type      Bounds     Mode  [0m</p>
-<p>display_window                    True                  Boolean     (0, 1)     V RW  
-extent                            None                 Parameter             V RW AN 
-file_dpi                         100.0                   Number   (0,[1;36m 1000[0m)    V RW  
-file_format                      &#8216;png&#8217;                   String                V RW  
-filename                          None                   String                V RW  
-filename_suffix                    &#8216;&#8217;                    String                V RW  
-plot_type         &lt;function autumn at 0x2b8491584140&gt;   Callable               V RW  
-title                             None                   String                V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mextent:          Subregion of the matrix to plot, as a tuple (l,b,r,t).[0m
-[1;34mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;34m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:     Which image format to use when saving images.[0m
-[1;31m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                 supported by Matplotlib.[0m
-[1;34mfilename:        Optional base of the filename to use when saving images;[0m
-[1;34m                 if None the plot will be displayed interactively.[0m
-[1;34m                 [0m
-[1;34m                 The actual name is constructed from the filename base plus the[0m
-[1;34m                 suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mplot_type:       Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">extent</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Subregion of the matrix to plot, as a tuple (l,b,r,t).</dd>
@@ -3772,7 +3157,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.autocorrelationplot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3786,17 +3171,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.autocorrelationplot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c18e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.autocorrelationplot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e8e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.autocorrelationplot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3857,12 +3242,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.autocorrelationplot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.autocorrelationplot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e680&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1db8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.autocorrelationplot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3949,7 +3334,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.normalize_path.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1aa0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3963,17 +3348,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.normalize_path.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.normalize_path.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e7e0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c19f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.normalize_path.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e788&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4027,12 +3412,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.normalize_path.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1cb0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.normalize_path.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ecb0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.normalize_path.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4105,7 +3490,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.ParameterizedFunction.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4119,17 +3504,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.ParameterizedFunction.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.ParameterizedFunction.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ed08&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c16d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.ParameterizedFunction.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ed60&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1e10&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4183,12 +3568,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.ParameterizedFunction.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849daca158&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8741e4208&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.ParameterizedFunction.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849daca1b0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8741e4260&gt;</em><a class="headerlink" href="#topo.command.pylabplot.ParameterizedFunction.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4233,45 +3618,10 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.activityplot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">activityplot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#activityplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.activityplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.matrixplot" title="topo.command.pylabplot.matrixplot"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.matrixplot</span></tt></a></p>
-<p>params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Plots the activity in a sheet with axis labels in Sheet (not matrix) coordinates.</p>
+<p>Plots the activity in a sheet with axis labels in Sheet (not matrix) coordinates.</p>
 <p>Same as matrixplot, but only for matrices associated with a Sheet.
 By default plots the Sheet&#8217;s activity, but any other matrix of the
 same size may be supplied for plotting in these coordinates instead.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                            Value                   Type      Bounds     Mode  [0m</p>
-<p>display_window                   True                 Boolean     (0, 1)     V RW  
-extent                           None                Parameter             V RW AN 
-file_dpi                        100.0                  Number   (0,[1;36m 1000[0m)    V RW  
-file_format                     &#8216;png&#8217;                  String                V RW  
-filename                         None                  String                V RW  
-filename_suffix                   &#8216;&#8217;                   String                V RW  
-plot_type         &lt;function gray at 0x2b849159b320&gt;   Callable               V RW  
-title                            None                  String                V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mextent:          Subregion of the matrix to plot, as a tuple (l,b,r,t).[0m
-[1;34mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;34m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:     Which image format to use when saving images.[0m
-[1;31m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                 supported by Matplotlib.[0m
-[1;34mfilename:        Optional base of the filename to use when saving images;[0m
-[1;34m                 if None the plot will be displayed interactively.[0m
-[1;34m                 [0m
-[1;34m                 The actual name is constructed from the filename base plus the[0m
-[1;34m                 suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mplot_type:       Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">extent</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Subregion of the matrix to plot, as a tuple (l,b,r,t).</dd>
@@ -4317,7 +3667,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.activityplot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eaf8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4331,17 +3681,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.activityplot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e680&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1db8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.activityplot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ed60&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1e10&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.activityplot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98edb8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1e68&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4402,12 +3752,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.activityplot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ef18&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1fc8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.activityplot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ee10&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ec0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.activityplot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4452,46 +3802,11 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.matrixplot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">matrixplot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#matrixplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.matrixplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(extent=Parameter, plot_type=Callable, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Simple plotting for any matrix as a bitmap with axes.</p>
+<p>Simple plotting for any matrix as a bitmap with axes.</p>
 <p>Like MatLab&#8217;s imagesc, scales the values to fit in the range 0 to 1.0.
 Intended for interactive debugging or analyzing from the command
 prompt.  See MatPlotLib&#8217;s pylab functions to create more elaborate
 or customized plots; this is just a simple example.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                            Value                   Type      Bounds     Mode  [0m</p>
-<p>display_window                   True                 Boolean     (0, 1)     V RW  
-extent                           None                Parameter             V RW AN 
-file_dpi                        100.0                  Number   (0,[1;36m 1000[0m)    V RW  
-file_format                     &#8216;png&#8217;                  String                V RW  
-filename                         None                  String                V RW  
-filename_suffix                   &#8216;&#8217;                   String                V RW  
-plot_type         &lt;function gray at 0x2b849159b320&gt;   Callable               V RW  
-title                            None                  String                V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mextent:          Subregion of the matrix to plot, as a tuple (l,b,r,t).[0m
-[1;34mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;34m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:     Which image format to use when saving images.[0m
-[1;31m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                 supported by Matplotlib.[0m
-[1;34mfilename:        Optional base of the filename to use when saving images;[0m
-[1;34m                 if None the plot will be displayed interactively.[0m
-[1;34m                 [0m
-[1;34m                 The actual name is constructed from the filename base plus the[0m
-[1;34m                 suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mplot_type:       Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">extent</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Subregion of the matrix to plot, as a tuple (l,b,r,t).</dd>
@@ -4537,7 +3852,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e8e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4551,17 +3866,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eaf8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4622,12 +3937,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.matrixplot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ee68&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1f18&gt;</em><a class="headerlink" href="#topo.command.pylabplot.matrixplot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4672,55 +3987,7 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.overlaid_plots">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">overlaid_plots</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#overlaid_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.overlaid_plot" title="topo.command.pylabplot.overlaid_plot"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.overlaid_plot</span></tt></a></p>
-<p>params(normalize=Boolean, overlay=List, plot_template=Dict, sheet=ClassSelector, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div>Use matplotlib to make a plot combining a bitmap and line-based overlays.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                               Value                         Type        Bounds     Mode  [0m</p>
-<p>display_window                      True                       Boolean       (0, 1)     V RW  
-file_dpi                           100.0                        Number     (0,[1;36m 1000[0m)    V RW  
-file_format                        &#8216;png&#8217;                        String                  V RW  
-filename                            None                        String                  V RW  
-filename_suffix                      &#8216;&#8217;                         String                  V RW  
-normalize                      &#8216;Individually&#8217;                  Boolean       (0, 1)     V RW  
-overlay           [(&#8216;contours&#8217;, &#8216;OcularPreference&#8217;, 0.5...       List      (0, None)    V RW  
-plot_template        [{&#8216;Hue&#8217;: &#8216;OrientationPreference&#8217;}]          List      (0, None)    V RW  
-sheet                               None                    ClassSelector             C RW AN 
-title                               None                        String                  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;31m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;31m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;34mfile_format:     Which image format to use when saving images.[0m
-[1;34m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;34m                 supported by Matplotlib.[0m
-[1;31mfilename:        Optional base of the filename to use when saving images;[0m
-[1;31m                 if None the plot will be displayed interactively.[0m
-[1;31m                 [0m
-[1;31m                 The actual name is constructed from the filename base plus the[0m
-[1;31m                 suffix plus the current simulator time plus the file_format.[0m
-[1;34mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;31mnormalize:       Type of normalization, if any, to use. Options include &#8216;None&#8217;,[0m
-[1;31m                 &#8216;Individually&#8217;, and &#8216;AllTogether&#8217;. See[0m
-[1;31m                 topo.plotting.plotgroup.TemplatePlotGroup.normalize for more[0m
-[1;31m                 details.[0m
-[1;34moverlay:         List of overlaid plots, where each list item may be a 4-tuple[0m
-[1;34m                 specifying either a contour line or a field of arrows::[0m
-[1;34m                 [0m
-[1;34m                   (&#8216;contours&#8217;,map-name,contour-value,line-color)[0m
-[1;34m                 [0m
-[1;34m                   (&#8216;arrows&#8217;,arrow-location-map-name,arrow-size-map-name,arrow-color)[0m
-[1;34m                 [0m
-[1;34m                 Any number or combination of contours and arrows may be supplied.[0m
-[1;31mplot_template:   Template for the underlying bitmap plot.[0m
-[1;34msheet:           The sheet from which sheetViews are to be obtained for plotting.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
+<p>Use matplotlib to make a plot combining a bitmap and line-based overlays.</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=Individually, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Type of normalization, if any, to use. Options include &#8216;None&#8217;,
@@ -4780,7 +4047,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plots.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e8e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4794,17 +4061,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plots.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e680&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1db8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plots.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ed08&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c16d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plots.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ef18&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1fc8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4858,12 +4125,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plots.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e6d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1d60&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.overlaid_plots.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eb50&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1b50&gt;</em><a class="headerlink" href="#topo.command.pylabplot.overlaid_plots.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -4908,60 +4175,13 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.tuning_curve">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">tuning_curve</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#tuning_curve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.tuning_curve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(center=Boolean, coord=NumericTuple, coords=List, group_by=List, legend=Boolean, relative_labels=Boolean, sheet=ObjectSelector, x_axis=String, display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Plot a tuning curve for a feature, such as orientation, contrast, or size.</p>
+<p>Plot a tuning curve for a feature, such as orientation, contrast, or size.</p>
 <p>The curve datapoints are collected from the curve_dict for
 the units at the specified coordinates in the specified sheet
 (where the units and sheet may be set by a GUI, using
 topo.analysis.featureresponses.UnitCurveCommand.sheet and
 topo.analysis.featureresponses.UnitCurveCommand.coords,
 or by hand).</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                 Value           Type         Bounds   Mode [0m</p>
-<p>center                True         Boolean        (0, 1)   V RW 
-coord                (0, 0)      NumericTuple              C RW 
-coords              [(0, 0)]         List       (0, None)  V RW 
-display_window        True         Boolean        (0, 1)   V RW 
-file_dpi             100.0          Number      (0,[1;36m 1000[0m)  V RW 
-file_format          &#8216;png&#8217;          String                 V RW 
-filename              None          String                 V RW 
-filename_suffix        &#8216;&#8217;           String                 V RW 
-group_by          [&#8216;Contrast&#8217;]       List       (0, None)  V RW 
-legend                True         Boolean        (0, 1)   V RW 
-relative_labels      False         Boolean        (0, 1)   V RW 
-sheet                 None      ObjectSelector             V RW 
-title                 None          String                 V RW 
-x_axis                 &#8216;&#8217;           String                 V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mcenter:          Centers the tuning curve around the maximally responding feature.[0m
-[1;31mcoord:           &lt; No docstring available &gt;[0m
-[1;34mcoords:          List of coordinates of units to measure.[0m
-[1;31mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;31m                 Topographica is running in a non-batch mode.[0m
-[1;34mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;34m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;34m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;31mfile_format:     Which image format to use when saving images.[0m
-[1;31m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;31m                 supported by Matplotlib.[0m
-[1;34mfilename:        Optional base of the filename to use when saving images;[0m
-[1;34m                 if None the plot will be displayed interactively.[0m
-[1;34m                 [0m
-[1;34m                 The actual name is constructed from the filename base plus the[0m
-[1;34m                 suffix plus the current simulator time plus the file_format.[0m
-[1;31mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;34mgroup_by:        Feature dimensions for which curves are overlaid.[0m
-[1;31mlegend:          Whether or not to include a legend in the plot.[0m
-[1;34mrelative_labels: Relabel the x-axis with values relative to the preferred.[0m
-[1;31msheet:           Name of the sheet to use in measurements.[0m
-[1;34mtitle:           Optional title to be used when displaying the plot interactively.[0m
-[1;31mx_axis:          Feature to plot on the x axis of the tuning curve[0m</p>
 <dl class="docutils">
 <dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>allow_None=None, check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Name of the sheet to use in measurements.</dd>
@@ -5020,7 +4240,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.tuning_curve.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5034,17 +4254,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.tuning_curve.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.tuning_curve.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98eaf8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1940&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.tuning_curve.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ee68&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1f18&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5098,12 +4318,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.tuning_curve.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ee10&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ec0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.tuning_curve.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ef70&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c19f0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.tuning_curve.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5148,46 +4368,13 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.histogramplot">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">histogramplot</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#histogramplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.histogramplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.pylabplot.PylabPlotCommand" title="topo.command.pylabplot.PylabPlotCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.pylabplot.PylabPlotCommand</span></tt></a></p>
-<p>params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)</p>
-<blockquote>
-<div><p>Compute and plot the histogram of the supplied data.</p>
+<p>Compute and plot the histogram of the supplied data.</p>
 <p>See help(plt.hist) for help on the histogram function itself.</p>
 <p>If given, colors is an iterable collection of matplotlib.colors
 (see help (matplotlib.colors) ) specifying the bar colors.</p>
 <dl class="docutils">
 <dt>Example use:</dt>
 <dd>histogramplot([1,1,1,2,2,3,4,5],title=&#8217;hist&#8217;,colors=&#8217;rgb&#8217;,bins=3,normed=1)</dd>
-</dl>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName              Value    Type     Bounds   Mode [0m</p>
-<p>display_window     True  Boolean    (0, 1)   V RW 
-file_dpi          100.0   Number  (0,[1;36m 1000[0m)  V RW 
-file_format       &#8216;png&#8217;   String             V RW 
-filename           None   String             V RW 
-filename_suffix     &#8216;&#8217;    String             V RW 
-title              None   String             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;31m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;31m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;34mfile_format:     Which image format to use when saving images.[0m
-[1;34m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;34m                 supported by Matplotlib.[0m
-[1;31mfilename:        Optional base of the filename to use when saving images;[0m
-[1;31m                 if None the plot will be displayed interactively.[0m
-[1;31m                 [0m
-[1;31m                 The actual name is constructed from the filename base plus the[0m
-[1;31m                 suffix plus the current simulator time plus the file_format.[0m
-[1;34mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
-<dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">file_dpi</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=100.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Default DPI when rendering to a bitmap.
         The nominal size * the dpi gives the final image size in pixels.
@@ -5228,7 +4415,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.histogramplot.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5242,17 +4429,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.histogramplot.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e680&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1db8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.histogramplot.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ed60&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1e10&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.histogramplot.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e6d8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1d60&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5306,12 +4493,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.histogramplot.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec58&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ba8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.histogramplot.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e8e8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1730&gt;</em><a class="headerlink" href="#topo.command.pylabplot.histogramplot.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5356,38 +4543,7 @@ containing the arguments.</p>
 <dt id="topo.command.pylabplot.PylabPlotCommand">
 <em class="property">class </em><tt class="descclassname">topo.command.pylabplot.</tt><tt class="descname">PylabPlotCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/command/pylabplot.html#PylabPlotCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.command.Command" title="topo.command.Command"><tt class="xref py py-class docutils literal"><span class="pre">topo.command.Command</span></tt></a></p>
-<p>params(display_window=Boolean, file_dpi=Number, file_format=String, filename=String, filename_suffix=String, title=String, name=String)
-Parameterized command for plotting using Matplotlib/Pylab.
-[1;32mParameters of &#8216;PylabPlotCommand&#8217;
-================================
-[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName              Value    Type     Bounds   Mode [0m</p>
-<p>display_window     True  Boolean    (0, 1)   V RW 
-file_dpi          100.0   Number  (0,[1;36m 1000[0m)  V RW 
-file_format       &#8216;png&#8217;   String             V RW 
-filename           None   String             V RW 
-filename_suffix     &#8216;&#8217;    String             V RW 
-title              None   String             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdisplay_window:  Whether to open a display window containing the plot when[0m
-[1;34m                 Topographica is running in a non-batch mode.[0m
-[1;31mfile_dpi:        Default DPI when rendering to a bitmap.[0m
-[1;31m                 The nominal size * the dpi gives the final image size in pixels.[0m
-[1;31m                 E.g.: 4&#8221;x4&#8221; image * 80 dpi ==&gt; 320x320 pixel image.[0m
-[1;34mfile_format:     Which image format to use when saving images.[0m
-[1;34m                 The output can be png, ps, pdf, svg, or any other format[0m
-[1;34m                 supported by Matplotlib.[0m
-[1;31mfilename:        Optional base of the filename to use when saving images;[0m
-[1;31m                 if None the plot will be displayed interactively.[0m
-[1;31m                 [0m
-[1;31m                 The actual name is constructed from the filename base plus the[0m
-[1;31m                 suffix plus the current simulator time plus the file_format.[0m
-[1;34mfilename_suffix: Optional suffix to be used for disambiguation of the filename.[0m
-[1;31mtitle:           Optional title to be used when displaying the plot interactively.[0m</p>
+<p>Parameterized command for plotting using Matplotlib/Pylab.</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">file_dpi</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=100.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Default DPI when rendering to a bitmap.
@@ -5429,7 +4585,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.PylabPlotCommand.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ec00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5443,17 +4599,17 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.PylabPlotCommand.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e838&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1890&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.PylabPlotCommand.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98e998&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1c00&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.PylabPlotCommand.instance">
-<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ee10&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.instance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">instance</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1ec0&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5507,12 +4663,12 @@ is replaced with X.classname.instance(Y</p>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.PylabPlotCommand.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ee68&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1f18&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.command.pylabplot.PylabPlotCommand.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d98ef18&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8740c1fc8&gt;</em><a class="headerlink" href="#topo.command.pylabplot.PylabPlotCommand.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -5553,6 +4709,7 @@ containing the arguments.</p>
 
 </dd></dl>
 
+<hr class="docutils" />
 </div>
 </div>
 

@@ -1,0 +1,9 @@
+<map id="inheritancefe104bf3e4" name="inheritancefe104bf3e4">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,103,264,129"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.functionfamily.LearningFn" title="Abstract base class for learning functions that plug into" alt="" coords="312,103,563,129"/>
+<area shape="rect" id="node3" href="#topo.learningfn.AntiHebbian" title="Opposite of the basic Hebbian rule." alt="" coords="611,5,811,30"/>
+<area shape="rect" id="node4" href="#topo.learningfn.BCMFixed" title="Bienenstock, Cooper, and Munro (1982) learning rule with a fixed threshold." alt="" coords="619,54,802,79"/>
+<area shape="rect" id="node5" href="#topo.learningfn.CPCA" title="CPCA (Conditional Principal Component Analysis) rule." alt="" coords="632,103,789,129"/>
+<area shape="rect" id="node6" href="#topo.learningfn.Covariance" title="Covariance learning rule supporting either input or unit thresholds." alt="" coords="614,153,807,178"/>
+<area shape="rect" id="node7" href="#topo.learningfn.Oja" title="Oja&#39;s rule (Oja, 1982; Dayan and Abbott, 2001, equation 8.16.)" alt="" coords="639,202,782,227"/>
+</map>

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/custom.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../_static/require.js"></script>
     <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../index.html" /> 
   </head>
@@ -61,17 +64,18 @@
             
   <div class="section" id="topo-gpu-package">
 <h1>topo.gpu Package<a class="headerlink" href="#topo-gpu-package" title="Permalink to this headline">¶</a></h1>
+<hr class="docutils" />
 <div class="section" id="projection-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">projection</span></tt> Module<a class="headerlink" href="#projection-module" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-9a5da4ecfdffb94bf4dd990701ff7f30b9af885a.png" alt="Inheritance diagram of topo.gpu.projection" usemap="#inheritancebd0a1bc029" class="inheritance"/>
+<img src="../_images/inheritance-c49a1b038b57fced6e656054995e224418d20cae.png" alt="Inheritance diagram of topo.gpu.projection" usemap="#inheritancebd0a1bc029" class="inheritance"/>
 <map id="inheritancebd0a1bc029" name="inheritancebd0a1bc029">
 <area shape="rect" id="node1" title="params(name=String)" alt="" coords="4,3,174,20"/>
-<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EPConnection" title="params(delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="205,3,369,20"/>
-<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFProjection" title="params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="578,3,698,20"/>
-<area shape="rect" id="node6" title="params(initialized=Boolean, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="731,3,917,20"/>
-<area shape="rect" id="node3" href="topo.base.html#topo.base.projection.Projection" title="params(activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="401,3,546,20"/>
-<area shape="rect" id="node5" href="#topo.gpu.projection.GPUSparseCFProjection" title="params(initialized=Boolean, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="949,3,1148,20"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EPConnection" title="EPConnection stores basic information for a connection between" alt="" coords="205,3,369,20"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFProjection" title="A projection composed of ConnectionFields from a Sheet into a ProjectionSheet." alt="" coords="578,3,698,20"/>
+<area shape="rect" id="node6" title="A projection composed of SparseConnectionFields from a Sheet into" alt="" coords="731,3,917,20"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.projection.Projection" title="A projection from a Sheet into a ProjectionSheet." alt="" coords="401,3,546,20"/>
+<area shape="rect" id="node5" href="#topo.gpu.projection.GPUSparseCFProjection" title="A projection composed of SparseConnectionFields from a Sheet into" alt="" coords="949,3,1148,20"/>
 </map>
 </p>
 <span class="target" id="module-topo.gpu.projection"></span><dl class="function">
@@ -98,125 +102,11 @@ between incoming activities and CF weights. Uses GPU.</p>
 <dt id="topo.gpu.projection.GPUSparseCFProjection">
 <em class="property">class </em><tt class="descclassname">topo.gpu.projection.</tt><tt class="descname">GPUSparseCFProjection</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/gpu/projection.html#GPUSparseCFProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">topo.sparse.sparsecf.SparseCFProjection</span></tt></p>
-<p>params(initialized=Boolean, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div><p>A projection composed of SparseConnectionFields from a Sheet into
+<p>A projection composed of SparseConnectionFields from a Sheet into
 a ProjectionSheet, calculated using a GPU.</p>
 <p>Any subclass has to implement the interface activate(self) that
 computes the response from the input and stores it in the activity
 array.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                         Value                              Type             Bounds     Mode  [0m</p>
-<p>activity_group                        (0.5, &lt;ufunc &#8216;add&#8217;&gt;)                   Parameter                      V RW  
-allow_null_cfs                               False                            Boolean            (0, 1)     V RW  
-apply_output_fns_init                         True                            Boolean            (0, 1)     V RW  
-autosize_mask                                 True                            Boolean            (0, 1)     C RW  
-cf_shape                    Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-cf_type                     &lt;class &#8216;topo.sparse.sparsecf.SparseCo...         Parameter                      V RW  
-coord_mapper                   IdentityMF(name=&#8217;IdentityMF00801&#8217;)          ClassSelector                    V RW  
-delay                                         0.05                             Number          (0, None)    V RW  
-dest                                          None                           Parameter                    C RW AN 
-dest_port                                  &#8216;Activity&#8217;                        Parameter                      V RW  
-hash_format                          &#8216;{name}-{src}-{dest}&#8217;                     String                       V RW  
-initialized                                  False                            Boolean            (0, 1)     V RW  
-input_fns                                      []                             HookList         (0, None)    V RW  
-learning_fn                 &lt;function CFPLF_Hebbian_Sparse_GPU at...          Callable                      V RW  
-learning_rate                                 0.0                              Number           ([1;36m0[0m,[1;36m 100[0m)    V RW  
-mask_threshold                                0.5                              Number                       C RW  
-min_matrix_radius                              1                              Integer          (0, None)    V RW  
-nominal_bounds_template             BoundingBox(radius=0.1)           BoundingRegionParameter               V RW  
-output_fns                                     []                             HookList         (0, None)    V RW  
-plastic                                       True                            Boolean            (0, 1)     V RW  
-precedence                                    0.8                              Number                       V RW  
-private                                      False                            Boolean            (0, 1)     V RW  
-response_fn                 &lt;function CFPRF_DotProduct_Sparse_GPU...          Callable                      V RW  
-same_cf_shape_for_all_cfs                     True                            Boolean            (0, 1)     V RW  
-seed                                          None                            Integer                     V RW AN 
-src                                           None                           Parameter                    C RW AN 
-src_port                                   &#8216;Activity&#8217;                        Parameter                      V RW  
-strength                                      1.0                              Number                       V RW  
-weights_generator           Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-weights_output_fns          [&lt;function <a href="#id1"><span class="problematic" id="id2">CFPOF_DivisiveNormalizeL1_</span></a>...          HookList         (0, None)    V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group:            Grouping and precedence specifier for computing activity from[0m
-[1;34m                           Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                           same activity_group will be summed, and then the results from[0m
-[1;34m                           each group will be combined in the order of the activity_group[0m
-[1;34m                           using the operator specified by the activity_operator.  For[0m
-[1;34m                           instance, if there are two Projections with[0m
-[1;34m                           activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                           activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                           from the first two will be added together, and the result[0m
-[1;34m                           divided by the sum of the second two.[0m
-[1;31mallow_null_cfs:            Whether or not the projection can have entirely empty CFs[0m
-[1;34mapply_output_fns_init:     Whether to apply the output function to connection fields (e.g. for[0m
-[1;34m                           normalization) when the CFs are first created.[0m
-[1;31mautosize_mask:             Topographica sets the mask size so that it is the same as the connection field&#8217;s[0m
-[1;31m                           size, unless this parameter is False - in which case the user-specified size of[0m
-[1;31m                           the cf_shape is used. In normal usage of Topographica, this parameter should[0m
-[1;31m                           remain True.[0m
-[1;34mcf_shape:                  Mask pattern to define the shape of the connection fields.[0m
-[1;31mcf_type:                   Type of ConnectionField to use when creating individual CFs.[0m
-[1;34mcoord_mapper:              Function to map a projected coordinate into the target sheet.[0m
-[1;31mdelay:                     Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;31m                           Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;31m                           of events.[0m
-[1;34mdest:                      The EventProcessor to which messages are delivered.[0m
-[1;31mdest_port:                 Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that accept only a single type of incoming[0m
-[1;31m                           event will typically use a src_port of None.  However, if[0m
-[1;31m                           multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for dest_port.  It is up[0m
-[1;31m                           to the dest EventProcessor to process the data appropriately[0m
-[1;31m                           for each port, and to define what is expected to be sent to[0m
-[1;31m                           that port.[0m
-[1;34mhash_format:               Format string to determine the hash value used to initialize[0m
-[1;34m                           random weight generation. Format keys available include {name}[0m
-[1;34m                           {src} and {dest}.[0m
-[1;31minitialized:               &lt; No docstring available &gt;[0m
-[1;34minput_fns:                 Function(s) applied to the input before the projection activity is computed.[0m
-[1;31mlearning_fn:               Function for computing changes to the weights based on one activation step.[0m
-[1;34mlearning_rate:             Amount of learning at each step for this projection, specified[0m
-[1;34m                           in units that are independent of the density of each Sheet.[0m
-[1;31mmask_threshold:            If a unit is above this value in the cf_shape mask, it is[0m
-[1;31m                           included; otherwise it is excluded from the mask.[0m
-[1;34mmin_matrix_radius:         Enforced minimum for radius of weights matrix.[0m
-[1;34m                           The default of 1 gives a minimum matrix of 3x3. 0 would[0m
-[1;34m                           allow a 1x1 matrix.[0m
-[1;31mnominal_bounds_template:   Bounds defining the Sheet area covered by a prototypical ConnectionField.[0m
-[1;31m                           The true bounds will differ depending on the density (see create_slice_template()).[0m
-[1;34moutput_fns:                Function(s) applied to the projection activity after it is computed.[0m
-[1;31mplastic:                   Whether or not to update the internal state on each call.[0m
-[1;31m                           Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;34mprecedence:                &lt; No docstring available &gt;[0m
-[1;31mprivate:                   Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;34mresponse_fn:               Function for computing the Projection response to an input pattern.[0m
-[1;31msame_cf_shape_for_all_cfs: Whether or not to share a single cf_shape mask for all CFs.[0m
-[1;31m                           If True, the cf_shape is evaluated only once and shared for[0m
-[1;31m                           all CFs, which saves computation time and memory.  If False,[0m
-[1;31m                           the cf_shape is evaluated once for each CF, allowing each to[0m
-[1;31m                           have its own shape.[0m
-[1;34mseed:                      The random seed used to determine the randomized weight[0m
-[1;34m                           initialization stream. If not None, equivalent to appending the[0m
-[1;34m                           chosen integer to the hash_format.[0m
-[1;31msrc:                       The EventProcessor from which messages originate.[0m
-[1;34msrc_port:                  Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;34m                           [0m
-[1;34m                           EventProcessors that generate only a single type of[0m
-[1;34m                           outgoing event will typically use a src_port of None.  However,[0m
-[1;34m                           if multiple types of communication are meaningful, the[0m
-[1;34m                           EventProcessor can accept other values for src_port.  It is up[0m
-[1;34m                           to the src EventProcessor to deliver appropriate data to each[0m
-[1;34m                           port, and to declare what will be sent over that port.[0m
-[1;31mstrength:                  Global multiplicative scaling applied to the Activity of this Sheet.[0m
-[1;34mweights_generator:         Generate initial weights values.[0m
-[1;31mweights_output_fns:        Functions applied to each CF after learning.[0m</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
@@ -316,7 +206,7 @@ weights_output_fns          [&lt;function <a href="#id1"><span class="problemati
 <dd>The EventProcessor from which messages originate.</dd>
 <dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">weights_generator</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant00795&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Generate initial weights values.</dd>
-<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">weights_output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[&lt;function CFPOF_DivisiveNormalizeL1_Sparse_GPU at 0x2b849c1d5c08&gt;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">weights_output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[&lt;function CFPOF_DivisiveNormalizeL1_Sparse_GPU at 0x2ae872f68d70&gt;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Functions applied to each CF after learning.</dd>
 <dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">input_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Function(s) applied to the input before the projection activity is computed.</dd>
@@ -371,7 +261,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849da163c0&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8731eaaa0&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -385,12 +275,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849da164c8&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8731eaba8&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849da16520&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8731eac00&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -528,12 +418,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849da16c00&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8731ef310&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849da16c58&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8731ef368&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -574,644 +464,30 @@ containing the arguments.</p>
 </dd></dl>
 
 </div>
+<hr class="docutils" />
 <div class="section" id="sheet-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">sheet</span></tt> Module<a class="headerlink" href="#sheet-module" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-58e73a27f5c20f3318a33dd33436aae19002729b.png" alt="Inheritance diagram of topo.gpu.sheet" usemap="#inheritance8752b5a604" class="inheritance"/>
+<img src="../_images/inheritance-1bc6209b37b589559fec96fff0dff941839dd0e1.png" alt="Inheritance diagram of topo.gpu.sheet" usemap="#inheritance8752b5a604" class="inheritance"/>
 <map id="inheritance8752b5a604" name="inheritance8752b5a604">
 <area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="159,2,342,15"/>
-<area shape="rect" id="node5" href="topo.base.html#topo.base.sheet.Sheet" title="params(apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)" alt="" coords="367,15,452,28"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="367,15,452,28"/>
 <area shape="rect" id="node2" title="params(name=String)" alt="" coords="3,28,134,40"/>
-<area shape="rect" id="node6" href="topo.base.html#topo.base.simulation.EventProcessor" title="params(name=String)" alt="" coords="185,28,317,40"/>
-<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFSheet" title="params(measure_maps=Boolean, allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)" alt="" coords="633,15,714,28"/>
-<area shape="rect" id="node7" href="#topo.gpu.sheet.GPUCFSheet" title="params(measure_maps=Boolean, allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)" alt="" coords="751,2,856,15"/>
-<area shape="rect" id="node10" href="topo.sheet.html#topo.sheet.JointNormalizingCFSheet" title="params(joint_norm_fn=Callable, measure_maps=Boolean, allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)" alt="" coords="739,28,868,40"/>
-<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.ProjectionSheet" title="params(allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)" alt="" coords="477,15,609,28"/>
-<area shape="rect" id="node8" href="#topo.gpu.sheet.GPUSettlingCFSheet" title="params(beginning_of_iteration=HookList, continuous_learning=Boolean, end_of_iteration=HookList, mask_init_time=Integer, post_initialization_weights_output_fns=HookList, strict_tsettle=Parameter, tsettle=Integer, joint_norm_fn=Callable, measure_maps=Boolean, allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)" alt="" coords="1019,28,1149,40"/>
-<area shape="rect" id="node9" href="topo.sheet.html#topo.sheet.SettlingCFSheet" title="params(beginning_of_iteration=HookList, continuous_learning=Boolean, end_of_iteration=HookList, mask_init_time=Integer, post_initialization_weights_output_fns=HookList, strict_tsettle=Parameter, tsettle=Integer, joint_norm_fn=Callable, measure_maps=Boolean, allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)" alt="" coords="893,28,994,40"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="185,28,317,40"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFSheet" title="A ProjectionSheet providing access to the ConnectionFields in its CFProjections." alt="" coords="633,15,714,28"/>
+<area shape="rect" id="node10" href="topo.sheet.html#topo.sheet.JointNormalizingCFSheet" title="A type of CFSheet extended to support joint sum&#45;based normalization." alt="" coords="739,28,868,40"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.ProjectionSheet" title="A Sheet whose activity is computed using Projections from other sheets." alt="" coords="477,15,609,28"/>
+<area shape="rect" id="node8" href="#topo.gpu.sheet.GPUSettlingCFSheet" title="A SettlingCFSheet that makes it possible to calculate projection activities and learning in concurrent GPU streams." alt="" coords="1019,28,1149,40"/>
+<area shape="rect" id="node9" href="topo.sheet.html#topo.sheet.SettlingCFSheet" title="A JointNormalizingCFSheet implementing the idea of settling." alt="" coords="893,28,994,40"/>
 </map>
 </p>
 <span class="target" id="module-topo.gpu.sheet"></span><dl class="class">
-<dt id="topo.gpu.sheet.GPUCFSheet">
-<em class="property">class </em><tt class="descclassname">topo.gpu.sheet.</tt><tt class="descname">GPUCFSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/gpu/sheet.html#GPUCFSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFSheet" title="topo.base.cf.CFSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFSheet</span></tt></a></p>
-<p>params(measure_maps=Boolean, allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)
-[1;32mParameters of &#8216;GPUCFSheet&#8217;
-==========================
-[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                           Value                          Type             Bounds    Mode [0m</p>
-<p>allow_skip_non_responding_units                 True                        Boolean            (0, 1)    V RW 
-apply_output_fns                                True                        Boolean            (0, 1)    V RW 
-layout_location                               (-1, -1)                    NumericTuple                   V RW 
-mask                              SheetMask(name=&#8217;SheetMask00471&#8217;)         Parameter                     V RW 
-measure_maps                                    True                        Boolean            (0, 1)    V RW 
-nominal_bounds                        BoundingBox(radius=0.5)       BoundingRegionParameter              C RW 
-nominal_density                                  10                          Number                      C RW 
-output_fns                                       []                         HookList         (0, None)   V RW 
-plastic                                         True                        Boolean            (0, 1)    V RW 
-precedence                                      0.5                          Number          ([1;36m0.0[0m,[1;36m 1.0[0m)  V RW 
-properties                                       {}                           Dict                       V RW 
-row_precedence                                  0.5                          Number          ([1;36m0.0[0m,[1;36m 1.0[0m)  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mallow_skip_non_responding_units: If true, then units that are inactive after the response[0m
-[1;34m                                 function has been called can be skipped in subsequent[0m
-[1;34m                                 processing. Whether or not the units will actually be skipped[0m
-[1;34m                                 depends on the implementation of learning and learning output[0m
-[1;34m                                 functions.[0m
-[1;31mapply_output_fns:                Whether to apply the output_fn after computing an Activity matrix.[0m
-[1;34mlayout_location:                 Location for this Sheet in an arbitrary pixel-based space[0m
-[1;34m                                 in which Sheets can be laid out for visualization.[0m
-[1;31mmask:                            SheetMask object for computing which units need to be computed further.[0m
-[1;31m                                 The object should be an instance of SheetMask, and will[0m
-[1;31m                                 compute which neurons will be considered active for the[0m
-[1;31m                                 purposes of further processing.  The default mask effectively[0m
-[1;31m                                 disables all masking, but subclasses can use this mask to[0m
-[1;31m                                 implement optimizations, non-rectangular Sheet shapes,[0m
-[1;31m                                 lesions, etc.[0m
-[1;34mmeasure_maps:                    Whether to include this Sheet when measuring various maps to create SheetViews.[0m
-[1;31mnominal_bounds:                  User-specified BoundingBox of the Sheet coordinate area[0m
-[1;31m                                 covered by this Sheet.  The left and right bounds&#8211;if[0m
-[1;31m                                 specified&#8211;will always be observed, but the top and bottom[0m
-[1;31m                                 bounds may be adjusted to ensure the density in the y[0m
-[1;31m                                 direction is the same as the density in the x direction.[0m
-[1;31m                                 In such a case, the top and bottom bounds are adjusted[0m
-[1;31m                                 so that the center y point remains the same, and each[0m
-[1;31m                                 bound is as close as possible to its specified value. The[0m
-[1;31m                                 actual value of this Parameter is not adjusted, but the[0m
-[1;31m                                 true bounds may be found from the &#8216;bounds&#8217; attribute[0m
-[1;31m                                 of this object.[0m
-[1;34mnominal_density:                 User-specified number of processing units per 1.0 distance[0m
-[1;34m                                 horizontally or vertically in Sheet coordinates. The actual[0m
-[1;34m                                 number may be different because of discretization; the matrix[0m
-[1;34m                                 needs to tile the plane exactly, and for that to work the[0m
-[1;34m                                 density might need to be adjusted.  For instance, an area of 3x2[0m
-[1;34m                                 cannot have a density of 2 in each direction. The true density[0m
-[1;34m                                 may be obtained from either the xdensity or ydensity attribute[0m
-[1;34m                                 (since these are identical for a Sheet).[0m
-[1;31moutput_fns:                      Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.[0m
-[1;34mplastic:                         Setting this to False tells the Sheet not to change its[0m
-[1;34m                                 permanent state (e.g. any connection weights) based on[0m
-[1;34m                                 incoming events.[0m
-[1;31mprecedence:                      Allows a sorting order for Sheets, e.g. in the GUI.[0m
-[1;34mproperties:                      A dictionary of property values associated with the Sheet[0m
-[1;34m                                 object.  For instance, the dictionary:[0m
-[1;34m                                 [0m
-[1;34m                                 {&#8216;polarity&#8217;:&#8217;ON&#8217;, &#8216;eye&#8217;:&#8217;Left&#8217;}[0m
-[1;34m                                 [0m
-[1;34m                                 could be used to indicate a left, LGN Sheet with ON-surround[0m
-[1;34m                                 receptive fields.[0m
-[1;31mrow_precedence:                  Allows grouping of Sheets before sorting precedence is[0m
-[1;31m                                 applied, e.g. for two-dimensional plots in the GUI.[0m</p>
-<dl class="docutils">
-<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
-<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
-<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
-<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>allow_None=False, constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>User-specified BoundingBox of the Sheet coordinate area
-            covered by this Sheet.  The left and right bounds&#8211;if
-            specified&#8211;will always be observed, but the top and bottom
-            bounds may be adjusted to ensure the density in the y
-            direction is the same as the density in the x direction.
-            In such a case, the top and bottom bounds are adjusted
-            so that the center y point remains the same, and each
-            bound is as close as possible to its specified value. The
-            actual value of this Parameter is not adjusted, but the
-            true bounds may be found from the &#8216;bounds&#8217; attribute
-            of this object.</dd>
-<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>allow_None=False, constant=False, default=&lt;SheetMask SheetMask00471&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>SheetMask object for computing which units need to be computed further.
-        The object should be an instance of SheetMask, and will
-        compute which neurons will be considered active for the
-        purposes of further processing.  The default mask effectively
-        disables all masking, but subclasses can use this mask to
-        implement optimizations, non-rectangular Sheet shapes,
-        lesions, etc.</dd>
-<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
-<dd>Allows grouping of Sheets before sorting precedence is
-            applied, e.g. for two-dimensional plots in the GUI.</dd>
-<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>Setting this to False tells the Sheet not to change its
-            permanent state (e.g. any connection weights) based on
-            incoming events.</dd>
-<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">measure_maps</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>Whether to include this Sheet when measuring various maps to create SheetViews.</dd>
-<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
-<dd>User-specified number of processing units per 1.0 distance
-            horizontally or vertically in Sheet coordinates. The actual
-            number may be different because of discretization; the matrix
-            needs to tile the plane exactly, and for that to work the
-            density might need to be adjusted.  For instance, an area of 3x2
-            cannot have a density of 2 in each direction. The true density
-            may be obtained from either the xdensity or ydensity attribute
-            (since these are identical for a Sheet).</dd>
-<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
-<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>If true, then units that are inactive after the response
-        function has been called can be skipped in subsequent
-        processing. Whether or not the units will actually be skipped
-        depends on the implementation of learning and learning output
-        functions.</dd>
-<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>allow_None=False, constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
-<dd>Location for this Sheet in an arbitrary pixel-based space
-            in which Sheets can be laid out for visualization.</dd>
-<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">properties</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
-<dd>A dictionary of property values associated with the Sheet
-       object.  For instance, the dictionary:
-
-       {&#8216;polarity&#8217;:&#8217;ON&#8217;, &#8216;eye&#8217;:&#8217;Left&#8217;}
-
-       could be used to indicate a left, LGN Sheet with ON-surround
-       receptive fields.</dd>
-</dl>
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.activate">
-<tt class="descname">activate</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.activate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Collect activity from each projection, combine it to calculate
-the activity for this sheet, and send the result out.</p>
-<p>Subclasses may override this method to whatever it means to
-calculate activity in that subclass.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.activity_len">
-<tt class="descname">activity_len</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.activity_len" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the number of items that have been saved by state_push().</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.closest_cell_center">
-<tt class="descname">closest_cell_center</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.closest_cell_center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given arbitary sheet coordinates, return the sheet coordinates
-of the center of the closest unit.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.debug">
-<tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.debug" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a debugging statement.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.defaults">
-<tt class="descname">defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return {parameter_name:parameter.default} for all non-constant
-Parameters.</p>
-<p>Note that a Parameter for which instantiate==True has its default
-instantiated.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.density">
-<tt class="descname">density</tt><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.density" title="Permalink to this definition">¶</a></dt>
-<dd><p>The sheet&#8217;s true density (i.e. the
-xdensity, which is equal to the ydensity for a Sheet.)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849cc32e10&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.get_param_values">
-<tt class="descname">get_param_values</tt><big>(</big><em>onlychanged=False</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.get_param_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a list of name,value pairs for all Parameters of this
-object.</p>
-<p>If onlychanged is True, will only return values that are not
-equal to the default value.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849cc32d60&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.get_value_generator" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.input_event">
-<tt class="descname">input_event</tt><big>(</big><em>conn</em>, <em>data</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.input_event" title="Permalink to this definition">¶</a></dt>
-<dd><p>Accept input from some sheet.  Call .present_input() to
-compute the stimulation from that sheet.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849cc32b50&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.inspect_value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.learn">
-<tt class="descname">learn</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.learn" title="Permalink to this definition">¶</a></dt>
-<dd><p>By default, call the learn() and apply_learn_output_fns()
-methods on every Projection to this Sheet.</p>
-<p>Any other type of learning can be implemented by overriding this method.
-Called from self.process_current_time() _after_ activity has
-been propagated.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.matrix2sheet">
-<tt class="descname">matrix2sheet</tt><big>(</big><em>float_row</em>, <em>float_col</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.matrix2sheet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a floating-point location (float_row,float_col) in
-matrix coordinates to its corresponding location (x,y) in
-sheet coordinates.</p>
-<p>Valid for scalar or array float_row and float_col.</p>
-<p>Inverse of sheet2matrix().</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.matrixidx2sheet">
-<tt class="descname">matrixidx2sheet</tt><big>(</big><em>row</em>, <em>col</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.matrixidx2sheet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return (x,y) where x and y are the floating point coordinates
-of the <em>center</em> of the given matrix cell (row,col). If the
-matrix cell represents a 0.2 by 0.2 region, then the center
-location returned would be 0.1,0.1.</p>
-<p>NOTE: This is NOT the strict mathematical inverse of
-sheet2matrixidx(), because sheet2matrixidx() discards all but
-the integer portion of the continuous matrix coordinate.</p>
-<p>Valid only for scalar or array row and col.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.message">
-<tt class="descname">message</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a message.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.n_bytes">
-<tt class="descname">n_bytes</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.n_bytes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Estimate the memory bytes taken by this Sheet and its Projections.</p>
-<p>Typically, this number will include the activity array and any
-similar arrays, plus memory taken by all incoming Projections.
-It will not usually include memory taken by the Python
-dictionary or various &#8220;housekeeping&#8221; attributes, which usually
-contribute only a small amount to the memory requirements.
-Thus this value should be considered only a rough lower bound
-from which memory requirements and memory usage patterns can
-be estimated.</p>
-<p>Subclasses should reimplement this method if they store a
-significant amount of data other than in the activity array
-and the projections.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.n_conns">
-<tt class="descname">n_conns</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.n_conns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count the total size of all incoming projections, in number of connections.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.override_plasticity_state">
-<tt class="descname">override_plasticity_state</tt><big>(</big><em>new_plasticity_state</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.override_plasticity_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Temporarily override plasticity state of medium and long term
-internal state.</p>
-<p>This function should be implemented by all subclasses so that
-when new_plasticity_state=False, it preserves the ability of
-the ProjectionSheet to compute activity, i.e. to operate over
-a short time scale, while preventing any lasting changes to
-the state.</p>
-<p>Any process that does not have any lasting state, such as
-those affecting only the current activity level, should not
-be affected by this call.</p>
-<p>By default, calls override_plasticity_state() on the
-ProjectionSheet&#8217;s output_fns and all of its incoming
-Projections, and also enables the &#8216;plastic&#8217; parameter for this
-ProjectionSheet.  The old value of the plastic parameter is
-saved to an internal stack to be restored by
-restore_plasticity_state().</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="topo.gpu.sheet.GPUCFSheet.params">
-<em class="property">classmethod </em><tt class="descname">params</tt><big>(</big><em>parameter_name=None</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the Parameters of this class as the
-dictionary {name: parameter_object}</p>
-<p>Includes Parameters from this class and its
-superclasses.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.pprint">
-<tt class="descname">pprint</tt><big>(</big><em>imports=None</em>, <em>prefix=' '</em>, <em>unknown_value='&lt;?&gt;'</em>, <em>qualify=False</em>, <em>separator=''</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.pprint" title="Permalink to this definition">¶</a></dt>
-<dd><p>(Experimental) Pretty printed representation that may be
-evaluated with eval. See pprint() function for more details.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.present_input">
-<tt class="descname">present_input</tt><big>(</big><em>input_activity</em>, <em>conn</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.present_input" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provide the given input_activity to each in_projection that has a dest_port
-equal to the specified port, asking each one to compute its activity.</p>
-<p>The sheet&#8217;s own activity is not calculated until activate()
-is called.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="topo.gpu.sheet.GPUCFSheet.print_param_defaults">
-<em class="property">classmethod </em><tt class="descname">print_param_defaults</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.print_param_defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print the default values of all cls&#8217;s Parameters.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.print_param_values">
-<tt class="descname">print_param_values</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.print_param_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print the values of all this object&#8217;s Parameters.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.process_current_time">
-<tt class="descname">process_current_time</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/gpu/sheet.html#GPUCFSheet.process_current_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.process_current_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by the simulation after all the events are processed for the
-current time but before time advances.  Allows the event processor
-to send any events that must be sent before time advances to drive
-the simulation.</p>
-<p>GPUCFSheet is meant to be used with GPU projections that are called
-asynchronously and might not have computed the activation. Therefore, we synchronize.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.projections">
-<tt class="descname">projections</tt><big>(</big><em>name=None</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.projections" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return either a named input p, or a dictionary
-{projection_name, projection} of all the in_connections for
-this ProjectionSheet.</p>
-<p>A minor convenience function for finding projections by name;
-the sheet&#8217;s list of in_connections usually provides simpler
-access to the Projections.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.release_sheet_view">
-<tt class="descname">release_sheet_view</tt><big>(</big><em>view_name</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.release_sheet_view" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete the dictionary entry with key entry &#8216;view_name&#8217; to save
-memory.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.row_col_sheetcoords">
-<tt class="descname">row_col_sheetcoords</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.row_col_sheetcoords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an array of Y-coordinates corresponding to the rows of
-the activity matrix of the sheet, and an array of
-X-coordinates corresponding to the columns.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.script_repr">
-<tt class="descname">script_repr</tt><big>(</big><em>imports=</em>, <span class="optional">[</span><span class="optional">]</span><em>prefix='    '</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.script_repr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a runnable command for creating this EventProcessor.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.send_output">
-<tt class="descname">send_output</tt><big>(</big><em>src_port=None</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.send_output" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send some data out to all connections on the given src_port.
-The data is deepcopied before it is sent out, to ensure that
-future changes to the data are not reflected in events from
-the past.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="topo.gpu.sheet.GPUCFSheet.set_default">
-<em class="property">classmethod </em><tt class="descname">set_default</tt><big>(</big><em>param_name</em>, <em>value</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.set_default" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the default value of param_name.</p>
-<p>Equivalent to setting param_name on the class.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d2eb0a8&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d2eb050&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.set_param" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.sheet2matrix">
-<tt class="descname">sheet2matrix</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.sheet2matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a point (x,y) in Sheet coordinates to continuous
-matrix coordinates.</p>
-<p>Returns (float_row,float_col), where float_row corresponds to
-y, and float_col to x.</p>
-<p>Valid for scalar or array x and y.</p>
-<p>Note about Bounds For a Sheet with
-BoundingBox(points=((-0.5,-0.5),(0.5,0.5))) and density=3,
-x=-0.5 corresponds to float_col=0.0 and x=0.5 corresponds to
-float_col=3.0.  float_col=3.0 is not inside the matrix
-representing this Sheet, which has the three columns
-(0,1,2). That is, x=-0.5 is inside the BoundingBox but x=0.5
-is outside. Similarly, y=0.5 is inside (at row 0) but y=-0.5
-is outside (at row 3) (it&#8217;s the other way round for y because
-the matrix row index increases as y decreases).</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.sheet2matrixidx">
-<tt class="descname">sheet2matrixidx</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.sheet2matrixidx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a point (x,y) in sheet coordinates to the integer row
-and column index of the matrix cell in which that point falls,
-given a bounds and density.  Returns (row,column).</p>
-<p>Note that if coordinates along the right or bottom boundary
-are passed into this function, the returned matrix coordinate
-of the boundary will be just outside the matrix, because the
-right and bottom boundaries are exclusive.</p>
-<p>Valid for scalar or array x and y.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.sheetcoordinates_of_matrixidx">
-<tt class="descname">sheetcoordinates_of_matrixidx</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.sheetcoordinates_of_matrixidx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return x,y where x is a vector of sheet coordinates
-representing the x-center of each matrix cell, and y
-represents the corresponding y-center of the cell.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.sheetcoords_of_idx_grid">
-<tt class="descname">sheetcoords_of_idx_grid</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.sheetcoords_of_idx_grid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an array of x-coordinates and an array of y-coordinates
-corresponding to the activity matrix of the sheet.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.start">
-<tt class="descname">start</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by the simulation when the EventProcessor is added to
-the simulation.</p>
-<p>If an EventProcessor needs to have any code run when it is
-added to the simulation, the code can be put into this method
-in the subclass.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.state_pop">
-<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.state_pop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Subclasses Sheet state_pop to also pop projection activities.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.state_push">
-<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.state_push" title="Permalink to this definition">¶</a></dt>
-<dd><p>Subclasses Sheet state_push to also push projection activities.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.update_unit_view">
-<tt class="descname">update_unit_view</tt><big>(</big><em>x</em>, <em>y</em>, <em>proj_name=''</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.update_unit_view" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates the list of UnitView objects for a particular unit in this CFSheet.
-(There is one UnitView for each Projection to this CFSheet).</p>
-<p>Each UnitView is then added to the sheet_views of its source sheet.
-It returns the list of all UnitViews for the given unit.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.verbose">
-<tt class="descname">verbose</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.verbose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a verbose message.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="topo.gpu.sheet.GPUCFSheet.warning">
-<tt class="descname">warning</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.warning" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print msg merged with args as a warning, unless module variable
-warnings_as_exceptions is True, then raise an Exception
-containing the arguments.</p>
-<p>See Python&#8217;s logging module for details of message formatting.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.xdensity">
-<tt class="descname">xdensity</tt><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.xdensity" title="Permalink to this definition">¶</a></dt>
-<dd><p>The spacing between elements in an underlying matrix
-representation, in the x direction.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="topo.gpu.sheet.GPUCFSheet.ydensity">
-<tt class="descname">ydensity</tt><a class="headerlink" href="#topo.gpu.sheet.GPUCFSheet.ydensity" title="Permalink to this definition">¶</a></dt>
-<dd><p>The spacing between elements in an underlying matrix
-representation, in the y direction.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet">
 <em class="property">class </em><tt class="descclassname">topo.gpu.sheet.</tt><tt class="descname">GPUSettlingCFSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/gpu/sheet.html#GPUSettlingCFSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.sheet.html#topo.sheet.SettlingCFSheet" title="topo.sheet.SettlingCFSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.sheet.SettlingCFSheet</span></tt></a></p>
-<p>params(beginning_of_iteration=HookList, continuous_learning=Boolean, end_of_iteration=HookList, mask_init_time=Integer, post_initialization_weights_output_fns=HookList, strict_tsettle=Parameter, tsettle=Integer, joint_norm_fn=Callable, measure_maps=Boolean, allow_skip_non_responding_units=Boolean, mask=Parameter, apply_output_fns=Boolean, layout_location=NumericTuple, nominal_bounds=BoundingRegionParameter, nominal_density=Number, output_fns=HookList, plastic=Boolean, precedence=Number, properties=Dict, row_precedence=Number, name=String)</p>
-<blockquote>
-<div><p>A SettlingCFSheet that makes it possible to calculate projection activities and learning in concurrent GPU streams.
+<p>A SettlingCFSheet that makes it possible to calculate projection activities and learning in concurrent GPU streams.
 This is done by placing barriers before the &#8216;activate&#8217; and &#8216;learn&#8217; methods of the sheet that synchronize GPU streams.</p>
 <p>Otherwise, behaves exactly the same as SettlingCFSheet.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                                      Value                              Type             Bounds      Mode  [0m</p>
-<p>allow_skip_non_responding_units                            True                            Boolean            (0, 1)      V RW  
-apply_output_fns                                           True                            Boolean            (0, 1)      V RW  
-beginning_of_iteration                                      []                             HookList         (0, None)     V RW  
-continuous_learning                                       False                            Boolean            (0, 1)      V RW  
-end_of_iteration                                            []                             HookList         (0, None)     V RW  
-joint_norm_fn                            &lt;function compute_sparse_gpu_joint_no...          Callable                       V RW  
-layout_location                                          (-1, -1)                        NumericTuple                     V RW  
-mask                                         SheetMask(name=&#8217;SheetMask00471&#8217;)             Parameter                       V RW  
-mask_init_time                                              5                              Integer          (0, None)     V RW  
-measure_maps                                               True                            Boolean            (0, 1)      V RW  
-nominal_bounds                                   BoundingBox(radius=0.5)           BoundingRegionParameter                C RW  
-nominal_density                                             10                              Number                        C RW  
-output_fns                                                  []                             HookList         (0, None)     V RW  
-plastic                                                    True                            Boolean            (0, 1)      V RW  
-post_initialization_weights_output_fns                      []                             HookList         (0, None)     V RW  
-precedence                                                 0.6                              Number          ([1;36m0.0[0m,[1;36m 1.0[0m)    V RW  
-properties                                                  {}                               Dict                         V RW  
-row_precedence                                             0.5                              Number          ([1;36m0.0[0m,[1;36m 1.0[0m)    V RW  
-strict_tsettle                                             None                           Parameter                     V RW AN 
-tsettle                                                     8                              Integer          (0, None)     V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mallow_skip_non_responding_units:        If true, then units that are inactive after the response[0m
-[1;34m                                        function has been called can be skipped in subsequent[0m
-[1;34m                                        processing. Whether or not the units will actually be skipped[0m
-[1;34m                                        depends on the implementation of learning and learning output[0m
-[1;34m                                        functions.[0m
-[1;31mapply_output_fns:                       Whether to apply the output_fn after computing an Activity matrix.[0m
-[1;34mbeginning_of_iteration:                 List of callables to be executed at the beginning of each iteration.[0m
-[1;31mcontinuous_learning:                    Whether to modify the weights after every settling step.[0m
-[1;31m                                        If false, waits until settling is completed before doing learning.[0m
-[1;34mend_of_iteration:                       List of callables to be executed at the end of each iteration.[0m
-[1;31mjoint_norm_fn:                          Function to use to compute the norm_total for each CF in each[0m
-[1;31m                                        gpu projection from a group to be normalized jointly.[0m
-[1;34mlayout_location:                        Location for this Sheet in an arbitrary pixel-based space[0m
-[1;34m                                        in which Sheets can be laid out for visualization.[0m
-[1;31mmask:                                   SheetMask object for computing which units need to be computed further.[0m
-[1;31m                                        The object should be an instance of SheetMask, and will[0m
-[1;31m                                        compute which neurons will be considered active for the[0m
-[1;31m                                        purposes of further processing.  The default mask effectively[0m
-[1;31m                                        disables all masking, but subclasses can use this mask to[0m
-[1;31m                                        implement optimizations, non-rectangular Sheet shapes,[0m
-[1;31m                                        lesions, etc.[0m
-[1;34mmask_init_time:                         Determines when a new mask is initialized in each new iteration.[0m
-[1;34m                                        [0m
-[1;34m                                        The mask is reset whenever new input comes in.  Once the[0m
-[1;34m                                        activation_count (see tsettle) reaches mask_init_time, the mask[0m
-[1;34m                                        is initialized to reflect the current activity profile.[0m
-[1;31mmeasure_maps:                           Whether to include this Sheet when measuring various maps to create SheetViews.[0m
-[1;34mnominal_bounds:                         User-specified BoundingBox of the Sheet coordinate area[0m
-[1;34m                                        covered by this Sheet.  The left and right bounds&#8211;if[0m
-[1;34m                                        specified&#8211;will always be observed, but the top and bottom[0m
-[1;34m                                        bounds may be adjusted to ensure the density in the y[0m
-[1;34m                                        direction is the same as the density in the x direction.[0m
-[1;34m                                        In such a case, the top and bottom bounds are adjusted[0m
-[1;34m                                        so that the center y point remains the same, and each[0m
-[1;34m                                        bound is as close as possible to its specified value. The[0m
-[1;34m                                        actual value of this Parameter is not adjusted, but the[0m
-[1;34m                                        true bounds may be found from the &#8216;bounds&#8217; attribute[0m
-[1;34m                                        of this object.[0m
-[1;31mnominal_density:                        User-specified number of processing units per 1.0 distance[0m
-[1;31m                                        horizontally or vertically in Sheet coordinates. The actual[0m
-[1;31m                                        number may be different because of discretization; the matrix[0m
-[1;31m                                        needs to tile the plane exactly, and for that to work the[0m
-[1;31m                                        density might need to be adjusted.  For instance, an area of 3x2[0m
-[1;31m                                        cannot have a density of 2 in each direction. The true density[0m
-[1;31m                                        may be obtained from either the xdensity or ydensity attribute[0m
-[1;31m                                        (since these are identical for a Sheet).[0m
-[1;34moutput_fns:                             Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.[0m
-[1;31mplastic:                                Setting this to False tells the Sheet not to change its[0m
-[1;31m                                        permanent state (e.g. any connection weights) based on[0m
-[1;31m                                        incoming events.[0m
-[1;34mpost_initialization_weights_output_fns: If not empty, weights output_fns that will replace the[0m
-[1;34m                                        existing ones after an initial normalization step.[0m
-[1;31mprecedence:                             Allows a sorting order for Sheets, e.g. in the GUI.[0m
-[1;34mproperties:                             A dictionary of property values associated with the Sheet[0m
-[1;34m                                        object.  For instance, the dictionary:[0m
-[1;34m                                        [0m
-[1;34m                                        {&#8216;polarity&#8217;:&#8217;ON&#8217;, &#8216;eye&#8217;:&#8217;Left&#8217;}[0m
-[1;34m                                        [0m
-[1;34m                                        could be used to indicate a left, LGN Sheet with ON-surround[0m
-[1;34m                                        receptive fields.[0m
-[1;31mrow_precedence:                         Allows grouping of Sheets before sorting precedence is[0m
-[1;31m                                        applied, e.g. for two-dimensional plots in the GUI.[0m
-[1;34mstrict_tsettle:                         If non-None, delay sending output until activation_count reaches this value.[0m
-[1;31mtsettle:                                Number of times to activate the SettlingCFSheet sheet for each external input event.[0m
-[1;31m                                        [0m
-[1;31m                                        A counter is incremented each time an input is received from any[0m
-[1;31m                                        source, and once the counter reaches tsettle, the last activation[0m
-[1;31m                                        step is skipped so that there will not be any further recurrent[0m
-[1;31m                                        activation.  The next external (i.e., afferent or feedback)[0m
-[1;31m                                        event will then start the counter over again.[0m</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
@@ -1351,7 +627,7 @@ xdensity, which is equal to the ydensity for a Sheet.)</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849cc32ba8&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8731044c8&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1365,12 +641,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849cc32fc8&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae873104260&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849cc32c58&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae873104578&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1547,12 +823,12 @@ X-coordinates corresponding to the columns.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849d2eb1b0&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873104730&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849d2eb158&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873104788&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1643,6 +919,7 @@ representation, in the y direction.</p>
 
 </dd></dl>
 
+<hr class="docutils" />
 </div>
 </div>
 

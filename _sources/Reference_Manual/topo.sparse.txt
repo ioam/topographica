@@ -1,6 +1,9 @@
 topo.sparse Package
 ===================
 
+
+---------
+
 :mod:`sparse` Package
 ---------------------
 
@@ -11,6 +14,8 @@ topo.sparse Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`compile` Module
 ---------------------
@@ -23,6 +28,8 @@ topo.sparse Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`sparsecf` Module
 ----------------------
 
@@ -33,4 +40,6 @@ topo.sparse Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

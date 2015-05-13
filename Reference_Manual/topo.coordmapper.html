@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/custom.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../_static/require.js"></script>
     <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../index.html" /> 
   </head>
@@ -61,30 +64,31 @@
             
   <div class="section" id="topo-coordmapper-package">
 <h1>topo.coordmapper Package<a class="headerlink" href="#topo-coordmapper-package" title="Permalink to this headline">¶</a></h1>
+<hr class="docutils" />
 <div class="section" id="coordmapper-package">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">coordmapper</span></tt> Package<a class="headerlink" href="#coordmapper-package" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-4c4b19e0b002f38e3db5204b00e88b3afa27c9a7.png" alt="Inheritance diagram of topo.coordmapper" usemap="#inheritancebe3ab90ace" class="inheritance"/>
+<img src="../_images/inheritance-c2f5b5754a36da1e75b3e39820292b51983c925c.png" alt="Inheritance diagram of topo.coordmapper" usemap="#inheritancebe3ab90ace" class="inheritance"/>
 <map id="inheritancebe3ab90ace" name="inheritancebe3ab90ace">
 <area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,243,232,265"/>
-<area shape="rect" id="node2" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="params(name=String)" alt="" coords="274,243,550,265"/>
-<area shape="rect" id="node3" href="#topo.coordmapper.AffineTransform" title="params(matrix=Parameter, name=String)" alt="" coords="617,47,830,70"/>
-<area shape="rect" id="node4" href="#topo.coordmapper.Cartesian2Polar" title="params(degrees=Boolean, negative_radii=Boolean, name=String)" alt="" coords="616,91,831,113"/>
-<area shape="rect" id="node5" href="#topo.coordmapper.ConstantMapper" title="params(x_cons=Number, y_cons=Number, name=String)" alt="" coords="613,134,834,156"/>
-<area shape="rect" id="node6" href="#topo.coordmapper.Grid" title="params(xdensity=Number, ydensity=Number, name=String)" alt="" coords="649,177,798,200"/>
-<area shape="rect" id="node7" href="#topo.coordmapper.Jitter" title="params(gen=Parameter, scale=Parameter, name=String)" alt="" coords="647,221,800,243"/>
-<area shape="rect" id="node9" href="#topo.coordmapper.SingleDimensionMapper" title="params(in_range=Number, out_range=Number, remap_dimension=ObjectSelector, name=String)" alt="" coords="592,264,855,286"/>
-<area shape="rect" id="node10" href="#topo.coordmapper.NormalJitter" title="params(gen=Parameter, name=String)" alt="" coords="627,307,820,330"/>
-<area shape="rect" id="node11" href="#topo.coordmapper.OttesSCMapper" title="params(A=Number, Bu=Number, Bv=Number, amplitude_scale=Number, direction_scale=Number, mm_scale=Number, name=String)" alt="" coords="616,351,831,373"/>
-<area shape="rect" id="node14" href="#topo.coordmapper.Pipeline" title="params(mappers=List, name=String)" alt="" coords="639,394,808,416"/>
-<area shape="rect" id="node15" href="#topo.coordmapper.Polar2Cartesian" title="params(degrees=Boolean, name=String)" alt="" coords="616,437,831,460"/>
-<area shape="rect" id="node17" href="#topo.coordmapper.Rotate2d" title="params(angle=Number, matrix=Parameter, name=String)" alt="" coords="934,4,1110,26"/>
-<area shape="rect" id="node18" href="#topo.coordmapper.Scale2d" title="params(sx=Number, sy=Number, matrix=Parameter, name=String)" alt="" coords="937,47,1108,70"/>
-<area shape="rect" id="node19" href="#topo.coordmapper.Translate2d" title="params(xoff=Number, yoff=Number, matrix=Parameter, name=String)" alt="" coords="927,91,1117,113"/>
-<area shape="rect" id="node8" href="#topo.coordmapper.MagnifyingMapper" title="params(k=Number, in_range=Number, out_range=Number, remap_dimension=ObjectSelector, name=String)" alt="" coords="908,243,1136,265"/>
-<area shape="rect" id="node16" href="#topo.coordmapper.ReducingMapper" title="params(k=Number, in_range=Number, out_range=Number, remap_dimension=ObjectSelector, name=String)" alt="" coords="913,286,1132,308"/>
-<area shape="rect" id="node12" href="#topo.coordmapper.OttesSCMotorMapper" title="params(A=Number, Bu=Number, Bv=Number, amplitude_scale=Number, direction_scale=Number, mm_scale=Number, name=String)" alt="" coords="898,330,1146,352"/>
-<area shape="rect" id="node13" href="#topo.coordmapper.OttesSCSenseMapper" title="params(A=Number, Bu=Number, Bv=Number, amplitude_scale=Number, direction_scale=Number, mm_scale=Number, name=String)" alt="" coords="897,373,1147,395"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="Abstract base class for functions mapping from a 2D coordinate into another one." alt="" coords="274,243,550,265"/>
+<area shape="rect" id="node3" href="#topo.coordmapper.AffineTransform" title="Remaps the input with an affine transform." alt="" coords="617,47,830,70"/>
+<area shape="rect" id="node4" href="#topo.coordmapper.Cartesian2Polar" title="Maps from Cartesian (x,y) to polar (radius,angle)." alt="" coords="616,91,831,113"/>
+<area shape="rect" id="node5" href="#topo.coordmapper.ConstantMapper" title="Map all values to the same constant, pre&#45;specified coordinates." alt="" coords="613,134,834,156"/>
+<area shape="rect" id="node6" href="#topo.coordmapper.Grid" title="Divides the 2D area into a grid, where all points within each grid" alt="" coords="649,177,798,200"/>
+<area shape="rect" id="node7" href="#topo.coordmapper.Jitter" title="Additively modifies calculated x,y coordinates, e.g. with random noise." alt="" coords="647,221,800,243"/>
+<area shape="rect" id="node9" href="#topo.coordmapper.SingleDimensionMapper" title="Coordinate Mapper that uses an origin&#45;centered 1&#45;D mapping function." alt="" coords="592,264,855,286"/>
+<area shape="rect" id="node10" href="#topo.coordmapper.NormalJitter" title="Additively modifies calculated x,y coordinates with Gaussian random noise." alt="" coords="627,307,820,330"/>
+<area shape="rect" id="node11" href="#topo.coordmapper.OttesSCMapper" title="Abstract class for superior colliculus mappings." alt="" coords="616,351,831,373"/>
+<area shape="rect" id="node14" href="#topo.coordmapper.Pipeline" title="Applies a sequence of coordmappers, left to right." alt="" coords="639,394,808,416"/>
+<area shape="rect" id="node15" href="#topo.coordmapper.Polar2Cartesian" title="Map from polar (radius,angle) to Cartesian (x,y) coordinates." alt="" coords="616,437,831,460"/>
+<area shape="rect" id="node17" href="#topo.coordmapper.Rotate2d" title="Rotate the input around the origin by an angle in radians." alt="" coords="934,4,1110,26"/>
+<area shape="rect" id="node18" href="#topo.coordmapper.Scale2d" title="Scale the input along the x and y axes by sx and sy, respectively." alt="" coords="937,47,1108,70"/>
+<area shape="rect" id="node19" href="#topo.coordmapper.Translate2d" title="Translate the input by xoff,yoff." alt="" coords="927,91,1117,113"/>
+<area shape="rect" id="node8" href="#topo.coordmapper.MagnifyingMapper" title="Exponential (magnifying) mapping function." alt="" coords="908,243,1136,265"/>
+<area shape="rect" id="node16" href="#topo.coordmapper.ReducingMapper" title="Provides a mapping that reduces the center of the activity." alt="" coords="913,286,1132,308"/>
+<area shape="rect" id="node12" href="#topo.coordmapper.OttesSCMotorMapper" title="Efferent superior colliculus mapping." alt="" coords="898,330,1146,352"/>
+<area shape="rect" id="node13" href="#topo.coordmapper.OttesSCSenseMapper" title="Afferent superior colliculus mapping." alt="" coords="897,373,1147,395"/>
 </map>
 </p>
 <span class="target" id="module-topo.coordmapper"></span><p>A family of function objects for transforming one set of coordinates into
@@ -100,26 +104,8 @@ CoordinateMapperFn.</p>
 <dt id="topo.coordmapper.ReducingMapper">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">ReducingMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#ReducingMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.ReducingMapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.SingleDimensionMapper" title="topo.coordmapper.SingleDimensionMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.SingleDimensionMapper</span></tt></a></p>
-<p>params(k=Number, in_range=Number, out_range=Number, remap_dimension=ObjectSelector, name=String)</p>
-<blockquote>
-<div><p>Provides a mapping that reduces the center of the activity.</p>
+<p>Provides a mapping that reduces the center of the activity.</p>
 <p>Roughly the inverse of MagnifyingMapper.  k indicates amount of reduction.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                     Value              Type         Bounds   Mode [0m</p>
-<p>in_range          0.70710678118654757      Number      (0, None)  V RW 
-k                         1.0              Number      (0, None)  V RW 
-out_range         0.70710678118654757      Number      (0, None)  V RW 
-remap_dimension         &#8216;radius&#8217;       ObjectSelector             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34min_range:        The maximum range of the mapping input.[0m
-[1;31mk:               &lt; No docstring available &gt;[0m
-[1;34mout_range:       The maximum range of the output.[0m
-[1;31mremap_dimension: The dimension to remap. (&#8216;xy&#8217; remaps x and y independently.)[0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">in_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>The maximum range of the mapping input.</dd>
@@ -149,7 +135,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ReducingMapper.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32208&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2368&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -163,12 +149,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ReducingMapper.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32998&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ReducingMapper.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32578&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -221,12 +207,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ReducingMapper.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32368&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ReducingMapper.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32680&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4998&gt;</em><a class="headerlink" href="#topo.coordmapper.ReducingMapper.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -271,33 +257,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Scale2d">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Scale2d</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Scale2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Scale2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.AffineTransform" title="topo.coordmapper.AffineTransform"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.AffineTransform</span></tt></a></p>
-<p>params(sx=Number, sy=Number, matrix=Parameter, name=String)</p>
-<blockquote>
-<div>Scale the input along the x and y axes by sx and sy, respectively.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                      Value                       Type    Mode [0m</p>
-<dl class="docutils">
-<dt>matrix   array([[ 1.,  1.,  1.],</dt>
-<dd>[ 1., ...  Parameter  V RW</dd>
-</dl>
-<p>sx                         1.0                       Number   V RW 
-sy                         1.0                       Number   V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mmatrix: The affine transformation matrix.  The functions[0m
-[1;34m        Translate2dMat, Rotate2dMat, and Scale2dMat generate affine[0m
-[1;34m        transform matrices that can be multiplied together to create[0m
-[1;34m        combination transforms.  E.g. the matrix::[0m
-[1;34m        [0m
-[1;34m          Translate2dMat(3,0)*Rotate2d(pi/2)[0m
-[1;34m        [0m
-[1;34m        will shift points to the right by 3 units and rotate them around[0m
-[1;34m        the origin by 90 degrees.[0m
-[1;31msx:     &lt; No docstring available &gt;[0m
-[1;34msy:     &lt; No docstring available &gt;[0m</p>
+<p>Scale the input along the x and y axes by sx and sy, respectively.</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">sy</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">sx</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
@@ -332,7 +292,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Scale2d.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32310&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2368&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -346,12 +306,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Scale2d.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf322b8&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Scale2d.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32838&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -404,12 +364,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Scale2d.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32418&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Scale2d.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32940&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4cb0&gt;</em><a class="headerlink" href="#topo.coordmapper.Scale2d.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -454,20 +414,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Jitter">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Jitter</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Jitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Jitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(gen=Parameter, scale=Parameter, name=String)</p>
-<blockquote>
-<div>Additively modifies calculated x,y coordinates, e.g. with random noise.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                     Value                       Type    Mode [0m</p>
-<p>gen     UniformRandom(lbound=0.0, name=&#8217;Unifo...  Parameter  V RW 
-scale                     0.0                     Parameter  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mgen:   Number generator to use, typically a random distribution.[0m
-[1;31mscale: Amount of jitter.[0m</p>
+<p>Additively modifies calculated x,y coordinates, e.g. with random noise.</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, constant=False, default=0.0, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Amount of jitter.</dd>
@@ -492,7 +439,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Jitter.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32368&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a22b8&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -506,12 +453,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Jitter.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32998&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Jitter.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32578&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -564,12 +511,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Jitter.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32208&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Jitter.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32ba8&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4998&gt;</em><a class="headerlink" href="#topo.coordmapper.Jitter.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -614,22 +561,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Cartesian2Polar">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Cartesian2Polar</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Cartesian2Polar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(degrees=Boolean, negative_radii=Boolean, name=String)</p>
-<blockquote>
-<div>Maps from Cartesian (x,y) to polar (radius,angle).</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName             Value    Type   Bounds  Mode [0m</p>
-<p>degrees           True  Boolean  (0, 1)  V RW 
-negative_radii   False  Boolean  (0, 1)  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdegrees:        Indicates whether the output angle is in degrees or radians.[0m
-[1;31mnegative_radii: If true, coordinates with negative x values will be[0m
-[1;31m                        given negative radii, and angles between -90 and 90[0m
-[1;31m                        degrees. (useful for mapping to saccade amplitude/direction space)[0m</p>
+<p>Maps from Cartesian (x,y) to polar (radius,angle).</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">negative_radii</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>If true, coordinates with negative x values will be
@@ -656,7 +588,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Cartesian2Polar.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32838&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a22b8&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -670,12 +602,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Cartesian2Polar.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32310&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Cartesian2Polar.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32418&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -728,12 +660,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Cartesian2Polar.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf322b8&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Cartesian2Polar.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32940&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -778,40 +710,12 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.OttesSCMotorMapper">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">OttesSCMotorMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#OttesSCMotorMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.OttesSCMapper" title="topo.coordmapper.OttesSCMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.OttesSCMapper</span></tt></a></p>
-<p>params(A=Number, Bu=Number, Bv=Number, amplitude_scale=Number, direction_scale=Number, mm_scale=Number, name=String)</p>
-<blockquote>
-<div><p>Efferent superior colliculus mapping.</p>
+<p>Efferent superior colliculus mapping.</p>
 <p>Provides the output/motor mapping from SC as defined by Ottes et al.
 (see superclass docs for reference)</p>
 <p>The mapping allows the creation of a single sheet representing
 both colliculi, one in the x-positive hemisheet and the other in
 the x-negative hemisheet.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName             Value  Type   Mode [0m</p>
-<p>A                 5.3  Number  V RW 
-Bu                1.8  Number  V RW 
-Bv                1.8  Number  V RW 
-amplitude_scale    1   Number  V RW 
-direction_scale    1   Number  V RW 
-mm_scale          8.0  Number  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mA:               Shape parameter A, in degrees[0m
-[1;31mBu:              Rostral-caudal scale parameter, in mm[0m
-[1;34mBv:              Orthogonal (medial-lateral?) scale paraemter in mm/deg[0m
-[1;31mamplitude_scale: Scale factor for saccade command amplitude, expressed in[0m
-[1;31m                 degrees per unit of sheet.  Indicates how large a[0m
-[1;31m                 saccade is represented by the x-component of the command[0m
-[1;31m                 input.[0m
-[1;34mdirection_scale: Scale factor for saccade command direction, expressed in[0m
-[1;34m                 degrees per unit of sheet.  Indicates what direction of saccade[0m
-[1;34m                 is represented by the y-component of the command input.[0m
-[1;31mmm_scale:        Scale factor to convert constants Bu and Bv from mm to sheet[0m
-[1;31m                 units.  Expressed in mm/unit. [0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">A</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=5.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Shape parameter A, in degrees</dd>
@@ -850,7 +754,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMotorMapper.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32998&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2310&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -864,12 +768,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMotorMapper.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32578&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMotorMapper.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32ba8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -922,12 +826,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMotorMapper.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32368&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMotorMapper.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32208&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4998&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -972,18 +876,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.NormalJitter">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">NormalJitter</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#NormalJitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.NormalJitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(gen=Parameter, name=String)</p>
-<blockquote>
-<div>Additively modifies calculated x,y coordinates with Gaussian random noise.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                   Value                       Type    Mode [0m</p>
-<p>gen   NormalRandom(mu=0.0, name=&#8217;NormalRand...  Parameter  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mgen: Number generator to use, typically a Gaussian distribution.[0m</p>
+<p>Additively modifies calculated x,y coordinates with Gaussian random noise.</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">gen</span></tt> (<em>allow_None=False, constant=False, default=&lt;NormalRandom NormalRandom00828&gt;, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Number generator to use, typically a Gaussian distribution.</dd>
@@ -1006,7 +899,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.NormalJitter.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32418&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2310&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1020,12 +913,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.NormalJitter.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32838&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.NormalJitter.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf322b8&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1078,12 +971,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.NormalJitter.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32310&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.NormalJitter.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32940&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.NormalJitter.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1128,18 +1021,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Pipeline">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Pipeline</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Pipeline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(mappers=List, name=String)</p>
-<blockquote>
-<div>Applies a sequence of coordmappers, left to right.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName     Value Type    Bounds   Mode [0m</p>
-<p>mappers   []  List  (0, None)  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mmappers: The sequence of mappers to apply.[0m</p>
+<p>Applies a sequence of coordmappers, left to right.</p>
 <dl class="docutils">
 <dt><em>param List</em> <tt class="docutils literal"><span class="pre">mappers</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>The sequence of mappers to apply.</dd>
@@ -1162,7 +1044,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Pipeline.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32578&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a20a8&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1176,12 +1058,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Pipeline.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32998&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Pipeline.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32ba8&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1234,12 +1116,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Pipeline.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32368&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Pipeline.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32680&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4cb0&gt;</em><a class="headerlink" href="#topo.coordmapper.Pipeline.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1284,20 +1166,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.ConstantMapper">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">ConstantMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#ConstantMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.ConstantMapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(x_cons=Number, y_cons=Number, name=String)</p>
-<blockquote>
-<div>Map all values to the same constant, pre-specified coordinates.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName    Value  Type   Mode [0m</p>
-<p>x_cons   0.0  Number  V RW 
-y_cons   0.0  Number  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mx_cons: Constant x value returned by the mapping.[0m
-[1;31my_cons: Constant y value returned by the mapping.[0m</p>
+<p>Map all values to the same constant, pre-specified coordinates.</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x_cons</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Constant x value returned by the mapping.</dd>
@@ -1322,7 +1191,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ConstantMapper.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32838&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a20a8&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1336,12 +1205,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ConstantMapper.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32418&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ConstantMapper.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32310&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1394,12 +1263,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ConstantMapper.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf322b8&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.ConstantMapper.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32940&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f45d0&gt;</em><a class="headerlink" href="#topo.coordmapper.ConstantMapper.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1444,28 +1313,10 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.MagnifyingMapper">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">MagnifyingMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#MagnifyingMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.SingleDimensionMapper" title="topo.coordmapper.SingleDimensionMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.SingleDimensionMapper</span></tt></a></p>
-<p>params(k=Number, in_range=Number, out_range=Number, remap_dimension=ObjectSelector, name=String)</p>
-<blockquote>
-<div><p>Exponential (magnifying) mapping function.</p>
+<p>Exponential (magnifying) mapping function.</p>
 <p>Provides a mapping that magnifies the center of the activity image.
 Parameter k indicates amount of magnification, where 0 means no
 magnification.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                     Value              Type         Bounds   Mode [0m</p>
-<p>in_range          0.70710678118654757      Number      (0, None)  V RW 
-k                         1.0              Number      (0, None)  V RW 
-out_range         0.70710678118654757      Number      (0, None)  V RW 
-remap_dimension         &#8216;radius&#8217;       ObjectSelector             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34min_range:        The maximum range of the mapping input.[0m
-[1;31mk:               &lt; No docstring available &gt;[0m
-[1;34mout_range:       The maximum range of the output.[0m
-[1;31mremap_dimension: The dimension to remap. (&#8216;xy&#8217; remaps x and y independently.)[0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">in_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>The maximum range of the mapping input.</dd>
@@ -1495,7 +1346,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.MagnifyingMapper.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32418&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2310&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1509,12 +1360,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.MagnifyingMapper.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32ba8&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.MagnifyingMapper.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32680&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1567,12 +1418,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.MagnifyingMapper.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32368&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.MagnifyingMapper.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00be10&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4cb0&gt;</em><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1617,34 +1468,11 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.AffineTransform">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">AffineTransform</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#AffineTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.AffineTransform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(matrix=Parameter, name=String)</p>
-<blockquote>
-<div><p>Remaps the input with an affine transform.</p>
+<p>Remaps the input with an affine transform.</p>
 <p>This mapper allows the specification of an arbitrary combination
 of translation, rotation and scaling via a transform
 matrix. Single translations, etc, can be specified more simply
 with the subclasses Translate2d, Rotate2d, and Scale2d.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                      Value                       Type    Mode [0m</p>
-<dl class="docutils">
-<dt>matrix   array([[ 1.,  1.,  1.],</dt>
-<dd>[ 1., ...  Parameter  V RW</dd>
-</dl>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mmatrix: The affine transformation matrix.  The functions[0m
-[1;34m        Translate2dMat, Rotate2dMat, and Scale2dMat generate affine[0m
-[1;34m        transform matrices that can be multiplied together to create[0m
-[1;34m        combination transforms.  E.g. the matrix::[0m
-[1;34m        [0m
-[1;34m          Translate2dMat(3,0)*Rotate2d(pi/2)[0m
-[1;34m        [0m
-[1;34m        will shift points to the right by 3 units and rotate them around[0m
-[1;34m        the origin by 90 degrees.[0m</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">matrix</span></tt> (<em>allow_None=False, constant=False, default=[[ 1.  1.  1.]
  [ 1.  1.  1.]
@@ -1677,7 +1505,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.AffineTransform.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32418&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a22b8&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1691,12 +1519,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.AffineTransform.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32838&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.AffineTransform.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32578&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1749,12 +1577,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.AffineTransform.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf32940&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.AffineTransform.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bc00&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f45d0&gt;</em><a class="headerlink" href="#topo.coordmapper.AffineTransform.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1799,26 +1627,10 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.SingleDimensionMapper">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">SingleDimensionMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#SingleDimensionMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(in_range=Number, out_range=Number, remap_dimension=ObjectSelector, name=String)</p>
-<blockquote>
-<div><p>Coordinate Mapper that uses an origin-centered 1-D mapping function.</p>
+<p>Coordinate Mapper that uses an origin-centered 1-D mapping function.</p>
 <p>An abstract mapping function for coordinate mappers that remap
 based on the radius, x, or y individually. Subclasses should override
 _map_fn(self,z).</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                     Value              Type         Bounds   Mode [0m</p>
-<p>in_range          0.70710678118654757      Number      (0, None)  V RW 
-out_range         0.70710678118654757      Number      (0, None)  V RW 
-remap_dimension         &#8216;radius&#8217;       ObjectSelector             V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34min_range:        The maximum range of the mapping input.[0m
-[1;31mout_range:       The maximum range of the output.[0m
-[1;34mremap_dimension: The dimension to remap. (&#8216;xy&#8217; remaps x and y independently.)[0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">in_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>The maximum range of the mapping input.</dd>
@@ -1845,7 +1657,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.SingleDimensionMapper.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849bf322b8&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f45d0&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1859,12 +1671,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.SingleDimensionMapper.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b940&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f46d8&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.SingleDimensionMapper.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bdb8&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4998&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1917,12 +1729,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.SingleDimensionMapper.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b578&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae873258788&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.SingleDimensionMapper.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b418&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae873258f70&gt;</em><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1967,18 +1779,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Polar2Cartesian">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Polar2Cartesian</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Polar2Cartesian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(degrees=Boolean, name=String)</p>
-<blockquote>
-<div>Map from polar (radius,angle) to Cartesian (x,y) coordinates.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName     Value    Type   Bounds  Mode [0m</p>
-<p>degrees   True  Boolean  (0, 1)  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mdegrees: Indicates whether the input angle is in degrees or radians.[0m</p>
+<p>Map from polar (radius,angle) to Cartesian (x,y) coordinates.</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">degrees</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Indicates whether the input angle is in degrees or radians.</dd>
@@ -2001,7 +1802,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Polar2Cartesian.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b8e8&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4260&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2015,12 +1816,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Polar2Cartesian.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00ba48&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4998&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Polar2Cartesian.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bcb0&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4100&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2073,12 +1874,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Polar2Cartesian.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b998&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Polar2Cartesian.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b3c0&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2470&gt;</em><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2123,21 +1924,8 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Grid">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Grid</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(xdensity=Number, ydensity=Number, name=String)</p>
-<blockquote>
-<div>Divides the 2D area into a grid, where all points within each grid
-element map to the same location.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName      Value  Type     Bounds   Mode [0m</p>
-<p>xdensity   1  Number  (0, None)  V RW 
-ydensity   1  Number  (0, None)  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mxdensity: Number of columns per 1.0 input sheet distance horizontally.[0m
-[1;31mydensity: Number of rows per 1.0 input sheet distance vertically.[0m</p>
+<p>Divides the 2D area into a grid, where all points within each grid
+element map to the same location.</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">xdensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Number of columns per 1.0 input sheet distance horizontally.</dd>
@@ -2162,7 +1950,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Grid.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bcb0&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4998&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2176,12 +1964,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Grid.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bdb8&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4cb0&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Grid.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bba8&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2234,12 +2022,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Grid.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bc00&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2470&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Grid.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b838&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a20a8&gt;</em><a class="headerlink" href="#topo.coordmapper.Grid.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2284,33 +2072,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Translate2d">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Translate2d</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Translate2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Translate2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.AffineTransform" title="topo.coordmapper.AffineTransform"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.AffineTransform</span></tt></a></p>
-<p>params(xoff=Number, yoff=Number, matrix=Parameter, name=String)</p>
-<blockquote>
-<div>Translate the input by xoff,yoff.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                      Value                       Type    Mode [0m</p>
-<dl class="docutils">
-<dt>matrix   array([[ 1.,  1.,  1.],</dt>
-<dd>[ 1., ...  Parameter  V RW</dd>
-</dl>
-<p>xoff                       0.0                       Number   V RW 
-yoff                       0.0                       Number   V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mmatrix: The affine transformation matrix.  The functions[0m
-[1;34m        Translate2dMat, Rotate2dMat, and Scale2dMat generate affine[0m
-[1;34m        transform matrices that can be multiplied together to create[0m
-[1;34m        combination transforms.  E.g. the matrix::[0m
-[1;34m        [0m
-[1;34m          Translate2dMat(3,0)*Rotate2d(pi/2)[0m
-[1;34m        [0m
-[1;34m        will shift points to the right by 3 units and rotate them around[0m
-[1;34m        the origin by 90 degrees.[0m
-[1;31mxoff:   &lt; No docstring available &gt;[0m
-[1;34myoff:   &lt; No docstring available &gt;[0m</p>
+<p>Translate the input by xoff,yoff.</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">xoff</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">yoff</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
@@ -2345,7 +2107,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Translate2d.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b6d8&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2359,12 +2121,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Translate2d.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b998&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Translate2d.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b3c0&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2417,12 +2179,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Translate2d.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00ba48&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a20a8&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Translate2d.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bec0&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2310&gt;</em><a class="headerlink" href="#topo.coordmapper.Translate2d.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2467,38 +2229,10 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.OttesSCMapper">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">OttesSCMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#OttesSCMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.OttesSCMapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
-<p>params(A=Number, Bu=Number, Bv=Number, amplitude_scale=Number, direction_scale=Number, mm_scale=Number, name=String)</p>
-<blockquote>
-<div><p>Abstract class for superior colliculus mappings.</p>
+<p>Abstract class for superior colliculus mappings.</p>
 <p>Subclasses of this class implement afferent and efferent mappings
 from Ottes et al. (1986) Vision Research 26:857-873.</p>
 <p>Default constant values are from Table 1, ibid.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName             Value  Type   Mode [0m</p>
-<p>A                 5.3  Number  V RW 
-Bu                1.8  Number  V RW 
-Bv                1.8  Number  V RW 
-amplitude_scale    1   Number  V RW 
-direction_scale    1   Number  V RW 
-mm_scale          8.0  Number  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mA:               Shape parameter A, in degrees[0m
-[1;31mBu:              Rostral-caudal scale parameter, in mm[0m
-[1;34mBv:              Orthogonal (medial-lateral?) scale paraemter in mm/deg[0m
-[1;31mamplitude_scale: Scale factor for saccade command amplitude, expressed in[0m
-[1;31m                 degrees per unit of sheet.  Indicates how large a[0m
-[1;31m                 saccade is represented by the x-component of the command[0m
-[1;31m                 input.[0m
-[1;34mdirection_scale: Scale factor for saccade command direction, expressed in[0m
-[1;34m                 degrees per unit of sheet.  Indicates what direction of saccade[0m
-[1;34m                 is represented by the y-component of the command input.[0m
-[1;31mmm_scale:        Scale factor to convert constants Bu and Bv from mm to sheet[0m
-[1;31m                 units.  Expressed in mm/unit. [0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">A</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=5.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Shape parameter A, in degrees</dd>
@@ -2537,7 +2271,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMapper.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bdb8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4158&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2551,12 +2285,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMapper.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00be10&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4d60&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMapper.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bba8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f46d8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2609,12 +2343,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMapper.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b838&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a24c8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCMapper.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b940&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2470&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCMapper.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2659,30 +2393,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.Rotate2d">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Rotate2d</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Rotate2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Rotate2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.AffineTransform" title="topo.coordmapper.AffineTransform"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.AffineTransform</span></tt></a></p>
-<p>params(angle=Number, matrix=Parameter, name=String)</p>
-<blockquote>
-<div>Rotate the input around the origin by an angle in radians.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                      Value                       Type    Mode [0m</p>
-<p>angle                      0.0                       Number   V RW 
-matrix   array([[ 1.,  1.,  1.],</p>
-<blockquote>
-<div>[ 1., ...  Parameter  V RW</div></blockquote>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mangle:  &lt; No docstring available &gt;[0m
-[1;31mmatrix: The affine transformation matrix.  The functions[0m
-[1;31m        Translate2dMat, Rotate2dMat, and Scale2dMat generate affine[0m
-[1;31m        transform matrices that can be multiplied together to create[0m
-[1;31m        combination transforms.  E.g. the matrix::[0m
-[1;31m        [0m
-[1;31m          Translate2dMat(3,0)*Rotate2d(pi/2)[0m
-[1;31m        [0m
-[1;31m        will shift points to the right by 3 units and rotate them around[0m
-[1;31m        the origin by 90 degrees.[0m</p>
+<p>Rotate the input around the origin by an angle in radians.</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">angle</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">matrix</span></tt> (<em>allow_None=False, constant=False, default=[[ 1.  1.  1.]
@@ -2716,7 +2427,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Rotate2d.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bf18&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4100&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2730,12 +2441,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Rotate2d.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b6d8&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f45d0&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Rotate2d.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bdb8&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4158&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2788,12 +2499,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Rotate2d.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b998&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a24c8&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.Rotate2d.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b578&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2470&gt;</em><a class="headerlink" href="#topo.coordmapper.Rotate2d.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2838,41 +2549,13 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.OttesSCSenseMapper">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">OttesSCSenseMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#OttesSCSenseMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.OttesSCMapper" title="topo.coordmapper.OttesSCMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.OttesSCMapper</span></tt></a></p>
-<p>params(A=Number, Bu=Number, Bv=Number, amplitude_scale=Number, direction_scale=Number, mm_scale=Number, name=String)</p>
-<blockquote>
-<div><p>Afferent superior colliculus mapping.</p>
+<p>Afferent superior colliculus mapping.</p>
 <p>Provides the input/retinal mapping to SC as defined by Ottes et al.
 (see superclass docs for reference)</p>
 <p>The mapping allows the creation of a single sheet representing
 both colliculi, one in the x-positive hemisheet and the other in
 the x-negative hemisheet.</p>
 <p>[NOTE: see warning in docs for ottes_inverse_mapping().]</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName             Value  Type   Mode [0m</p>
-<p>A                 5.3  Number  V RW 
-Bu                1.8  Number  V RW 
-Bv                1.8  Number  V RW 
-amplitude_scale    1   Number  V RW 
-direction_scale    1   Number  V RW 
-mm_scale          8.0  Number  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mA:               Shape parameter A, in degrees[0m
-[1;31mBu:              Rostral-caudal scale parameter, in mm[0m
-[1;34mBv:              Orthogonal (medial-lateral?) scale paraemter in mm/deg[0m
-[1;31mamplitude_scale: Scale factor for saccade command amplitude, expressed in[0m
-[1;31m                 degrees per unit of sheet.  Indicates how large a[0m
-[1;31m                 saccade is represented by the x-component of the command[0m
-[1;31m                 input.[0m
-[1;34mdirection_scale: Scale factor for saccade command direction, expressed in[0m
-[1;34m                 degrees per unit of sheet.  Indicates what direction of saccade[0m
-[1;34m                 is represented by the y-component of the command input.[0m
-[1;31mmm_scale:        Scale factor to convert constants Bu and Bv from mm to sheet[0m
-[1;31m                 units.  Expressed in mm/unit. [0m</p>
 <dl class="docutils">
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">A</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=5.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>Shape parameter A, in degrees</dd>
@@ -2911,7 +2594,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCSenseMapper.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00be10&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f46d8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2925,12 +2608,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCSenseMapper.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b3c0&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4cb0&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCSenseMapper.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b940&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4730&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2983,12 +2666,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCSenseMapper.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bba8&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2470&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.OttesSCSenseMapper.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b418&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2100&gt;</em><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3033,12 +2716,7 @@ containing the arguments.</p>
 <dt id="topo.coordmapper.CoordinateMapperFn">
 <em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">CoordinateMapperFn</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://ioam.github.io/param/Reference_Manual/param.html#param.parameterized.Parameterized" title="(in Param v1.3.1)"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
-<p>params(name=String)
-Abstract base class for functions mapping from a 2D coordinate into another one.
-[1;32mParameters of &#8216;CoordinateMapperFn&#8217;
-==================================
-[0m
-Object has no parameters.</p>
+<p>Abstract base class for functions mapping from a 2D coordinate into another one.</p>
 <dl class="method">
 <dt id="topo.coordmapper.CoordinateMapperFn.debug">
 <tt class="descname">debug</tt><big>(</big><em>msg</em>, <em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.debug" title="Permalink to this definition">¶</a></dt>
@@ -3057,7 +2735,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.CoordinateMapperFn.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00bec0&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f4ec0&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3071,12 +2749,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.CoordinateMapperFn.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00be10&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f46d8&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.CoordinateMapperFn.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b998&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8732f48e8&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3129,12 +2807,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.CoordinateMapperFn.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b6d8&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a2100&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.coordmapper.CoordinateMapperFn.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849c00b838&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8733a24c8&gt;</em><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3175,6 +2853,7 @@ containing the arguments.</p>
 
 </dd></dl>
 
+<hr class="docutils" />
 </div>
 </div>
 

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/custom.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../_static/require.js"></script>
     <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../index.html" /> 
   </head>
@@ -61,28 +64,31 @@
             
   <div class="section" id="topo-sparse-package">
 <h1>topo.sparse Package<a class="headerlink" href="#topo-sparse-package" title="Permalink to this headline">¶</a></h1>
+<hr class="docutils" />
 <div class="section" id="sparse-package">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">sparse</span></tt> Package<a class="headerlink" href="#sparse-package" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-topo.sparse"></span></div>
+<hr class="docutils" />
 <div class="section" id="compile-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">compile</span></tt> Module<a class="headerlink" href="#compile-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-topo.sparse.compile"></span></div>
+<hr class="docutils" />
 <div class="section" id="sparsecf-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">sparsecf</span></tt> Module<a class="headerlink" href="#sparsecf-module" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-de82f0988ebecd83acd40a4535f07ed7e9399eec.png" alt="Inheritance diagram of topo.sparse.sparsecf" usemap="#inheritancee1b2df4fe6" class="inheritance"/>
+<img src="../_images/inheritance-9e6c51d718053318145aa1d6a9fee5cc38c76a51.png" alt="Inheritance diagram of topo.sparse.sparsecf" usemap="#inheritancee1b2df4fe6" class="inheritance"/>
 <map id="inheritancee1b2df4fe6" name="inheritancee1b2df4fe6">
 <area shape="rect" id="node1" title="params(name=String)" alt="" coords="4,78,198,97"/>
-<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EPConnection" title="params(delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="255,4,441,23"/>
-<area shape="rect" id="node5" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="254,41,442,60"/>
-<area shape="rect" id="node6" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="253,78,444,97"/>
-<area shape="rect" id="node9" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="254,115,443,134"/>
-<area shape="rect" id="node11" title="params(min_matrix_radius=Integer, output_fns=HookList, weights_generator=ClassSelector, x=Number, y=Number, name=String)" alt="" coords="234,152,462,171"/>
-<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFProjection" title="params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="763,4,900,23"/>
-<area shape="rect" id="node10" title="params(initialized=Boolean, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="936,4,1148,23"/>
-<area shape="rect" id="node3" href="topo.base.html#topo.base.projection.Projection" title="params(activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="530,4,695,23"/>
-<area shape="rect" id="node7" title="params(interval=Number, percentile=Number, single_cf_fn=ClassSelector, name=String)" alt="" coords="517,60,707,79"/>
-<area shape="rect" id="node8" title="params(disk_mask=Boolean, interval=Number, kernel_sigma=Number, residual_turnover=Number, target_sparsity=Number, turnover_rate=Number, single_cf_fn=ClassSelector, name=String)" alt="" coords="498,97,726,116"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.simulation.EPConnection" title="EPConnection stores basic information for a connection between" alt="" coords="255,4,441,23"/>
+<area shape="rect" id="node5" title="CFSPLearningFunction applying the specified single_cf_fn to each Sparse CF." alt="" coords="254,41,442,60"/>
+<area shape="rect" id="node6" title="Applies the specified single_cf_fn to each SparseCF in the SparseCFProjection." alt="" coords="253,78,444,97"/>
+<area shape="rect" id="node9" title="Generic large&#45;scale response function based on a simple single&#45;CF function." alt="" coords="254,115,443,134"/>
+<area shape="rect" id="node11" title="A set of weights on one input Sheet." alt="" coords="234,152,462,171"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFProjection" title="A projection composed of ConnectionFields from a Sheet into a ProjectionSheet." alt="" coords="763,4,900,23"/>
+<area shape="rect" id="node10" title="A projection composed of SparseConnectionFields from a Sheet into" alt="" coords="936,4,1148,23"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.projection.Projection" title="A projection from a Sheet into a ProjectionSheet." alt="" coords="530,4,695,23"/>
+<area shape="rect" id="node7" title="Prunes specified percentage of connections from CFs in SparseCFProjection" alt="" coords="517,60,707,79"/>
+<area shape="rect" id="node8" title="Sprouting and retraction weights output function. At a preset time" alt="" coords="498,97,726,116"/>
 </map>
 </p>
 <span class="target" id="module-topo.sparse.sparsecf"></span><p>Basic SparseCFProjection with associated sparse CFs and output,
@@ -92,6 +98,7 @@ SparseCFProjection will fall back to a basic dense CFProjection.</p>
 be applied to the sparse CFs, but may suffer a serious performance
 loss.  For real work, such functions should be implemented at the
 Cython or C++ level.</p>
+<hr class="docutils" />
 </div>
 </div>
 

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../../index.html" />
     <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
@@ -116,7 +119,7 @@
     <span class="k">return</span> <span class="n">busy_fn</span>
 
 </div>
-<div class="viewcode-block" id="PlotGroupPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel">[docs]</a><span class="k">class</span> <span class="nc">PlotGroupPanel</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">TkParameterized</span><span class="p">,</span><span class="n">Frame</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PlotGroupPanel</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">TkParameterized</span><span class="p">,</span><span class="n">Frame</span><span class="p">):</span>
 
     <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
 
@@ -340,7 +343,7 @@
 
 
 
-<div class="viewcode-block" id="PlotGroupPanel.setup_plotgroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.setup_plotgroup">[docs]</a>    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform any necessary initialization of the plotgroup.</span>
 
@@ -348,7 +351,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">desired_maximum_plot_height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gui_desired_maximum_plot_height</span>
 
-</div>
+
     <span class="k">def</span> <span class="nf">__process_canvas_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">,</span><span class="n">func</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a dictionary containing the event itself, and, if the</span>
@@ -434,7 +437,7 @@
 
     <span class="c"># rename (not specific to plot_frame)</span>
     <span class="c"># document, and make display_* methods semi-private methods</span>
-<div class="viewcode-block" id="PlotGroupPanel.update_plot_frame"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.update_plot_frame">[docs]</a>    <span class="k">def</span> <span class="nf">update_plot_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plots</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">geom</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_plot_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plots</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">geom</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        set geom True for any action that user would expect to lose</span>
@@ -476,7 +479,7 @@
             <span class="k">except</span> <span class="n">TclError</span><span class="p">:</span>
                 <span class="k">pass</span>
 
-</div>
+
     <span class="nd">@with_busy_cursor</span>
     <span class="k">def</span> <span class="nf">refresh_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -498,7 +501,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_plot_frame</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="PlotGroupPanel.rescale_plots"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.rescale_plots">[docs]</a>    <span class="k">def</span> <span class="nf">rescale_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">rescale_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rescale the existing plots, without calling either the</span>
 <span class="sd">        plot_hooks or the pre_plot_hooks, then display the result.</span>
@@ -506,8 +509,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">scale_images</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_plot_frame</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">geom</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-</div>
-<div class="viewcode-block" id="PlotGroupPanel.refresh"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Main steps for generating plots in the Frame.</span>
 
@@ -526,8 +529,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">()</span>
 
 
-    <span class="c"># CEBALERT: this method needs cleaning, along with its versions in subclasses.</span></div>
-<div class="viewcode-block" id="PlotGroupPanel.display_plots"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.display_plots">[docs]</a>    <span class="k">def</span> <span class="nf">display_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c"># CEBALERT: this method needs cleaning, along with its versions in subclasses.</span>
+    <span class="k">def</span> <span class="nf">display_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        This function should be redefined in subclasses for interesting</span>
@@ -578,7 +581,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_canvas_bindings</span><span class="p">()</span>
 
-</div>
+
     <span class="k">def</span> <span class="nf">_add_canvas_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c">### plotting over; bind events to each canvas</span>
         <span class="k">for</span> <span class="n">plot</span><span class="p">,</span><span class="n">canvas</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plots</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">canvases</span><span class="p">):</span>
@@ -610,7 +613,7 @@
 
 
 
-<div class="viewcode-block" id="PlotGroupPanel.display_labels"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.display_labels">[docs]</a>    <span class="k">def</span> <span class="nf">display_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">display_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function should be redefined by subclasses to match any</span>
 <span class="sd">        changes made to display__plots().  Depending on the situation,</span>
@@ -639,15 +642,15 @@
     <span class="c"># enlarge, then the enlarge button gets disabled. If I then press</span>
     <span class="c"># refresh to get a plot, I can&#39;t enlarge it because the button&#39;s</span>
     <span class="c"># disabled. Probably need to reset button status if the plots</span>
-    <span class="c"># change.</span></div>
-<div class="viewcode-block" id="PlotGroupPanel.reduce_plots"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.reduce_plots">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c"># change.</span>
+    <span class="k">def</span> <span class="nf">reduce_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function called by widget to reduce the plot size, when possible.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">scale_images</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom_factor</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">[</span><span class="s">&#39;Reduce&#39;</span><span class="p">][</span><span class="s">&#39;widget&#39;</span><span class="p">][</span><span class="s">&#39;state&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">DISABLED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">[</span><span class="s">&#39;Enlarge&#39;</span><span class="p">][</span><span class="s">&#39;widget&#39;</span><span class="p">][</span><span class="s">&#39;state&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">NORMAL</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_plot_frame</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">geom</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="PlotGroupPanel.enlarge_plots"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.enlarge_plots">[docs]</a>    <span class="k">def</span> <span class="nf">enlarge_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">enlarge_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function called by widget to increase the plot size, when possible.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">scale_images</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom_factor</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">[</span><span class="s">&#39;Enlarge&#39;</span><span class="p">][</span><span class="s">&#39;widget&#39;</span><span class="p">][</span><span class="s">&#39;state&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">DISABLED</span>
@@ -664,8 +667,8 @@
     <span class="c"># need to be.</span>
 
     <span class="c"># CEBALERT: in a history research, a disabled widget does not display</span>
-    <span class="c"># up-to-date information (e.g. normalize checkbutton doesn&#39;t change).</span></div>
-<div class="viewcode-block" id="PlotGroupPanel.add_to_plotgroups_history"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.add_to_plotgroups_history">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_plotgroups_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c"># up-to-date information (e.g. normalize checkbutton doesn&#39;t change).</span>
+    <span class="k">def</span> <span class="nf">add_to_plotgroups_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If there are plots on display, and we&#39;re not doing a history research,</span>
 <span class="sd">        the plotgroup is stored in the history depending on the parameter </span>
@@ -683,7 +686,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_plot_history_length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plotgroups_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__update_widgets_for_history</span><span class="p">()</span>
-</div>
+
     <span class="k">def</span> <span class="nf">__set_widget_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">widget</span><span class="p">,</span><span class="n">state</span><span class="p">):</span>
         <span class="c"># sets the widget&#39;s state to state, unless state==&#39;normal&#39;</span>
         <span class="c"># and the widget&#39;s current state is &#39;readonly&#39;, in which</span>
@@ -792,7 +795,7 @@
 
 
     <span class="c"># rename to refresh_titles</span>
-<div class="viewcode-block" id="PlotGroupPanel.refresh_title"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.refresh_title">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">refresh_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set Window title and plot frame&#39;s title.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -801,21 +804,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_frame</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;: &quot;</span><span class="o">+</span><span class="n">title</span><span class="p">)</span>
         <span class="c"># JABALERT: Used to say .replace(&quot; at time &quot;,&quot;/&quot;); was there a reason?</span>
-</div>
-<div class="viewcode-block" id="PlotGroupPanel.destroy"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.PlotGroupPanel.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;overrides toplevel destroy, adding removal from autorefresh panels&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">auto_refresh_panels</span><span class="p">:</span>
             <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">auto_refresh_panels</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">Frame</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
-</div></div>
-<div class="viewcode-block" id="SheetPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.SheetPanel">[docs]</a><span class="k">class</span> <span class="nc">SheetPanel</span><span class="p">(</span><span class="n">PlotGroupPanel</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">SheetPanel</span><span class="p">(</span><span class="n">PlotGroupPanel</span><span class="p">):</span>
 
     <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">Sheet</span>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="SheetPanel.valid_context"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.SheetPanel.valid_context">[docs]</a>    <span class="k">def</span> <span class="nf">valid_context</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">valid_context</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if there appears to be data available for this type of plot.</span>
 
@@ -833,7 +836,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span>
 
-</div>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SheetPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
 
@@ -903,7 +906,7 @@
 <span class="c">#######################################</span>
 
 
-<div class="viewcode-block" id="SheetPanel.set_auto_refresh"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.SheetPanel.set_auto_refresh">[docs]</a>    <span class="k">def</span> <span class="nf">set_auto_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_auto_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add or remove this panel from the console&#39;s</span>
 <span class="sd">        auto_refresh_panels list.</span>
@@ -916,7 +919,7 @@
                 <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">auto_refresh_panels</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
-</div>
+
     <span class="k">def</span> <span class="nf">_connection_fields_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open a Connection Fields plot for the unit currently</span>
@@ -970,17 +973,17 @@
                 <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;No orientation tuning curve measurements are available yet for sheet </span><span class="si">%s</span><span class="s">; run the Orientation Tuning (Fullfield) command and try again.&quot;</span><span class="o">%</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="SheetPanel.conditional_refresh"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.SheetPanel.conditional_refresh">[docs]</a>    <span class="k">def</span> <span class="nf">conditional_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">conditional_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Only calls refresh() if auto_refresh is enabled.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
-</div>
-<div class="viewcode-block" id="SheetPanel.conditional_redraw"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.html#topo.tkgui.plotgrouppanel.SheetPanel.conditional_redraw">[docs]</a>    <span class="k">def</span> <span class="nf">conditional_redraw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">conditional_redraw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Only calls redraw_plots() if auto_refresh is enabled.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">()</span></div></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">()</span>
 </pre></div>
 
           </div>

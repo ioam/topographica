@@ -1,6 +1,9 @@
 topo.analysis Package
 =====================
 
+
+---------
+
 :mod:`analysis` Package
 -----------------------
 
@@ -11,6 +14,8 @@ topo.analysis Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`command` Module
 ---------------------
@@ -23,6 +28,8 @@ topo.analysis Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`featureresponses` Module
 ------------------------------
 
@@ -33,4 +40,6 @@ topo.analysis Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

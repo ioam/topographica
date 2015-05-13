@@ -1,6 +1,9 @@
 topo.responsefn Package
 =======================
 
+
+---------
+
 :mod:`responsefn` Package
 -------------------------
 
@@ -11,6 +14,8 @@ topo.responsefn Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`optimized` Module
 -----------------------
@@ -23,6 +28,8 @@ topo.responsefn Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`projfn` Module
 --------------------
 
@@ -33,4 +40,6 @@ topo.responsefn Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

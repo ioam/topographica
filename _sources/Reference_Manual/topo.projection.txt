@@ -1,6 +1,9 @@
 topo.projection Package
 =======================
 
+
+---------
+
 :mod:`projection` Package
 -------------------------
 
@@ -12,6 +15,8 @@ topo.projection Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`optimized` Module
 -----------------------
 
@@ -22,4 +27,6 @@ topo.projection Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

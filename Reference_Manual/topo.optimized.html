@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/custom.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../_static/require.js"></script>
     <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../index.html" /> 
   </head>
@@ -61,27 +64,30 @@
             
   <div class="section" id="topo-optimized-package">
 <h1>topo.optimized Package<a class="headerlink" href="#topo-optimized-package" title="Permalink to this headline">¶</a></h1>
+<hr class="docutils" />
 <div class="section" id="optimized-package">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">optimized</span></tt> Package<a class="headerlink" href="#optimized-package" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-topo.optimized"></span></div>
+<hr class="docutils" />
 <div class="section" id="compile-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">compile</span></tt> Module<a class="headerlink" href="#compile-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-topo.optimized.compile"></span></div>
+<hr class="docutils" />
 <div class="section" id="unoptimized-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">unoptimized</span></tt> Module<a class="headerlink" href="#unoptimized-module" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-522013a3ab8747d7e2542c39dd8b76a5adebb3ae.png" alt="Inheritance diagram of topo.optimized.unoptimized" usemap="#inheritancecfedd44b41" class="inheritance"/>
+<img src="../_images/inheritance-7e7b5fc024b666a03bb2f62a7ff93b405c9f3eb3.png" alt="Inheritance diagram of topo.optimized.unoptimized" usemap="#inheritancecfedd44b41" class="inheritance"/>
 <map id="inheritancecfedd44b41" name="inheritancecfedd44b41">
 <area shape="rect" id="node1" title="params(name=String)" alt="" coords="4,63,214,84"/>
-<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFPLearningFn" title="params(name=String)" alt="" coords="255,23,416,44"/>
-<area shape="rect" id="node4" href="topo.base.html#topo.base.cf.CFPOutputFn" title="params(name=String)" alt="" coords="260,63,411,84"/>
-<area shape="rect" id="node6" href="topo.base.html#topo.base.cf.CFPResponseFn" title="params(name=String)" alt="" coords="253,103,418,124"/>
-<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="557,23,708,44"/>
-<area shape="rect" id="node7" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="851,4,1143,24"/>
-<area shape="rect" id="node8" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="854,44,1140,64"/>
-<area shape="rect" id="node9" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="458,63,806,84"/>
-<area shape="rect" id="node5" href="topo.base.html#topo.base.cf.CFPRF_Plugin" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="556,103,708,124"/>
-<area shape="rect" id="node10" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="846,103,1148,124"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFPLearningFn" title="Compute new CFs for a CFProjection based on input and output activity values." alt="" coords="255,23,416,44"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.cf.CFPOutputFn" title="Type for an object that applies some operation (typically something" alt="" coords="260,63,411,84"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.cf.CFPResponseFn" title="Map an input activity matrix into an output matrix using the CFs" alt="" coords="253,103,418,124"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="CFPLearningFunction applying the specified single_cf_fn to each CF." alt="" coords="557,23,708,44"/>
+<area shape="rect" id="node7" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython" title="Same as CFPLF_Plugin(single_cf_fn=BCMFixed()); just for non&#45;optimized fallback." alt="" coords="851,4,1143,24"/>
+<area shape="rect" id="node8" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython" title="Same as CFPLF_Plugin(single_cf_fn=Hebbian()); just for non&#45;optimized fallback." alt="" coords="854,44,1140,64"/>
+<area shape="rect" id="node9" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython" title="Non&#45;optimized version of CFPOF_DivisiveNormalizeL1_cython." alt="" coords="458,63,806,84"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.cf.CFPRF_Plugin" title="Generic large&#45;scale response function based on a simple single&#45;CF function." alt="" coords="556,103,708,124"/>
+<area shape="rect" id="node10" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython" title="Wrapper written to allow transparent non&#45;optimized fallback;" alt="" coords="846,103,1148,124"/>
 </map>
 </p>
 <span class="target" id="module-topo.optimized.unoptimized"></span><p>Provides unoptimized fallbacks for Cython optimized components.</p>
@@ -89,19 +95,7 @@
 <dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython">
 <em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPLF_BCMFixed_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPLF_BCMFixed_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="topo.base.cf.CFPLF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPLF_Plugin</span></tt></a></p>
-<p>params(single_cf_fn=ClassSelector, name=String)
-Same as CFPLF_Plugin(single_cf_fn=BCMFixed()); just for non-optimized fallback.
-[1;32mParameters of &#8216;CFPLF_BCMFixed_cython&#8217;
-=====================================
-[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                            Value                         Type      Mode [0m</p>
-<p>single_cf_fn   BCMFixed(name=&#8217;BCMFixed00852&#8217;, unit_t...  ClassSelector  C RO</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34msingle_cf_fn: Accepts a LearningFn that will be applied to each CF individually.[0m</p>
+<p>Same as CFPLF_Plugin(single_cf_fn=BCMFixed()); just for non-optimized fallback.</p>
 <dl class="docutils">
 <dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;BCMFixed BCMFixed00852&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=True</em>)</dt>
 <dd>Accepts a LearningFn that will be applied to each CF individually.</dd>
@@ -132,7 +126,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666c00&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c94c8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -146,12 +140,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666d08&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c95d0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666d60&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9628&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -204,12 +198,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f64c158&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c99f0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f64c1b0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9a48&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_BCMFixed_cython.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -254,19 +248,7 @@ containing the arguments.</p>
 <dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython">
 <em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPLF_Hebbian_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPLF_Hebbian_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPLF_Plugin" title="topo.base.cf.CFPLF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPLF_Plugin</span></tt></a></p>
-<p>params(single_cf_fn=ClassSelector, name=String)
-Same as CFPLF_Plugin(single_cf_fn=Hebbian()); just for non-optimized fallback.
-[1;32mParameters of &#8216;CFPLF_Hebbian_cython&#8217;
-====================================
-[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                      Value                   Type      Mode [0m</p>
-<p>single_cf_fn   Hebbian(name=&#8217;Hebbian00851&#8217;)  ClassSelector  C RO</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34msingle_cf_fn: Accepts a LearningFn that will be applied to each CF individually.[0m</p>
+<p>Same as CFPLF_Plugin(single_cf_fn=Hebbian()); just for non-optimized fallback.</p>
 <dl class="docutils">
 <dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;Hebbian Hebbian00851&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=True</em>)</dt>
 <dd>Accepts a LearningFn that will be applied to each CF individually.</dd>
@@ -297,7 +279,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666e68&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9680&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -311,12 +293,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666ec0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c96d8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666f70&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9788&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -369,12 +351,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f6551b0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9100&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f655208&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c91b0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPLF_Hebbian_cython.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -419,22 +401,10 @@ containing the arguments.</p>
 <dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython">
 <em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPOF_DivisiveNormalizeL1_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPOF_DivisiveNormalizeL1_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPOutputFn" title="topo.base.cf.CFPOutputFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPOutputFn</span></tt></a></p>
-<p>params(single_cf_fn=ClassSelector, name=String)</p>
-<blockquote>
-<div><p>Non-optimized version of CFPOF_DivisiveNormalizeL1_cython.</p>
+<p>Non-optimized version of CFPOF_DivisiveNormalizeL1_cython.</p>
 <p>Same as CFPOF_Plugin(single_cf_fn=DivisiveNormalizeL1()), except
 that it supports joint normalization using the norm_total
 property of ConnectionField.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                            Value                         Type      Mode [0m</p>
-<p>single_cf_fn   DivisiveNormalizeL1(init_keys=[], nam...  ClassSelector  C RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34msingle_cf_fn: &lt; No docstring available &gt;[0m</p>
 <p><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;DivisiveNormalizeL1 DivisiveNormalizeL100853&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
 <dl class="method">
 <dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.debug">
@@ -454,7 +424,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666c58&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9c58&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -468,12 +438,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666e10&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9680&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666fc8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c96d8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -526,12 +496,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666f18&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c97e0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666838&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c98e8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPOF_DivisiveNormalizeL1_cython.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -576,19 +546,8 @@ containing the arguments.</p>
 <dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython">
 <em class="property">class </em><tt class="descclassname">topo.optimized.unoptimized.</tt><tt class="descname">CFPRF_DotProduct_cython</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/optimized/unoptimized.html#CFPRF_DotProduct_cython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPRF_Plugin" title="topo.base.cf.CFPRF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPRF_Plugin</span></tt></a></p>
-<p>params(single_cf_fn=ClassSelector, name=String)</p>
-<blockquote>
-<div>Wrapper written to allow transparent non-optimized fallback;
-equivalent to CFPRF_Plugin(single_cf_fn=DotProduct()).</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                         Value                      Type      Mode [0m</p>
-<p>single_cf_fn   DotProduct(name=&#8217;DotProduct00850&#8217;)  ClassSelector  C RO</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34msingle_cf_fn: Accepts a ResponseFn that will be applied to each CF individually.[0m</p>
+<p>Wrapper written to allow transparent non-optimized fallback;
+equivalent to CFPRF_Plugin(single_cf_fn=DotProduct()).</p>
 <dl class="docutils">
 <dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;DotProduct DotProduct00850&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=True</em>)</dt>
 <dd>Accepts a ResponseFn that will be applied to each CF individually.</dd>
@@ -611,7 +570,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666a48&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c93c0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -625,12 +584,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666e10&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9c58&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666db8&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9520&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -683,12 +642,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666d08&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c95d0&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b849f666940&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8759c9890&gt;</em><a class="headerlink" href="#topo.optimized.unoptimized.CFPRF_DotProduct_cython.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -729,6 +688,7 @@ containing the arguments.</p>
 
 </dd></dl>
 
+<hr class="docutils" />
 </div>
 </div>
 

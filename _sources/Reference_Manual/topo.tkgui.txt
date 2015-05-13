@@ -1,6 +1,9 @@
 topo.tkgui Package
 ==================
 
+
+---------
+
 :mod:`tkgui` Package
 --------------------
 
@@ -11,6 +14,8 @@ topo.tkgui Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`editor` Module
 --------------------
@@ -23,6 +28,8 @@ topo.tkgui Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`featurecurvepanel` Module
 -------------------------------
 
@@ -33,6 +40,8 @@ topo.tkgui Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`plotgrouppanel` Module
 ----------------------------
@@ -45,6 +54,8 @@ topo.tkgui Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`projectionpanel` Module
 -----------------------------
 
@@ -55,6 +66,8 @@ topo.tkgui Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`templateplotgrouppanel` Module
 ------------------------------------
@@ -67,6 +80,8 @@ topo.tkgui Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`testpattern` Module
 -------------------------
 
@@ -78,6 +93,8 @@ topo.tkgui Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`topoconsole` Module
 -------------------------
 
@@ -88,4 +105,6 @@ topo.tkgui Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

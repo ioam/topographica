@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
@@ -295,7 +298,7 @@
 <span class="c">### set when the plotgroup is instantiated. Then if sheet=None, the</span>
 <span class="c">### sheet&#39;s range can be used as the list of sheets.</span>
 </div></div>
-<div class="viewcode-block" id="SheetPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.SheetPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">SheetPlotGroup</span><span class="p">(</span><span class="n">PlotGroup</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SheetPlotGroup</span><span class="p">(</span><span class="n">PlotGroup</span><span class="p">):</span>
 
     <span class="c"># CEBALERT: shouldn&#39;t this be abstract? Currently it wouldn&#39;t do</span>
     <span class="c"># anything with its sheets if you asked it to make plots.</span>
@@ -376,7 +379,7 @@
         <span class="k">return</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="SheetPlotGroup.update_maximum_plot_height"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.SheetPlotGroup.update_maximum_plot_height">[docs]</a>    <span class="k">def</span> <span class="nf">update_maximum_plot_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">zoom_factor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_maximum_plot_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">zoom_factor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Determine which plot will be the largest, based on the</span>
 <span class="sd">        settings for minimum plot heights, the specified zoom factor</span>
@@ -449,8 +452,8 @@
     <span class="c">### windows.</span>
     <span class="c">###</span>
     <span class="c">### Could strip out the matrix-coord scaling and put it into</span>
-    <span class="c">### PlotGroup</span></div>
-<div class="viewcode-block" id="SheetPlotGroup.scale_images"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.SheetPlotGroup.scale_images">[docs]</a>    <span class="k">def</span> <span class="nf">scale_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">zoom_factor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c">### PlotGroup</span>
+    <span class="k">def</span> <span class="nf">scale_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">zoom_factor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Enlarge or reduce the bitmaps as needed for display.</span>
 
@@ -492,7 +495,7 @@
         <span class="k">return</span> <span class="bp">True</span>
 
 
-</div></div>
+
 <span class="k">def</span> <span class="nf">_get_value_range</span><span class="p">(</span><span class="n">plots</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to return the (min,max) given by the value_ranges of</span>
@@ -1077,7 +1080,7 @@
 
 
 </div>
-<div class="viewcode-block" id="RFProjectionPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.RFProjectionPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">RFProjectionPlotGroup</span><span class="p">(</span><span class="n">GridPlotGroup</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RFProjectionPlotGroup</span><span class="p">(</span><span class="n">GridPlotGroup</span><span class="p">):</span>
     <span class="n">keyname</span><span class="o">=</span><span class="s">&#39;RFs&#39;</span>
     <span class="n">input_sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">compute_default_fn</span><span class="o">=</span><span class="n">default_input_sheet</span><span class="p">,</span>
                                        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;The sheet on which to measure the RFs.&quot;</span><span class="p">)</span>
@@ -1114,7 +1117,7 @@
         <span class="k">return</span> <span class="n">kw</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">kw</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">]</span>
 
 
-</div>
+
 <div class="viewcode-block" id="TwoOrientationsPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.TwoOrientationsPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">TwoOrientationsPlotGroup</span><span class="p">(</span> <span class="n">TemplatePlotGroup</span> <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Display with small segments the two most preferred orientations for each</span>
 <span class="sd">    units in the sheet. Only orientation with significative selectivity are</span>
@@ -1143,7 +1146,7 @@
 
 <span class="c"># CEBALERT: haven&#39;t modified; might need updating. Doesn&#39;t seem to be</span>
 <span class="c"># a way to call it from the GUI - is it known to be broken?</span></div>
-<div class="viewcode-block" id="RetinotopyPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.RetinotopyPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">RetinotopyPlotGroup</span><span class="p">(</span><span class="n">TemplatePlotGroup</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RetinotopyPlotGroup</span><span class="p">(</span><span class="n">TemplatePlotGroup</span><span class="p">):</span>
     <span class="n">input_sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">compute_default_fn</span><span class="o">=</span><span class="n">default_input_sheet</span><span class="p">,</span>
                                        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;The sheet on which to measure the RFs.&quot;</span><span class="p">)</span>
 
@@ -1153,8 +1156,8 @@
             <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">name</span><span class="p">],</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
 
 
-</div>
-<div class="viewcode-block" id="ProjectionPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.ProjectionPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">ProjectionPlotGroup</span><span class="p">(</span><span class="n">GridPlotGroup</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">ProjectionPlotGroup</span><span class="p">(</span><span class="n">GridPlotGroup</span><span class="p">):</span>
 
     <span class="n">keyname</span><span class="o">=</span><span class="s">&#39;Weights&#39;</span>
 
@@ -1210,7 +1213,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span><span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
 
 
-</div>
+
 <div class="viewcode-block" id="CFProjectionPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.CFProjectionPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">CFProjectionPlotGroup</span><span class="p">(</span><span class="n">ProjectionPlotGroup</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Visualize one CFProjection.&quot;&quot;&quot;</span>
 
@@ -1361,7 +1364,7 @@
 
 
 </div>
-<div class="viewcode-block" id="FeatureCurvePlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.FeatureCurvePlotGroup">[docs]</a><span class="k">class</span> <span class="nc">FeatureCurvePlotGroup</span><span class="p">(</span><span class="n">UnitPlotGroup</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">FeatureCurvePlotGroup</span><span class="p">(</span><span class="n">UnitPlotGroup</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">FeatureCurvePlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
@@ -1371,7 +1374,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">FeatureCurvePlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_plot_hooks</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
         <span class="c">#self.get_curve_time()</span>
 
-<div class="viewcode-block" id="FeatureCurvePlotGroup.get_curve_time"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.html#topo.plotting.plotgroup.FeatureCurvePlotGroup.get_curve_time">[docs]</a>    <span class="k">def</span> <span class="nf">get_curve_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_curve_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get timestamps from the current SheetViews in the curve_dict and</span>
 <span class="sd">        use the max timestamp as the plot label</span>
@@ -1386,7 +1389,7 @@
                              <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">timestamps</span><span class="p">),</span><span class="nb">max</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)))</span>
 
 
-</div></div>
+
 <span class="n">plotgroups</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Global repository of PlotGroups, to which users can add their own as</span>

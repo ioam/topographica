@@ -1,6 +1,9 @@
 topo.optimized Package
 ======================
 
+
+---------
+
 :mod:`optimized` Package
 ------------------------
 
@@ -11,6 +14,8 @@ topo.optimized Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`compile` Module
 ---------------------
@@ -23,6 +28,8 @@ topo.optimized Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`unoptimized` Module
 -------------------------
 
@@ -33,4 +40,6 @@ topo.optimized Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

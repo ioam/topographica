@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/custom.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../_static/require.js"></script>
     <link rel="shortcut icon" href="../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../index.html" /> 
   </head>
@@ -61,23 +64,24 @@
             
   <div class="section" id="topo-projection-package">
 <h1>topo.projection Package<a class="headerlink" href="#topo-projection-package" title="Permalink to this headline">¶</a></h1>
+<hr class="docutils" />
 <div class="section" id="projection-package">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">projection</span></tt> Package<a class="headerlink" href="#projection-package" title="Permalink to this headline">¶</a></h2>
 <p class="graphviz">
-<img src="../_images/inheritance-4438f00f0967d95ef0bfdec544acdd3ff9a90b90.png" alt="Inheritance diagram of topo.projection" usemap="#inheritance6b99715b23" class="inheritance"/>
+<img src="../_images/inheritance-6fe1bafbf2747f747bc5769faecba9c3b8e97178.png" alt="Inheritance diagram of topo.projection" usemap="#inheritance6b99715b23" class="inheritance"/>
 <map id="inheritance6b99715b23" name="inheritance6b99715b23">
 <area shape="rect" id="node1" title="params(name=String)" alt="" coords="3,52,169,68"/>
-<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPOutputFn" title="params(name=String)" alt="" coords="220,35,339,52"/>
-<area shape="rect" id="node7" href="topo.base.html#topo.base.simulation.EPConnection" title="params(delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="200,67,359,83"/>
-<area shape="rect" id="node8" href="#topo.projection.CFPOF_SharedWeight" title="params(single_cf_fn=ClassSelector, name=String)" alt="" coords="390,35,555,52"/>
-<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFProjection" title="params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="608,51,725,67"/>
-<area shape="rect" id="node6" href="topo.base.html#topo.base.cf.ResizableCFProjection" title="params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="793,19,949,35"/>
-<area shape="rect" id="node11" href="#topo.projection.ScaledCFProjection" title="params(smoothing=Number, target=Number, target_lr=Number, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="793,51,949,67"/>
-<area shape="rect" id="node13" href="#topo.projection.SharedWeightCFProjection" title="params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="778,82,964,99"/>
-<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.Projection" title="params(activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="402,67,543,83"/>
-<area shape="rect" id="node10" href="#topo.projection.OneToOneProjection" title="params(coord_mapper=ClassSelector, learning_fn=ClassSelector, learning_rate=Number, weights_generator=ClassSelector, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="586,82,747,99"/>
+<area shape="rect" id="node2" href="topo.base.html#topo.base.cf.CFPOutputFn" title="Type for an object that applies some operation (typically something" alt="" coords="220,35,339,52"/>
+<area shape="rect" id="node7" href="topo.base.html#topo.base.simulation.EPConnection" title="EPConnection stores basic information for a connection between" alt="" coords="200,67,359,83"/>
+<area shape="rect" id="node8" href="#topo.projection.CFPOF_SharedWeight" title="CFPOutputFn for use with SharedWeightCFProjections." alt="" coords="390,35,555,52"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFProjection" title="A projection composed of ConnectionFields from a Sheet into a ProjectionSheet." alt="" coords="608,51,725,67"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.cf.ResizableCFProjection" title="A CFProjection with resizable weights." alt="" coords="793,19,949,35"/>
+<area shape="rect" id="node11" href="#topo.projection.ScaledCFProjection" title="Allows scaling of activity based on a specified target average activity." alt="" coords="793,51,949,67"/>
+<area shape="rect" id="node13" href="#topo.projection.SharedWeightCFProjection" title="A Projection with a single set of weights, shared by all units." alt="" coords="778,82,964,99"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.Projection" title="A projection from a Sheet into a ProjectionSheet." alt="" coords="402,67,543,83"/>
+<area shape="rect" id="node10" href="#topo.projection.OneToOneProjection" title="A projection that has at most one input connection for each unit." alt="" coords="586,82,747,99"/>
 <area shape="rect" id="node5" href="topo.base.html#topo.base.cf.ConnectionField" title="A set of weights on one input Sheet." alt="" coords="21,4,152,20"/>
-<area shape="rect" id="node9" href="#topo.projection.LeakyCFProjection" title="params(decay_rate=Number, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)" alt="" coords="995,19,1148,35"/>
+<area shape="rect" id="node9" href="#topo.projection.LeakyCFProjection" title="A projection that has a decay_rate parameter so that incoming" alt="" coords="995,19,1148,35"/>
 </map>
 </p>
 <span class="target" id="module-topo.projection"></span><p>Projection classes.</p>
@@ -89,80 +93,11 @@ become available for any model.</p>
 <dt id="topo.projection.OneToOneProjection">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">OneToOneProjection</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/projection.html#OneToOneProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.projection.OneToOneProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.projection.Projection" title="topo.base.projection.Projection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.Projection</span></tt></a></p>
-<p>params(coord_mapper=ClassSelector, learning_fn=ClassSelector, learning_rate=Number, weights_generator=ClassSelector, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div><p>A projection that has at most one input connection for each unit.</p>
+<p>A projection that has at most one input connection for each unit.</p>
 <p>This projection has exactly one weight for each destination unit.
 The input locations on the input sheet are determined by a
 coordinate mapper.  Inputs that map outside the bounds of the
 input sheet are treated as having zero weight.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                 Value                         Type        Bounds     Mode  [0m</p>
-<p>activity_group                (0.5, &lt;ufunc &#8216;add&#8217;&gt;)              Parameter                 V RW  
-coord_mapper           IdentityMF(name=&#8217;IdentityMF01020&#8217;)     ClassSelector               V RW  
-delay                                 0.05                        Number     (0, None)    V RW  
-dest                                  None                      Parameter               C RW AN 
-dest_port                          &#8216;Activity&#8217;                   Parameter                 V RW  
-input_fns                              []                        HookList    (0, None)    V RW  
-learning_fn            IdentityLF(name=&#8217;IdentityLF01022&#8217;)     ClassSelector               V RW  
-learning_rate                          0                          Number                  V RW  
-output_fns                             []                        HookList    (0, None)    V RW  
-plastic                               True                       Boolean       (0, 1)     V RW  
-precedence                            0.5                         Number                  V RW  
-private                              False                       Boolean       (0, 1)     V RW  
-src                                   None                      Parameter               C RW AN 
-src_port                           &#8216;Activity&#8217;                   Parameter                 V RW  
-strength                              1.0                         Number                  V RW  
-weights_generator   Constant(bounds=BoundingBox(radius=0....  ClassSelector               C RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group:    Grouping and precedence specifier for computing activity from[0m
-[1;34m                   Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                   same activity_group will be summed, and then the results from[0m
-[1;34m                   each group will be combined in the order of the activity_group[0m
-[1;34m                   using the operator specified by the activity_operator.  For[0m
-[1;34m                   instance, if there are two Projections with[0m
-[1;34m                   activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                   activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                   from the first two will be added together, and the result[0m
-[1;34m                   divided by the sum of the second two.[0m
-[1;31mcoord_mapper:      Function to map a destination unit coordinate into the src sheet.[0m
-[1;34mdelay:             Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;34m                   Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;34m                   of events.[0m
-[1;31mdest:              The EventProcessor to which messages are delivered.[0m
-[1;34mdest_port:         Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;34m                   [0m
-[1;34m                   EventProcessors that accept only a single type of incoming[0m
-[1;34m                   event will typically use a src_port of None.  However, if[0m
-[1;34m                   multiple types of communication are meaningful, the[0m
-[1;34m                   EventProcessor can accept other values for dest_port.  It is up[0m
-[1;34m                   to the dest EventProcessor to process the data appropriately[0m
-[1;34m                   for each port, and to define what is expected to be sent to[0m
-[1;34m                   that port.[0m
-[1;31minput_fns:         Function(s) applied to the input before the projection activity is computed.[0m
-[1;34mlearning_fn:       Learning function applied to weights.[0m
-[1;31mlearning_rate:     &lt; No docstring available &gt;[0m
-[1;34moutput_fns:        Function(s) applied to the projection activity after it is computed.[0m
-[1;31mplastic:           Whether or not to update the internal state on each call.[0m
-[1;31m                   Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;34mprecedence:        &lt; No docstring available &gt;[0m
-[1;31mprivate:           Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;34msrc:               The EventProcessor from which messages originate.[0m
-[1;31msrc_port:          Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;31m                   [0m
-[1;31m                   EventProcessors that generate only a single type of[0m
-[1;31m                   outgoing event will typically use a src_port of None.  However,[0m
-[1;31m                   if multiple types of communication are meaningful, the[0m
-[1;31m                   EventProcessor can accept other values for src_port.  It is up[0m
-[1;31m                   to the src EventProcessor to deliver appropriate data to each[0m
-[1;31m                   port, and to declare what will be sent over that port.[0m
-[1;34mstrength:          &lt; No docstring available &gt;[0m
-[1;31mweights_generator: Generate initial weight values for each unit of the destination sheet.[0m</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">learning_rate</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.1, readonly=False</em>)</dt>
@@ -253,7 +188,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.OneToOneProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a07a71b0&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9c58&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -267,12 +202,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.OneToOneProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a07a7100&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9f70&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.OneToOneProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a07a7208&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9fc8&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -376,12 +311,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.OneToOneProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a07a7260&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9ec0&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.OneToOneProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a07a7158&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8775100a8&gt;</em><a class="headerlink" href="#topo.projection.OneToOneProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -418,72 +353,11 @@ containing the arguments.</p>
 <dt id="topo.projection.Projection">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">Projection</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.projection.Projection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.simulation.EPConnection" title="topo.base.simulation.EPConnection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.simulation.EPConnection</span></tt></a></p>
-<p>params(activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div><p>A projection from a Sheet into a ProjectionSheet.</p>
+<p>A projection from a Sheet into a ProjectionSheet.</p>
 <p>Projections are required to support the activate() method, which
 will construct a matrix the same size as the target
 ProjectionSheet, from an input matrix of activity from the source
 Sheet.  Other than that, a Projection may be of any type.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                    Value             Type      Bounds     Mode  [0m</p>
-<p>activity_group   (0.5, &lt;ufunc &#8216;add&#8217;&gt;)  Parameter               V RW  
-delay                    0.05            Number   (0, None)    V RW  
-dest                     None          Parameter             C RW AN 
-dest_port             &#8216;Activity&#8217;       Parameter               V RW  
-input_fns                 []            HookList  (0, None)    V RW  
-output_fns                []            HookList  (0, None)    V RW  
-plastic                  True           Boolean     (0, 1)     V RW  
-precedence               0.5             Number                V RW  
-private                 False           Boolean     (0, 1)     V RW  
-src                      None          Parameter             C RW AN 
-src_port              &#8216;Activity&#8217;       Parameter               V RW  
-strength                 1.0             Number                V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group: Grouping and precedence specifier for computing activity from[0m
-[1;34m                Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                same activity_group will be summed, and then the results from[0m
-[1;34m                each group will be combined in the order of the activity_group[0m
-[1;34m                using the operator specified by the activity_operator.  For[0m
-[1;34m                instance, if there are two Projections with[0m
-[1;34m                activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                from the first two will be added together, and the result[0m
-[1;34m                divided by the sum of the second two.[0m
-[1;31mdelay:          Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;31m                Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;31m                of events.[0m
-[1;34mdest:           The EventProcessor to which messages are delivered.[0m
-[1;31mdest_port:      Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;31m                [0m
-[1;31m                EventProcessors that accept only a single type of incoming[0m
-[1;31m                event will typically use a src_port of None.  However, if[0m
-[1;31m                multiple types of communication are meaningful, the[0m
-[1;31m                EventProcessor can accept other values for dest_port.  It is up[0m
-[1;31m                to the dest EventProcessor to process the data appropriately[0m
-[1;31m                for each port, and to define what is expected to be sent to[0m
-[1;31m                that port.[0m
-[1;34minput_fns:      Function(s) applied to the input before the projection activity is computed.[0m
-[1;31moutput_fns:     Function(s) applied to the projection activity after it is computed.[0m
-[1;34mplastic:        Whether or not to update the internal state on each call.[0m
-[1;34m                Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;31mprecedence:     &lt; No docstring available &gt;[0m
-[1;34mprivate:        Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;31msrc:            The EventProcessor from which messages originate.[0m
-[1;34msrc_port:       Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;34m                [0m
-[1;34m                EventProcessors that generate only a single type of[0m
-[1;34m                outgoing event will typically use a src_port of None.  However,[0m
-[1;34m                if multiple types of communication are meaningful, the[0m
-[1;34m                EventProcessor can accept other values for src_port.  It is up[0m
-[1;34m                to the src EventProcessor to deliver appropriate data to each[0m
-[1;34m                port, and to declare what will be sent over that port.[0m
-[1;31mstrength:       &lt; No docstring available &gt;[0m</p>
 <dl class="docutils">
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.1, readonly=False</em>)</dt>
 <dd>The EventProcessor from which messages originate.</dd>
@@ -575,7 +449,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.Projection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e0a8&gt;</em><a class="headerlink" href="#topo.projection.Projection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9c58&gt;</em><a class="headerlink" href="#topo.projection.Projection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -589,12 +463,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.Projection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e158&gt;</em><a class="headerlink" href="#topo.projection.Projection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9e10&gt;</em><a class="headerlink" href="#topo.projection.Projection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.Projection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e100&gt;</em><a class="headerlink" href="#topo.projection.Projection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9db8&gt;</em><a class="headerlink" href="#topo.projection.Projection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -724,12 +598,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.Projection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e310&gt;</em><a class="headerlink" href="#topo.projection.Projection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae877487050&gt;</em><a class="headerlink" href="#topo.projection.Projection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.Projection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e208&gt;</em><a class="headerlink" href="#topo.projection.Projection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774870a8&gt;</em><a class="headerlink" href="#topo.projection.Projection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -766,121 +640,9 @@ containing the arguments.</p>
 <dt id="topo.projection.SharedWeightCFProjection">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">SharedWeightCFProjection</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/projection.html#SharedWeightCFProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.projection.SharedWeightCFProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFProjection" title="topo.base.cf.CFProjection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFProjection</span></tt></a></p>
-<p>params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div><p>A Projection with a single set of weights, shared by all units.</p>
+<p>A Projection with a single set of weights, shared by all units.</p>
 <p>Otherwise similar to CFProjection, except that learning is
 currently disabled.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                         Value                              Type             Bounds     Mode  [0m</p>
-<p>activity_group                        (0.5, &lt;ufunc &#8216;add&#8217;&gt;)                   Parameter                      V RW  
-allow_null_cfs                               False                            Boolean            (0, 1)     V RW  
-apply_output_fns_init                         True                            Boolean            (0, 1)     V RW  
-autosize_mask                                 True                            Boolean            (0, 1)     C RW  
-cf_shape                    Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-cf_type                     &lt;class &#8216;topo.base.cf.ConnectionField&#8217;...         Parameter                      C RW  
-coord_mapper                   IdentityMF(name=&#8217;IdentityMF00801&#8217;)          ClassSelector                    V RW  
-delay                                         0.05                             Number          (0, None)    V RW  
-dest                                          None                           Parameter                    C RW AN 
-dest_port                                  &#8216;Activity&#8217;                        Parameter                      V RW  
-hash_format                          &#8216;{name}-{src}-{dest}&#8217;                     String                       V RW  
-input_fns                                      []                             HookList         (0, None)    V RW  
-learning_fn                 CFPLF_Identity(name=&#8217;CFPLF_Identity01...       ClassSelector                    C RW  
-learning_rate                                 0.0                              Number           ([1;36m0[0m,[1;36m 100[0m)    V RW  
-mask_threshold                                0.5                              Number                       C RW  
-min_matrix_radius                              1                              Integer          (0, None)    V RW  
-nominal_bounds_template             BoundingBox(radius=0.1)           BoundingRegionParameter               V RW  
-output_fns                                     []                             HookList         (0, None)    V RW  
-plastic                                       True                            Boolean            (0, 1)     V RW  
-precedence                                    0.5                              Number                       V RW  
-private                                      False                            Boolean            (0, 1)     V RW  
-response_fn                 CFPRF_Plugin(name=&#8217;CFPRF_Plugin00793&#8217;...       ClassSelector                    V RW  
-same_cf_shape_for_all_cfs                     True                            Boolean            (0, 1)     V RW  
-seed                                          None                            Integer                     V RW AN 
-src                                           None                           Parameter                    C RW AN 
-src_port                                   &#8216;Activity&#8217;                        Parameter                      V RW  
-strength                                      1.0                              Number                       V RW  
-weights_generator           Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-weights_output_fns          [CFPOF_SharedWeight(name=&#8217;CFPOF_Share...          HookList         (0, None)    V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group:            Grouping and precedence specifier for computing activity from[0m
-[1;34m                           Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                           same activity_group will be summed, and then the results from[0m
-[1;34m                           each group will be combined in the order of the activity_group[0m
-[1;34m                           using the operator specified by the activity_operator.  For[0m
-[1;34m                           instance, if there are two Projections with[0m
-[1;34m                           activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                           activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                           from the first two will be added together, and the result[0m
-[1;34m                           divided by the sum of the second two.[0m
-[1;31mallow_null_cfs:            Whether or not the projection can have entirely empty CFs[0m
-[1;34mapply_output_fns_init:     Whether to apply the output function to connection fields (e.g. for[0m
-[1;34m                           normalization) when the CFs are first created.[0m
-[1;31mautosize_mask:             Topographica sets the mask size so that it is the same as the connection field&#8217;s[0m
-[1;31m                           size, unless this parameter is False - in which case the user-specified size of[0m
-[1;31m                           the cf_shape is used. In normal usage of Topographica, this parameter should[0m
-[1;31m                           remain True.[0m
-[1;34mcf_shape:                  Mask pattern to define the shape of the connection fields.[0m
-[1;31mcf_type:                   Type of ConnectionField to use when creating individual CFs.[0m
-[1;34mcoord_mapper:              Function to map a projected coordinate into the target sheet.[0m
-[1;31mdelay:                     Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;31m                           Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;31m                           of events.[0m
-[1;34mdest:                      The EventProcessor to which messages are delivered.[0m
-[1;31mdest_port:                 Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that accept only a single type of incoming[0m
-[1;31m                           event will typically use a src_port of None.  However, if[0m
-[1;31m                           multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for dest_port.  It is up[0m
-[1;31m                           to the dest EventProcessor to process the data appropriately[0m
-[1;31m                           for each port, and to define what is expected to be sent to[0m
-[1;31m                           that port.[0m
-[1;34mhash_format:               Format string to determine the hash value used to initialize[0m
-[1;34m                           random weight generation. Format keys available include {name}[0m
-[1;34m                           {src} and {dest}.[0m
-[1;31minput_fns:                 Function(s) applied to the input before the projection activity is computed.[0m
-[1;34mlearning_fn:               Function for computing changes to the weights based on one activation step.[0m
-[1;31mlearning_rate:             Amount of learning at each step for this projection, specified[0m
-[1;31m                           in units that are independent of the density of each Sheet.[0m
-[1;34mmask_threshold:            If a unit is above this value in the cf_shape mask, it is[0m
-[1;34m                           included; otherwise it is excluded from the mask.[0m
-[1;31mmin_matrix_radius:         Enforced minimum for radius of weights matrix.[0m
-[1;31m                           The default of 1 gives a minimum matrix of 3x3. 0 would[0m
-[1;31m                           allow a 1x1 matrix.[0m
-[1;34mnominal_bounds_template:   Bounds defining the Sheet area covered by a prototypical ConnectionField.[0m
-[1;34m                           The true bounds will differ depending on the density (see create_slice_template()).[0m
-[1;31moutput_fns:                Function(s) applied to the projection activity after it is computed.[0m
-[1;34mplastic:                   Whether or not to update the internal state on each call.[0m
-[1;34m                           Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;31mprecedence:                &lt; No docstring available &gt;[0m
-[1;34mprivate:                   Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;31mresponse_fn:               Function for computing the Projection response to an input pattern.[0m
-[1;34msame_cf_shape_for_all_cfs: Whether or not to share a single cf_shape mask for all CFs.[0m
-[1;34m                           If True, the cf_shape is evaluated only once and shared for[0m
-[1;34m                           all CFs, which saves computation time and memory.  If False,[0m
-[1;34m                           the cf_shape is evaluated once for each CF, allowing each to[0m
-[1;34m                           have its own shape.[0m
-[1;31mseed:                      The random seed used to determine the randomized weight[0m
-[1;31m                           initialization stream. If not None, equivalent to appending the[0m
-[1;31m                           chosen integer to the hash_format.[0m
-[1;34msrc:                       The EventProcessor from which messages originate.[0m
-[1;31msrc_port:                  Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that generate only a single type of[0m
-[1;31m                           outgoing event will typically use a src_port of None.  However,[0m
-[1;31m                           if multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for src_port.  It is up[0m
-[1;31m                           to the src EventProcessor to deliver appropriate data to each[0m
-[1;31m                           port, and to declare what will be sent over that port.[0m
-[1;34mstrength:                  Global multiplicative scaling applied to the Activity of this Sheet.[0m
-[1;31mweights_generator:         Generate initial weights values.[0m
-[1;34mweights_output_fns:        Functions applied to each CF after learning.[0m</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
@@ -1034,7 +796,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.SharedWeightCFProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e1b0&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9fc8&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1048,12 +810,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.SharedWeightCFProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e100&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9cb0&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.SharedWeightCFProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e208&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9f18&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1165,12 +927,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.SharedWeightCFProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e2b8&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9ec0&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.SharedWeightCFProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a088e0a8&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae87748a050&gt;</em><a class="headerlink" href="#topo.projection.SharedWeightCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1214,122 +976,9 @@ containing the arguments.</p>
 <dt id="topo.projection.LeakyCFProjection">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">LeakyCFProjection</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/projection.html#LeakyCFProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.projection.LeakyCFProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.ResizableCFProjection" title="topo.base.cf.ResizableCFProjection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.ResizableCFProjection</span></tt></a></p>
-<p>params(decay_rate=Number, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div>A projection that has a decay_rate parameter so that incoming
+<p>A projection that has a decay_rate parameter so that incoming
 input is decayed over time as x(t) = input + x(t-1)*exp(-decay_rate),
-and then the weighted sum of x(t) is calculated.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                         Value                              Type             Bounds     Mode  [0m</p>
-<p>activity_group                        (0.5, &lt;ufunc &#8216;add&#8217;&gt;)                   Parameter                      V RW  
-allow_null_cfs                               False                            Boolean            (0, 1)     V RW  
-apply_output_fns_init                         True                            Boolean            (0, 1)     V RW  
-autosize_mask                                 True                            Boolean            (0, 1)     C RW  
-cf_shape                    Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-cf_type                     &lt;class &#8216;topo.base.cf.ConnectionField&#8217;...         Parameter                      C RW  
-coord_mapper                   IdentityMF(name=&#8217;IdentityMF00801&#8217;)          ClassSelector                    V RW  
-decay_rate                                    1.0                              Number          (0, None)    V RW  
-delay                                         0.05                             Number          (0, None)    V RW  
-dest                                          None                           Parameter                    C RW AN 
-dest_port                                  &#8216;Activity&#8217;                        Parameter                      V RW  
-hash_format                          &#8216;{name}-{src}-{dest}&#8217;                     String                       V RW  
-input_fns                                      []                             HookList         (0, None)    V RW  
-learning_fn                 CFPLF_Plugin(name=&#8217;CFPLF_Plugin00797&#8217;...       ClassSelector                    V RW  
-learning_rate                                 0.0                              Number           ([1;36m0[0m,[1;36m 100[0m)    V RW  
-mask_threshold                                0.5                              Number                       C RW  
-min_matrix_radius                              1                              Integer          (0, None)    V RW  
-nominal_bounds_template             BoundingBox(radius=0.1)           BoundingRegionParameter               V RW  
-output_fns                                     []                             HookList         (0, None)    V RW  
-plastic                                       True                            Boolean            (0, 1)     V RW  
-precedence                                    0.4                              Number                       V RW  
-private                                      False                            Boolean            (0, 1)     V RW  
-response_fn                 CFPRF_Plugin(name=&#8217;CFPRF_Plugin00793&#8217;...       ClassSelector                    V RW  
-same_cf_shape_for_all_cfs                     True                            Boolean            (0, 1)     V RW  
-seed                                          None                            Integer                     V RW AN 
-src                                           None                           Parameter                    C RW AN 
-src_port                                   &#8216;Activity&#8217;                        Parameter                      V RW  
-strength                                      1.0                              Number                       V RW  
-weights_generator           Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-weights_output_fns          [CFPOF_Plugin(name=&#8217;CFPOF_Plugin00799...          HookList         (0, None)    V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group:            Grouping and precedence specifier for computing activity from[0m
-[1;34m                           Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                           same activity_group will be summed, and then the results from[0m
-[1;34m                           each group will be combined in the order of the activity_group[0m
-[1;34m                           using the operator specified by the activity_operator.  For[0m
-[1;34m                           instance, if there are two Projections with[0m
-[1;34m                           activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                           activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                           from the first two will be added together, and the result[0m
-[1;34m                           divided by the sum of the second two.[0m
-[1;31mallow_null_cfs:            Whether or not the projection can have entirely empty CFs[0m
-[1;34mapply_output_fns_init:     Whether to apply the output function to connection fields (e.g. for[0m
-[1;34m                           normalization) when the CFs are first created.[0m
-[1;31mautosize_mask:             Topographica sets the mask size so that it is the same as the connection field&#8217;s[0m
-[1;31m                           size, unless this parameter is False - in which case the user-specified size of[0m
-[1;31m                           the cf_shape is used. In normal usage of Topographica, this parameter should[0m
-[1;31m                           remain True.[0m
-[1;34mcf_shape:                  Mask pattern to define the shape of the connection fields.[0m
-[1;31mcf_type:                   Type of ConnectionField to use when creating individual CFs.[0m
-[1;34mcoord_mapper:              Function to map a projected coordinate into the target sheet.[0m
-[1;31mdecay_rate:                Input decay rate for each leaky synapse[0m
-[1;34mdelay:                     Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;34m                           Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;34m                           of events.[0m
-[1;31mdest:                      The EventProcessor to which messages are delivered.[0m
-[1;34mdest_port:                 Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;34m                           [0m
-[1;34m                           EventProcessors that accept only a single type of incoming[0m
-[1;34m                           event will typically use a src_port of None.  However, if[0m
-[1;34m                           multiple types of communication are meaningful, the[0m
-[1;34m                           EventProcessor can accept other values for dest_port.  It is up[0m
-[1;34m                           to the dest EventProcessor to process the data appropriately[0m
-[1;34m                           for each port, and to define what is expected to be sent to[0m
-[1;34m                           that port.[0m
-[1;31mhash_format:               Format string to determine the hash value used to initialize[0m
-[1;31m                           random weight generation. Format keys available include {name}[0m
-[1;31m                           {src} and {dest}.[0m
-[1;34minput_fns:                 Function(s) applied to the input before the projection activity is computed.[0m
-[1;31mlearning_fn:               Function for computing changes to the weights based on one activation step.[0m
-[1;34mlearning_rate:             Amount of learning at each step for this projection, specified[0m
-[1;34m                           in units that are independent of the density of each Sheet.[0m
-[1;31mmask_threshold:            If a unit is above this value in the cf_shape mask, it is[0m
-[1;31m                           included; otherwise it is excluded from the mask.[0m
-[1;34mmin_matrix_radius:         Enforced minimum for radius of weights matrix.[0m
-[1;34m                           The default of 1 gives a minimum matrix of 3x3. 0 would[0m
-[1;34m                           allow a 1x1 matrix.[0m
-[1;31mnominal_bounds_template:   Bounds defining the Sheet area covered by a prototypical ConnectionField.[0m
-[1;31m                           The true bounds will differ depending on the density (see create_slice_template()).[0m
-[1;34moutput_fns:                Function(s) applied to the projection activity after it is computed.[0m
-[1;31mplastic:                   Whether or not to update the internal state on each call.[0m
-[1;31m                           Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;34mprecedence:                &lt; No docstring available &gt;[0m
-[1;31mprivate:                   Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;34mresponse_fn:               Function for computing the Projection response to an input pattern.[0m
-[1;31msame_cf_shape_for_all_cfs: Whether or not to share a single cf_shape mask for all CFs.[0m
-[1;31m                           If True, the cf_shape is evaluated only once and shared for[0m
-[1;31m                           all CFs, which saves computation time and memory.  If False,[0m
-[1;31m                           the cf_shape is evaluated once for each CF, allowing each to[0m
-[1;31m                           have its own shape.[0m
-[1;34mseed:                      The random seed used to determine the randomized weight[0m
-[1;34m                           initialization stream. If not None, equivalent to appending the[0m
-[1;34m                           chosen integer to the hash_format.[0m
-[1;31msrc:                       The EventProcessor from which messages originate.[0m
-[1;34msrc_port:                  Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;34m                           [0m
-[1;34m                           EventProcessors that generate only a single type of[0m
-[1;34m                           outgoing event will typically use a src_port of None.  However,[0m
-[1;34m                           if multiple types of communication are meaningful, the[0m
-[1;34m                           EventProcessor can accept other values for src_port.  It is up[0m
-[1;34m                           to the src EventProcessor to deliver appropriate data to each[0m
-[1;34m                           port, and to declare what will be sent over that port.[0m
-[1;31mstrength:                  Global multiplicative scaling applied to the Activity of this Sheet.[0m
-[1;34mweights_generator:         Generate initial weights values.[0m
-[1;31mweights_output_fns:        Functions applied to each CF after learning.[0m</p>
+and then the weighted sum of x(t) is calculated.</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.4, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
@@ -1502,7 +1151,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.LeakyCFProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a12300a8&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9e10&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1516,12 +1165,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.LeakyCFProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a1230208&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9f70&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.LeakyCFProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a1230260&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9db8&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1631,12 +1280,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.LeakyCFProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a12302b8&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae877498050&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.LeakyCFProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a1230158&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae877498100&gt;</em><a class="headerlink" href="#topo.projection.LeakyCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1680,130 +1329,12 @@ containing the arguments.</p>
 <dt id="topo.projection.ScaledCFProjection">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">ScaledCFProjection</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/projection.html#ScaledCFProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.projection.ScaledCFProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFProjection" title="topo.base.cf.CFProjection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFProjection</span></tt></a></p>
-<p>params(smoothing=Number, target=Number, target_lr=Number, allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div><p>Allows scaling of activity based on a specified target average activity.</p>
+<p>Allows scaling of activity based on a specified target average activity.</p>
 <p>An exponentially weighted average is used to calculate the average
 activity.  This average is then used to calculate scaling factors
 for the current activity and for the learning rate.</p>
 <p>The plastic parameter can be used to turn off updating of the average
 activity, e.g. during map measurement.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                         Value                              Type             Bounds     Mode  [0m</p>
-<p>activity_group                        (0.5, &lt;ufunc &#8216;add&#8217;&gt;)                   Parameter                      V RW  
-allow_null_cfs                               False                            Boolean            (0, 1)     V RW  
-apply_output_fns_init                         True                            Boolean            (0, 1)     V RW  
-autosize_mask                                 True                            Boolean            (0, 1)     C RW  
-cf_shape                    Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-cf_type                     &lt;class &#8216;topo.base.cf.ConnectionField&#8217;...         Parameter                      C RW  
-coord_mapper                   IdentityMF(name=&#8217;IdentityMF00801&#8217;)          ClassSelector                    V RW  
-delay                                         0.05                             Number          (0, None)    V RW  
-dest                                          None                           Parameter                    C RW AN 
-dest_port                                  &#8216;Activity&#8217;                        Parameter                      V RW  
-hash_format                          &#8216;{name}-{src}-{dest}&#8217;                     String                       V RW  
-input_fns                                      []                             HookList         (0, None)    V RW  
-learning_fn                 CFPLF_Plugin(name=&#8217;CFPLF_Plugin00797&#8217;...       ClassSelector                    V RW  
-learning_rate                                 0.0                              Number           ([1;36m0[0m,[1;36m 100[0m)    V RW  
-mask_threshold                                0.5                              Number                       C RW  
-min_matrix_radius                              1                              Integer          (0, None)    V RW  
-nominal_bounds_template             BoundingBox(radius=0.1)           BoundingRegionParameter               V RW  
-output_fns                                     []                             HookList         (0, None)    V RW  
-plastic                                       True                            Boolean            (0, 1)     V RW  
-precedence                                    0.4                              Number                       V RW  
-private                                      False                            Boolean            (0, 1)     V RW  
-response_fn                 CFPRF_Plugin(name=&#8217;CFPRF_Plugin00793&#8217;...       ClassSelector                    V RW  
-same_cf_shape_for_all_cfs                     True                            Boolean            (0, 1)     V RW  
-seed                                          None                            Integer                     V RW AN 
-smoothing                                    0.999                             Number                       V RW  
-src                                           None                           Parameter                    C RW AN 
-src_port                                   &#8216;Activity&#8217;                        Parameter                      V RW  
-strength                                      1.0                              Number                       V RW  
-target                                       0.045                             Number                       V RW  
-target_lr                                    0.045                             Number                       V RW  
-weights_generator           Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-weights_output_fns          [CFPOF_Plugin(name=&#8217;CFPOF_Plugin00799...          HookList         (0, None)    V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group:            Grouping and precedence specifier for computing activity from[0m
-[1;34m                           Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                           same activity_group will be summed, and then the results from[0m
-[1;34m                           each group will be combined in the order of the activity_group[0m
-[1;34m                           using the operator specified by the activity_operator.  For[0m
-[1;34m                           instance, if there are two Projections with[0m
-[1;34m                           activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                           activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                           from the first two will be added together, and the result[0m
-[1;34m                           divided by the sum of the second two.[0m
-[1;31mallow_null_cfs:            Whether or not the projection can have entirely empty CFs[0m
-[1;34mapply_output_fns_init:     Whether to apply the output function to connection fields (e.g. for[0m
-[1;34m                           normalization) when the CFs are first created.[0m
-[1;31mautosize_mask:             Topographica sets the mask size so that it is the same as the connection field&#8217;s[0m
-[1;31m                           size, unless this parameter is False - in which case the user-specified size of[0m
-[1;31m                           the cf_shape is used. In normal usage of Topographica, this parameter should[0m
-[1;31m                           remain True.[0m
-[1;34mcf_shape:                  Mask pattern to define the shape of the connection fields.[0m
-[1;31mcf_type:                   Type of ConnectionField to use when creating individual CFs.[0m
-[1;34mcoord_mapper:              Function to map a projected coordinate into the target sheet.[0m
-[1;31mdelay:                     Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;31m                           Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;31m                           of events.[0m
-[1;34mdest:                      The EventProcessor to which messages are delivered.[0m
-[1;31mdest_port:                 Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that accept only a single type of incoming[0m
-[1;31m                           event will typically use a src_port of None.  However, if[0m
-[1;31m                           multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for dest_port.  It is up[0m
-[1;31m                           to the dest EventProcessor to process the data appropriately[0m
-[1;31m                           for each port, and to define what is expected to be sent to[0m
-[1;31m                           that port.[0m
-[1;34mhash_format:               Format string to determine the hash value used to initialize[0m
-[1;34m                           random weight generation. Format keys available include {name}[0m
-[1;34m                           {src} and {dest}.[0m
-[1;31minput_fns:                 Function(s) applied to the input before the projection activity is computed.[0m
-[1;34mlearning_fn:               Function for computing changes to the weights based on one activation step.[0m
-[1;31mlearning_rate:             Amount of learning at each step for this projection, specified[0m
-[1;31m                           in units that are independent of the density of each Sheet.[0m
-[1;34mmask_threshold:            If a unit is above this value in the cf_shape mask, it is[0m
-[1;34m                           included; otherwise it is excluded from the mask.[0m
-[1;31mmin_matrix_radius:         Enforced minimum for radius of weights matrix.[0m
-[1;31m                           The default of 1 gives a minimum matrix of 3x3. 0 would[0m
-[1;31m                           allow a 1x1 matrix.[0m
-[1;34mnominal_bounds_template:   Bounds defining the Sheet area covered by a prototypical ConnectionField.[0m
-[1;34m                           The true bounds will differ depending on the density (see create_slice_template()).[0m
-[1;31moutput_fns:                Function(s) applied to the projection activity after it is computed.[0m
-[1;34mplastic:                   Whether or not to update the internal state on each call.[0m
-[1;34m                           Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;31mprecedence:                &lt; No docstring available &gt;[0m
-[1;34mprivate:                   Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;31mresponse_fn:               Function for computing the Projection response to an input pattern.[0m
-[1;34msame_cf_shape_for_all_cfs: Whether or not to share a single cf_shape mask for all CFs.[0m
-[1;34m                           If True, the cf_shape is evaluated only once and shared for[0m
-[1;34m                           all CFs, which saves computation time and memory.  If False,[0m
-[1;34m                           the cf_shape is evaluated once for each CF, allowing each to[0m
-[1;34m                           have its own shape.[0m
-[1;31mseed:                      The random seed used to determine the randomized weight[0m
-[1;31m                           initialization stream. If not None, equivalent to appending the[0m
-[1;31m                           chosen integer to the hash_format.[0m
-[1;34msmoothing:                 Influence of previous activity, relative to current, for computing the average.[0m
-[1;31msrc:                       The EventProcessor from which messages originate.[0m
-[1;34msrc_port:                  Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;34m                           [0m
-[1;34m                           EventProcessors that generate only a single type of[0m
-[1;34m                           outgoing event will typically use a src_port of None.  However,[0m
-[1;34m                           if multiple types of communication are meaningful, the[0m
-[1;34m                           EventProcessor can accept other values for src_port.  It is up[0m
-[1;34m                           to the src EventProcessor to deliver appropriate data to each[0m
-[1;34m                           port, and to declare what will be sent over that port.[0m
-[1;31mstrength:                  Global multiplicative scaling applied to the Activity of this Sheet.[0m
-[1;34mtarget:                    Target average activity for the projection.[0m
-[1;31mtarget_lr:                 Target average activity for scaling the learning rate.[0m
-[1;34mweights_generator:         Generate initial weights values.[0m
-[1;31mweights_output_fns:        Functions applied to each CF after learning.[0m</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.4, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
@@ -1976,7 +1507,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.ScaledCFProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a1249100&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9d08&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1990,12 +1521,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.ScaledCFProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a12490a8&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9c58&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.ScaledCFProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a1249208&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9f18&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2105,12 +1636,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.ScaledCFProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a1249260&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9ec0&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.ScaledCFProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a1249310&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774c10a8&gt;</em><a class="headerlink" href="#topo.projection.ScaledCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2154,118 +1685,7 @@ containing the arguments.</p>
 <dt id="topo.projection.ResizableCFProjection">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">ResizableCFProjection</tt><big>(</big><em>initialize_cfs=True</em>, <em>**params</em><big>)</big><a class="headerlink" href="#topo.projection.ResizableCFProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFProjection" title="topo.base.cf.CFProjection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFProjection</span></tt></a></p>
-<p>params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div>A CFProjection with resizable weights.</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                         Value                              Type             Bounds     Mode  [0m</p>
-<p>activity_group                        (0.5, &lt;ufunc &#8216;add&#8217;&gt;)                   Parameter                      V RW  
-allow_null_cfs                               False                            Boolean            (0, 1)     V RW  
-apply_output_fns_init                         True                            Boolean            (0, 1)     V RW  
-autosize_mask                                 True                            Boolean            (0, 1)     C RW  
-cf_shape                    Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-cf_type                     &lt;class &#8216;topo.base.cf.ConnectionField&#8217;...         Parameter                      C RW  
-coord_mapper                   IdentityMF(name=&#8217;IdentityMF00801&#8217;)          ClassSelector                    V RW  
-delay                                         0.05                             Number          (0, None)    V RW  
-dest                                          None                           Parameter                    C RW AN 
-dest_port                                  &#8216;Activity&#8217;                        Parameter                      V RW  
-hash_format                          &#8216;{name}-{src}-{dest}&#8217;                     String                       V RW  
-input_fns                                      []                             HookList         (0, None)    V RW  
-learning_fn                 CFPLF_Plugin(name=&#8217;CFPLF_Plugin00797&#8217;...       ClassSelector                    V RW  
-learning_rate                                 0.0                              Number           ([1;36m0[0m,[1;36m 100[0m)    V RW  
-mask_threshold                                0.5                              Number                       C RW  
-min_matrix_radius                              1                              Integer          (0, None)    V RW  
-nominal_bounds_template             BoundingBox(radius=0.1)           BoundingRegionParameter               V RW  
-output_fns                                     []                             HookList         (0, None)    V RW  
-plastic                                       True                            Boolean            (0, 1)     V RW  
-precedence                                    0.8                              Number                       V RW  
-private                                      False                            Boolean            (0, 1)     V RW  
-response_fn                 CFPRF_Plugin(name=&#8217;CFPRF_Plugin00793&#8217;...       ClassSelector                    V RW  
-same_cf_shape_for_all_cfs                     True                            Boolean            (0, 1)     V RW  
-seed                                          None                            Integer                     V RW AN 
-src                                           None                           Parameter                    C RW AN 
-src_port                                   &#8216;Activity&#8217;                        Parameter                      V RW  
-strength                                      1.0                              Number                       V RW  
-weights_generator           Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-weights_output_fns          [CFPOF_Plugin(name=&#8217;CFPOF_Plugin00799...          HookList         (0, None)    V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group:            Grouping and precedence specifier for computing activity from[0m
-[1;34m                           Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                           same activity_group will be summed, and then the results from[0m
-[1;34m                           each group will be combined in the order of the activity_group[0m
-[1;34m                           using the operator specified by the activity_operator.  For[0m
-[1;34m                           instance, if there are two Projections with[0m
-[1;34m                           activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                           activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                           from the first two will be added together, and the result[0m
-[1;34m                           divided by the sum of the second two.[0m
-[1;31mallow_null_cfs:            Whether or not the projection can have entirely empty CFs[0m
-[1;34mapply_output_fns_init:     Whether to apply the output function to connection fields (e.g. for[0m
-[1;34m                           normalization) when the CFs are first created.[0m
-[1;31mautosize_mask:             Topographica sets the mask size so that it is the same as the connection field&#8217;s[0m
-[1;31m                           size, unless this parameter is False - in which case the user-specified size of[0m
-[1;31m                           the cf_shape is used. In normal usage of Topographica, this parameter should[0m
-[1;31m                           remain True.[0m
-[1;34mcf_shape:                  Mask pattern to define the shape of the connection fields.[0m
-[1;31mcf_type:                   Type of ConnectionField to use when creating individual CFs.[0m
-[1;34mcoord_mapper:              Function to map a projected coordinate into the target sheet.[0m
-[1;31mdelay:                     Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;31m                           Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;31m                           of events.[0m
-[1;34mdest:                      The EventProcessor to which messages are delivered.[0m
-[1;31mdest_port:                 Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that accept only a single type of incoming[0m
-[1;31m                           event will typically use a src_port of None.  However, if[0m
-[1;31m                           multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for dest_port.  It is up[0m
-[1;31m                           to the dest EventProcessor to process the data appropriately[0m
-[1;31m                           for each port, and to define what is expected to be sent to[0m
-[1;31m                           that port.[0m
-[1;34mhash_format:               Format string to determine the hash value used to initialize[0m
-[1;34m                           random weight generation. Format keys available include {name}[0m
-[1;34m                           {src} and {dest}.[0m
-[1;31minput_fns:                 Function(s) applied to the input before the projection activity is computed.[0m
-[1;34mlearning_fn:               Function for computing changes to the weights based on one activation step.[0m
-[1;31mlearning_rate:             Amount of learning at each step for this projection, specified[0m
-[1;31m                           in units that are independent of the density of each Sheet.[0m
-[1;34mmask_threshold:            If a unit is above this value in the cf_shape mask, it is[0m
-[1;34m                           included; otherwise it is excluded from the mask.[0m
-[1;31mmin_matrix_radius:         Enforced minimum for radius of weights matrix.[0m
-[1;31m                           The default of 1 gives a minimum matrix of 3x3. 0 would[0m
-[1;31m                           allow a 1x1 matrix.[0m
-[1;34mnominal_bounds_template:   Bounds defining the Sheet area covered by a prototypical ConnectionField.[0m
-[1;34m                           The true bounds will differ depending on the density (see create_slice_template()).[0m
-[1;31moutput_fns:                Function(s) applied to the projection activity after it is computed.[0m
-[1;34mplastic:                   Whether or not to update the internal state on each call.[0m
-[1;34m                           Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;31mprecedence:                &lt; No docstring available &gt;[0m
-[1;34mprivate:                   Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;31mresponse_fn:               Function for computing the Projection response to an input pattern.[0m
-[1;34msame_cf_shape_for_all_cfs: Whether or not to share a single cf_shape mask for all CFs.[0m
-[1;34m                           If True, the cf_shape is evaluated only once and shared for[0m
-[1;34m                           all CFs, which saves computation time and memory.  If False,[0m
-[1;34m                           the cf_shape is evaluated once for each CF, allowing each to[0m
-[1;34m                           have its own shape.[0m
-[1;31mseed:                      The random seed used to determine the randomized weight[0m
-[1;31m                           initialization stream. If not None, equivalent to appending the[0m
-[1;31m                           chosen integer to the hash_format.[0m
-[1;34msrc:                       The EventProcessor from which messages originate.[0m
-[1;31msrc_port:                  Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that generate only a single type of[0m
-[1;31m                           outgoing event will typically use a src_port of None.  However,[0m
-[1;31m                           if multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for src_port.  It is up[0m
-[1;31m                           to the src EventProcessor to deliver appropriate data to each[0m
-[1;31m                           port, and to declare what will be sent over that port.[0m
-[1;34mstrength:                  Global multiplicative scaling applied to the Activity of this Sheet.[0m
-[1;31mweights_generator:         Generate initial weights values.[0m
-[1;34mweights_output_fns:        Functions applied to each CF after learning.[0m</p>
+<p>A CFProjection with resizable weights.</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
@@ -2434,7 +1854,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.ResizableCFProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11c24c8&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774da2b8&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2448,12 +1868,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.ResizableCFProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11c25d0&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774da3c0&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.ResizableCFProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11c2628&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774da418&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2563,12 +1983,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.ResizableCFProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11c2ba8&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774da998&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.ResizableCFProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11c2c00&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774da9f0&gt;</em><a class="headerlink" href="#topo.projection.ResizableCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2612,9 +2032,7 @@ containing the arguments.</p>
 <dt id="topo.projection.CFProjection">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">CFProjection</tt><big>(</big><em>initialize_cfs=True</em>, <em>**params</em><big>)</big><a class="headerlink" href="#topo.projection.CFProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.projection.Projection" title="topo.base.projection.Projection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.Projection</span></tt></a></p>
-<p>params(allow_null_cfs=Boolean, apply_output_fns_init=Boolean, autosize_mask=Boolean, cf_shape=ClassSelector, cf_type=Parameter, coord_mapper=ClassSelector, hash_format=String, learning_fn=ClassSelector, learning_rate=Number, mask_threshold=Number, min_matrix_radius=Integer, nominal_bounds_template=BoundingRegionParameter, response_fn=ClassSelector, same_cf_shape_for_all_cfs=Boolean, seed=Integer, weights_generator=ClassSelector, weights_output_fns=HookList, activity_group=Parameter, input_fns=HookList, output_fns=HookList, plastic=Boolean, precedence=Number, strength=Number, delay=Number, dest=Parameter, dest_port=Parameter, private=Boolean, src=Parameter, src_port=Parameter, name=String)</p>
-<blockquote>
-<div><p>A projection composed of ConnectionFields from a Sheet into a ProjectionSheet.</p>
+<p>A projection composed of ConnectionFields from a Sheet into a ProjectionSheet.</p>
 <p>CFProjection computes its activity using a response_fn of type
 CFPResponseFn (typically a CF-aware version of mdot) and output_fns
 (typically none).  The initial contents of the
@@ -2625,116 +2043,6 @@ ConnectionField is controlled by the coord_mapper parameter.</p>
 <p>Any subclass has to implement the interface
 activate(self,input_activity) that computes the response from the
 input and stores it in the activity array.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                         Value                              Type             Bounds     Mode  [0m</p>
-<p>activity_group                        (0.5, &lt;ufunc &#8216;add&#8217;&gt;)                   Parameter                      V RW  
-allow_null_cfs                               False                            Boolean            (0, 1)     V RW  
-apply_output_fns_init                         True                            Boolean            (0, 1)     V RW  
-autosize_mask                                 True                            Boolean            (0, 1)     C RW  
-cf_shape                    Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-cf_type                     &lt;class &#8216;topo.base.cf.ConnectionField&#8217;...         Parameter                      C RW  
-coord_mapper                   IdentityMF(name=&#8217;IdentityMF00801&#8217;)          ClassSelector                    V RW  
-delay                                         0.05                             Number          (0, None)    V RW  
-dest                                          None                           Parameter                    C RW AN 
-dest_port                                  &#8216;Activity&#8217;                        Parameter                      V RW  
-hash_format                          &#8216;{name}-{src}-{dest}&#8217;                     String                       V RW  
-input_fns                                      []                             HookList         (0, None)    V RW  
-learning_fn                 CFPLF_Plugin(name=&#8217;CFPLF_Plugin00797&#8217;...       ClassSelector                    V RW  
-learning_rate                                 0.0                              Number           ([1;36m0[0m,[1;36m 100[0m)    V RW  
-mask_threshold                                0.5                              Number                       C RW  
-min_matrix_radius                              1                              Integer          (0, None)    V RW  
-nominal_bounds_template             BoundingBox(radius=0.1)           BoundingRegionParameter               V RW  
-output_fns                                     []                             HookList         (0, None)    V RW  
-plastic                                       True                            Boolean            (0, 1)     V RW  
-precedence                                    0.8                              Number                       V RW  
-private                                      False                            Boolean            (0, 1)     V RW  
-response_fn                 CFPRF_Plugin(name=&#8217;CFPRF_Plugin00793&#8217;...       ClassSelector                    V RW  
-same_cf_shape_for_all_cfs                     True                            Boolean            (0, 1)     V RW  
-seed                                          None                            Integer                     V RW AN 
-src                                           None                           Parameter                    C RW AN 
-src_port                                   &#8216;Activity&#8217;                        Parameter                      V RW  
-strength                                      1.0                              Number                       V RW  
-weights_generator           Constant(bounds=BoundingBox(radius=0....       ClassSelector                    C RW  
-weights_output_fns          [CFPOF_Plugin(name=&#8217;CFPOF_Plugin00799...          HookList         (0, None)    V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mactivity_group:            Grouping and precedence specifier for computing activity from[0m
-[1;34m                           Projections.  In a ProjectionSheet, all Projections in the[0m
-[1;34m                           same activity_group will be summed, and then the results from[0m
-[1;34m                           each group will be combined in the order of the activity_group[0m
-[1;34m                           using the operator specified by the activity_operator.  For[0m
-[1;34m                           instance, if there are two Projections with[0m
-[1;34m                           activity_group==(0.2,numpy.add) and two with[0m
-[1;34m                           activity_group==(0.6,numpy.divide), activity[0m
-[1;34m                           from the first two will be added together, and the result[0m
-[1;34m                           divided by the sum of the second two.[0m
-[1;31mallow_null_cfs:            Whether or not the projection can have entirely empty CFs[0m
-[1;34mapply_output_fns_init:     Whether to apply the output function to connection fields (e.g. for[0m
-[1;34m                           normalization) when the CFs are first created.[0m
-[1;31mautosize_mask:             Topographica sets the mask size so that it is the same as the connection field&#8217;s[0m
-[1;31m                           size, unless this parameter is False - in which case the user-specified size of[0m
-[1;31m                           the cf_shape is used. In normal usage of Topographica, this parameter should[0m
-[1;31m                           remain True.[0m
-[1;34mcf_shape:                  Mask pattern to define the shape of the connection fields.[0m
-[1;31mcf_type:                   Type of ConnectionField to use when creating individual CFs.[0m
-[1;34mcoord_mapper:              Function to map a projected coordinate into the target sheet.[0m
-[1;31mdelay:                     Simulation time between generation of an Event by the src and delivery to the dest.[0m
-[1;31m                           Should normally be nonzero, to represent a causal with a well-defined ordering[0m
-[1;31m                           of events.[0m
-[1;34mdest:                      The EventProcessor to which messages are delivered.[0m
-[1;31mdest_port:                 Identifier that can be used to distinguish different types of incoming connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that accept only a single type of incoming[0m
-[1;31m                           event will typically use a src_port of None.  However, if[0m
-[1;31m                           multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for dest_port.  It is up[0m
-[1;31m                           to the dest EventProcessor to process the data appropriately[0m
-[1;31m                           for each port, and to define what is expected to be sent to[0m
-[1;31m                           that port.[0m
-[1;34mhash_format:               Format string to determine the hash value used to initialize[0m
-[1;34m                           random weight generation. Format keys available include {name}[0m
-[1;34m                           {src} and {dest}.[0m
-[1;31minput_fns:                 Function(s) applied to the input before the projection activity is computed.[0m
-[1;34mlearning_fn:               Function for computing changes to the weights based on one activation step.[0m
-[1;31mlearning_rate:             Amount of learning at each step for this projection, specified[0m
-[1;31m                           in units that are independent of the density of each Sheet.[0m
-[1;34mmask_threshold:            If a unit is above this value in the cf_shape mask, it is[0m
-[1;34m                           included; otherwise it is excluded from the mask.[0m
-[1;31mmin_matrix_radius:         Enforced minimum for radius of weights matrix.[0m
-[1;31m                           The default of 1 gives a minimum matrix of 3x3. 0 would[0m
-[1;31m                           allow a 1x1 matrix.[0m
-[1;34mnominal_bounds_template:   Bounds defining the Sheet area covered by a prototypical ConnectionField.[0m
-[1;34m                           The true bounds will differ depending on the density (see create_slice_template()).[0m
-[1;31moutput_fns:                Function(s) applied to the projection activity after it is computed.[0m
-[1;34mplastic:                   Whether or not to update the internal state on each call.[0m
-[1;34m                           Allows plasticity to be turned off during analysis, and then re-enabled.[0m
-[1;31mprecedence:                &lt; No docstring available &gt;[0m
-[1;34mprivate:                   Set to true if this connection is for internal use only, not to be manipulated by a user.[0m
-[1;31mresponse_fn:               Function for computing the Projection response to an input pattern.[0m
-[1;34msame_cf_shape_for_all_cfs: Whether or not to share a single cf_shape mask for all CFs.[0m
-[1;34m                           If True, the cf_shape is evaluated only once and shared for[0m
-[1;34m                           all CFs, which saves computation time and memory.  If False,[0m
-[1;34m                           the cf_shape is evaluated once for each CF, allowing each to[0m
-[1;34m                           have its own shape.[0m
-[1;31mseed:                      The random seed used to determine the randomized weight[0m
-[1;31m                           initialization stream. If not None, equivalent to appending the[0m
-[1;31m                           chosen integer to the hash_format.[0m
-[1;34msrc:                       The EventProcessor from which messages originate.[0m
-[1;31msrc_port:                  Identifier that can be used to distinguish different types of outgoing connections.[0m
-[1;31m                           [0m
-[1;31m                           EventProcessors that generate only a single type of[0m
-[1;31m                           outgoing event will typically use a src_port of None.  However,[0m
-[1;31m                           if multiple types of communication are meaningful, the[0m
-[1;31m                           EventProcessor can accept other values for src_port.  It is up[0m
-[1;31m                           to the src EventProcessor to deliver appropriate data to each[0m
-[1;31m                           port, and to declare what will be sent over that port.[0m
-[1;34mstrength:                  Global multiplicative scaling applied to the Activity of this Sheet.[0m
-[1;31mweights_generator:         Generate initial weights values.[0m
-[1;34mweights_output_fns:        Functions applied to each CF after learning.[0m</p>
 <p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</p>
 <dl class="docutils">
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
@@ -2887,7 +2195,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.CFProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab100&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9e68&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2901,12 +2209,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.CFProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab1b0&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9fc8&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.CFProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab260&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9f70&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3016,12 +2324,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.CFProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab158&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774d0050&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.CFProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab208&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774d0100&gt;</em><a class="headerlink" href="#topo.projection.CFProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3065,20 +2373,8 @@ containing the arguments.</p>
 <dt id="topo.projection.CFPOF_SharedWeight">
 <em class="property">class </em><tt class="descclassname">topo.projection.</tt><tt class="descname">CFPOF_SharedWeight</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/projection.html#CFPOF_SharedWeight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="topo.base.html#topo.base.cf.CFPOutputFn" title="topo.base.cf.CFPOutputFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPOutputFn</span></tt></a></p>
-<p>params(single_cf_fn=ClassSelector, name=String)</p>
-<blockquote>
-<div><p>CFPOutputFn for use with SharedWeightCFProjections.</p>
+<p>CFPOutputFn for use with SharedWeightCFProjections.</p>
 <p>Applies the single_cf_fn to the single shared CF&#8217;s weights.</p>
-</div></blockquote>
-<p>[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                            Value                         Type      Mode [0m</p>
-<p>single_cf_fn   IdentityTF(init_keys=[], name=&#8217;Identi...  ClassSelector  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34msingle_cf_fn: &lt; No docstring available &gt;[0m</p>
 <p><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityTF IdentityTF01014&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
 <dl class="method">
 <dt id="topo.projection.CFPOF_SharedWeight.debug">
@@ -3098,7 +2394,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.CFPOF_SharedWeight.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab1b0&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9c58&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3112,12 +2408,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.CFPOF_SharedWeight.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab100&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9cb0&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.CFPOF_SharedWeight.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab208&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2ae876fc9db8&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3170,12 +2466,12 @@ evaluated with eval. See pprint() function for more details.</p>
 
 <dl class="attribute">
 <dt id="topo.projection.CFPOF_SharedWeight.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab158&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774d4050&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.projection.CFPOF_SharedWeight.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2b84a11ab310&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2ae8774d4100&gt;</em><a class="headerlink" href="#topo.projection.CFPOF_SharedWeight.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3217,9 +2513,11 @@ containing the arguments.</p>
 </dd></dl>
 
 </div>
+<hr class="docutils" />
 <div class="section" id="optimized-module">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">optimized</span></tt> Module<a class="headerlink" href="#optimized-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-topo.projection.optimized"></span><p>Optimized versions of Projection classes.</p>
+<hr class="docutils" />
 </div>
 </div>
 

@@ -1,0 +1,11 @@
+<map id="inheritance8752b5a604" name="inheritance8752b5a604">
+<area shape="rect" id="node1" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="159,2,342,15"/>
+<area shape="rect" id="node5" href="topo.base.html#topo.base.sheet.Sheet" title="The generic base class for neural sheets." alt="" coords="367,15,452,28"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="3,28,134,40"/>
+<area shape="rect" id="node6" href="topo.base.html#topo.base.simulation.EventProcessor" title="Base class for EventProcessors, i.e. objects that can accept and" alt="" coords="185,28,317,40"/>
+<area shape="rect" id="node3" href="topo.base.html#topo.base.cf.CFSheet" title="A ProjectionSheet providing access to the ConnectionFields in its CFProjections." alt="" coords="633,15,714,28"/>
+<area shape="rect" id="node10" href="topo.sheet.html#topo.sheet.JointNormalizingCFSheet" title="A type of CFSheet extended to support joint sum&#45;based normalization." alt="" coords="739,28,868,40"/>
+<area shape="rect" id="node4" href="topo.base.html#topo.base.projection.ProjectionSheet" title="A Sheet whose activity is computed using Projections from other sheets." alt="" coords="477,15,609,28"/>
+<area shape="rect" id="node8" href="#topo.gpu.sheet.GPUSettlingCFSheet" title="A SettlingCFSheet that makes it possible to calculate projection activities and learning in concurrent GPU streams." alt="" coords="1019,28,1149,40"/>
+<area shape="rect" id="node9" href="topo.sheet.html#topo.sheet.SettlingCFSheet" title="A JointNormalizingCFSheet implementing the idea of settling." alt="" coords="893,28,994,40"/>
+</map>

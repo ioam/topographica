@@ -1,98 +1,111 @@
 .related a {
-	margin-left: .5em;
-	margin-right: .5em;
+    margin-left: .5em;
+    margin-right: .5em;
 }
 
 p.caption {
-	text-align: center !important;
-	font-weight: bold;
+    text-align: center !important;
+    font-weight: bold;
 }
 
 ul.parents {
-	display: none;
+    display: none;
 }
 
 .related a:hover {
-	background: #7cb92f;
+    background: #7cb92f;
 }
 .related a[href="#"]:hover, .related a[href="index.html"]:hover {
-	background: #9edb4f;
+    background: #9edb4f;
 }
 .related a[href="#"], .related a[href="index.html"] {
-	background: #8dca3f;
+    background: #8dca3f;
 }
 .related a {
-	padding: 0.5em;
-	margin: 0;
+    padding: 0.5em;
+    margin: 0;
 }
 
 .global-toc li a[href="#"]:hover, .global-toc li a[href="index.html"]:hover {
-	background: #fff;
+    background: #fff;
 }
 
 .global-toc li a[href="#"], .global-toc li a[href="index.html"] {
-	background: #fafafa;
+    background: #fafafa;
 }
 
 .global-toc li a {
-	display: block;
+    display: block;
 }
 
 .global-toc li a:hover {
-	background: #f5f5f5;
+    background: #f5f5f5;
 }
 
 div.body h1 {
-	background: #beebbe;
+    background: #beebbe;
 }
 
 div.body h2 {
-	background: #c8e3c8;
+    background: #c8e3c8;
 }
 
 div.body h3, div.body h4, div.body h5, div.body h6 {
-	background: #d9e3d8;
+    background: #d9e3d8;
 }
 
 div.inheritance_box {
-	overflow: auto;
+    overflow: auto;
 }
 
 tt.docutils.literal {
-	background: transparent;
-	font-size: 1.2em;
-	font-weight: bold;
+    background: transparent;
+    font-size: 0.9em;
 }
 
 dl.class {
-	border-top: 1px solid #5a970d;
-	padding-top: 15px;
+    border-top: 1px solid #5a970d;
+    padding-top: 15px;
 }
 
 dl.class.rm_expanded, dl.class.rm_collapsed {
-	border-top: none;
-	padding: 0;
-	margin-top: 0;
-	margin-bottom: 0;
-	/*padding-left: 1.5em;*/
+    border-top: none;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    /*padding-left: 1.5em;*/
 }
 
 dl.class.rm_expanded > dt:before {
-	content: "[−]";
-	cursor: pointer;
-	color: #005B81;
+    content: "[−]";
+    cursor: pointer;
+    color: #005B81;
 }
 
 dl.class.rm_collapsed dt:before {
-	content: "[+]";
-	cursor: pointer;
-	color: #005B81;
+    content: "[+]";
+    cursor: pointer;
+    color: #005B81;
 }
 
 dl.class.rm_expanded dd {
-	display: block;
+    display: block;
 }
 
 dl.class.rm_collapsed dd {
-	display: none;
+    display: none;
+}
+
+a.anchor-link {
+    visibility: hidden;
+}
+
+div.input_prompt {
+    visibility: hidden;
+    height: 0;
+}
+
+div.output_prompt {
+    visibility: hidden;
+    height: 0;
 }

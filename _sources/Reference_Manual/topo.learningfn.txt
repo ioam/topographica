@@ -1,6 +1,9 @@
 topo.learningfn Package
 =======================
 
+
+---------
+
 :mod:`learningfn` Package
 -------------------------
 
@@ -11,6 +14,8 @@ topo.learningfn Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`optimized` Module
 -----------------------
@@ -23,6 +28,8 @@ topo.learningfn Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`projfn` Module
 --------------------
 
@@ -34,6 +41,8 @@ topo.learningfn Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`som` Module
 -----------------
 
@@ -44,4 +53,6 @@ topo.learningfn Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

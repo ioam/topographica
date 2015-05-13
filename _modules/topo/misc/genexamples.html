@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
@@ -322,7 +325,7 @@
     <span class="k">return</span> <span class="n">command_labels</span><span class="p">,</span><span class="n">available_targets</span>
 
 
-<div class="viewcode-block" id="generate"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.genexamples.generate">[docs]</a><span class="k">class</span> <span class="nc">generate</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">generate</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
 
     <span class="n">targets</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;all_quick&#39;</span><span class="p">])</span>
 
@@ -334,7 +337,7 @@
             <span class="n">c</span> <span class="o">=</span> <span class="n">available_targets</span><span class="p">[</span><span class="n">cmd</span><span class="p">]</span>
             <span class="k">print</span> <span class="n">c</span>
             <span class="n">system</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-</pre></div></div>
+</pre></div>
 
           </div>
         </div>

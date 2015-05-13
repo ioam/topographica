@@ -1,6 +1,9 @@
 topo.hardware Package
 =====================
 
+
+---------
+
 :mod:`opencvcamera` Module
 --------------------------
 
@@ -11,6 +14,8 @@ topo.hardware Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`playerrobot` Module
 -------------------------
@@ -23,6 +28,8 @@ topo.hardware Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`ptz` Module
 -----------------
 
@@ -34,6 +41,8 @@ topo.hardware Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`robotics` Module
 ----------------------
 
@@ -44,4 +53,6 @@ topo.hardware Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

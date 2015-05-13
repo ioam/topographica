@@ -1,6 +1,9 @@
 topo.misc Package
 =================
 
+
+---------
+
 :mod:`misc` Package
 -------------------
 
@@ -11,6 +14,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`asizeof` Module
 ---------------------
@@ -23,6 +28,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`attrdict` Module
 ----------------------
 
@@ -33,6 +40,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`color` Module
 -------------------
@@ -45,6 +54,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`commandline` Module
 -------------------------
 
@@ -55,6 +66,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`featurecoordinators` Module
 ---------------------------------
@@ -67,6 +80,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`fixedpoint` Module
 ------------------------
 
@@ -77,6 +92,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`gendocs` Module
 ---------------------
@@ -89,6 +106,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`genexamples` Module
 -------------------------
 
@@ -99,6 +118,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`inlinec` Module
 ---------------------
@@ -111,6 +132,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`ipython` Module
 ---------------------
 
@@ -121,6 +144,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`lancext` Module
 ---------------------
@@ -133,6 +158,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`legacy` Module
 --------------------
 
@@ -143,6 +170,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`memuse` Module
 --------------------
@@ -155,6 +184,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`picklemain` Module
 ------------------------
 
@@ -165,6 +196,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`pyxhandler` Module
 ------------------------
@@ -177,6 +210,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`snapshots` Module
 -----------------------
 
@@ -187,6 +222,8 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 
 :mod:`trace` Module
 -------------------
@@ -199,6 +236,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`unitsupport` Module
 -------------------------
 
@@ -210,6 +249,8 @@ topo.misc Package
     :inherited-members:
     :show-inheritance:
 
+-------
+
 :mod:`util` Module
 ------------------
 
@@ -220,4 +261,6 @@ topo.misc Package
     :members:
     :inherited-members:
     :show-inheritance:
+
+-------
 

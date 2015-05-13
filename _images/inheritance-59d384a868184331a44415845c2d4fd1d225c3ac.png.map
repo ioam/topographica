@@ -1,0 +1,13 @@
+<map id="inheritance5c943e4cbf" name="inheritance5c943e4cbf">
+<area shape="rect" id="node1" title="Dimensioned is a base class that allows the data contents of a" alt="" coords="264,43,378,54"/>
+<area shape="rect" id="node4" title="A ViewableElement is a dimensioned datastructure that may be" alt="" coords="398,43,523,54"/>
+<area shape="rect" id="node2" title="LabelledData is a mix&#45;in class designed to introduce the group and" alt="" coords="130,43,244,54"/>
+<area shape="rect" id="node3" title="params(name=String)" alt="" coords="2,54,110,64"/>
+<area shape="rect" id="node13" href="#topo.base.sheetview.SheetView" title="Class provided for backward compatibility with earlier SheetView" alt="" coords="141,64,233,74"/>
+<area shape="rect" id="node5" title="Element is the baseclass for all ViewableElement types, with an x&#45; and" alt="" coords="543,22,638,33"/>
+<area shape="rect" id="node6" title="Composable is a mix&#45;in class to allow Dimensioned object to be" alt="" coords="410,2,511,12"/>
+<area shape="rect" id="node7" title="Overlayable provides a mix&#45;in class to support the" alt="" coords="410,22,511,33"/>
+<area shape="rect" id="node11" title="Raster is a basic 2D element type for presenting numpy arrays as" alt="" coords="809,22,903,33"/>
+<area shape="rect" id="node9" title="Provides methods to allow conversion between sheet and matrix" alt="" coords="782,2,931,12"/>
+<area shape="rect" id="node10" title="Image is the atomic unit as which 2D data is stored, along with" alt="" coords="951,12,1045,23"/>
+</map>

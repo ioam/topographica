@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../_static/require.js"></script>
     <link rel="shortcut icon" href="../../_static/topo-favicon.ico"/>
     <link rel="top" title="Topographica" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" /> 
@@ -554,7 +557,7 @@
 <span class="c"># following:</span>
 <span class="c"># run_batch.dirname_params_filter.map=OrderedDict((&quot;cortex_density&quot;,&quot;cd&quot;))</span>
 
-<div class="viewcode-block" id="param_formatter"><a class="viewcode-back" href="../../Reference_Manual/topo.command.html#topo.command.param_formatter">[docs]</a><span class="k">class</span> <span class="nc">param_formatter</span><span class="p">(</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">param_formatter</span><span class="p">(</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
 
     <span class="c"># CEBALERT: should I have made this a parameter at the run_batch</span>
     <span class="c"># level? And I don&#39;t know what to call it.</span>
@@ -586,7 +589,7 @@
 
 <span class="c"># Used only by default_analysis_function</span>
 <span class="c"># Should be in order they are needed; e.g. Activity after map measurement,</span>
-<span class="c"># in case Activity plot includes map subplots</span></div>
+<span class="c"># in case Activity plot includes map subplots</span>
 <span class="n">default_analysis_plotgroups</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Orientation Preference&quot;</span><span class="p">,</span><span class="s">&quot;Activity&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="default_analysis_function"><a class="viewcode-back" href="../../Reference_Manual/topo.command.html#topo.command.default_analysis_function">[docs]</a><span class="k">def</span> <span class="nf">default_analysis_function</span><span class="p">():</span>
