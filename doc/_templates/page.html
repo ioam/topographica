@@ -2,8 +2,8 @@
 {# add our custom css and js #}
 {% set project_name = 'Topographica' %}
 {% set ioam_project = 'topographica' %}
-{% set css_files = css_files + ["_static/custom.css"] %}
-{% set script_files = script_files + ["_static/custom.js"] %}
+{% set css_files = css_files + ["_static/custom.css", "_static/bootstrap.css"] %}
+{% set script_files = script_files + ["_static/custom.js", "_static/bootstrap.js", "_static/require.js"] %}
 
 {% if 'Tutorial' in pagename %}
 {% set abs_path = "http://ioam.github.io/topographica/" %}
