@@ -120,3 +120,10 @@ add them here!
 
 .. _older tutorial: ./lissom_oo_or.html
 
+.. Unused links (though still live)
+.. _gcal_ipynb: ../_static/gcal.html
+.. |gcal_ipynb| replace:: GCAL Model definition
+
+.. Trick to get matching italic style for the links
+.. _stevens_jn13: ../_static/stevens_jn13.html
+.. |stevens_jn13| replace:: *Replicating Stevens et al. (J. Neuroscience 2013)*
