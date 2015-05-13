@@ -99,31 +99,24 @@ add them here!
 
 
 .. Notebook tutorials
-.. _som_ipynb: http://ioam.github.io/media/topo/som_retinotopy.html
+.. _som_ipynb: ./som_retinotopy.html
 .. |som_ipynb| replace:: SOM Retinotopic Map
 
-.. _gcal_tutorial: http://ioam.github.io/media/topo/GCAL_Tutorial.html
+.. _gcal_tutorial: ./GCAL_Tutorial.html
 .. |gcal_tutorial| replace:: GCAL Tutorial
 
-.. _gcal_collector: http://ioam.github.io/media/topo/GCAL_Collector.html
+.. _gcal_collector: ./GCAL_Collector.html
 .. |gcal_collector| replace:: GCAL Collector Tutorial
 
-.. _gcal_all: http://ioam.github.io/media/topo/gcal_all.html
+.. _gcal_all: ./gcal_all.html
 .. |gcal_all| replace:: GCAL All-Maps Tutorial
 
 .. GUI tutorials
 .. _gcal_gui_tutorial: ./gcal.html
 .. |gcal_gui_tutorial| replace:: GCAL GUI Tutorial
 
-.. _som_retinotopy_gui: ./som_retinotopy.html
+.. _som_retinotopy_gui: ./som_retinotopy_static.html
 .. |som_retinotopy_gui| replace:: SOM Retinotopy GUI Tutorial
 
 .. _older tutorial: ./lissom_oo_or.html
 
-.. Unused links (though still live)
-.. _gcal_ipynb: ../_static/gcal.html
-.. |gcal_ipynb| replace:: GCAL Model definition
-
-.. Trick to get matching italic style for the links
-.. _stevens_jn13: ../_static/stevens_jn13.html
-.. |stevens_jn13| replace:: *Replicating Stevens et al. (J. Neuroscience 2013)*
