@@ -504,6 +504,8 @@ def n_action(option,opt_str,value,parser):
     sys.argv = ['notebook']
     NotebookApp.ipython_dir = param.resolve_path('platform/ipython', path_to_file=False)
     NotebookApp.profile = 'topo'
+    if options.Profile is not None:
+        NotebookApp.profile = options.Profile
     if options.IP is not None:
         NotebookApp.ip = options.IP
     if options.Port is not None:
@@ -517,6 +519,9 @@ topo_parser.add_option("--ip", action="store", default=None, dest="IP",
 
 topo_parser.add_option("--port", action="store", default=None, dest="Port",
                        type=int, help="Store the provided notebook port.")
+
+topo_parser.add_option("--profile", action="store", default=None, dest="Profile",
+                       type=str, help="Store the provided notebook port.")
 
 topo_parser.add_option("-n", "--notebook", action="callback", callback=n_action,
                        default=False, dest="notebook",
