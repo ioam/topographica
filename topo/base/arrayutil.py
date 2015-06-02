@@ -4,14 +4,13 @@ General utility functions and classes for Topographica that require numpy.
 
 import re
 
-from numpy import sqrt,dot,arctan2,array2string,fmod,floor,array, \
-     unravel_index,concatenate,set_printoptions,divide,maximum,minimum
+import numpy as np
 from numpy import ufunc
 
 import param
 
 # Ask numpy to print even relatively large arrays by default
-set_printoptions(threshold=200*200)
+np.set_printoptions(threshold=200*200)
 
 
 def ufunc_script_repr(f,imports,prefix=None,settings=None):
@@ -32,7 +31,7 @@ def L2norm(v):
     """
     Return the L2 norm of the vector v.
     """
-    return sqrt(dot(v,v))
+    return np.sqrt(np.dot(v,v))
 
 
 def divisive_normalization(weights):
@@ -50,11 +49,11 @@ def add_border(matrix,width=1,value=0.0):
     """
     rows,cols = matrix.shape
 
-    hborder = array([ [value]*(cols+2*width) ]*width)
-    vborder = array([ [value]*width ] * rows)
+    hborder = np.array([ [value]*(cols+2*width) ]*width)
+    vborder = np.array([ [value]*width ] * rows)
 
-    temp = concatenate( (vborder,matrix,vborder), axis=1)
-    return concatenate( (hborder,temp,hborder) )
+    temp = np.concatenate( (vborder,matrix,vborder), axis=1)
+    return np.concatenate( (hborder,temp,hborder) )
 
 
 def arg(z):
@@ -63,7 +62,7 @@ def arg(z):
     (z in radians.)
     """
     z = z + complex(0,0)  # so that arg(z) also works for real z
-    return arctan2(z.imag, z.real)
+    return np.arctan2(z.imag, z.real)
 
 
 def octave_str(mat,name="mat",owner=""):
@@ -73,7 +72,7 @@ def octave_str(mat,name="mat",owner=""):
     """
     # This just prints the string version of the matrix and does search/replace
     # to convert it; there may be a faster or easier way.
-    mstr=array2string(mat)
+    mstr=np.array2string(mat)
     mstr=re.sub('\n','',mstr)
     mstr=re.sub('[[]','',mstr)
     mstr=re.sub('[]]','\n',mstr)
@@ -118,7 +117,7 @@ def clip_lower(arr,lower_bound):
 
     i.e. numpy.clip(arr,a_min=lower_bound,out=arr) if it existed.
     """
-    maximum(arr,lower_bound,arr)
+    np.maximum(arr,lower_bound,arr)
 
 
 def clip_upper(arr,upper_bound):
@@ -127,7 +126,7 @@ def clip_upper(arr,upper_bound):
 
     i.e. numpy.clip(arr,a_max=upper_bound,out=arr) if it existed.
     """
-    minimum(arr,upper_bound,arr)
+    np.minimum(arr,upper_bound,arr)
 
 
 def wrap(lower, upper, x):
@@ -142,12 +141,12 @@ def wrap(lower, upper, x):
     # usually one can simply use that instead.  E.g. to wrap array or
     # scalar x into 0,2*pi, just use "x % (2*pi)".
     range_=upper-lower
-    return lower + fmod(x-lower + 2*range_*(1-floor(x/(2*range_))), range_)
+    return lower + np.fmod(x-lower + 2*range_*(1-np.floor(x/(2*range_))), range_)
 
 
 def array_argmax(arr):
     "Returns the coordinates of the maximum element in the given array."
-    return unravel_index(arr.argmax(),arr.shape)
+    return np.unravel_index(arr.argmax(),arr.shape)
 
 
 
@@ -162,4 +161,4 @@ class DivideWithConstant(param.Parameterized):
     c = param.Number(default=1.0)
 
     def __call__(self, x, y):
-        return divide(x,maximum(y,0)+self.c)
+        return np.divide(x,np.maximum(y,0)+self.c)
