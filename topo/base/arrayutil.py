@@ -162,3 +162,15 @@ class DivideWithConstant(param.Parameterized):
 
     def __call__(self, x, y):
         return np.divide(x,np.maximum(y,0)+self.c)
+
+
+class MultiplyWithConstant(param.Parameterized):
+    """
+    Allows multiplying with a constant offset parameter.
+    Useful to ensure positive scaling of responses.
+    """
+
+    c = param.Number(default=1.0)
+
+    def __call__(self, x, y):
+        return np.multiply(x, np.maximum(y+self.c, 0))
