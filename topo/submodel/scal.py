@@ -114,7 +114,7 @@ class ModelSCAL(ModelGCAL):
         Lateral excitatory connection strength""")
 
     latexc_lr=param.Number(default=1.0, doc="""
-        Lateral excitatory connection strength""")
+        Lateral excitatory connection learning rate.""")
 
     # Excitatory connection profiles #
 
@@ -160,16 +160,16 @@ class ModelSCAL(ModelGCAL):
                 radius=self.latinh_radius))
 
 
-    @Model.matchconditions('V1', 'lateral_excitatory')
-    def lateral_excitatory_conditions(self, properties):
+    @Model.matchconditions('V1', 'lr_lateral_excitatory')
+    def lr_lateral_excitatory_conditions(self, properties):
         return {'level': 'V1'} if self.laterals else {'level': None}
 
 
     @Model.CFProjection
-    def lateral_excitatory(self, src_properties, dest_properties):
+    def lr_lateral_excitatory(self, src_properties, dest_properties):
         return Model.CFProjection.params(
             delay=0.1,
-            name='LateralExcitatory',
+            name='LRExcitatory',
             activity_group=(0.9, MultiplyWithConstant()),
             weights_generator=imagen.Gaussian(aspect_ratio=1.0, size=self.lateral_size),
             strength=self.latexc_strength,
