@@ -26,6 +26,9 @@ class ModelGCAL(EarlyVisionModel):
         The initial V1 threshold value. This value is static in the L and GCL models
         and adaptive in the AL and GCAL models.""")
 
+    t_settle = param.Integer(default=16, doc="""
+        Number of settling steps before applying a reset in the V1 sheet.""")
+
     target_activity = param.Number(default=0.024,doc="""
         The target average activity for the homeostatic threshold mechanism.""")
 
@@ -86,7 +89,7 @@ class ModelGCAL(EarlyVisionModel):
     @Model.SettlingCFSheet
     def V1(self, properties):
         return Model.SettlingCFSheet.params(
-            tsettle=16,
+            tsettle=self.t_settle,
             plastic=True,
             joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt,
             output_fns=[transferfn.misc.HomeostaticResponse(t_init=self.t_init,

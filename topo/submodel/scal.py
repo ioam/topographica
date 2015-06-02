@@ -49,6 +49,8 @@ class ModelSCAL(ModelGCAL):
     t_init = param.Number(default=0.4, doc="""
         The initial threshold value for homeostatic adaptation in V1.""")
 
+    t_settle = param.Integer(default=0, doc="""
+        Number of settling steps before applying a reset in the V1 sheet.""")
 
     #=================#
     # Spatial extents #
