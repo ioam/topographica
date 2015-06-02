@@ -2,7 +2,7 @@ import param
 
 import imagen
 
-from topo.base.arrayutil import DivideWithConstant
+from topo.base.arrayutil import DivideWithConstant, MultiplyWithConstant
 from topo import sheet
 
 from . import Model
@@ -101,6 +101,27 @@ class ModelSCAL(ModelGCAL):
 
         divide(x,maximum(y,0) + division_constant).""")
 
+    #=========================#
+    # Long-range connectivity #
+    #=========================#
+
+    laterals = param.Boolean(default=False, doc="""
+        Instantiate long-range lateral connections. Expensive!""")
+
+    latexc_strength=param.Number(default=0, doc="""
+        Lateral excitatory connection strength""")
+
+    latexc_lr=param.Number(default=1.0, doc="""
+        Lateral excitatory connection strength""")
+
+    # Excitatory connection profiles #
+
+    lateral_radius = param.Number(default=1.25, bounds=(0, None), doc="""
+        Radius of the lateral excitatory bounds within V1Exc.""")
+
+    lateral_size = param.Number(default=2.5, bounds=(0, None), doc="""
+        Size of the lateral excitatory connections within V1Exc.""")
+
 
     def training_pattern_setup(self, **overrides):
         """
@@ -135,6 +156,23 @@ class ModelSCAL(ModelGCAL):
             learning_rate=self.inh_lr,
             nominal_bounds_template=sheet.BoundingBox(
                 radius=self.latinh_radius))
+
+
+    @Model.matchconditions('V1', 'lateral_excitatory')
+    def lateral_excitatory_conditions(self, properties):
+        return {'level': 'V1'} if self.laterals else {'level': None}
+
+
+    @Model.CFProjection
+    def lateral_excitatory(self, src_properties, dest_properties):
+        return Model.CFProjection.params(
+            delay=0.1,
+            name='LateralExcitatory',
+            activity_group=(0.9, MultiplyWithConstant()),
+            weights_generator=imagen.Gaussian(aspect_ratio=1.0, size=self.lateral_size),
+            strength=self.latexc_strength,
+            learning_rate=self.latexc_lr,
+            nominal_bounds_template=sheet.BoundingBox(radius=self.lateral_radius))
 
 
     def analysis_setup(self):
