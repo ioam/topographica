@@ -74,7 +74,7 @@
 
 <span class="kn">import</span> <span class="nn">imagen</span>
 
-<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">DivideWithConstant</span>
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">DivideWithConstant</span><span class="p">,</span> <span class="n">MultiplyWithConstant</span>
 <span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">sheet</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Model</span>
@@ -121,6 +121,8 @@
     <span class="n">t_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        The initial threshold value for homeostatic adaptation in V1.&quot;&quot;&quot;</span><span class="p">)</span>
 
+    <span class="n">t_settle</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of settling steps before applying a reset in the V1 sheet.&quot;&quot;&quot;</span><span class="p">)</span>
 
     <span class="c">#=================#</span>
     <span class="c"># Spatial extents #</span>
@@ -173,6 +175,27 @@
 
 <span class="s">        divide(x,maximum(y,0) + division_constant).&quot;&quot;&quot;</span><span class="p">)</span>
 
+    <span class="c">#=========================#</span>
+    <span class="c"># Long-range connectivity #</span>
+    <span class="c">#=========================#</span>
+
+    <span class="n">laterals</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Instantiate long-range lateral connections. Expensive!&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">latexc_strength</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Lateral excitatory connection strength&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">latexc_lr</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Lateral excitatory connection learning rate.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># Excitatory connection profiles #</span>
+
+    <span class="n">lateral_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Radius of the lateral excitatory bounds within V1Exc.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lateral_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Size of the lateral excitatory connections within V1Exc.&quot;&quot;&quot;</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="ModelSCAL.training_pattern_setup"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.scal.ModelSCAL.training_pattern_setup">[docs]</a>    <span class="k">def</span> <span class="nf">training_pattern_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -209,6 +232,23 @@
                 <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latinh_radius</span><span class="p">))</span>
 
 </div>
+    <span class="nd">@Model.matchconditions</span><span class="p">(</span><span class="s">&#39;V1&#39;</span><span class="p">,</span> <span class="s">&#39;lr_lateral_excitatory&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">lr_lateral_excitatory_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="s">&#39;V1&#39;</span><span class="p">}</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">laterals</span> <span class="k">else</span> <span class="p">{</span><span class="s">&#39;level&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+
+
+    <span class="nd">@Model.CFProjection</span>
+    <span class="k">def</span> <span class="nf">lr_lateral_excitatory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_properties</span><span class="p">,</span> <span class="n">dest_properties</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">CFProjection</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
+            <span class="n">delay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s">&#39;LRExcitatory&#39;</span><span class="p">,</span>
+            <span class="n">activity_group</span><span class="o">=</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">MultiplyWithConstant</span><span class="p">()),</span>
+            <span class="n">weights_generator</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lateral_size</span><span class="p">),</span>
+            <span class="n">strength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latexc_strength</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latexc_lr</span><span class="p">,</span>
+            <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lateral_radius</span><span class="p">))</span>
+
+
     <span class="k">def</span> <span class="nf">analysis_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ModelSCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">analysis_setup</span><span class="p">()</span>
         <span class="kn">from</span> <span class="nn">topo.analysis.command</span> <span class="kn">import</span> <span class="n">measure_sine_pref</span><span class="p">,</span> <span class="n">measure_or_pref</span>

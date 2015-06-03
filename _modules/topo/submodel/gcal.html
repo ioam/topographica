@@ -98,6 +98,9 @@
 <span class="s">        The initial V1 threshold value. This value is static in the L and GCL models</span>
 <span class="s">        and adaptive in the AL and GCAL models.&quot;&quot;&quot;</span><span class="p">)</span>
 
+    <span class="n">t_settle</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of settling steps before applying a reset in the V1 sheet.&quot;&quot;&quot;</span><span class="p">)</span>
+
     <span class="n">target_activity</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.024</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        The target average activity for the homeostatic threshold mechanism.&quot;&quot;&quot;</span><span class="p">)</span>
 
@@ -158,7 +161,7 @@
     <span class="nd">@Model.SettlingCFSheet</span>
     <span class="k">def</span> <span class="nf">V1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">SettlingCFSheet</span><span class="o">.</span><span class="n">params</span><span class="p">(</span>
-            <span class="n">tsettle</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="n">tsettle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_settle</span><span class="p">,</span>
             <span class="n">plastic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
             <span class="n">joint_norm_fn</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">optimized</span><span class="o">.</span><span class="n">compute_joint_norm_totals_opt</span><span class="p">,</span>
             <span class="n">output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">transferfn</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">HomeostaticResponse</span><span class="p">(</span><span class="n">t_init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init</span><span class="p">,</span>

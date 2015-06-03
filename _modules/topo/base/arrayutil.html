@@ -75,14 +75,13 @@
 
 <span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sqrt</span><span class="p">,</span><span class="n">dot</span><span class="p">,</span><span class="n">arctan2</span><span class="p">,</span><span class="n">array2string</span><span class="p">,</span><span class="n">fmod</span><span class="p">,</span><span class="n">floor</span><span class="p">,</span><span class="n">array</span><span class="p">,</span> \
-     <span class="n">unravel_index</span><span class="p">,</span><span class="n">concatenate</span><span class="p">,</span><span class="n">set_printoptions</span><span class="p">,</span><span class="n">divide</span><span class="p">,</span><span class="n">maximum</span><span class="p">,</span><span class="n">minimum</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ufunc</span>
 
 <span class="kn">import</span> <span class="nn">param</span>
 
 <span class="c"># Ask numpy to print even relatively large arrays by default</span>
-<span class="n">set_printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="mi">200</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ufunc_script_repr"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.ufunc_script_repr">[docs]</a><span class="k">def</span> <span class="nf">ufunc_script_repr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">imports</span><span class="p">,</span><span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">settings</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -103,7 +102,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the L2 norm of the vector v.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">v</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">v</span><span class="p">))</span>
 
 </div>
 <div class="viewcode-block" id="divisive_normalization"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.divisive_normalization">[docs]</a><span class="k">def</span> <span class="nf">divisive_normalization</span><span class="p">(</span><span class="n">weights</span><span class="p">):</span>
@@ -121,11 +120,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span>
 
-    <span class="n">hborder</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">cols</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">width</span><span class="p">)</span> <span class="p">]</span><span class="o">*</span><span class="n">width</span><span class="p">)</span>
-    <span class="n">vborder</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">*</span><span class="n">width</span> <span class="p">]</span> <span class="o">*</span> <span class="n">rows</span><span class="p">)</span>
+    <span class="n">hborder</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">cols</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">width</span><span class="p">)</span> <span class="p">]</span><span class="o">*</span><span class="n">width</span><span class="p">)</span>
+    <span class="n">vborder</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">*</span><span class="n">width</span> <span class="p">]</span> <span class="o">*</span> <span class="n">rows</span><span class="p">)</span>
 
-    <span class="n">temp</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">vborder</span><span class="p">,</span><span class="n">matrix</span><span class="p">,</span><span class="n">vborder</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">hborder</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">hborder</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">vborder</span><span class="p">,</span><span class="n">matrix</span><span class="p">,</span><span class="n">vborder</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">hborder</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">hborder</span><span class="p">)</span> <span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="arg"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.arg">[docs]</a><span class="k">def</span> <span class="nf">arg</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
@@ -134,7 +133,7 @@
 <span class="sd">    (z in radians.)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="nb">complex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># so that arg(z) also works for real z</span>
-    <span class="k">return</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="octave_str"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.octave_str">[docs]</a><span class="k">def</span> <span class="nf">octave_str</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mat&quot;</span><span class="p">,</span><span class="n">owner</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
@@ -144,7 +143,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># This just prints the string version of the matrix and does search/replace</span>
     <span class="c"># to convert it; there may be a faster or easier way.</span>
-    <span class="n">mstr</span><span class="o">=</span><span class="n">array2string</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+    <span class="n">mstr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
     <span class="n">mstr</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">mstr</span><span class="p">)</span>
     <span class="n">mstr</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;[[]&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">mstr</span><span class="p">)</span>
     <span class="n">mstr</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;[]]&#39;</span><span class="p">,</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="n">mstr</span><span class="p">)</span>
@@ -189,7 +188,7 @@
 
 <span class="sd">    i.e. numpy.clip(arr,a_min=lower_bound,out=arr) if it existed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">maximum</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">lower_bound</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">lower_bound</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="clip_upper"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.clip_upper">[docs]</a><span class="k">def</span> <span class="nf">clip_upper</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">upper_bound</span><span class="p">):</span>
@@ -198,7 +197,7 @@
 
 <span class="sd">    i.e. numpy.clip(arr,a_max=upper_bound,out=arr) if it existed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">minimum</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">upper_bound</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">upper_bound</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="wrap"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.wrap">[docs]</a><span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
@@ -213,12 +212,12 @@
     <span class="c"># usually one can simply use that instead.  E.g. to wrap array or</span>
     <span class="c"># scalar x into 0,2*pi, just use &quot;x % (2*pi)&quot;.</span>
     <span class="n">range_</span><span class="o">=</span><span class="n">upper</span><span class="o">-</span><span class="n">lower</span>
-    <span class="k">return</span> <span class="n">lower</span> <span class="o">+</span> <span class="n">fmod</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">lower</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">range_</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">range_</span><span class="p">))),</span> <span class="n">range_</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lower</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">fmod</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">lower</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">range_</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">range_</span><span class="p">))),</span> <span class="n">range_</span><span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="array_argmax"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.array_argmax">[docs]</a><span class="k">def</span> <span class="nf">array_argmax</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
     <span class="s">&quot;Returns the coordinates of the maximum element in the given array.&quot;</span>
-    <span class="k">return</span> <span class="n">unravel_index</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
 
 
@@ -233,7 +232,19 @@
     <span class="n">c</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">divide</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">maximum</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="MultiplyWithConstant"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.html#topo.base.arrayutil.MultiplyWithConstant">[docs]</a><span class="k">class</span> <span class="nc">MultiplyWithConstant</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows multiplying with a constant offset parameter.</span>
+<span class="sd">    Useful to ensure positive scaling of responses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
 </pre></div>
 
           </div>

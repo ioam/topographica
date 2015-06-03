@@ -1,0 +1,5 @@
+<map id="inheritancefb77bc0bf5" name="inheritancefb77bc0bf5">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="5,30,264,55"/>
+<area shape="rect" id="node2" href="#topo.base.arrayutil.DivideWithConstant" title="Divide two scalars or arrays with a constant (c) offset on the" alt="" coords="317,5,587,30"/>
+<area shape="rect" id="node3" href="#topo.base.arrayutil.MultiplyWithConstant" title="Allows multiplying with a constant offset parameter." alt="" coords="313,54,591,79"/>
+</map>
