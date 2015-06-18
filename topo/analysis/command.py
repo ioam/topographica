@@ -229,11 +229,11 @@ class measure_cog(ParameterizedFunction):
 
         return {'XCoG': xcog_map, 'YCoG': ycog_map, 'CoG': contour_map}
 
-
-Store.options.Contours.Gravity = Options('style', linewidth=1.0)
-Store.options.Image.X_CoG = Options('style', cmap='gray')
-Store.options.Image.Y_CoG = Options('style', cmap='gray')
-Store.options.CFView.OnOff_CFs = Options('style', cmap='RdYlBu_r', interpolation='nearest')
+options = Store.options(backend='matplotlib')
+options.Contours.Gravity = Options('style', linewidth=1.0)
+options.Image.X_CoG = Options('style', cmap='gray')
+options.Image.Y_CoG = Options('style', cmap='gray')
+options.CFView.OnOff_CFs = Options('style', cmap='RdYlBu_r', interpolation='nearest')
 
 import types
 
