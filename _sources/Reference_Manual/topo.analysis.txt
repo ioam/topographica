@@ -43,3 +43,16 @@ topo.analysis Package
 
 -------
 
+:mod:`weights` Module
+---------------------
+
+.. inheritance-diagram:: topo.analysis.weights
+
+
+.. automodule:: topo.analysis.weights
+    :members:
+    :inherited-members:
+    :show-inheritance:
+
+-------
+

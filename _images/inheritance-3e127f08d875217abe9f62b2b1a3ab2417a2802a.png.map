@@ -1,0 +1,8 @@
+<map id="inheritance01d11ac237" name="inheritance01d11ac237">
+<area shape="rect" id="node1" title="Base class for all Operation types." alt="" coords="493,22,673,41"/>
+<area shape="rect" id="node3" title="A TreeOperation is the most general Operation type; it accepts any" alt="" coords="709,22,909,41"/>
+<area shape="rect" id="node2" title="params(name=String)" alt="" coords="228,22,457,41"/>
+<area shape="rect" id="node5" href="#topo.analysis.weights.WeightDistribution" title="Computes histogram of the difference in feature" alt="" coords="945,3,1148,22"/>
+<area shape="rect" id="node6" href="#topo.analysis.weights.WeightIsotropy" title="Computes a histogram of azimuths between the positional" alt="" coords="953,40,1140,58"/>
+<area shape="rect" id="node4" title="params(name=String)" alt="" coords="4,22,193,41"/>
+</map>

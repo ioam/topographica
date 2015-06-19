@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.analysis.weights &mdash; Topographica</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/custom.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../_static/require.js"></script>
+    <link rel="shortcut icon" href="../../../_static/topo-favicon.ico"/>
+    <link rel="top" title="Topographica" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.analysis.weights</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">holoviews</span> <span class="kn">import</span> <span class="n">Store</span><span class="p">,</span> <span class="n">Options</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">HoloMap</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Dimension</span><span class="p">,</span> <span class="n">Scatter</span>
+<span class="kn">from</span> <span class="nn">holoviews.operation</span> <span class="kn">import</span> <span class="n">TreeOperation</span>
+
+<div class="viewcode-block" id="WeightIsotropy"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.weights.WeightIsotropy">[docs]</a><span class="k">class</span> <span class="nc">WeightIsotropy</span><span class="p">(</span><span class="n">TreeOperation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes a histogram of azimuths between the positional</span>
+<span class="sd">    preferences of pre- and post-synaptic neurons weighted</span>
+<span class="sd">    by the connection strength and normalized relative to</span>
+<span class="sd">    the orientation preference.</span>
+<span class="sd">    </span>
+<span class="sd">    Useful for determining whether lateral connection are</span>
+<span class="sd">    anisotropic along the axis of preferred orientation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">num_bins</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of bins in the histogram.&quot;&quot;&quot;</span><span class="p">)</span>
+    
+    <span class="n">roi</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">NumericTuple</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Region of interest supplied as a four-tuple of the</span>
+<span class="s">        form (left, bottom, right, top)&quot;&quot;&quot;</span><span class="p">)</span>
+    
+    <span class="n">projections</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       List of tuples of the form (sheet, projection).&quot;&quot;&quot;</span><span class="p">)</span>   
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_last</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">last</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">HoloMap</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span>
+
+    <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">projections</span><span class="p">:</span>
+            <span class="c"># Get last element</span>
+            <span class="n">orelmnt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">OrientationPreference</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
+            <span class="n">xelmnt</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">XPreference</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
+            <span class="n">yelmnt</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">YPreference</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
+        
+            <span class="c"># If any preference has not been supplied skip analysis</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="p">[</span><span class="n">orelmnt</span><span class="p">,</span> <span class="n">xelmnt</span><span class="p">,</span> <span class="n">yelmnt</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="n">Layout</span><span class="p">()</span>
+        
+            <span class="c"># Flatten preferences</span>
+            <span class="n">xpref_arr</span> <span class="o">=</span> <span class="n">xelmnt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">flat</span>
+            <span class="n">ypref_arr</span> <span class="o">=</span> <span class="n">yelmnt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">flat</span>    
+
+            <span class="c"># Iterate over CFs in ROI</span>
+            <span class="n">l</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">roi</span>
+            <span class="n">lat_weights</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">CFs</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">azimuths</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">lat_weights</span><span class="p">[</span><span class="n">l</span><span class="p">:</span><span class="n">r</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c"># Get preferences for a particular unit</span>
+                <span class="n">unit_angle</span><span class="p">,</span> <span class="n">unit_x</span><span class="p">,</span> <span class="n">unit_y</span> <span class="o">=</span> <span class="n">orelmnt</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">xelmnt</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">yelmnt</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">weight_arr</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">situated</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">flat</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="n">weight_arr</span><span class="p">[</span><span class="n">weight_arr</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">xpref</span> <span class="o">=</span> <span class="n">xpref_arr</span><span class="p">[</span><span class="n">weight_arr</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ypref</span> <span class="o">=</span> <span class="n">ypref_arr</span><span class="p">[</span><span class="n">weight_arr</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+            
+                <span class="c"># Compute x/y-preference differences between</span>
+                <span class="c"># pre- and post-synaptic neurons</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">unit_x</span> <span class="o">-</span> <span class="n">xpref</span>
+                <span class="n">dy</span> <span class="o">=</span> <span class="n">unit_y</span> <span class="o">-</span> <span class="n">ypref</span>
+            
+                <span class="c"># Compute angle between position preferences</span>
+                <span class="c"># of the pre- and post-synaptic neurons</span>
+                <span class="c"># Correcting for preferred orientation</span>
+                <span class="n">conn_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="n">conn_angle</span><span class="p">[</span><span class="n">conn_angle</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">conn_angle</span> <span class="o">-</span> <span class="n">unit_angle</span>
+                <span class="n">delta2</span> <span class="o">=</span> <span class="n">conn_angle</span> <span class="o">-</span> <span class="p">(</span><span class="n">unit_angle</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">delta</span><span class="p">,</span> <span class="n">delta2</span><span class="p">])</span>
+                <span class="n">delta</span><span class="p">[</span><span class="n">delta</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">weight</span><span class="p">,</span> <span class="n">weight</span><span class="p">])</span>
+                <span class="n">azimuths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+                <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span> 
+        
+            <span class="c"># Combine azimuths and weights for all CFs</span>
+            <span class="n">azimuths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">azimuths</span><span class="p">)</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+        
+            <span class="c"># Compute histogram</span>
+            <span class="n">bins</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">azimuths</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
+                                       <span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">num_bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+            <span class="c"># Construct Elements</span>
+            <span class="n">label</span> <span class="o">=</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">])</span>
+            <span class="n">histogram</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s">&quot;Weight Isotropy&quot;</span><span class="p">,</span>
+                                  <span class="n">kdims</span><span class="o">=</span><span class="p">[</span><span class="n">Dimension</span><span class="p">(</span><span class="s">&#39;Azimuth&#39;</span><span class="p">)],</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">WeightIsotropy</span><span class="p">[</span><span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">])]</span> <span class="o">=</span> <span class="n">histogram</span>
+        <span class="k">return</span> <span class="n">layout</span>
+
+</div>
+<div class="viewcode-block" id="circular_dist"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.weights.circular_dist">[docs]</a><span class="k">def</span> <span class="nf">circular_dist</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the distance between a and b (scalars) in a domain with `period` period.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">),</span> <span class="n">period</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="WeightDistribution"><a class="viewcode-back" href="../../../Reference_Manual/topo.analysis.html#topo.analysis.weights.WeightDistribution">[docs]</a><span class="k">class</span> <span class="nc">WeightDistribution</span><span class="p">(</span><span class="n">TreeOperation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes histogram of the difference in feature</span>
+<span class="sd">    preference between pre- and post-synaptic neurons</span>
+<span class="sd">    weighted by the connection strength between them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">feature</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;Orientation&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Feature to compute the distribution over&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">num_bins</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Number of histogram bins.&quot;&quot;&quot;</span><span class="p">)</span>
+    
+    <span class="n">normalized</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Whether to normalize the histogram&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">projections</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       List of tuples of the form (sheet, projection).&quot;&quot;&quot;</span><span class="p">)</span>   
+
+    <span class="n">weighted</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">preferences</span> <span class="o">=</span> <span class="n">tree</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">feature</span><span class="o">+</span><span class="s">&#39;Preference&#39;</span><span class="p">]</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">projections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">preferences</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">featurepref</span> <span class="o">=</span> <span class="n">preferences</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">featurepref</span><span class="p">,</span> <span class="n">HoloMap</span><span class="p">):</span>
+                <span class="n">featurepref</span> <span class="o">=</span> <span class="n">featurepref</span><span class="o">.</span><span class="n">last</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">featurepref</span><span class="o">.</span><span class="n">value_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">feature_arr</span> <span class="o">=</span> <span class="n">featurepref</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">flat</span>
+            <span class="n">cfs</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">CFs</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">deltas</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">cfs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">preferred</span> <span class="o">=</span> <span class="n">featurepref</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">weight_arr</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">situated</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">flat</span>
+                <span class="n">feature_slice</span> <span class="o">=</span> <span class="n">feature_arr</span><span class="p">[</span><span class="n">weight_arr</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">weight_slice</span> <span class="o">=</span> <span class="n">weight_arr</span><span class="p">[</span><span class="n">weight_arr</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">feature</span><span class="o">.</span><span class="n">cyclic</span><span class="p">:</span>
+                    <span class="n">feature_delta</span> <span class="o">=</span> <span class="n">circular_dist</span><span class="p">(</span><span class="n">preferred</span><span class="p">,</span> <span class="n">feature_slice</span><span class="p">,</span> <span class="n">feature</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">feature_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">feature_slice</span><span class="o">-</span><span class="n">preferred</span><span class="p">)</span>
+                <span class="n">deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_delta</span><span class="p">)</span>
+                <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight_slice</span><span class="p">)</span>
+            <span class="n">deltas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">deltas</span><span class="p">)</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+            <span class="n">bin_range</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">feature</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span> <span class="k">if</span> <span class="n">feature</span><span class="o">.</span><span class="n">cyclic</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="n">bins</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">deltas</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">bin_range</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">num_bins</span><span class="p">,</span>
+                                       <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">normalized</span><span class="p">)</span>
+            <span class="c"># Construct Elements </span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span><span class="p">,</span><span class="n">p</span><span class="p">])</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> Weight Distribution&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">feature</span>
+            <span class="n">histogram</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                                  <span class="n">kdims</span><span class="o">=</span><span class="p">[</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">feature</span><span class="p">,</span> <span class="s">&#39;Difference&#39;</span><span class="p">])],</span>
+                                  <span class="n">vdims</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Weight&#39;</span><span class="p">])</span>
+
+            <span class="n">layout</span><span class="o">.</span><span class="n">WeightDistribution</span><span class="p">[</span><span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span><span class="p">,</span><span class="n">p</span><span class="p">])]</span> <span class="o">=</span> <span class="n">histogram</span>
+            
+        <span class="k">return</span> <span class="n">layout</span>     
+</div>
+<span class="n">options</span> <span class="o">=</span> <span class="n">Store</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s">&#39;matplotlib&#39;</span><span class="p">)</span>
+<span class="n">options</span><span class="o">.</span><span class="n">Histogram</span><span class="o">.</span><span class="n">Weight_Isotropy</span> <span class="o">=</span> <span class="n">Options</span><span class="p">(</span><span class="s">&#39;plot&#39;</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;polar&#39;</span><span class="p">,</span> <span class="n">show_grid</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+<li><a href="../../../site_map.html">Site Map</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/_modules/topo/analysis/weights.rst" rel="nofollow">Edit on GitHub</a></li>
+    <li><a	href="http://doozy.inf.ed.ac.uk:8010/builders/topographica_docs" rel="nofollow">Rebuild docs</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
