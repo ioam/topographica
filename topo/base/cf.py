@@ -787,7 +787,7 @@ class CFProjection(Projection):
                     label=self.name, group='CF Weight')
         sv.metadata=AttrDict(timestamp=timestamp)
 
-        viewmap = HoloMap((timestamp, sv), key_dimensions=[time_dim])
+        viewmap = HoloMap((timestamp, sv), kdims=[time_dim])
         viewmap.metadata = AttrDict(coords=(sheet_x, sheet_y),
                                     dest_name=self.dest.name,
                                     precedence=self.src.precedence,

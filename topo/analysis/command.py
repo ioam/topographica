@@ -206,9 +206,9 @@ class measure_cog(ParameterizedFunction):
         timestamp = topo.sim.time()
         lbrt = sheet.bounds.lbrt()
         xsv = Image(xcog, sheet.bounds, label=proj.name, group='X CoG',
-                    value_dimensions=[Dimension('X CoG', range=(lbrt[0], lbrt[2]))])
+                    vdims=[Dimension('X CoG', range=(lbrt[0], lbrt[2]))])
         ysv = Image(ycog, sheet.bounds, label=proj.name, group='Y CoG',
-                    value_dimensions=[Dimension('Y CoG', range=(lbrt[1], lbrt[3]))])
+                    vdims=[Dimension('Y CoG', range=(lbrt[1], lbrt[3]))])
 
         lines = []
         hlines, vlines = xsv.data.shape
@@ -219,12 +219,12 @@ class measure_cog(ParameterizedFunction):
         cogmesh = Contours(lines, extents=sheet.bounds.lbrt(), label=proj.name,
                            group='Center of Gravity')
 
-        xcog_map = HoloMap((timestamp, xsv), key_dimensions=[features.Time])
+        xcog_map = HoloMap((timestamp, xsv), kdims=[features.Time])
         xcog_map.metadata = metadata
-        ycog_map = HoloMap((timestamp, ysv), key_dimensions=[features.Time])
+        ycog_map = HoloMap((timestamp, ysv), kdims=[features.Time])
         ycog_map.metadata = metadata
 
-        contour_map = HoloMap((timestamp, cogmesh), key_dimensions=[features.Time])
+        contour_map = HoloMap((timestamp, cogmesh), kdims=[features.Time])
         contour_map.metadata = metadata
 
         return {'XCoG': xcog_map, 'YCoG': ycog_map, 'CoG': contour_map}

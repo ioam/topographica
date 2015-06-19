@@ -244,8 +244,8 @@ class TemplatePlot(Plot):
             matrix = None
         else:
             matrix = sv.data.copy()
-            if key=='Hue' and sv.value_dimensions[0].cyclic:
-                cyclic_range = sv.value_dimensions[0].range[1] - sv.value_dimensions[0].range[0]
+            if key=='Hue' and sv.vdims[0].cyclic:
+                cyclic_range = sv.vdims[0].range[1] - sv.vdims[0].range[0]
                 matrix /= cyclic_range
 
             # Calculate timestamp for this plot
