@@ -15,7 +15,7 @@ import param
 
 from holoviews.core import BoundingRegion, SheetCoordinateSystem
 from holoviews.core.options import Store, Options
-from holoviews.plotting.mpl import RasterPlot, style_aliases
+from holoviews.plotting.mpl import RasterPlot
 from holoviews import Image
 
 

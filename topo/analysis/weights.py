@@ -1,7 +1,7 @@
 import numpy as np
 
 import param
-from holoviews import Store, Options, Layout, HoloMap, Histogram, Dimension, Scatter
+from holoviews import Store, Options, Layout, HoloMap, Histogram, Dimension
 from holoviews.operation import TreeOperation
 
 class WeightIsotropy(TreeOperation):
