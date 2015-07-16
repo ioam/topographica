@@ -10,21 +10,21 @@ class WeightIsotropy(TreeOperation):
     preferences of pre- and post-synaptic neurons weighted
     by the connection strength and normalized relative to
     the orientation preference.
-    
+
     Useful for determining whether lateral connection are
     anisotropic along the axis of preferred orientation.
     """
-    
+
     num_bins = param.Integer(default=20, doc="""
         Number of bins in the histogram.""")
-    
+
     roi = param.NumericTuple(default=(-0.5, -0.5, 0.5, 0.5), doc="""
         Region of interest supplied as a four-tuple of the
         form (left, bottom, right, top)""")
-    
+
     projections = param.List(default=[], doc="""
-       List of tuples of the form (sheet, projection).""")   
-    
+       List of tuples of the form (sheet, projection).""")
+
     @classmethod
     def _last(cls, obj):
         return obj.last if isinstance(obj, HoloMap) else obj
@@ -36,14 +36,14 @@ class WeightIsotropy(TreeOperation):
             orelmnt = self._last(tree.OrientationPreference[s])
             xelmnt  = self._last(tree.XPreference[s])
             yelmnt  = self._last(tree.YPreference[s])
-        
+
             # If any preference has not been supplied skip analysis
             if any(not o for o in [orelmnt, xelmnt, yelmnt]):
                 return Layout()
-        
+
             # Flatten preferences
             xpref_arr = xelmnt.data.flat
-            ypref_arr = yelmnt.data.flat    
+            ypref_arr = yelmnt.data.flat
 
             # Iterate over CFs in ROI
             l, b, r, t = self.p.roi
@@ -56,12 +56,12 @@ class WeightIsotropy(TreeOperation):
                 weight = weight_arr[weight_arr>0]
                 xpref = xpref_arr[weight_arr>0]
                 ypref = ypref_arr[weight_arr>0]
-            
+
                 # Compute x/y-preference differences between
                 # pre- and post-synaptic neurons
                 dx = unit_x - xpref
                 dy = unit_y - ypref
-            
+
                 # Compute angle between position preferences
                 # of the pre- and post-synaptic neurons
                 # Correcting for preferred orientation
@@ -73,16 +73,16 @@ class WeightIsotropy(TreeOperation):
                 delta[delta<0] += 2*np.pi
                 weight = np.hstack([weight, weight])
                 azimuths.append(delta)
-                weights.append(weight) 
-        
+                weights.append(weight)
+
             # Combine azimuths and weights for all CFs
             azimuths = np.concatenate(azimuths)
             weights = np.concatenate(weights)
-        
+
             # Compute histogram
             bins, edges = np.histogram(azimuths, range=(0, 2*np.pi),
                                        bins=self.p.num_bins, weights=weights, normed=True)
-        
+
             # Construct Elements
             label =' '.join([s, p])
             histogram = Histogram(bins, edges, group="Weight Isotropy",
@@ -110,15 +110,15 @@ class WeightDistribution(TreeOperation):
 
     num_bins = param.Integer(default=10, doc="""
        Number of histogram bins.""")
-    
+
     normalized = param.Boolean(default=False, doc="""
        Whether to normalize the histogram""")
 
     projections = param.List(default=[], doc="""
-       List of tuples of the form (sheet, projection).""")   
+       List of tuples of the form (sheet, projection).""")
 
     weighted = param.Boolean(default=True)
-    
+
     def _process(self, tree, key=None):
         preferences = tree[self.p.feature+'Preference']
         layout = Layout()
@@ -148,7 +148,7 @@ class WeightDistribution(TreeOperation):
             bin_range = (0, feature.range[1]/2.) if feature.cyclic else None
             bins, edges = np.histogram(deltas, range=bin_range, bins=self.p.num_bins,
                                        weights=weights, normed=self.p.normalized)
-            # Construct Elements 
+            # Construct Elements
             label = ' '.join([s,p])
             group = '%s Weight Distribution' % self.p.feature
             histogram = Histogram(bins, edges, group=group, label=label,
@@ -156,8 +156,8 @@ class WeightDistribution(TreeOperation):
                                   vdims=['Weight'])
 
             layout.WeightDistribution['_'.join([s,p])] = histogram
-            
-        return layout     
+
+        return layout
 
 options = Store.options(backend='matplotlib')
 options.Histogram.Weight_Isotropy = Options('plot', projection='polar', show_grid=True)
