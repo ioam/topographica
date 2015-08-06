@@ -34,10 +34,9 @@ from topo.plotting.plot import make_template_plot
 from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
-from holoviews import HoloMap
+from holoviews import HoloMap, NdLayout
 from holoviews.core.overlay import CompositeOverlay
-from holoviews.plotting import NdLayout, CurvePlot
-from holoviews.plotting.element import OverlayPlot
+from holoviews.plotting.mpl import CurvePlot, OverlayPlot
 
 from topo.command import Command
 
