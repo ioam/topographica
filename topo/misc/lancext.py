@@ -397,18 +397,21 @@ class TopoCommand(Command):
 class BatchCollector(PrettyPrinted, param.Parameterized):
    """
    BatchCollector is a wrapper class used to execute a Collector in a
-   Topographica run_batch context, saving the holoviews to disk as
-   *.view files.
+   Topographica run_batch context, saving the HoloViews to disk as
+   *.hvz files.
    """
 
-   metadata = param.List(default=[], doc="""
+   metadata = param.List(default=['tid'], doc="""
        Spec keys or collector paths to include as metadata in the
-       output file along with 'time' (simulation time).
+       output file along with the simulation time.
 
        Layout paths are specified by dotted paths
        e.g. 'PinwheelAnalysis.V1' would add the pinwheel analysis on
        V1 to the metadata.
        """)
+
+   time_dimension = param.String(default='time', doc="""
+      Name of the Topographica simulation time dimension.""")
 
    @classmethod
    def pickle_path(cls, root_directory, batch_name):
@@ -473,7 +476,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
 
       Pickler.save(viewtree,
                    param.normalize_path(filename),
-                   key=dict(spec_metadata + path_metadata + [('time',topo_time)]))
+                   key=dict(spec_metadata + path_metadata + [(self.time_dimension, topo_time)]))
 
 
    def verify(self, specs, model_params):
