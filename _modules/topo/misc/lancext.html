@@ -468,18 +468,21 @@
 <div class="viewcode-block" id="BatchCollector"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollector">[docs]</a><span class="k">class</span> <span class="nc">BatchCollector</span><span class="p">(</span><span class="n">PrettyPrinted</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">   BatchCollector is a wrapper class used to execute a Collector in a</span>
-<span class="sd">   Topographica run_batch context, saving the holoviews to disk as</span>
-<span class="sd">   *.view files.</span>
+<span class="sd">   Topographica run_batch context, saving the HoloViews to disk as</span>
+<span class="sd">   *.hvz files.</span>
 <span class="sd">   &quot;&quot;&quot;</span>
 
-   <span class="n">metadata</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+   <span class="n">metadata</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;tid&#39;</span><span class="p">],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">       Spec keys or collector paths to include as metadata in the</span>
-<span class="s">       output file along with &#39;time&#39; (simulation time).</span>
+<span class="s">       output file along with the simulation time.</span>
 
 <span class="s">       Layout paths are specified by dotted paths</span>
 <span class="s">       e.g. &#39;PinwheelAnalysis.V1&#39; would add the pinwheel analysis on</span>
 <span class="s">       V1 to the metadata.</span>
 <span class="s">       &quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">time_dimension</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;time&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">      Name of the Topographica simulation time dimension.&quot;&quot;&quot;</span><span class="p">)</span>
 
    <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="BatchCollector.pickle_path"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollector.pickle_path">[docs]</a>   <span class="k">def</span> <span class="nf">pickle_path</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">,</span> <span class="n">batch_name</span><span class="p">):</span>
@@ -544,7 +547,7 @@
 
       <span class="n">Pickler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">viewtree</span><span class="p">,</span>
                    <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
-                   <span class="n">key</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec_metadata</span> <span class="o">+</span> <span class="n">path_metadata</span> <span class="o">+</span> <span class="p">[(</span><span class="s">&#39;time&#39;</span><span class="p">,</span><span class="n">topo_time</span><span class="p">)]))</span>
+                   <span class="n">key</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec_metadata</span> <span class="o">+</span> <span class="n">path_metadata</span> <span class="o">+</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_dimension</span><span class="p">,</span> <span class="n">topo_time</span><span class="p">)]))</span>
 
 
 <div class="viewcode-block" id="BatchCollector.verify"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollector.verify">[docs]</a>   <span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specs</span><span class="p">,</span> <span class="n">model_params</span><span class="p">):</span>
@@ -589,134 +592,6 @@
          <span class="n">spec_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;(</span><span class="si">%s</span><span class="s">,</span><span class="si">%s%s%r</span><span class="s">),&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">tab</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
 
       <span class="k">return</span> <span class="s">&#39;Collector([</span><span class="si">%s%s%s</span><span class="s">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">split</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spec_strs</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">split</span><span class="p">)</span>
-
-
-</div>
-<div class="viewcode-block" id="BatchCollator"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollator">[docs]</a><span class="k">class</span> <span class="nc">BatchCollator</span><span class="p">(</span><span class="n">Collator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    BatchCollator provides a convenient interface to load the output</span>
-<span class="sd">    of a BatchCollector run, which is spread across a number of</span>
-<span class="sd">    files. As input it takes a Lancet FileInfo object, an NdMapping or</span>
-<span class="sd">    a Pandas DataFrame, which contains all the filenames indexed by</span>
-<span class="sd">    the parameter space values. The regular NdMapping slicing and</span>
-<span class="sd">    selecting syntax can be used to narrow down the parameter space</span>
-<span class="sd">    and load just the data that is needed.</span>
-
-<span class="sd">    By supplying a log, BatchCollector can also find missing data</span>
-<span class="sd">    files and return an Args object to relaunch them.</span>
-
-<span class="sd">    Internally it uses Pandas operations, making Pandas a core</span>
-<span class="sd">    dependency.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">filekey</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;filename&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        The column key in which file paths are stored.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">filetype</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">FileType</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">       FileType object required to load data files, can be passed directly</span>
-<span class="s">       or via the FileInfo object.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">fileinfo</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">FileInfo</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">       FileInfo object contains the filenames and associated metadata of all</span>
-<span class="s">       files to be loaded.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">log</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">Log</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        The Log object contains information about the full batch and may be</span>
-<span class="s">        passed optionally to find missing data files.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">_deep_indexable</span> <span class="o">=</span> <span class="bp">False</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filekey</span><span class="o">=</span><span class="s">&#39;filename&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">FileInfo</span><span class="p">)</span> <span class="ow">and</span> <span class="n">filetype</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;BatchCollator requires a FileType &#39;</span>
-                            <span class="s">&#39;to be specified.&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">OrderedDict</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;dimensions&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">FileInfo</span><span class="p">):</span>
-                <span class="n">params</span><span class="p">[</span><span class="s">&#39;fileinfo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-                <span class="n">filekey</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">key</span>
-                <span class="n">filetype</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">filetype</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dframe</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">NdMapping</span><span class="p">):</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dframe</span><span class="p">()</span>
-            <span class="n">data</span><span class="p">,</span> <span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_dframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">filekey</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Input data contains no items.&#39;</span><span class="p">)</span>
-
-        <span class="nb">super</span><span class="p">(</span><span class="n">BatchCollator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span>
-                                            <span class="n">filetype</span><span class="o">=</span><span class="n">filetype</span><span class="p">,</span> <span class="n">filekey</span><span class="o">=</span><span class="n">filekey</span><span class="p">,</span>
-                                            <span class="o">**</span><span class="n">params</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileinfo</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing_args</span><span class="p">()):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Missing data files. Use .missing_args method &quot;</span>
-                             <span class="s">&quot;to view missing entries.&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_process_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">data_key</span><span class="p">]</span>
-
-
-    <span class="k">def</span> <span class="nf">_process_dframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dframe</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">filekey</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Takes a dframe as input, merges it with the log dframe if</span>
-<span class="sd">        supplied, and converts it to an OrderedDict.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s">&#39;tid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dframe</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Without a tid field, missing runs cannot be determined.&#39;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">dframe</span> <span class="o">=</span> <span class="n">dframe</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">dframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s">&#39;times&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">dframe</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">filekey</span><span class="p">):</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">filekey</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="n">filename</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">dimensions</span>
-
-
-<div class="viewcode-block" id="BatchCollator.missing_args"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.html#topo.misc.lancext.BatchCollator.missing_args">[docs]</a>    <span class="k">def</span> <span class="nf">missing_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds any missing data by merging the FileInfo and Log,</span>
-<span class="sd">        returning an Args object, which can be used to fill in the</span>
-<span class="sd">        missing runs.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileinfo</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Lancet FileInfo and Lancet log required &#39;</span>
-                            <span class="s">&#39;to determine missing args.&#39;</span><span class="p">)</span>
-
-        <span class="c"># Expand &#39;times&#39; list into &#39;time&#39;</span>
-        <span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">expanded_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">*</span> <span class="n">List</span><span class="p">(</span><span class="s">&#39;time&#39;</span><span class="p">,</span> <span class="n">specs</span><span class="p">[</span><span class="s">&#39;times&#39;</span><span class="p">])</span>
-
-        <span class="c"># Expand fileinfo with constant dims</span>
-        <span class="n">expanded_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileinfo</span>
-        <span class="n">constant_args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="o">**</span><span class="nb">dict</span><span class="p">((</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_values</span><span class="p">(</span><span class="n">d</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                                        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_dims</span>
-                                        <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expanded_info</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">constant_args</span><span class="p">:</span>
-           <span class="n">expanded_info</span> <span class="o">*=</span> <span class="n">constant_args</span>
-
-        <span class="c"># Compute set of sorted log and file spec tuples</span>
-        <span class="n">sort_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dimension_index</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">log_specs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">tuple</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                                        <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s">&#39;times&#39;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">sort_fn</span><span class="p">))</span>
-                     <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">expanded_log</span><span class="o">.</span><span class="n">specs</span><span class="p">]</span>
-        <span class="n">file_specs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">tuple</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                                         <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s">&#39;filename&#39;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">sort_fn</span><span class="p">))</span>
-                      <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">expanded_info</span><span class="o">.</span><span class="n">specs</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">Args</span><span class="p">([</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">log_specs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">file_specs</span><span class="p">))])</span>
-
-</div>
-    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
-
 
 
 </div>
