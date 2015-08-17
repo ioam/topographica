@@ -31,25 +31,29 @@ class ModelSCAL(ModelGCAL):
         cortical areas larger than 1.0x1.0 to avoid strong suppressive
         edge effects.""")
 
+    lgn_density = param.Number(default=16.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the LGN.""")
+
     num_inputs = param.Integer(default=1, bounds=(1,None))
 
     lgnaff_strength = param.Number(default=10, doc="""
         Overall strength of the afferent projection from the retina to
         the LGN sheets.""")
 
-    aff_strength = param.Number(default=2.8, bounds=(0.0, None), doc="""
+    aff_strength = param.Number(default=2.4, bounds=(0.0, None), doc="""
         Overall strength of the afferent projection to V1.""")
 
-    exc_strength = param.Number(default=1.0, bounds=(0.0, None), doc="""
+    exc_strength = param.Number(default=1.4, bounds=(0.0, None), doc="""
         Overall strength of the lateral excitatory projection to V1.""")
 
-    inh_strength = param.Number(default=1.8, bounds=(0.0, None), doc="""
+    inh_strength = param.Number(default=2.0, bounds=(0.0, None), doc="""
         Overall strength of the lateral inhibitory projection to V1.""")
 
     t_init = param.Number(default=0.4, doc="""
         The initial threshold value for homeostatic adaptation in V1.""")
 
-    t_settle = param.Integer(default=0, doc="""
+    t_settle = param.Integer(default=16, doc="""
         Number of settling steps before applying a reset in the V1 sheet.""")
 
     #=================#
