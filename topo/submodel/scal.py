@@ -77,14 +77,14 @@ class EarlyVisionSCAL(EarlyVisionModel):
                                       else 3 * 0.1 if gaussian else 10.0),
                               'aspect_ratio': 5 if or_dim else 1.0,
                               'scale': self.contrast / 100.0}
-        return super(ModelCalibratedLGN, self).training_pattern_setup(
+        return super(EarlyVisionSCAL, self).training_pattern_setup(
             pattern_parameters=pattern_parameters,
             position_bound_x=self.area/2.0+self.v1aff_radius,
             position_bound_y=self.area/2.0+self.v1aff_radius)
 
 
     def analysis_setup(self):
-        super(ModelCalibratedLGN, self).analysis_setup()
+        super(EarlyVisionSCAL, self).analysis_setup()
         from topo.analysis.command import measure_sine_pref, measure_or_pref
 
         sf_relative_sizes = [self.sf_spacing ** (sf_channel - 1)
