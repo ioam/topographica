@@ -7,10 +7,103 @@ from topo import sheet
 
 from . import Model
 from .gcal import ModelGCAL
+from .earlyvision import EarlyVisionModel
 
 
 @Model.definition
-class ModelSCAL(ModelGCAL):
+class EarlyVisionSCAL(EarlyVisionModel):
+    """
+    EarlyVisionModel subclass with spatially calibrated extents
+    used for SCAL and other models.
+    """
+
+    area = param.Number(default=2.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        Linear size of cortical area to simulate.
+
+        SCAL and other spatially calibrated variants of GCAL require
+        cortical areas larger than 1.0x1.0 to avoid strong suppressive
+        edge effects.""")
+
+    expand_sf_test_range=param.Boolean(default=False,doc="""
+        By default, measure_sine_pref() measures SF at the sizes of RF
+        used, for speed, but if expand_sf_test_range is True, it will
+        test over a larger range, including half the size of the
+        smallest and twice the size of the largest.""")
+
+    lgn_density = param.Number(default=16.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the LGN.""")
+
+    num_inputs = param.Number(default=1.5, bounds=(0,None))
+
+    lgnaff_strength = param.Number(default=14, doc="""
+        Overall strength of the afferent projection from the retina to
+        the LGN sheets.""")
+
+    #=================#
+    # Spatial extents #
+    #=================#
+
+    center_size = param.Number(default=0.2, bounds=(0, None), doc="""
+        The size of the central Gaussian used to compute the
+        center-surround receptive field.""")
+
+    surround_size = param.Number(default=0.3, bounds=(0, None), doc="""
+        The size of the surround Gaussian used to compute the
+        center-surround receptive field.""")
+
+    gain_control_size = param.Number(default=0.5, bounds=(0, None), doc="""
+        The size of the divisive inhibitory suppressive field used for
+        contrast-gain control in the LGN sheets. This also acts as the
+        corresponding bounds radius.""")
+
+    lgnaff_radius = param.Number(default=0.4, bounds=(0, None), doc="""
+        Connection field radius of a unit in the LGN level to units in
+        a retina sheet.""")
+
+    lgnlateral_radius = param.Number(default=0.5, bounds=(0, None), doc="""
+        Connection field radius of a unit in the LGN level to
+        surrounding units, in case gain control is used.""")
+
+    def training_pattern_setup(self, **overrides):
+        """
+        Only the size of Gaussian training patterns has been modified.
+        The 'aspect_ratio' and 'scale' parameter values are unchanged.
+        """
+        or_dim = 'or' in self.dims
+        gaussian = (self.dataset == 'Gaussian')
+        pattern_parameters = {'size':(0.1 if or_dim and gaussian
+                                      else 3 * 0.1 if gaussian else 10.0),
+                              'aspect_ratio': 5 if or_dim else 1.0,
+                              'scale': self.contrast / 100.0}
+        return super(ModelCalibratedLGN, self).training_pattern_setup(
+            pattern_parameters=pattern_parameters,
+            position_bound_x=self.area/2.0+self.v1aff_radius,
+            position_bound_y=self.area/2.0+self.v1aff_radius)
+
+
+    def analysis_setup(self):
+        super(ModelCalibratedLGN, self).analysis_setup()
+        from topo.analysis.command import measure_sine_pref, measure_or_pref
+
+        sf_relative_sizes = [self.sf_spacing ** (sf_channel - 1)
+                             for sf_channel in self['SF']]
+
+        wide_relative_sizes = ([0.5 * sf_relative_sizes[0]]
+                               + sf_relative_sizes
+                               + [2.0 * sf_relative_sizes[-1]])
+
+        relative_sizes = (wide_relative_sizes if self.expand_sf_test_range
+                          else sf_relative_sizes)
+        frequencies = [1.5 * s for s in relative_sizes]
+        measure_sine_pref.frequencies = frequencies
+        measure_or_pref.frequencies= frequencies
+
+
+
+@Model.definition
+class ModelSCAL(EarlyVisionSCAL, ModelGCAL):
     """
     Spatially-tuned GCAL (SCAL) calibrated to represent a 3 degree
     parafoveal region of macaque primary visual cortex, assuming a
@@ -31,16 +124,6 @@ class ModelSCAL(ModelGCAL):
         cortical areas larger than 1.0x1.0 to avoid strong suppressive
         edge effects.""")
 
-    lgn_density = param.Number(default=16.0,bounds=(0,None),
-        inclusive_bounds=(False,True),doc="""
-        The nominal_density to use for the LGN.""")
-
-    num_inputs = param.Integer(default=1, bounds=(1,None))
-
-    lgnaff_strength = param.Number(default=10, doc="""
-        Overall strength of the afferent projection from the retina to
-        the LGN sheets.""")
-
     aff_strength = param.Number(default=2.4, bounds=(0.0, None), doc="""
         Overall strength of the afferent projection to V1.""")
 
@@ -50,7 +133,7 @@ class ModelSCAL(ModelGCAL):
     inh_strength = param.Number(default=2.0, bounds=(0.0, None), doc="""
         Overall strength of the lateral inhibitory projection to V1.""")
 
-    t_init = param.Number(default=0.4, doc="""
+    t_init = param.Number(default=0.45, doc="""
         The initial threshold value for homeostatic adaptation in V1.""")
 
     t_settle = param.Integer(default=16, doc="""
@@ -75,27 +158,6 @@ class ModelSCAL(ModelGCAL):
     v1aff_radius = param.Number(default=0.5, bounds=(0, None), doc="""
         Connection field radius of a unit in V1 to units in a LGN
         sheet.""")
-
-    center_size = param.Number(default=0.2, bounds=(0, None), doc="""
-        The size of the central Gaussian used to compute the
-        center-surround receptive field.""")
-
-    surround_size = param.Number(default=0.3, bounds=(0, None), doc="""
-        The size of the surround Gaussian used to compute the
-        center-surround receptive field.""")
-
-    gain_control_size = param.Number(default=0.8, bounds=(0, None), doc="""
-        The size of the divisive inhibitory suppressive field used for
-        contrast-gain control in the LGN sheets. This also acts as the
-        corresponding bounds radius.""")
-
-    lgnaff_radius = param.Number(default=0.4, bounds=(0, None), doc="""
-        Connection field radius of a unit in the LGN level to units in
-        a retina sheet.""")
-
-    lgnlateral_radius = param.Number(default=0.5, bounds=(0, None), doc="""
-        Connection field radius of a unit in the LGN level to
-        surrounding units, in case gain control is used.""")
 
     #=====================#
     # Divisive inhibition #
@@ -127,24 +189,6 @@ class ModelSCAL(ModelGCAL):
 
     lateral_size = param.Number(default=2.5, bounds=(0, None), doc="""
         Size of the lateral excitatory connections within V1Exc.""")
-
-
-    def training_pattern_setup(self, **overrides):
-        """
-        Only the size of Gaussian training patterns has been modified.
-        The 'aspect_ratio' and 'scale' parameter values are unchanged.
-        """
-        or_dim = 'or' in self.dims
-        gaussian = (self.dataset == 'Gaussian')
-        pattern_parameters = {'size':(0.2 if or_dim and gaussian
-                                      else 3 * 0.2 if gaussian else 10.0),
-                              'aspect_ratio': 4.66667 if or_dim else 1.0,
-                              'scale': self.contrast / 100.0}
-        return super(ModelSCAL, self).training_pattern_setup(
-            pattern_parameters=pattern_parameters,
-            position_bound_x=self.area/2.0+self.v1aff_radius,
-            position_bound_y=self.area/2.0+self.v1aff_radius)
-
 
     @Model.CFProjection
     def lateral_inhibitory(self, src_properties, dest_properties):
@@ -179,21 +223,3 @@ class ModelSCAL(ModelGCAL):
             strength=self.latexc_strength,
             learning_rate=self.latexc_lr,
             nominal_bounds_template=sheet.BoundingBox(radius=self.lateral_radius))
-
-
-    def analysis_setup(self):
-        super(ModelSCAL, self).analysis_setup()
-        from topo.analysis.command import measure_sine_pref, measure_or_pref
-
-        sf_relative_sizes = [self.sf_spacing ** (sf_channel - 1)
-                             for sf_channel in self['SF']]
-
-        wide_relative_sizes = ([0.5 * sf_relative_sizes[0]]
-                               + sf_relative_sizes
-                               + [2.0 * sf_relative_sizes[-1]])
-
-        relative_sizes = (wide_relative_sizes if self.expand_sf_test_range
-                          else sf_relative_sizes)
-        frequencies = [1.65 * s for s in relative_sizes]
-        measure_sine_pref.frequencies = frequencies
-        measure_or_pref.frequencies= frequencies
