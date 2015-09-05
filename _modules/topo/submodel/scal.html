@@ -79,10 +79,103 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">.gcal</span> <span class="kn">import</span> <span class="n">ModelGCAL</span>
+<span class="kn">from</span> <span class="nn">.earlyvision</span> <span class="kn">import</span> <span class="n">EarlyVisionModel</span>
 
 
 <span class="nd">@Model.definition</span>
-<div class="viewcode-block" id="ModelSCAL"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.scal.ModelSCAL">[docs]</a><span class="k">class</span> <span class="nc">ModelSCAL</span><span class="p">(</span><span class="n">ModelGCAL</span><span class="p">):</span>
+<div class="viewcode-block" id="EarlyVisionSCAL"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.scal.EarlyVisionSCAL">[docs]</a><span class="k">class</span> <span class="nc">EarlyVisionSCAL</span><span class="p">(</span><span class="n">EarlyVisionModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    EarlyVisionModel subclass with spatially calibrated extents</span>
+<span class="sd">    used for SCAL and other models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">area</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Linear size of cortical area to simulate.</span>
+
+<span class="s">        SCAL and other spatially calibrated variants of GCAL require</span>
+<span class="s">        cortical areas larger than 1.0x1.0 to avoid strong suppressive</span>
+<span class="s">        edge effects.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">expand_sf_test_range</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        By default, measure_sine_pref() measures SF at the sizes of RF</span>
+<span class="s">        used, for speed, but if expand_sf_test_range is True, it will</span>
+<span class="s">        test over a larger range, including half the size of the</span>
+<span class="s">        smallest and twice the size of the largest.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lgn_density</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">16.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The nominal_density to use for the LGN.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">num_inputs</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">))</span>
+
+    <span class="n">lgnaff_strength</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Overall strength of the afferent projection from the retina to</span>
+<span class="s">        the LGN sheets.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c">#=================#</span>
+    <span class="c"># Spatial extents #</span>
+    <span class="c">#=================#</span>
+
+    <span class="n">center_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The size of the central Gaussian used to compute the</span>
+<span class="s">        center-surround receptive field.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">surround_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The size of the surround Gaussian used to compute the</span>
+<span class="s">        center-surround receptive field.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">gain_control_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The size of the divisive inhibitory suppressive field used for</span>
+<span class="s">        contrast-gain control in the LGN sheets. This also acts as the</span>
+<span class="s">        corresponding bounds radius.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lgnaff_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Connection field radius of a unit in the LGN level to units in</span>
+<span class="s">        a retina sheet.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">lgnlateral_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Connection field radius of a unit in the LGN level to</span>
+<span class="s">        surrounding units, in case gain control is used.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EarlyVisionSCAL.training_pattern_setup"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.scal.EarlyVisionSCAL.training_pattern_setup">[docs]</a>    <span class="k">def</span> <span class="nf">training_pattern_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Only the size of Gaussian training patterns has been modified.</span>
+<span class="sd">        The &#39;aspect_ratio&#39; and &#39;scale&#39; parameter values are unchanged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">or_dim</span> <span class="o">=</span> <span class="s">&#39;or&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span>
+        <span class="n">gaussian</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="s">&#39;Gaussian&#39;</span><span class="p">)</span>
+        <span class="n">pattern_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;size&#39;</span><span class="p">:(</span><span class="mf">0.1</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="ow">and</span> <span class="n">gaussian</span>
+                                      <span class="k">else</span> <span class="mi">3</span> <span class="o">*</span> <span class="mf">0.1</span> <span class="k">if</span> <span class="n">gaussian</span> <span class="k">else</span> <span class="mf">10.0</span><span class="p">),</span>
+                              <span class="s">&#39;aspect_ratio&#39;</span><span class="p">:</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
+                              <span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">contrast</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">}</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">EarlyVisionSCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">training_pattern_setup</span><span class="p">(</span>
+            <span class="n">pattern_parameters</span><span class="o">=</span><span class="n">pattern_parameters</span><span class="p">,</span>
+            <span class="n">position_bound_x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span><span class="p">,</span>
+            <span class="n">position_bound_y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">analysis_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EarlyVisionSCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">analysis_setup</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">topo.analysis.command</span> <span class="kn">import</span> <span class="n">measure_sine_pref</span><span class="p">,</span> <span class="n">measure_or_pref</span>
+
+        <span class="n">sf_relative_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span> <span class="o">**</span> <span class="p">(</span><span class="n">sf_channel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                             <span class="k">for</span> <span class="n">sf_channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]]</span>
+
+        <span class="n">wide_relative_sizes</span> <span class="o">=</span> <span class="p">([</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sf_relative_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                               <span class="o">+</span> <span class="n">sf_relative_sizes</span>
+                               <span class="o">+</span> <span class="p">[</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sf_relative_sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+
+        <span class="n">relative_sizes</span> <span class="o">=</span> <span class="p">(</span><span class="n">wide_relative_sizes</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_sf_test_range</span>
+                          <span class="k">else</span> <span class="n">sf_relative_sizes</span><span class="p">)</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span> <span class="o">*</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">relative_sizes</span><span class="p">]</span>
+        <span class="n">measure_sine_pref</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span>
+        <span class="n">measure_or_pref</span><span class="o">.</span><span class="n">frequencies</span><span class="o">=</span> <span class="n">frequencies</span>
+
+
+</div>
+<span class="nd">@Model.definition</span>
+<div class="viewcode-block" id="ModelSCAL"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.scal.ModelSCAL">[docs]</a><span class="k">class</span> <span class="nc">ModelSCAL</span><span class="p">(</span><span class="n">EarlyVisionSCAL</span><span class="p">,</span> <span class="n">ModelGCAL</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Spatially-tuned GCAL (SCAL) calibrated to represent a 3 degree</span>
 <span class="sd">    parafoveal region of macaque primary visual cortex, assuming a</span>
@@ -103,16 +196,6 @@
 <span class="s">        cortical areas larger than 1.0x1.0 to avoid strong suppressive</span>
 <span class="s">        edge effects.&quot;&quot;&quot;</span><span class="p">)</span>
 
-    <span class="n">lgn_density</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">16.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
-        <span class="n">inclusive_bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        The nominal_density to use for the LGN.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">num_inputs</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">None</span><span class="p">))</span>
-
-    <span class="n">lgnaff_strength</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        Overall strength of the afferent projection from the retina to</span>
-<span class="s">        the LGN sheets.&quot;&quot;&quot;</span><span class="p">)</span>
-
     <span class="n">aff_strength</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.4</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        Overall strength of the afferent projection to V1.&quot;&quot;&quot;</span><span class="p">)</span>
 
@@ -122,7 +205,7 @@
     <span class="n">inh_strength</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        Overall strength of the lateral inhibitory projection to V1.&quot;&quot;&quot;</span><span class="p">)</span>
 
-    <span class="n">t_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+    <span class="n">t_init</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        The initial threshold value for homeostatic adaptation in V1.&quot;&quot;&quot;</span><span class="p">)</span>
 
     <span class="n">t_settle</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
@@ -147,27 +230,6 @@
     <span class="n">v1aff_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        Connection field radius of a unit in V1 to units in a LGN</span>
 <span class="s">        sheet.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">center_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        The size of the central Gaussian used to compute the</span>
-<span class="s">        center-surround receptive field.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">surround_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        The size of the surround Gaussian used to compute the</span>
-<span class="s">        center-surround receptive field.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">gain_control_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        The size of the divisive inhibitory suppressive field used for</span>
-<span class="s">        contrast-gain control in the LGN sheets. This also acts as the</span>
-<span class="s">        corresponding bounds radius.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">lgnaff_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        Connection field radius of a unit in the LGN level to units in</span>
-<span class="s">        a retina sheet.&quot;&quot;&quot;</span><span class="p">)</span>
-
-    <span class="n">lgnlateral_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">        Connection field radius of a unit in the LGN level to</span>
-<span class="s">        surrounding units, in case gain control is used.&quot;&quot;&quot;</span><span class="p">)</span>
 
     <span class="c">#=====================#</span>
     <span class="c"># Divisive inhibition #</span>
@@ -200,24 +262,6 @@
     <span class="n">lateral_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        Size of the lateral excitatory connections within V1Exc.&quot;&quot;&quot;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="ModelSCAL.training_pattern_setup"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.scal.ModelSCAL.training_pattern_setup">[docs]</a>    <span class="k">def</span> <span class="nf">training_pattern_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Only the size of Gaussian training patterns has been modified.</span>
-<span class="sd">        The &#39;aspect_ratio&#39; and &#39;scale&#39; parameter values are unchanged.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">or_dim</span> <span class="o">=</span> <span class="s">&#39;or&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span>
-        <span class="n">gaussian</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="s">&#39;Gaussian&#39;</span><span class="p">)</span>
-        <span class="n">pattern_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;size&#39;</span><span class="p">:(</span><span class="mf">0.2</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="ow">and</span> <span class="n">gaussian</span>
-                                      <span class="k">else</span> <span class="mi">3</span> <span class="o">*</span> <span class="mf">0.2</span> <span class="k">if</span> <span class="n">gaussian</span> <span class="k">else</span> <span class="mf">10.0</span><span class="p">),</span>
-                              <span class="s">&#39;aspect_ratio&#39;</span><span class="p">:</span> <span class="mf">4.66667</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
-                              <span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">contrast</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">}</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ModelSCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">training_pattern_setup</span><span class="p">(</span>
-            <span class="n">pattern_parameters</span><span class="o">=</span><span class="n">pattern_parameters</span><span class="p">,</span>
-            <span class="n">position_bound_x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span><span class="p">,</span>
-            <span class="n">position_bound_y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">/</span><span class="mf">2.0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">v1aff_radius</span><span class="p">)</span>
-
-</div>
     <span class="nd">@Model.CFProjection</span>
 <div class="viewcode-block" id="ModelSCAL.lateral_inhibitory"><a class="viewcode-back" href="../../../Reference_Manual/topo.submodel.html#topo.submodel.scal.ModelSCAL.lateral_inhibitory">[docs]</a>    <span class="k">def</span> <span class="nf">lateral_inhibitory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_properties</span><span class="p">,</span> <span class="n">dest_properties</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -250,25 +294,7 @@
             <span class="n">weights_generator</span><span class="o">=</span><span class="n">imagen</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lateral_size</span><span class="p">),</span>
             <span class="n">strength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latexc_strength</span><span class="p">,</span>
             <span class="n">learning_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latexc_lr</span><span class="p">,</span>
-            <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lateral_radius</span><span class="p">))</span>
-
-
-    <span class="k">def</span> <span class="nf">analysis_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ModelSCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">analysis_setup</span><span class="p">()</span>
-        <span class="kn">from</span> <span class="nn">topo.analysis.command</span> <span class="kn">import</span> <span class="n">measure_sine_pref</span><span class="p">,</span> <span class="n">measure_or_pref</span>
-
-        <span class="n">sf_relative_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_spacing</span> <span class="o">**</span> <span class="p">(</span><span class="n">sf_channel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                             <span class="k">for</span> <span class="n">sf_channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]]</span>
-
-        <span class="n">wide_relative_sizes</span> <span class="o">=</span> <span class="p">([</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sf_relative_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-                               <span class="o">+</span> <span class="n">sf_relative_sizes</span>
-                               <span class="o">+</span> <span class="p">[</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sf_relative_sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
-
-        <span class="n">relative_sizes</span> <span class="o">=</span> <span class="p">(</span><span class="n">wide_relative_sizes</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_sf_test_range</span>
-                          <span class="k">else</span> <span class="n">sf_relative_sizes</span><span class="p">)</span>
-        <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.65</span> <span class="o">*</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">relative_sizes</span><span class="p">]</span>
-        <span class="n">measure_sine_pref</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span>
-        <span class="n">measure_or_pref</span><span class="o">.</span><span class="n">frequencies</span><span class="o">=</span> <span class="n">frequencies</span></div>
+            <span class="n">nominal_bounds_template</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lateral_radius</span><span class="p">))</span></div>
 </pre></div>
 
           </div>

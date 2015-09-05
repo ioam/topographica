@@ -1,0 +1,6 @@
+<map id="inheritance1355a88f2e" name="inheritance1355a88f2e">
+<area shape="rect" id="node1" title="params(name=String)" alt="" coords="3,17,146,31"/>
+<area shape="rect" id="node2" href="#topo.submodel.Model" title="The available setup options are:" alt="" coords="173,17,261,31"/>
+<area shape="rect" id="node7" href="#topo.submodel.scal.EarlyVisionSCAL" title="EarlyVisionModel subclass with spatially calibrated extents" alt="" coords="857,30,998,44"/>
+<area shape="rect" id="node8" href="#topo.submodel.scal.ModelSCAL" title="Spatially&#45;tuned GCAL (SCAL) calibrated to represent a 3 degree" alt="" coords="1026,17,1149,31"/>
+</map>
