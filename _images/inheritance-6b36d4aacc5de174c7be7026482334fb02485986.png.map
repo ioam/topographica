@@ -1,0 +1,5 @@
+<map id="inheritanceb275281aee" name="inheritanceb275281aee">
+<area shape="rect" id="node1" title="Base class for implementing magic functions." alt="" coords="568,5,760,30"/>
+<area shape="rect" id="node3" href="#topo.misc.ipython.ExportMagic" title="Line magic that defines a cell magic to export the cell contents" alt="" coords="808,5,1027,30"/>
+<area shape="rect" id="node4" title="The base class for all classes that have traitlets." alt="" coords="5,5,192,30"/>
+</map>
