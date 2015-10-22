@@ -34,9 +34,9 @@ from topo.plotting.plot import make_template_plot
 from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
-from holoviews import HoloMap, NdLayout
+from holoviews import HoloMap, NdLayout, Options
 from holoviews.core.overlay import CompositeOverlay
-from holoviews.plotting.mpl import CurvePlot, OverlayPlot
+from holoviews.plotting.mpl import MPLPlot, CurvePlot, OverlayPlot
 
 from topo.command import Command
 
@@ -615,6 +615,7 @@ class tuning_curve(PylabPlotCommand):
 
     def __call__(self, **params):
         p = ParamOverrides(self, params, allow_extra_keywords=True)
+        MPLPlot._close_figures = False
 
         x_axis = p.x_axis.capitalize()
         vmap = p.sheet.views.Curves[x_axis.capitalize()+"Tuning"]
@@ -636,9 +637,10 @@ class tuning_curve(PylabPlotCommand):
         figs = []
         for coord, curve in zip(p.coords,curves):
             if isinstance(curve, HoloMap): curve = curve.last
+            curve(plot={'Curve': dict(xticks=5, center_cyclic=p.center, relative_labels=p.relative_labels,
+                                      show_legend=p.legend)})
             plot = OverlayPlot if isinstance(curve, CompositeOverlay) else CurvePlot
-            fig = plot(curve, center=p.center, relative_labels=p.relative_labels,
-                       show_legend=p.legend)()
+            fig = plot(curve).initialize_plot()
             self._generate_figure(p, fig)
             figs.append((coord, fig))
 
@@ -663,6 +665,7 @@ class tuning_curve(PylabPlotCommand):
             fig.show()
         else:
             fig.close()
+        MPLPlot._close_figures = True
 
 
 cyclic_tuning_curve = tuning_curve
