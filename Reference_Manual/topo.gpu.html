@@ -144,7 +144,7 @@ array.</p>
        port, and to declare what will be sent over that port.</dd>
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">cf_type</span></tt> (<em>allow_None=False, constant=False, default=&lt;class &#8216;topo.sparse.sparsecf.SparseConnectionField&#8217;&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Type of ConnectionField to use when creating individual CFs.</dd>
-<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">cf_shape</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant01195&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">cf_shape</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant01282&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Mask pattern to define the shape of the connection fields.</dd>
 <dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Whether or not to update the internal state on each call.
@@ -175,7 +175,7 @@ array.</p>
        activity_group==(0.6,numpy.divide), activity
        from the first two will be added together, and the result
        divided by the sum of the second two.</dd>
-<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">coord_mapper</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityMF IdentityMF01200&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">coord_mapper</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityMF IdentityMF01287&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Function to map a projected coordinate into the target sheet.</dd>
 <dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mask_threshold</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=0.5, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False, time_dependent=True, time_fn=&lt;Time Time00001&gt;</em>)</dt>
 <dd>If a unit is above this value in the cf_shape mask, it is
@@ -204,9 +204,9 @@ array.</p>
        {src} and {dest}.</dd>
 <dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src</span></tt> (<em>allow_None=True, constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.1, readonly=False</em>)</dt>
 <dd>The EventProcessor from which messages originate.</dd>
-<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">weights_generator</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant01194&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">weights_generator</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant01281&gt;, instantiate=True, is_instance=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Generate initial weights values.</dd>
-<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">weights_output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[&lt;function CFPOF_DivisiveNormalizeL1_Sparse_GPU at 0x2aaec32f21b8&gt;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">weights_output_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[&lt;function CFPOF_DivisiveNormalizeL1_Sparse_GPU at 0x2af9dc83d320&gt;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Functions applied to each CF after learning.</dd>
 <dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">input_fns</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>Function(s) applied to the input before the projection activity is computed.</dd>
@@ -261,7 +261,7 @@ instantiated.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2aaec3d178e8&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2af9dca56ec0&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -275,12 +275,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2aaec3d179f0&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2af9dca56fc8&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2aaec3d17a48&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2af9dcb1b050&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -418,12 +418,12 @@ e.g. to reenable plasticity of any type that was disabled.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2aaec3ece158&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2af9dcb1b730&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.projection.GPUSparseCFProjection.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2aaec3ece1b0&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2af9dcb1b788&gt;</em><a class="headerlink" href="#topo.gpu.projection.GPUSparseCFProjection.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -514,7 +514,7 @@ This is done by placing barriers before the &#8216;activate&#8217; and &#8216;le
             actual value of this Parameter is not adjusted, but the
             true bounds may be found from the &#8216;bounds&#8217; attribute
             of this object.</dd>
-<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>allow_None=False, constant=False, default=&lt;SheetMask SheetMask00903&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>allow_None=False, constant=False, default=&lt;SheetMask SheetMask00984&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
 <dd>SheetMask object for computing which units need to be computed further.
         The object should be an instance of SheetMask, and will
         compute which neurons will be considered active for the
@@ -627,7 +627,7 @@ xdensity, which is equal to the ydensity for a Sheet.)</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.force_new_dynamic_value">
-<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2aaec43e4310&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">force_new_dynamic_value</tt><em class="property"> = &lt;functools.partial object at 0x2af9dc0a68e8&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.force_new_dynamic_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -641,12 +641,12 @@ equal to the default value.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.get_value_generator">
-<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2aaec43e40a8&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.get_value_generator" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_value_generator</tt><em class="property"> = &lt;functools.partial object at 0x2af9dc0a6680&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.get_value_generator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.inspect_value">
-<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2aaec43e43c0&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.inspect_value" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">inspect_value</tt><em class="property"> = &lt;functools.partial object at 0x2af9dc0a6998&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.inspect_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -823,12 +823,12 @@ X-coordinates corresponding to the columns.</p>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.set_dynamic_time_fn">
-<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2aaec43e4578&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dynamic_time_fn</tt><em class="property"> = &lt;functools.partial object at 0x2af9dc0a6b50&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_dynamic_time_fn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="topo.gpu.sheet.GPUSettlingCFSheet.set_param">
-<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2aaec43e45d0&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_param</tt><em class="property"> = &lt;functools.partial object at 0x2af9dc0a6ba8&gt;</em><a class="headerlink" href="#topo.gpu.sheet.GPUSettlingCFSheet.set_param" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
