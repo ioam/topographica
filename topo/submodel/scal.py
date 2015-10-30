@@ -73,9 +73,9 @@ class EarlyVisionSCAL(EarlyVisionModel):
         """
         or_dim = 'or' in self.dims
         gaussian = (self.dataset == 'Gaussian')
-        pattern_parameters = {'size':(0.1 if or_dim and gaussian
+        pattern_parameters = {'size':(0.2 if or_dim and gaussian
                                       else 3 * 0.1 if gaussian else 10.0),
-                              'aspect_ratio': 5 if or_dim else 1.0,
+                              'aspect_ratio': 4.6667 if or_dim else 1.0,
                               'scale': self.contrast / 100.0}
         return super(EarlyVisionSCAL, self).training_pattern_setup(
             pattern_parameters=pattern_parameters,
