@@ -53,7 +53,7 @@ class EarlyVisionSCAL(EarlyVisionModel):
         The size of the surround Gaussian used to compute the
         center-surround receptive field.""")
 
-    gain_control_size = param.Number(default=0.5, bounds=(0, None), doc="""
+    gain_control_size = param.Number(default=0.8, bounds=(0, None), doc="""
         The size of the divisive inhibitory suppressive field used for
         contrast-gain control in the LGN sheets. This also acts as the
         corresponding bounds radius.""")
@@ -62,7 +62,7 @@ class EarlyVisionSCAL(EarlyVisionModel):
         Connection field radius of a unit in the LGN level to units in
         a retina sheet.""")
 
-    lgnlateral_radius = param.Number(default=0.5, bounds=(0, None), doc="""
+    lgnlateral_radius = param.Number(default=0.8, bounds=(0, None), doc="""
         Connection field radius of a unit in the LGN level to
         surrounding units, in case gain control is used.""")
 
