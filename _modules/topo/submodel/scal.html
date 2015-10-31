@@ -125,7 +125,7 @@
 <span class="s">        The size of the surround Gaussian used to compute the</span>
 <span class="s">        center-surround receptive field.&quot;&quot;&quot;</span><span class="p">)</span>
 
-    <span class="n">gain_control_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+    <span class="n">gain_control_size</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        The size of the divisive inhibitory suppressive field used for</span>
 <span class="s">        contrast-gain control in the LGN sheets. This also acts as the</span>
 <span class="s">        corresponding bounds radius.&quot;&quot;&quot;</span><span class="p">)</span>
@@ -134,7 +134,7 @@
 <span class="s">        Connection field radius of a unit in the LGN level to units in</span>
 <span class="s">        a retina sheet.&quot;&quot;&quot;</span><span class="p">)</span>
 
-    <span class="n">lgnlateral_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+    <span class="n">lgnlateral_radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        Connection field radius of a unit in the LGN level to</span>
 <span class="s">        surrounding units, in case gain control is used.&quot;&quot;&quot;</span><span class="p">)</span>
 
@@ -145,9 +145,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">or_dim</span> <span class="o">=</span> <span class="s">&#39;or&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span>
         <span class="n">gaussian</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="s">&#39;Gaussian&#39;</span><span class="p">)</span>
-        <span class="n">pattern_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;size&#39;</span><span class="p">:(</span><span class="mf">0.1</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="ow">and</span> <span class="n">gaussian</span>
+        <span class="n">pattern_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;size&#39;</span><span class="p">:(</span><span class="mf">0.2</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="ow">and</span> <span class="n">gaussian</span>
                                       <span class="k">else</span> <span class="mi">3</span> <span class="o">*</span> <span class="mf">0.1</span> <span class="k">if</span> <span class="n">gaussian</span> <span class="k">else</span> <span class="mf">10.0</span><span class="p">),</span>
-                              <span class="s">&#39;aspect_ratio&#39;</span><span class="p">:</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
+                              <span class="s">&#39;aspect_ratio&#39;</span><span class="p">:</span> <span class="mf">4.6667</span> <span class="k">if</span> <span class="n">or_dim</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
                               <span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">contrast</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">}</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">EarlyVisionSCAL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">training_pattern_setup</span><span class="p">(</span>
             <span class="n">pattern_parameters</span><span class="o">=</span><span class="n">pattern_parameters</span><span class="p">,</span>
