@@ -76,6 +76,8 @@
   } \
   _norm_total[0] = total
 
+#define min(x,y) (x<y?x:y)
+#define max(x,y) (x>y?x:y)
 
 
 void dot_product(double mask[], double X[], double strength, int icols,
@@ -388,4 +390,57 @@ void divisive_normalize_l1(double sheet_mask[], double active_units_mask[],
             _has_norm_total[0]=0;
         }
     }
+}
+
+
+void compute_joint_norm_totals(PyObject* projlist, double active_units_mask[],
+							   double sheet_mask[], int num_cfs, int length,
+							   PyObject* cf_type) {
+  DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+  DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
+  DECLARE_SLOT_OFFSET(weights,cf_type);
+  DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
+  DECLARE_SLOT_OFFSET(mask,cf_type);
+
+  double *x = active_units_mask;
+  double *m = sheet_mask;
+  int r, p;
+  for (r=0; r<num_cfs; ++r) {
+	double load = *x++;
+	double msk = *m++;
+	if (msk!=0 && load != 0) {
+	  double nt = 0;
+
+	  for(p=0; p<length; p++) {
+		PyObject *proj = PyList_GetItem(projlist,p);
+		PyObject *cfs = PyObject_GetAttrString(proj,"flatcfs");
+		PyObject *cf = PyList_GetItem(cfs,r);
+		LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+		LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+		if (_has_norm_total[0] == 0) {
+		  LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
+		  LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
+
+		  UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
+
+		  SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2);
+		}
+		nt += _norm_total[0];
+		Py_DECREF(cfs);
+	  }
+
+	  for(p=0; p<length; p++) {
+		PyObject *proj = PyList_GetItem(projlist,p);
+		PyObject *cfs = PyObject_GetAttrString(proj,"flatcfs");
+		PyObject *cf = PyList_GetItem(cfs,r);
+
+		LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+		_norm_total[0] = nt;
+		LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+		_has_norm_total[0] = 1;
+
+		Py_DECREF(cfs);
+	  }
+	}
+  }
 }

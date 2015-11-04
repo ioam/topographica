@@ -10,6 +10,7 @@ from topo.learningfn import BCMFixed
 from topo.transferfn import DivisiveNormalizeL1
 
 from topo.learningfn.projfn import CFPLF_Trace as CFPLF_Trace_cython # pyflakes:ignore (optimized version provided)
+from topo.sheet import compute_joint_norm_totals as compute_joint_norm_totals_cython # pyflakes:ignore (optimized version provided)
 
 
 class CFPRF_DotProduct_cython(CFPRF_Plugin):

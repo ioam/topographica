@@ -3,7 +3,7 @@ cimport numpy as np
 
 import param
 
-from topo.base.cf import CFPResponseFn, CFPLearningFn, CFPOutputFn
+from topo.base.cf import CFPResponseFn, CFPLearningFn, CFPOutputFn, CFIter
 from topo.base.functionfamily import ResponseFn, DotProduct, LearningFn, Hebbian
 from topo.base.sheet import activity_type
 
@@ -25,6 +25,9 @@ cdef extern from "optimized.h":
 
     void divisive_normalize_l1(double*, double*, cfs, cf_type,
                                np.int64_t)
+
+    void compute_joint_norm_totals(projlist, double*, double*, np.int64_t,
+                                   np.int64_t, cf_type)
 
 
 class CFPRF_DotProduct_cython(CFPResponseFn):
@@ -197,3 +200,24 @@ class CFPOF_DivisiveNormalize_L1_cython(CFPOutputFn):
 
         divisive_normalize_l1(<double*> sheet_mask.data, <double*> active_units_mask.data,
                               cfs, cf_type, num_cfs)
+
+
+def compute_joint_norm_totals_cython(projlist, active_units_mask):
+    """
+    Compute norm_total for each CF in each projections from a
+    group to be normalized jointly.  The same assumptions are
+    made as in the original function.
+    """
+    # Assumes that all Projections in the list have the same r,c size
+    length = len(projlist)
+    assert length>=1
+
+    proj = projlist[0]
+    iterator = CFIter(proj,active_units_mask=active_units_mask)
+    cdef np.ndarray[np.float64_t, ndim=2] active_units_mask_arr = iterator.get_active_units_mask()
+    cdef np.int64_t num_cfs = len(iterator.flatcfs)
+    cdef np.ndarray[np.float64_t, ndim=2] sheet_mask = iterator.get_sheet_mask()
+    cf_type = iterator.cf_type
+    compute_joint_norm_totals(projlist, <double*> active_units_mask_arr.data,
+                              <double*> sheet_mask.data, num_cfs, length,
+                              cf_type)
