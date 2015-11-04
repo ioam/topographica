@@ -3,7 +3,7 @@ import param
 import imagen
 
 from topo.base.arrayutil import DivideWithConstant, MultiplyWithConstant
-from topo import sheet
+from topo import optimized, projection, sheet
 
 from . import Model
 from .gcal import ModelGCAL
@@ -189,6 +189,18 @@ class ModelSCAL(EarlyVisionSCAL, ModelGCAL):
 
     lateral_size = param.Number(default=2.5, bounds=(0, None), doc="""
         Size of the lateral excitatory connections within V1Exc.""")
+
+    def property_setup(self, properties):
+        "Specify weight initialization, response function, and learning function"
+        properties = super(ModelSCAL, self).property_setup(properties)
+
+        projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
+        projection.CFProjection.response_fn=optimized.CFPRF_DotProduct_cython()
+        projection.CFProjection.learning_fn=optimized.CFPLF_Hebbian_cython()
+        projection.CFProjection.weights_output_fns=[optimized.CFPOF_DivisiveNormalize_L1_cython()]
+        projection.SharedWeightCFProjection.response_fn=optimized.CFPRF_DotProduct_cython()
+        sheet.SettlingCFSheet.joint_norm_fn = optimized.compute_joint_norm_totals_cython
+
 
     @Model.CFProjection
     def lateral_inhibitory(self, src_properties, dest_properties):
