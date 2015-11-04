@@ -9,7 +9,7 @@ in Cython.
 #define SparseMatrixEXT_H
 #include <iostream>
 #include <omp.h>
-#include <eigen3/Eigen/Sparse>
+#include <Eigen/Sparse>
 #include <vector>
 #define EIGEN_DONT_PARALLELIZE
 

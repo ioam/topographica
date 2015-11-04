@@ -38,13 +38,17 @@ packages_to_state = [required]
 
 setup_args = {}
 
-ext_module = Extension(
-    "optimized", ["topo/optimized/optimized.pyx"],
-    extra_compile_args=['-fopenmp', '-O2', '-Wno-unused-variable',
-                        '-fomit-frame-pointer','-funroll-loops'],
-    extra_link_args=['-fopenmp', '-lstdc++'],
-    include_dirs=[numpy.get_include()]
-)
+ext_modules = [
+    Extension("topo.optimized.optimized", ["topo/optimized/optimized.pyx"],
+              extra_compile_args=['-fopenmp', '-O2', '-Wno-unused-variable',
+                                  '-fomit-frame-pointer','-funroll-loops'],
+              extra_link_args=['-fopenmp', '-lstdc++'],
+              include_dirs=[numpy.get_include()]),
+    Extension("topo.sparse.sparse", ["topo/sparse/sparse.pyx"],
+              language="c++", extra_link_args=['-lgomp'],
+              extra_compile_args= ["-w","-O2","-fopenmp","-DNDEBUG","-msse2"],
+              include_dirs=[numpy.get_include(), 'external/eigen3'])]
+
 
 if 'setuptools' in sys.modules:
     # support easy_install without depending on setuptools
@@ -199,9 +203,9 @@ of `SciPy`_) for optimum performance.
 
     scripts = scripts,
 
-    script_args = ['--quiet', 'build_ext', '--build-lib', './topo/optimized/'],
+    script_args = ['--quiet', 'build_ext'],
     cmdclass = {'build_ext': build_ext} if build_ext else {},
-    ext_modules = [ext_module]))
+    ext_modules = ext_modules))
 
 # Help text for dependencies not PIP
 def help_dependency(package):

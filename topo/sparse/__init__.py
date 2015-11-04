@@ -3,11 +3,8 @@ import os
 (basepath, _) = os.path.split(os.path.abspath(__file__))
 
 try:
-    from distutils.core import run_setup
-
-    # Run the setup script in the sandbox, so that it doesn't complain about unknown args when launched through nose
-    run_setup(basepath + "/compile.py")
-
     from topo.sparse import sparse, sparsecf # pyflakes:ignore (try/except import)
 except ImportError:
-    print "WARNING: Install distutils and Cython to build sparse extension."
+    print "WARNING: Sparse extension could not be imported, ensure Cython and"
+          "distutils are available and the extension has been compiled using"
+          "python setup.py build_ext."
