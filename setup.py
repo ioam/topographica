@@ -26,6 +26,7 @@ required = {'PIL':">=1.1.6",
             'imagen':">=1.0"}
 
 optional = {'cython': '>=0.2',
+            'weave': '>=0.15',
             'gmpy':'>=1.0',
             'matplotlib':'>=0.8',
             'ipython':">=0.7"}
