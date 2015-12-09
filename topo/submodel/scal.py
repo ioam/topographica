@@ -200,6 +200,7 @@ class ModelSCAL(EarlyVisionSCAL, ModelGCAL):
         projection.CFProjection.weights_output_fns=[optimized.CFPOF_DivisiveNormalize_L1_cython()]
         projection.SharedWeightCFProjection.response_fn=optimized.CFPRF_DotProduct_cython()
         sheet.SettlingCFSheet.joint_norm_fn = optimized.compute_joint_norm_totals_cython
+        return properties
 
 
     @Model.CFProjection
