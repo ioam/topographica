@@ -25,6 +25,14 @@ class EarlyVisionSCAL(EarlyVisionModel):
         cortical areas larger than 1.0x1.0 to avoid strong suppressive
         edge effects.""")
 
+    input_aspect = param.Number(default=4.667, bounds=(0, None),
+                          doc="""
+        Aspect of the Gaussian input pattern""")
+
+    input_width = param.Number(default=0.2, bounds=(0, None),
+                          doc="""
+        Width of the Gaussian input pattern""")
+
     expand_sf_test_range=param.Boolean(default=False,doc="""
         By default, measure_sine_pref() measures SF at the sizes of RF
         used, for speed, but if expand_sf_test_range is True, it will
@@ -73,9 +81,9 @@ class EarlyVisionSCAL(EarlyVisionModel):
         """
         or_dim = 'or' in self.dims
         gaussian = (self.dataset == 'Gaussian')
-        pattern_parameters = {'size':(0.2 if or_dim and gaussian
+        pattern_parameters = {'size':(self.input_width if or_dim and gaussian
                                       else 3 * 0.1 if gaussian else 10.0),
-                              'aspect_ratio': 4.6667 if or_dim else 1.0,
+                              'aspect_ratio': self.input_aspect if or_dim else 1.0,
                               'scale': self.contrast / 100.0}
         return super(EarlyVisionSCAL, self).training_pattern_setup(
             pattern_parameters=pattern_parameters,
