@@ -1,6 +1,10 @@
 =============  =============  ===========  ==========
   Full Build       Docs        Coverage     Jenkins
 =============  =============  ===========  ==========
+
+.. image:: https://badges.gitter.im/ioam/topographica.svg
+   :alt: Join the chat at https://gitter.im/ioam/topographica
+   :target: https://gitter.im/ioam/topographica?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 |FullBuild|_    |TopoDocs|_   |Coverage|_  |Jenkins|_
 =============  =============  ===========  ==========
 
