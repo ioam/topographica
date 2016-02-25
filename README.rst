@@ -1,9 +1,8 @@
-=============  =============  ===========  ==========
-  Full Build       Docs        Coverage     Jenkins
-=============  =============  ===========  ==========
-|FullBuild|_    |TopoDocs|_   |Coverage|_  |Jenkins|_
-=============  =============  ===========  ==========
-
+=============  =============  ===========  ========== ==========
+  Full Build       Docs        Coverage     Jenkins    Gitter
+=============  =============  ===========  ========== ==========
+|FullBuild|_    |TopoDocs|_   |Coverage|_  |Jenkins|_  |Gitter|_
+=============  =============  ===========  ========== ==========
 
 TOPOGRAPHICA
 ============
@@ -131,3 +130,6 @@ to point to the newly updated submodule.
 
 .. |Jenkins| image:: https://qa.nest-initiative.org/view/Topographica/job/topographica-test/buildStatus/
 .. _Jenkins: https://qa.nest-initiative.org/view/Topographica/job/topographica-test
+
+.. |Gitter| image:: https://badges.gitter.im/Join%20Chat.svg
+.. _Gitter: https://gitter.im/ioam/topographica?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
