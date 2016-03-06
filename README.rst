@@ -41,19 +41,21 @@ which can be installed using::
 but other highly recommended packages include scipy, ipython, and
 matplotlib, which can each be installed in the same way::
 
-   pip install gmpy scipy ipython matplotlib
+   pip install gmpy scipy ipython matplotlib cython
+
+To build cython optimized components also run::
+
+   python setup.py build_ext
 
 If you wish to use `IPython Notebook <http://ipython.org/notebook>`_
 (optional) with Topographica, you can install the remaining
 dependencies as follows::
 
-   pip install ipython tornado pyzmq jinja2
+   pip install ipython jupyter notebook
 
-The notebook server may then be launched using the following command:
+The notebook server may then be launched using the following command::
 
-::
-
-   ../../topographica -n
+   ./topographica -n
 
 
 MAKING DOCUMENTATION (OPTIONAL)
