@@ -567,8 +567,6 @@ class SparseConnectionField(param.Parameterized):
         mask = self.weights_slice.submatrix(mask_template)
         mask = np.array(mask,copy=1)
 
-
-
         pattern_params = dict(x=self.x,y=self.y,
                               bounds=self.get_bounds(self.input_sheet),
                               xdensity=self.input_sheet.xdensity,
@@ -836,7 +834,7 @@ class SparseCFProjection(CFProjection):
         """
         # Learning is performed if the input_buffer has already been set,
         # i.e. there is an input to the Projection.
-        if self.input_buffer != None:
+        if self.input_buffer is not None:
             self.learning_fn(self)
 
 
