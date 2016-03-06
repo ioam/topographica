@@ -378,9 +378,9 @@ class StorageHook(param.ParameterizedFunction):
 
 def get_feature_preference(feature, sheet_name, coords, default=0.0):
     """Return the feature preference for a particular unit."""
+    map_name = feature.capitalize() + "Preference"
     try:
         sheet = topo.sim[sheet_name]
-        map_name = feature.capitalize() + "Preference"
         x, y = coords
         return sheet.views.Maps[map_name].last[x, y]
     except:
