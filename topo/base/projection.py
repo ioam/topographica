@@ -159,6 +159,31 @@ class OrMask(CompositeSheetMask):
         self._data = asarray(reduce(logical_or,(m.data for m in self.submasks)),dtype=int)
 
 
+class CircularMask(SheetMask):
+    """
+    Simple circular SheetMask masking out the corners
+    of a sheet to avoid edge effects.
+    """
+
+    @property
+    def sheet(self):
+        return self._sheet
+
+    @sheet.setter
+    def sheet(self, sheet):
+        self._sheet = sheet
+        if sheet is not None:
+            l, b, r, t = sheet.bounds.lbrt()
+            self.data = Disk(smoothing=0, xdensity=sheet.xdensity,
+                             ydensity=sheet.ydensity, size=t-b,
+                             bounds=sheet.bounds)[:].data
+
+    def reset(self):
+        pass
+
+    def calculate(self):
+        pass
+
 
 class Projection(EPConnection):
     """
