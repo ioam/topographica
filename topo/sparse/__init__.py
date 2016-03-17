@@ -5,6 +5,6 @@ import os
 try:
     from topo.sparse import sparse, sparsecf # pyflakes:ignore (try/except import)
 except ImportError:
-    print "WARNING: Sparse extension could not be imported, ensure Cython and"
+    print("WARNING: Sparse extension could not be imported, ensure Cython and"
           "distutils are available and the extension has been compiled using"
-          "python setup.py build_ext."
+          "python setup.py build_ext.")

@@ -198,7 +198,8 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
                 nnz_pp = np.count_nonzero(temp_weights)
                 prune_sum += (nnz_pp-nnz)
 
-                self.sprout(temp_weights,dense_unit_mask,sprout_count)
+                if sprout_count:
+                    self.sprout(temp_weights,dense_unit_mask,sprout_count)
                 nnz_ps = np.count_nonzero(temp_weights)
                 sprout_sum += nnz_ps - nnz_pp
                 unit_total += nnz_ps
@@ -223,8 +224,6 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
             projection.weights = sum_sparse
             del temp_sparse, sum_sparse
             projection.weights.compress()
-
-            self.message("%s pruned by %d and sprouted %d, connection is now %f%% dense" % (projection.name,prune_sum,sprout_sum,(float(unit_total)/self.mask_total)*100))
 
 
     def sprout(self, temp_weights, mask, sprout_count):
@@ -557,13 +556,6 @@ class SparseConnectionField(param.Parameterized):
 
 
     def _init_weights(self,mask_template):
-
-        if not hasattr(mask_template,'view'):
-            mask = _create_mask(mask_template,
-                                self.weights_slice.compute_bounds(
-                                    self.input_sheet),
-                                self.input_sheet,True,0.5)
-
         mask = self.weights_slice.submatrix(mask_template)
         mask = np.array(mask,copy=1)
 
@@ -761,13 +753,16 @@ class SparseCFProjection(CFProjection):
             temp_sparse = sparse.csarray_float(self.src.activity.shape,self.dest.activity.shape)
             idx = 0
             for y in range(cf_y):
-                x1,x2,y1,y2 = self.cfs[x][y].input_sheet_slice.tolist()
+                cf = self.cfs[x][y]
+                label = cf.label + ('-%d' % self.seed if self.seed is not None else '')
+                name = "%s_CF (%.5f, %.5f)" % ('' if label is None else label, cf.x,cf.y)
+                x1,x2,y1,y2 = cf.input_sheet_slice.tolist()
                 if self.same_cf_shape_for_all_cfs:
                     mask_template = self.mask_template
                 else:
                     mask_template = _create_mask(self.cf_shape,self.bounds_template,
                                                  self.src,self.autosize_mask,
-                                                 self.mask_threshold)
+                                                 self.mask_threshold, name=name)
                 weights = self.cfs[x][y]._init_weights(mask_template)
                 cn_x,cn_y = weights.shape
                 y_val = x * cf_y + y
