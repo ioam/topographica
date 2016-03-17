@@ -19,11 +19,7 @@ import numbergen
 import lancet
 
 
-from topo import projection, responsefn, learningfn, transferfn, sheet
-import topo.learningfn.optimized
-import topo.transferfn.optimized
-import topo.responsefn.optimized
-import topo.sheet.optimized
+from topo import projection, responsefn, learningfn, transferfn, sheet, optimized
 import topo.transferfn.misc
 
 from imagen.image import ScaleChannels
@@ -340,10 +336,10 @@ class ModelGCALInheritingColor(ColorEarlyVisionModel):
         "Specify weight initialization, response function, and learning function"
 
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
-        projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
-        projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
-        projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
-        projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+        projection.CFProjection.response_fn=optimized.CFPRF_DotProduct_cython()
+        projection.CFProjection.learning_fn=optimized.CFPLF_Hebbian_cython()
+        projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalize_L1_cython()]
+        projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_cython()
         return properties
 
     def sheet_setup(self):
@@ -357,7 +353,7 @@ class ModelGCALInheritingColor(ColorEarlyVisionModel):
         return Model.SettlingCFSheet.params(
             tsettle=16,
             plastic=True,
-            joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt,
+            joint_norm_fn=optimized.compute_joint_norm_totals_cython,
             output_fns=[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
                                                             learning_rate=0.01 if self.homeostasis else 0.0)],
             nominal_density=self.cortex_density,

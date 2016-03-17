@@ -14,7 +14,7 @@ from imagen.patterncoordinator import PatternCoordinator, PatternCoordinatorImag
 
 from topo.base.arrayutil import DivideWithConstant
 from topo.submodel import Model, ArraySpec # pyflakes:ignore (API import)
-from topo import sheet, transferfn
+from topo import sheet, transferfn, optimized
 
 from collections import OrderedDict
 
@@ -223,7 +223,7 @@ class EarlyVisionModel(VisualInputModel):
 
     def property_setup(self, properties):
         properties = super(EarlyVisionModel, self).property_setup(properties)
-        sheet.SettlingCFSheet.joint_norm_fn = sheet.optimized.compute_joint_norm_totals_opt
+        sheet.SettlingCFSheet.joint_norm_fn = optimized.compute_joint_norm_totals_cython
         center_polarities=['On','Off']
 
         # Useful for setting up sheets
