@@ -10,6 +10,7 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
+from imagen import Disk
 from holoviews import Image, Layout
 from holoviews.interface.collector import AttrDict
 
