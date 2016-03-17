@@ -332,23 +332,24 @@ class CFSPRF_Plugin(param.Parameterized):
         projection.activity *= projection.strength
 
 
-def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
+class compute_sparse_joint_norm_totals(param.ParameterizedFunction):
     """
     Compute norm_total for each CF in each projection from a group to be
     normalized jointly.
     """
 
-    # Assumes that all Projections in the list have the same r,c size
-    assert len(projlist)>=1
-    joint_sum = np.zeros(projlist[0].dest.shape,dtype=np.float64)
-    for p in projlist:
-        if not p.has_norm_total:
-            p.norm_total *= 0.0
-            p.weights.CFWeightTotals(p.norm_total)
-            p.has_norm_total=True
-    joint_sum = np.add.reduce([proj.norm_total for proj in projlist],dtype=np.float64)
-    for p in projlist:
-        p.norm_total = joint_sum.copy()
+    def __call__(self, projlist,active_units_mask=True):
+        # Assumes that all Projections in the list have the same r,c size
+        assert len(projlist)>=1
+        joint_sum = np.zeros(projlist[0].dest.shape,dtype=np.float64)
+        for p in projlist:
+            if not p.has_norm_total:
+                p.norm_total *= 0.0
+                p.weights.CFWeightTotals(p.norm_total)
+                p.has_norm_total=True
+        joint_sum = np.add.reduce([proj.norm_total for proj in projlist],dtype=np.float64)
+        for p in projlist:
+            p.norm_total = joint_sum.copy()
 
 
 
