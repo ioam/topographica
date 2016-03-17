@@ -3,6 +3,7 @@ import param
 import imagen
 
 from topo.base.arrayutil import DivideWithConstant, MultiplyWithConstant
+from topo.base.projection import SheetMask, CircularMask
 from topo import optimized, projection, sheet
 
 from . import Model
@@ -23,6 +24,10 @@ class EarlyVisionSCAL(EarlyVisionModel):
 
         SCAL and other spatially calibrated variants of GCAL require
         cortical areas larger than 1.0x1.0 to avoid strong suppressive
+        edge effects.""")
+
+    circular_mask = param.Boolean(default=False, doc="""
+        Whether the V1 sheet should be masked with a disk to reduce
         edge effects.""")
 
     input_aspect = param.Number(default=4.667, bounds=(0, None),
@@ -209,6 +214,13 @@ class ModelSCAL(EarlyVisionSCAL, ModelGCAL):
         projection.SharedWeightCFProjection.response_fn=optimized.CFPRF_DotProduct_cython()
         sheet.SettlingCFSheet.joint_norm_fn = optimized.compute_joint_norm_totals_cython
         return properties
+
+
+    @Model.SettlingCFSheet
+    def V1(self, properties):
+        params = super(ModelSCAL, self).V1(properties)
+        mask = CircularMask() if self.circular_mask else SheetMask(),
+        return dict(params, mask=mask)
 
 
     @Model.CFProjection
