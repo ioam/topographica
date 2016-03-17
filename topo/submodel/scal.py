@@ -6,6 +6,9 @@ import imagen as ig
 from topo.base.arrayutil import DivideWithConstant, MultiplyWithConstant
 from topo.base.projection import SheetMask, CircularMask
 from topo import optimized, projection, sheet
+from topo.sparse.sparsecf import SparseConnectionField, CFPLF_Hebbian_Sparse,\
+                                 CFPOF_DivisiveNormalizeL1_Sparse, CFPRF_DotProduct_Sparse,\
+                                 compute_sparse_joint_norm_totals, CFSPOF_SproutRetract
 
 from . import Model
 from .gcal import ModelGCAL
@@ -258,3 +261,70 @@ class ModelSCAL(EarlyVisionSCAL, ModelGCAL):
             strength=self.latexc_strength,
             learning_rate=self.latexc_lr,
             nominal_bounds_template=sheet.BoundingBox(radius=self.lateral_radius))
+
+
+
+@Model.definition
+class ModelSCALSparse(ModelSCAL):
+
+    afferent_density = param.Number(default=1.0, doc="""
+        The density of connections in the V1 afferents.""")
+
+    lateral_density = param.Number(default=1.0, doc="""
+        The sparsity of connections in long-range laterals""")
+
+    sprout_and_retract = param.Boolean(default=False)
+
+    @Model.SettlingCFSheet
+    def V1(self, properties):
+        params = super(ModelSCALSparse, self).V1(properties)
+        return dict(params, joint_norm_fn=compute_sparse_joint_norm_totals)
+
+    @Model.SparseCFProjection
+    def lr_lateral_excitatory(self, src_properties, dest_properties):
+        params = super(ModelSCALSparse, self).lr_lateral_excitatory(src_properties,
+                                                                    dest_properties)
+
+        disk = ig.Disk(smoothing=0.0)
+        output_fns = [CFPOF_DivisiveNormalizeL1_Sparse]
+        if self.sprout_and_retract:
+            cf_shape = disk
+            same_shape = True
+            output_fns = [CFSPOF_SproutRetract(target_sparsity=self.lateral_density),
+                          CFPOF_DivisiveNormalizeL1_Sparse]
+        else:
+            density = self.afferent_density*(1/(np.pi/4))
+            cf_shape = ig.random.BinaryUniformRandom(on_probability=density,
+                                                     mask_shape=disk,
+                                                     name='LateralDensity')
+            same_shape = False
+
+        return dict(params, cf_shape=cf_shape, cf_type=SparseConnectionField,
+                    same_cf_shape_for_all_cfs=same_shape,
+                    response_fn = CFPRF_DotProduct_Sparse,
+                    learning_fn = CFPLF_Hebbian_Sparse,
+                    weights_output_fns = output_fns)
+
+
+    @Model.SparseCFProjection
+    def V1_afferent(self, src_properties, dest_properties):
+        params = super(ModelSCALSparse, self).V1_afferent(src_properties, dest_properties)
+        # Adjust density for size of disk mask
+        disk = ig.Disk(smoothing=0.0)
+        output_fns = [CFPOF_DivisiveNormalizeL1_Sparse]
+        if self.sprout_and_retract:
+            cf_shape = disk
+            same_shape = True
+            output_fns = [CFSPOF_SproutRetract(target_sparsity=self.afferent_density)] + output_fns
+        else:
+            density = self.afferent_density*(1/(np.pi/4))
+            cf_shape = ig.random.BinaryUniformRandom(on_probability=density,
+                                                     mask_shape=disk,
+                                                     name='AffDensity')
+            same_shape = False
+
+        return dict(params[0], cf_shape=cf_shape, cf_type = SparseConnectionField,
+                    same_cf_shape_for_all_cfs=same_shape,
+                    response_fn = CFPRF_DotProduct_Sparse,
+                    learning_fn = CFPLF_Hebbian_Sparse,
+                    weights_output_fns = output_fns)
