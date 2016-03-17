@@ -15,6 +15,7 @@ from .gcal import ModelGCAL
 from .earlyvision import EarlyVisionModel
 
 
+
 @Model.definition
 class EarlyVisionSCAL(EarlyVisionModel):
     """
@@ -224,7 +225,7 @@ class ModelSCAL(EarlyVisionSCAL, ModelGCAL):
     @Model.SettlingCFSheet
     def V1(self, properties):
         params = super(ModelSCAL, self).V1(properties)
-        mask = CircularMask() if self.circular_mask else SheetMask(),
+        mask = CircularMask() if self.circular_mask else SheetMask()
         return dict(params, mask=mask)
 
 

@@ -13,12 +13,13 @@ import numpy as np
 import math
 from scipy.ndimage.filters import gaussian_filter
 import param
+import imagen as ig
 
 from copy import copy
 
 import topo
 from topo.base.cf import CFProjection, NullCFError, _create_mask, simple_vectorize
-from topo import pattern
+from topo.submodel import Model
 from imagen import patterngenerator
 from imagen.patterngenerator import PatternGenerator
 from topo.base.functionfamily import TransferFn, IdentityTF
@@ -163,7 +164,7 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
         time = math.ceil(topo.sim.time())
 
         if self.disk_mask:
-            self.disk = pattern.Disk(size=1.0,smoothing=0.0)
+            self.disk = ig.Disk(size=1.0,smoothing=0.0)
 
         # Get CF and src sheet shapes
         cf_x,cf_y = projection.dest.activity.shape
@@ -861,6 +862,8 @@ if not use_sparse:
     def SparseCFProjection(*args, **kwargs): # pyflakes:ignore (optimized version provided)
         return CFProjection(*args,**kwargs)
 
+
+Model.register_decorator(SparseCFProjection)
 
 sparse_components = [CFSPLF_Plugin,
                      CFSPOF_Plugin,
