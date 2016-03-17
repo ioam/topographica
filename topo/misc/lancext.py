@@ -600,7 +600,7 @@ class RunBatchCommand(TopoCommand):
       pkl_path = self.analysis.pickle_path(info['root_directory'],
                                            info['batch_name'])
       with open(pkl_path,'wb') as pkl:
-         pickle.dump(self.analysis, pkl)
+         pickle.dump(self.analysis, pkl, protocol=2)
 
 
    def summary(self):
