@@ -294,7 +294,7 @@ class ModelSCALSparse(ModelSCAL):
             output_fns = [CFSPOF_SproutRetract(target_sparsity=self.lateral_density),
                           CFPOF_DivisiveNormalizeL1_Sparse]
         else:
-            density = self.afferent_density*(1/(np.pi/4))
+            density = self.lateral_density*(1/(np.pi/4))
             cf_shape = ig.random.BinaryUniformRandom(on_probability=min([1, density]),
                                                      mask_shape=disk,
                                                      name='LateralDensity')
