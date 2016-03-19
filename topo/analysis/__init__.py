@@ -190,7 +190,7 @@ def projection_hook(obj, *args, **kwargs):
     grid=True, return a Grid of the CFs.
     """
     if kwargs.pop('grid', False):
-        return obj.grid(**kwargs)
+        return obj.grid(*args, **kwargs)
     else:
         return obj.projection_view()
 
