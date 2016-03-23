@@ -26,6 +26,7 @@ from topo.base.functionfamily import TransferFn, IdentityTF
 from topo.base.functionfamily import LearningFn, Hebbian
 from topo.base.functionfamily import ResponseFn, DotProduct
 from topo.base.sheetcoords import Slice
+from topo.submodel import register_submodel_decorators
 
 use_sparse = True
 try:
@@ -864,7 +865,7 @@ if not use_sparse:
         return CFProjection(*args,**kwargs)
 
 
-Model.register_decorator(SparseCFProjection)
+register_submodel_decorators([SparseCFProjection])
 
 sparse_components = [CFSPLF_Plugin,
                      CFSPOF_Plugin,
