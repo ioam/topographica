@@ -35,7 +35,7 @@ class CFPLF_BCMFixed_cython(CFPLF_Plugin):
     single_cf_fn = param.ClassSelector(LearningFn,default=BCMFixed(),readonly=True)
 
 
-class CFPOF_DivisiveNormalizeL1_cython(CFPOutputFn):
+class CFPOF_DivisiveNormalize_L1_cython(CFPOutputFn):
     """
     Non-optimized version of CFPOF_DivisiveNormalizeL1_cython.
 
