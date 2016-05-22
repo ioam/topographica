@@ -25,6 +25,15 @@ class WeightIsotropy(TreeOperation):
     projections = param.List(default=[], doc="""
        List of tuples of the form (sheet, projection).""")
 
+    threshold = param.Integer(default=70, doc="""
+       Threshold as a percentile of the weight field.""")
+
+    min_dist = param.Number(default=0.1, doc="""
+       Minimum distance in sheet coordinates""")
+
+    symmetric = param.Boolean(default=True, doc="""
+       Whether to make isotropy symmetric.""")
+
     @classmethod
     def _last(cls, obj):
         return obj.last if isinstance(obj, HoloMap) else obj
@@ -34,6 +43,7 @@ class WeightIsotropy(TreeOperation):
         for s, p in self.p.projections:
             # Get last element
             orelmnt = self._last(tree.OrientationPreference[s])
+            selelmnt = self._last(tree.OrientationSelectivity[s])
             xelmnt  = self._last(tree.XPreference[s])
             yelmnt  = self._last(tree.YPreference[s])
 
@@ -42,8 +52,9 @@ class WeightIsotropy(TreeOperation):
                 return Layout()
 
             # Flatten preferences
-            xpref_arr = xelmnt.data.flat
-            ypref_arr = yelmnt.data.flat
+            xpref_arr = xelmnt.dimension_values(2)
+            ypref_arr = yelmnt.dimension_values(2)
+            sel_arr = selelmnt.dimension_values(2)
 
             # Iterate over CFs in ROI
             l, b, r, t = self.p.roi
@@ -52,33 +63,38 @@ class WeightIsotropy(TreeOperation):
             for key, cf in lat_weights[l:r, b:t].items():
                 # Get preferences for a particular unit
                 unit_angle, unit_x, unit_y = orelmnt[key], xelmnt[key], yelmnt[key]
-                weight_arr = cf.situated.data.flat
-                weight = weight_arr[weight_arr>0]
-                xpref = xpref_arr[weight_arr>0]
-                ypref = ypref_arr[weight_arr>0]
+                unit_sel = selelmnt[key]
+                weight_arr = cf.situated.dimension_values(2)
+                mask = weight_arr>np.percentile(weight_arr, self.p.threshold)
+                sel = sel_arr[mask]
+                weight = weight_arr[mask] * unit_sel * sel
+                xpref = xpref_arr[mask]
+                ypref = ypref_arr[mask]
 
                 # Compute x/y-preference differences between
                 # pre- and post-synaptic neurons
-                dx = unit_x - xpref
-                dy = unit_y - ypref
+                dx = xpref - unit_x
+                dy = ypref - unit_y
+                d = np.sqrt(dx**2 + dy**2)
 
                 # Compute angle between position preferences
                 # of the pre- and post-synaptic neurons
                 # Correcting for preferred orientation
                 conn_angle = np.arctan2(dy, dx)
-                conn_angle[conn_angle<0] += 2*np.pi
                 delta = conn_angle - unit_angle
-                delta2 = conn_angle - (unit_angle + np.pi)
-                delta = np.hstack([delta, delta2])
-                delta[delta<0] += 2*np.pi
-                weight = np.hstack([weight, weight])
-                azimuths.append(delta)
-                weights.append(weight)
+                delta[delta<0] += np.pi*2
+                delta2 = delta + np.pi
+                delta2 %= np.pi*2
+
+                azimuths.append(delta[d>self.p.min_dist])
+                weights.append(weight[d>self.p.min_dist])
+                if self.p.symmetric:
+                    azimuths.append(delta2[d>self.p.min_dist])
+                    weights.append(weight[d>self.p.min_dist])
 
             # Combine azimuths and weights for all CFs
             azimuths = np.concatenate(azimuths)
             weights = np.concatenate(weights)
-
             # Compute histogram
             bins, edges = np.histogram(azimuths, range=(0, 2*np.pi),
                                        bins=self.p.num_bins, weights=weights, normed=True)
