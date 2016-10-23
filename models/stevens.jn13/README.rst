@@ -55,14 +55,14 @@ Running the live notebooks allows you to explore the model
 iteratively. If you simply wish to view the static contents of these
 notebooks, you may view the following two HTML versions:
 
-- `Model definition <http://ioam.github.io/media/gcal.html>`_: A
+- `Model definition <https://github.com/ioam/topographica/blob/master/models/stevens.jn13/gcal.ipynb>`_: A
   notebook that simultaneously defines the model and explores
   it. Running the live version of this notebook generates the
   Topographica model file '``gcal.ty``' and will regenerate the
   contents shown in the HTML version.
 
 - `Simulation and Figures
-  <http://ioam.github.io/media/stevens_jn13.html>`_:
+  <https://github.com/ioam/topographica/blob/master/models/stevens.jn13/stevens_jn13.html>`_:
   Defines all 842 model simulations needed to reproduce all the
   figures, allows you to launch them and automatically builds the
   corresponding SVG figures used in publication. Although running the
