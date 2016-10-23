@@ -200,6 +200,43 @@ class JointNormalizingCFSheet_Continuous(JointNormalizingCFSheet):
 
 
 
+class Continuous(JointNormalizingCFSheet):
+    """
+    CFSheet similar to JointNormalizingCFSheet_Continuous that runs
+    continuously, with no 'resting' periods between pattern
+    presentations.
+
+    The key difference is that this sheet supports optional snapshot
+    learning after a particular duration into each fixation, otherwise
+    continuous learning is applied. Used by the CGCAL and TCAL models.
+    """
+
+    snapshot_learning = param.NumericTuple(default=None, allow_None=True,
+                                           length=3, doc="""
+        Three tuple e.g (240,130,0.051) corresponding to (period,
+        interval, epsilon) where topo.sim.time() % period gives the
+        duration into the current 'fixation. In the example, for
+        instance, a fixation is 240 milliseconds. The interval specifies
+        the time within each fixation at which learning is applied i.e
+        130 milliseconds in the given example. Lastly epsilon is used
+        for comparison to zero, to make sure snapshot learning occurs
+        even when there are small mismatches e.g due to small delays
+        introducted by GeneratorSheets.""")
+
+    def process_current_time(self):
+        if self.snapshot_learning is None:
+            condition = True
+        else:
+            (period, interval, epsilon) = self.snapshot_learning
+            remainder = float(topo.sim.time()) % period
+            condition = (remainder % interval) < epsilon
+        if condition:
+            if self.plastic:
+                self.learn()
+        self.activate()
+
+
+
 class SettlingCFSheet(JointNormalizingCFSheet):
     """
     A JointNormalizingCFSheet implementing the idea of settling.
