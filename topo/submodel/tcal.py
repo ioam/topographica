@@ -77,7 +77,7 @@ class ModelTCAL(ModelCGCAL):
         TemporalScatter transfer function.
 
         Note: In cat, the scatter can be 100ms from retina to LGN
-        alone! Check the Saule and Wolfe references in Jim's book.""")
+        alone! Check the Saul and Wolfe references in the CMVC book.""")
 
     lgn_scatter_distribution = param.ClassSelector(imagen.PatternGenerator,
                                                    allow_None=True,
