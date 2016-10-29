@@ -77,7 +77,7 @@ class ModelCGCAL(ModelGCAL):
         The time constant for the LGN sheet (per millisecond) if supplied.""")
 
     v1_hysteresis = param.Number(default=None, allow_None=True, doc="""
-        The time constant for the LGN sheet (per millisecond) if supplied.""")
+        The time constant for the V1 sheet (per millisecond) if supplied.""")
 
     # Parameters affecting LGN PSTH profiles
 
