@@ -2,7 +2,11 @@ import numpy as np
 
 import param
 from holoviews import Store, Options, Layout, HoloMap, Histogram, Dimension
-from holoviews.operation import TreeOperation
+
+try:     # HoloViews <1.8
+    from holoviews.operation import TreeOperation
+except:  # HoloViws >=1.8
+    from featuremapper.analysis import TreeOperation
 
 class WeightIsotropy(TreeOperation):
     """
