@@ -42,6 +42,8 @@ install:
   - conda info -a
   - conda env create -q --file environment.yml -n testenv
   - source activate testenv
+  # dependencies for testing
+  - conda install nose pyflakes
 
 script:
   - ./topographica -t unit
