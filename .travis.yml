@@ -1,0 +1,45 @@
+language: python
+
+# doesn't mean much as we install miniconda
+python:
+  - "2.7"
+
+#cache:
+#  directories:
+#    - $HOME/.cache/pip
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+    - os: osx
+      # python doesn't seem to work on osx images
+      language: generic
+      osx_image: xcode8.3
+
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  - conda env create -q --file environment.yml
+  - source activate topographica
+  - pip install -e .
+  # for tests
+  - conda install nose
+  # pip in conda fails on deps
+  - pip install --no-deps https://github.com/ioam/paramtk/archive/master.zip
+
+
+
+script:
+  - nosetests
+
