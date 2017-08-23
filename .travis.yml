@@ -36,15 +36,10 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda env create -q --file environment.yml
-  - source activate topographica
-  - pip install -e .
-  # for tests
-  - conda install nose
+  - conda env create -q --file environment.yml -n testenv
+  - source activate testenv
   # pip in conda fails on deps
   - pip install --no-deps https://github.com/ioam/paramtk/archive/master.zip
-
-
 
 script:
   - ./topographica -t unit
