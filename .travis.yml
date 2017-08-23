@@ -1,3 +1,7 @@
+# the last topographica tag was many commits ago, maybe?
+git:
+  depth: 300
+  
 language: python
 
 # doesn't mean much as we install miniconda
