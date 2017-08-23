@@ -15,17 +15,7 @@ dependencies:
  - ipython
  - jupyter
  - notebook
- - holoviews
- - eigen
- - pip:
-   - git+https://github.com/ioam/param.git
-#   - git+https://github.com/ioam/paramtk.git
-   - git+https://github.com/ioam/featuremapper.git
-   - git+https://github.com/ioam/imagen.git
-   - git+https://github.com/ioam/lancet.git
+# - eigen
 
 # to do:
-# - reference_data
-# - builder
-# - nbpublisher
 # - gmpy

@@ -38,8 +38,6 @@ install:
   - conda info -a
   - conda env create -q --file environment.yml -n testenv
   - source activate testenv
-  # pip in conda fails on deps
-  - pip install --no-deps https://github.com/ioam/paramtk/archive/master.zip
 
 script:
   - ./topographica -t unit
