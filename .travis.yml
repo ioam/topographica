@@ -48,5 +48,5 @@ install:
   - conda install nose pyflakes
 
 script:
-  - ./topographica -t unit
+  - ./topographica -t quick
 
