@@ -19,3 +19,4 @@ dependencies:
  - gcc
  - pip:
    - gmpy==1.17
+   - weave
