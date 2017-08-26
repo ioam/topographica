@@ -43,6 +43,7 @@ install:
   - conda info -a
   - conda env create -q --file environment.yml -n testenv
   - source activate testenv
+  - python setup.py build_ext
   # dependencies for testing
   - conda install nose pyflakes
 
