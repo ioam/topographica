@@ -16,6 +16,6 @@ dependencies:
  - jupyter
  - notebook
 # - eigen
-
-# to do:
-# - gmpy
+ - gcc
+ - pip:
+   - gmpy==1.17
