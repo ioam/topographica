@@ -47,12 +47,15 @@ install:
   - conda env export
 
 script:
+  # no gui tests on osx
   # some kind of tk/matplotlib problem on osx? not setting tkagg early enough?
   # https://stackoverflow.com/questions/32019556/matplotlib-crashing-tkinter-application/34109240#34109240
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      DISPLAY= ./topographica -t quick;
+      export TOPO_SKIP_RUNTESTS_GUI_IF_NO_DISPLAY=1 && export DISPLAY=;
+    fi
+  # only run exhaustive tests for cron builds (travis web setting: once a week)
+  - if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
+      ./topographica -t all;
     else
       ./topographica -t quick;
     fi
-
-
