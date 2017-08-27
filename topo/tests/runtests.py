@@ -267,7 +267,13 @@ def run_tests():
         targets = speedtarget.keys()
     else:
         targets = p.targets
-
+        
+    _display = os.environ.get('DISPLAY')
+    if 'gui' in targets and (_display is None or _display==''):
+        if os.environ.get('TOPO_SKIP_RUNTESTS_GUI_IF_NO_DISPLAY')=='1':
+            print "No DISPLAY; skipping gui tests."
+            targets.remove('gui')
+        
     print "Running: %s" % list_tests(targets)
     print
 
@@ -283,7 +289,8 @@ def run_tests():
     print "="*60
     print
     print "runtests: targets with errors: %s %s" % (len(errors),list_tests(errors))
-
+    print "runtests: ran %s targets %s" % (len(targets),list_tests(targets))
+    
     return errors
 
 
