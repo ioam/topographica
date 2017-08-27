@@ -1,0 +1,24 @@
+name: topographica
+channels:
+ - ioam
+ - conda-forge
+ - defaults
+
+dependencies:
+ - python=2.7
+ - numpy
+ - pillow
+ - scipy
+ - matplotlib
+ - cython
+ - tk
+ - ipython
+ - jupyter
+ - notebook
+# - eigen
+ - gcc             # even on osx; needed for gmpy (plus our weave code?)
+ - nose            # for tests
+ - pyflakes        # for tests
+ - pip:
+   - gmpy==1.17
+   - weave
