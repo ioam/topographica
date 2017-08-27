@@ -18,6 +18,8 @@ dependencies:
 # - eigen
  - libpython
  - m2w64-toolchain
+ - msys2
+ - m2w64-gcc
  - nose            # for tests
  - pyflakes        # for tests
  - pip:
