@@ -1,3 +1,5 @@
+build: off
+
 environment:
   matrix:
     - PY: "2.7"
@@ -5,7 +7,7 @@ environment:
       CONDA: "C:\\Miniconda-x64"
 
 install:
-  -  "SET PATH=%CONDA%;%CONDA%\\Scripts;%PATH%"
+  - "SET PATH=%CONDA%;%CONDA%\\Scripts;%PATH%"
   - "conda config --set always_yes yes --set changeps1 no"
   - "conda update conda"
   - "conda info -a"
@@ -14,9 +16,7 @@ install:
   - "echo [build] > %CONDA_PREFIX%\Lib\distutils\distutils.cfg"
   - "echo compiler = mingw32 >> %CONDA_PREFIX%\Lib\distutils\distutils.cfg"
   - "python setup.py build_ext"
-  - "conda env export"  
-
-build: off
+  - "conda env export"
 
 test_script:
   - "./topographica -t quick"
