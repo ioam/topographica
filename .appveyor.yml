@@ -13,8 +13,8 @@ install:
   - "conda info -a"
   - "conda create --file environment-windows.yml -n testenv"
   - "activate testenv"
-  - "echo [build] > %CONDA_PREFIX%\Lib\distutils\distutils.cfg"
-  - "echo compiler = mingw32 >> %CONDA_PREFIX%\Lib\distutils\distutils.cfg"
+  - "echo [build] > %CONDA_PREFIX%\\Lib\\distutils\\distutils.cfg"
+  - "echo compiler = mingw32 >> %CONDA_PREFIX%\\Lib\\distutils\\distutils.cfg"
   - "python setup.py build_ext"
   - "conda env export"
 
