@@ -13,8 +13,6 @@ python:
 #    - $HOME/.cache/pip
 
 matrix:
-  allow_failures:
-    - os: osx
   include:
     - os: linux
       dist: trusty
@@ -40,15 +38,21 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
+  - conda update conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda env create -q --file environment.yml -n testenv
+  - conda env create --file environment.yml -n testenv
   - source activate testenv
   - python setup.py build_ext
-  # dependencies for testing
-  - conda install nose pyflakes
+  - conda env export
 
 script:
-  - ./topographica -t quick
+  # some kind of tk/matplotlib problem on osx? not setting tkagg early enough?
+  # https://stackoverflow.com/questions/32019556/matplotlib-crashing-tkinter-application/34109240#34109240
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      DISPLAY= ./topographica -t quick;
+    else
+      ./topographica -t quick;
+    fi
+
 
