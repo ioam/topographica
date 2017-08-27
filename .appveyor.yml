@@ -1,0 +1,22 @@
+environment:
+  matrix:
+    - PY: "2.7"
+      PYTHON: "C:\\Python27-x64"
+      CONDA: "C:\\Miniconda-x64"
+
+install:
+  -  "SET PATH=%CONDA%;%CONDA%\\Scripts;%PATH%"
+  - "conda config --set always_yes yes --set changeps1 no"
+  - "conda update conda"
+  - "conda info -a"
+  - "conda create --file environment-windows.yml -n testenv"
+  - "activate testenv"
+  - "echo [build] > %CONDA_PREFIX%\Lib\distutils\distutils.cfg"
+  - "echo compiler = mingw32 >> %CONDA_PREFIX%\Lib\distutils\distutils.cfg"
+  - "python setup.py build_ext"
+  - "conda env export"  
+
+build: off
+
+test_script:
+  - "./topographica -t quick"
