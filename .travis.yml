@@ -21,12 +21,12 @@ matrix:
       language: generic
       osx_image: xcode8.3
 
-# copied from https://docs.travis-ci.com/user/gui-and-headless-browsers/
 before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
   - git fetch --unshallow --tags # try some more to get a tag for param.version
+  # copied from https://docs.travis-ci.com/user/gui-and-headless-browsers/
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      export DISPLAY=:99.0 && sh -e /etc/init.d/xvfb start && sleep 3;
+    fi
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
