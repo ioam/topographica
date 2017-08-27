@@ -13,6 +13,8 @@ python:
 #    - $HOME/.cache/pip
 
 matrix:
+  allow_failures:
+    - os: osx
   include:
     - os: linux
       dist: trusty
