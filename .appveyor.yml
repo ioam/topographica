@@ -17,7 +17,7 @@ install:
   - "conda config --set always_yes yes --set changeps1 no"
   - "conda update conda"
   - "conda info -a"
-  - "conda create --file environment-windows.yml -n testenv"
+  - "conda env create --file environment-windows.yml -n testenv"
   - "activate testenv"
   - "echo [build] > %CONDA_PREFIX%\\Lib\\distutils\\distutils.cfg"
   - "echo compiler = mingw32 >> %CONDA_PREFIX%\\Lib\\distutils\\distutils.cfg"
