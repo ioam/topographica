@@ -23,5 +23,5 @@ dependencies:
  - nose            # for tests
  - pyflakes        # for tests
  - pip:
-   - gmpy==1.17
+#   - gmpy==1.17
    - weave
