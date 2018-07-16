@@ -16,7 +16,7 @@ import numpy as np
 import param
 
 from holoviews.core import BoundingBox, NdMapping
-from holoviews.interface.collector import AttrDict
+from topo.misc.attrdict import AttrDict
 from holoviews import Image
 
 

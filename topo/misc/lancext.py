@@ -15,7 +15,7 @@ import numpy.version as np_version
 import param
 
 from holoviews import NdMapping, Layout
-from holoviews.interface.collector import Collector
+from featuremapper.collector import Collector
 from holoviews.core.element import Collator
 from holoviews.core.io import Pickler
 

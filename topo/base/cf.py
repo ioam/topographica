@@ -23,7 +23,7 @@ import numpy as np
 
 import param
 from holoviews import GridSpace, Dimension, HoloMap, Layout
-from holoviews.interface.collector import AttrDict
+from topo.misc.attrdict import AttrDict
 from holoviews.core import BoundingBox, BoundingRegionParameter, Slice
 
 import patterngenerator
@@ -782,7 +782,7 @@ class CFProjection(Projection):
             matrix_data = cf.weights.copy()
             bounds = roi_bounds
 
-        sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
+        sv = CFView(matrix_data, bounds=bounds, situated_bounds=situated_bounds,
                     input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
                     label=self.name, group='CF Weight')
         sv.metadata=AttrDict(timestamp=timestamp)

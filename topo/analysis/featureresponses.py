@@ -16,7 +16,7 @@ from param.parameterized import ParamOverrides
 
 from holoviews import Image, HoloMap
 from holoviews.ipython.widgets import ProgressBar
-from holoviews.interface.collector import AttrDict
+from topo.misc.attrdict import AttrDict
 
 import topo
 import topo.base.sheetcoords
@@ -52,14 +52,14 @@ def update_sheet_activity(sheet_name, force=False):
                         src_name=sheet.name, shape=sheet.activity.shape,
                         timestamp=time)
     if not view:
-        im = Image(np.array(sheet.activity), sheet.bounds)
+        im = Image(np.array(sheet.activity), bounds=sheet.bounds)
         im.metadata=metadata
         view = HoloMap((time, im), key_dimensions=[Time])
         view.metadata = metadata
         sheet.views.Maps[name] = view
     else:
         if force or view.range('Time')[1] < time:
-            im = Image(np.array(sheet.activity), sheet.bounds)
+            im = Image(np.array(sheet.activity), bounds=sheet.bounds)
             im.metadata=metadata
             view[time] = im
     return view

@@ -117,7 +117,7 @@ class CFView(Image):
         r1, r2, c1, c2 = self.input_sheet_slice
         data[r1:r2, c1:c2] = self.data
 
-        return CFView(data, self.situated_bounds, roi_bounds=self.bounds,
+        return CFView(data, bounds=self.situated_bounds, roi_bounds=self.bounds,
                       situated_bounds=self.situated_bounds,
                       label=self.label, group=self.group)
 

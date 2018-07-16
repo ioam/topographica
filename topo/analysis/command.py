@@ -205,9 +205,9 @@ class measure_cog(ParameterizedFunction):
 
         timestamp = topo.sim.time()
         lbrt = sheet.bounds.lbrt()
-        xsv = Image(xcog, sheet.bounds, label=proj.name, group='X CoG',
+        xsv = Image(xcog, bounds=sheet.bounds, label=proj.name, group='X CoG',
                     vdims=[Dimension('X CoG', range=(lbrt[0], lbrt[2]))])
-        ysv = Image(ycog, sheet.bounds, label=proj.name, group='Y CoG',
+        ysv = Image(ycog, bounds=sheet.bounds, label=proj.name, group='Y CoG',
                     vdims=[Dimension('Y CoG', range=(lbrt[1], lbrt[3]))])
 
         lines = []

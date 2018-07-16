@@ -7,7 +7,7 @@ and sets the appropriate Topographica-specific hooks.
 
 import numpy as np
 
-from holoviews.interface.collector import Reference
+from holoviews.core.io import Reference
 from holoviews import HSV, Image
 from holoviews.core.options import Compositor
 from holoviews.ipython import IPTestCase
