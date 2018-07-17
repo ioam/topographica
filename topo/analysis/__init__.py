@@ -29,10 +29,10 @@ from command import measure_cog
 
 
 
-CoG_spec = "Image.X CoG * Image.Y CoG * Image.BlueChannel"
-XYCoG = chain.instance(group='XYCoG', name='XYCoG',
-                       operations = [image_overlay.instance(spec=CoG_spec), factory.instance()])
-Compositor.register(Compositor("Image.X CoG * Image.Y CoG", XYCoG, 'XYCoG', 'display'))
+# CoG_spec = "Image.X CoG * Image.Y CoG * Image.BlueChannel"
+# XYCoG = chain.instance(group='XYCoG', name='XYCoG',
+#                        operations = [image_overlay.instance(spec=CoG_spec), factory.instance()])
+# Compositor.register(Compositor("Image.X CoG * Image.Y CoG", XYCoG, 'XYCoG', 'display'))
 
 
 import param
