@@ -105,7 +105,7 @@ class WeightIsotropy(TreeOperation):
 
             # Construct Elements
             label =' '.join([s, p])
-            histogram = Histogram(bins, edges, group="Weight Isotropy",
+            histogram = Histogram((edges, bins), group="Weight Isotropy",
                                   kdims=[Dimension('Azimuth')], label=label)
             layout.WeightIsotropy['_'.join([s, p])] = histogram
         return layout
@@ -148,7 +148,7 @@ class WeightDistribution(TreeOperation):
             featurepref = preferences[s]
             if isinstance(featurepref, HoloMap):
                 featurepref = featurepref.last
-            feature = featurepref.value_dimensions[0]
+            feature = featurepref.vdims[0]
             feature_arr = featurepref.data.flat
             cfs = tree.CFs[p]
             deltas, weights = [], []
@@ -171,7 +171,7 @@ class WeightDistribution(TreeOperation):
             # Construct Elements
             label = ' '.join([s,p])
             group = '%s Weight Distribution' % self.p.feature
-            histogram = Histogram(bins, edges, group=group, label=label,
+            histogram = Histogram((edges, bins), group=group, label=label,
                                   kdims=[' '.join([self.p.feature, 'Difference'])],
                                   vdims=['Weight'])
 

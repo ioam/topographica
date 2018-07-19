@@ -54,7 +54,7 @@ def update_sheet_activity(sheet_name, force=False):
     if not view:
         im = Image(np.array(sheet.activity), bounds=sheet.bounds)
         im.metadata=metadata
-        view = HoloMap((time, im), key_dimensions=[Time])
+        view = HoloMap((time, im), kdims=[Time])
         view.metadata = metadata
         sheet.views.Maps[name] = view
     else:
