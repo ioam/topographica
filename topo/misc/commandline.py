@@ -477,8 +477,30 @@ topo_parser.add_option("-o","--outputpath",action="callback",callback=o_action,t
 		       help="set the default output path")
 
 
+if ipython_shell_interface == "InteractiveShellEmbed":
+    # IPython 0.11 and later
+
+    config = Config()
+    if ipython_prompt_interface == "PromptManager":
+        config.PromptManager.in_template = CommandPrompt.get_format()
+        config.PromptManager.in2_template = CommandPrompt2.get_format()
+        config.PromptManager.out_template = OutputPrompt.get_format()
+        config.InteractiveShell.confirm_exit = False
+    else:
+        config.TerminalInteractiveShell.prompts_class=IPythonCommandPrompt
+        config.InteractiveShell.confirm_exit = False
+        
+
 def gui(start=True,exit_on_quit=True):
     """Start the GUI as if -g were supplied in the command used to launch Topographica."""
+    # 
+    # To integrate with Tk we need to 
+    # create ipshell *before* calling enable_gui
+    # it is important that you use instance(), instead of the class
+    # constructor, so that it creates the global InteractiveShell singleton
+
+    IPShell.instance(config=config)
+
     try:
         # Need to connect Tk before import of pyplot
         import matplotlib
@@ -742,25 +764,6 @@ def exec_startup_files():
             cmdline_main.warning("Ignoring %s; location for startup file is %s (UNIX/Linux/Mac OS X) or %s (Windows)."%(startup_file,rcpath,inipath))
 
 ### Execute what is specified by the options.
-
-if ipython_shell_interface == "InteractiveShellEmbed":
-    # IPython 0.11 and later
-
-    # To integrate with Tk we need to 
-    # create ipshell *before* calling enable_gui
-    # it is important that you use instance(), instead of the class
-    # constructor, so that it creates the global InteractiveShell singleton
-    config = Config()
-    if ipython_prompt_interface == "PromptManager":
-        config.PromptManager.in_template = CommandPrompt.get_format()
-        config.PromptManager.in2_template = CommandPrompt2.get_format()
-        config.PromptManager.out_template = OutputPrompt.get_format()
-        config.InteractiveShell.confirm_exit = False
-    else:
-        config.TerminalInteractiveShell.prompts_class=IPythonCommandPrompt
-        config.InteractiveShell.confirm_exit = False
-        
-    ipshell = IPShell.instance(config=config)
 
 def process_argv(argv):
     """
