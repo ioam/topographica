@@ -1,6 +1,10 @@
 import unittest
 import numpy
 
+# Need to load TkAgg before any calls to pyplot in the imports
+import matplotlib
+matplotlib.use("TkAgg")
+
 from topo.base.simulation import Simulation
 from topo.base.boundingregion import BoundingBox
 from topo.base.cf import CFIter,ResizableCFProjection,CFSheet

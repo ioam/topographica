@@ -74,7 +74,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix1 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        im = Image(self.matrix1, self.bounds1)
+        im = Image(self.matrix1, bounds=self.bounds1)
         im.metadata=metadata
         self.sheet_view1 = NdMapping((None, im))
         self.sheet_view1.metadata = AttrDict(src_name='TestInputParam',
@@ -87,7 +87,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix2 = np.zeros((10,10),dtype=np.float) + 0.3
         self.bounds2 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        im = Image(self.matrix2, self.bounds2)
+        im = Image(self.matrix2, bounds=self.bounds2)
         im.metadata=metadata
         self.sheet_view2 = NdMapping((None, im))
         self.sheet_view2.metadata = AttrDict(src_name='TestInputParam',
@@ -100,7 +100,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix3 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        im = Image(self.matrix3, self.bounds3)
+        im = Image(self.matrix3, bounds=self.bounds3)
         im.metadata=metadata
         self.sheet_view3 = NdMapping((None, im))
         self.sheet_view3.metadata = AttrDict(src_name='TestInputParam',
@@ -113,7 +113,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix4 = np.zeros((10,10),dtype=np.float) + 1.6
         self.bounds4 = BoundingBox(points=((-0.7,-0.7),(0.7,0.7)))
-        im = Image(self.matrix4, self.bounds4)
+        im = Image(self.matrix4, bounds=self.bounds4)
         im.metadata=metadata
         self.sheet_view4 = NdMapping((None, im))
         self.sheet_view4.metadata = AttrDict(src_name='TestInputParam',

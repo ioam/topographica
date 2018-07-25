@@ -23,15 +23,6 @@ from param import parameterized
 from param.parameterized import Parameterized
 from topo.base.simulation import OptionalSingleton
 
-try:
-    # By default, use a non-GUI backend for matplotlib.
-    from matplotlib import pyplot as plt
-    plt.switch_backend('agg')
-
-    matplotlib_imported=True
-except ImportError:
-    matplotlib_imported=False
-
 # Dummy object just for messages
 cmdline_main=Parameterized(name="CommandLine")
 
@@ -39,10 +30,13 @@ ipython_shell_interface = None
 ipython_prompt_interface = None
 try:
     try:
-         from IPython.terminal.embed import InteractiveShellEmbed as IPShell
+        from IPython.terminal.embed import InteractiveShellEmbed as IPShell
+        from traitlets.config.loader import Config
+        from IPython.terminal.prompts import Prompts, Token
+        import IPython.lib.inputhook
     except ImportError: # Prior to IPython 1.0, InteractiveShellEmbed was found in the frontend package
         from IPython.frontend.terminal.embed import InteractiveShellEmbed as IPShell # pyflakes:ignore (try/except import)
-    from traitlets.config.loader import Config
+        from IPython.config.loader import Config
     ipython_shell_interface = "InteractiveShellEmbed"
     try:
         from IPython.core.prompts import PromptManager  # pyflakes:ignore (try/except import)
@@ -223,6 +217,34 @@ class IPCommandPromptHandler(object):
         """
         return cls._format
 
+
+class IPythonCommandPrompt(Prompts):
+    """
+    Control over input prompt.
+
+    Several predefined formats are provided, and any of these (or any
+    arbitrary string) can be used by calling set_format() with their
+    values.
+
+    See the IPython manual for details:
+    https://ipython.readthedocs.io/en/5.x/config/details.html?highlight=Prompts
+    """
+    def in_prompt_tokens(self, cli=None):
+
+        return [
+             (Token, 'Topographica '),
+             (Token.Prompt, 'In <'),
+             (Token.PromptNum, str(self.shell.execution_count)),
+             (Token.Prompt, '>: '),
+             ]
+        
+    def out_prompt_tokens(self):
+        return [
+             (Token.OutPrompt, 'Out<'),
+             (Token.OutPromptNum, str(self.shell.execution_count)),
+             (Token.OutPrompt, '>: '),
+         ]
+ 
 
 class CommandPrompt(IPCommandPromptHandler):
     """
@@ -457,9 +479,20 @@ topo_parser.add_option("-o","--outputpath",action="callback",callback=o_action,t
 
 def gui(start=True,exit_on_quit=True):
     """Start the GUI as if -g were supplied in the command used to launch Topographica."""
-    if matplotlib_imported:
+    try:
+        # Need to connect Tk before import of pyplot
+        import matplotlib
+        matplotlib.use("TkAgg")
+    
+#         # By default, use a non-GUI backend for matplotlib.
+#         from matplotlib import pyplot as plt
+#         plt.ioff()
+#         plt.switch_backend('agg')
+    
         from holoviews.plotting import mpl
-        plt.switch_backend('TkAgg')
+    except:
+        pass
+    
     auto_import_commands()
     if start:
         import topo.tkgui
@@ -708,9 +741,26 @@ def exec_startup_files():
         if os.path.exists(startup_file):
             cmdline_main.warning("Ignoring %s; location for startup file is %s (UNIX/Linux/Mac OS X) or %s (Windows)."%(startup_file,rcpath,inipath))
 
-
-
 ### Execute what is specified by the options.
+
+if ipython_shell_interface == "InteractiveShellEmbed":
+    # IPython 0.11 and later
+
+    # To integrate with Tk we need to 
+    # create ipshell *before* calling enable_gui
+    # it is important that you use instance(), instead of the class
+    # constructor, so that it creates the global InteractiveShell singleton
+    config = Config()
+    if ipython_prompt_interface == "PromptManager":
+        config.PromptManager.in_template = CommandPrompt.get_format()
+        config.PromptManager.in2_template = CommandPrompt2.get_format()
+        config.PromptManager.out_template = OutputPrompt.get_format()
+        config.InteractiveShell.confirm_exit = False
+    else:
+        config.TerminalInteractiveShell.prompts_class=IPythonCommandPrompt
+        config.InteractiveShell.confirm_exit = False
+        
+    ipshell = IPShell.instance(config=config)
 
 def process_argv(argv):
     """
@@ -799,19 +849,16 @@ def process_argv(argv):
         elif ipython_shell_interface == "InteractiveShellEmbed":
             # IPython 0.11 and later
 
-            config = Config()
-
             if ipython_prompt_interface == "PromptManager":
                 config.PromptManager.in_template = CommandPrompt.get_format()
                 config.PromptManager.in2_template = CommandPrompt2.get_format()
                 config.PromptManager.out_template = OutputPrompt.get_format()
-            else:
-                config.InteractiveShell.prompt_in1 = CommandPrompt.get_format()
-                config.InteractiveShell.prompt_in2 = CommandPrompt2.get_format()
-                config.InteractiveShell.prompt_out = OutputPrompt.get_format()
-            config.InteractiveShell.confirm_exit = False
-            ipshell = IPShell(config=config,user_ns=__main__.__dict__,
-                              banner1="",exit_msg="")
+                config.InteractiveShell.confirm_exit = False
+            
+            IPython.lib.inputhook.enable_gui(gui='tk')
+
+
+            ipshell = IPShell.instance()
             if option.pdb:
                 ipshell.call_pdb = True
 
@@ -822,7 +869,7 @@ def process_argv(argv):
                 cmdline_main.warning(
                     "Could not load IPython extension 'topo.misc.ipython'; ignored error was:\n%s"%traceback.format_exc())
 
-            ipshell()
+            ipshell.mainloop(local_ns=__main__.__dict__)
 
     global return_code
     if return_code != 0:
