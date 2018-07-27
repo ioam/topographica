@@ -6,13 +6,6 @@ Tests for the tkParameterized classes.
 ## CB: add test for change of po
 import __main__
 import unittest
-from Tkinter import Frame,Toplevel
-
-import param
-import paramtk as tk
-from imagen import PatternGenerator, Gaussian, Ring, Rectangle
-
-
 # CEBALERT: will be replaced with call to param.tk.initialize() when
 # param.tk doesn't depend on anything from tkgui.__init__ (plus this
 # test will move to the param package...)
@@ -24,6 +17,14 @@ if os.getenv("DISPLAY"):
     import topo.tkgui
     topo.tkgui.start()
 else: raise SkipTest("No DISPLAY found")
+
+from Tkinter import Frame,Toplevel
+
+from imagen import PatternGenerator, Gaussian, Ring, Rectangle
+
+
+import param
+import paramtk as tk
 
 @nottest
 class SomeFrame(tk.TkParameterized,Frame):

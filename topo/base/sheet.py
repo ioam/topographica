@@ -24,7 +24,7 @@ import param
 
 from holoviews import Image, Layout
 from holoviews.core import BoundingBox, BoundingRegionParameter, SheetCoordinateSystem
-from holoviews.interface.collector import AttrDict
+from topo.misc.attrdict import AttrDict
 
 from simulation import EventProcessor
 from functionfamily import TransferFn
@@ -309,7 +309,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
                             row_precedence=self.row_precedence,
                             timestamp=self.simulation.time())
 
-        image = Image(self.activity.copy(), self.bounds,
+        image = Image(self.activity.copy(), bounds=self.bounds,
                    label=self.name, group='Activity')[coords]
         image.metadata=metadata
         return image

@@ -57,8 +57,13 @@ class Specification(param.Parameterized):
 
 
     def __eq__(self, other):
-        return self.sort_precedence == other.sort_precedence
-
+        try:
+            return self.sort_precedence == other.sort_precedence
+        except Exception as e:
+            # Change in holoviews
+            if type(other) == str:
+                return False
+            raise e
 
     def __init__(self, object_type):
         self._object_type = object_type

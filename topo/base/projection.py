@@ -12,7 +12,7 @@ from param.parameterized import overridable_property
 
 from imagen import Disk
 from holoviews import Image, Layout
-from holoviews.interface.collector import AttrDict
+from topo.misc.attrdict import AttrDict
 
 from sheet import Sheet
 from simulation import EPConnection
@@ -326,7 +326,7 @@ class Projection(EPConnection):
         """Returns the activity in a single projection"""
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        im = Image(self.activity.copy(), self.dest.bounds,
+        im = Image(self.activity.copy(), bounds=self.dest.bounds,
                    label=self.name, group='Activity')
         im.metadata=AttrDict(proj_src_name=self.src.name,
                              precedence=self.src.precedence,

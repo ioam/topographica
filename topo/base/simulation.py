@@ -56,7 +56,7 @@ from copy import copy, deepcopy
 import time
 import bisect
 
-from holoviews.interface.collector import AttrDict
+from topo.misc.attrdict import AttrDict
 
 #: Default path to the current simulation, from main
 #: Only to be used by script_repr(), to allow it to generate

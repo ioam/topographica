@@ -531,7 +531,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             except:
                 pass
 
-            self.message("Quit selected%s" % ("; exiting" if  self.exit_on_quit else ""))
+#             self.message("Quit selected%s" % ("; exiting" if  self.exit_on_quit else "")) # Removed because does not restore prompt
 
             # Workaround for obscure problem on some UNIX systems
             # as of 4/2007, probably including Fedora Core 5.

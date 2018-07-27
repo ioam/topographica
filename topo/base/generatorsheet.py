@@ -8,7 +8,7 @@ from topo.base.sheet import Sheet
 from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
 
-from holoviews.interface.collector import AttrDict
+from topo.misc.attrdict import AttrDict
 from holoviews import Image
 
 import numpy as np
@@ -279,7 +279,7 @@ class ChannelGeneratorSheet(GeneratorSheet):
         else:
             arr = self.activity.copy()
 
-        im = Image(arr, self.bounds,
+        im = Image(arr, bounds=self.bounds,
                    label=self.name+' Activity', group='Activity')[coords]
         im.metadata=metadata
         return im

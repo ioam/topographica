@@ -53,7 +53,6 @@ from subprocess import Popen, PIPE #pyflakes:ignore (has to do with Python versi
 
 import os
 import param
-import imagen
 
 
 def version_int(v):
